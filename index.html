@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мой AI Агент</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding-bottom: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .user-greeting {
+            padding: 15px 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+        
+        .user-greeting h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .user-greeting p {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        .modules {
+            padding: 20px;
+        }
+        
+        .module-card {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .module-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .module-icon {
+            font-size: 32px;
+            margin-right: 15px;
+        }
+        
+        .module-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .module-description {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        
+        .module-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+        }
+        
+        .module-stat {
+            background: var(--tg-theme-bg-color, #fff);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        .module-stat strong {
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        
+        .quick-actions {
+            padding: 0 20px 20px;
+        }
+        
+        .quick-actions h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #fff);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .action-btn:active {
+            opacity: 0.8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.5;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Мой AI Агент</h1>
+        <p>Умный помощник для жизни</p>
+    </div>
+    
+    <div class="user-greeting">
+        <h2 id="greeting">Загрузка...</h2>
+        <p id="user-info"></p>
+    </div>
+    
+    <div class="modules">
+        <!-- Семейный бюджет -->
+        <div class="module-card" onclick="openModule('budget')">
+            <div class="module-header">
+                <div class="module-icon">💰</div>
+                <div class="module-title">Семейный бюджет</div>
+            </div>
+            <div class="module-description">
+                Отслеживание расходов, анализ цен и умные рекомендации по экономии
+            </div>
+            <div class="module-stats">
+                <div class="module-stat">
+                    <strong id="budget-total">-</strong> за месяц
+                </div>
+                <div class="module-stat">
+                    <strong id="budget-purchases">-</strong> покупок
+                </div>
+            </div>
+        </div>
+        
+        <!-- Здоровье -->
+        <div class="module-card" onclick="openModule('health')">
+            <div class="module-header">
+                <div class="module-icon">💪</div>
+                <div class="module-title">Здоровье</div>
+            </div>
+            <div class="module-description">
+                Ежедневная оценка самочувствия, трекинг симптомов и рекомендации
+            </div>
+            <div class="module-stats">
+                <div class="module-stat">
+                    <strong id="health-today">-</strong> сегодня
+                </div>
+                <div class="module-stat">
+                    <strong id="health-week">-</strong> неделя
+                </div>
+            </div>
+        </div>
+        
+        <!-- Физическая активность -->
+        <div class="module-card" onclick="openModule('activity')">
+            <div class="module-header">
+                <div class="module-icon">🏃</div>
+                <div class="module-title">Активность</div>
+            </div>
+            <div class="module-description">
+                Трекер тренировок, шагов и калорий с персональными планами
+            </div>
+            <div class="module-stats">
+                <div class="module-stat">
+                    <strong id="activity-steps">-</strong> шагов
+                </div>
+                <div class="module-stat">
+                    <strong id="activity-workouts">-</strong> тренировок
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Консультант -->
+        <div class="module-card" onclick="openModule('doctor')">
+            <div class="module-header">
+                <div class="module-icon">🩺</div>
+                <div class="module-title">Медицинский консультант</div>
+            </div>
+            <div class="module-description">
+                AI-помощник для консультаций по здоровью и первой помощи
+            </div>
+            <div class="module-stats">
+                <div class="module-stat">
+                    Доступен 24/7
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <h3>Быстрые действия</h3>
+        <div class="action-buttons">
+            <div class="action-btn" onclick="quickAction('log-expense')">
+                💳 Добавить расход
+            </div>
+            <div class="action-btn" onclick="quickAction('log-health')">
+                📝 Оценить самочувствие
+            </div>
+            <div class="action-btn" onclick="quickAction('log-activity')">
+                🏃 Записать тренировку
+            </div>
+            <div class="action-btn" onclick="quickAction('ask-doctor')">
+                💬 Спросить доктора
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
