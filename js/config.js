@@ -1,7 +1,7 @@
 // Конфигурация Mini App
 const CONFIG = {
     // API endpoints
-    API_BASE_URL: 'https://твой-api.ngrok-free.app', // ЗАМЕНИ на свой Static Domain!
+    API_BASE_URL: 'https://f07b045a5174.ngrok-free.app', // ЗАМЕНИ на свой Static Domain!
     
     // Endpoints
     ENDPOINTS: {
