@@ -110,38 +110,6 @@
             color: var(--tg-theme-button-color, #3390ec);
         }
         
-        .quick-actions {
-            padding: 0 20px 20px;
-        }
-        
-        .quick-actions h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
-            opacity: 0.7;
-        }
-        
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        
-        .action-btn {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #fff);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        
-        .action-btn:active {
-            opacity: 0.8;
-        }
-        
         .loading {
             text-align: center;
             padding: 20px;
@@ -155,6 +123,7 @@
             margin: 20px;
             border-radius: 8px;
             text-align: center;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -188,24 +157,25 @@
                 </div>
             </div>
         </div>
-
+        
+        <!-- Управление товарами -->
         <div class="module-card" onclick="openModule('products')">
-    <div class="module-header">
-        <div class="module-icon">📦</div>
-        <div class="module-title">Управление товарами</div>
-    </div>
-    <div class="module-description">
-        Категоризация товаров и управление каталогом
-    </div>
-    <div class="module-stats">
-        <div class="module-stat">
-            <strong id="products-total">-</strong> товаров
+            <div class="module-header">
+                <div class="module-icon">📦</div>
+                <div class="module-title">Управление товарами</div>
+            </div>
+            <div class="module-description">
+                Категоризация товаров и управление каталогом
+            </div>
+            <div class="module-stats">
+                <div class="module-stat">
+                    <strong id="products-total">-</strong> товаров
+                </div>
+                <div class="module-stat">
+                    <strong id="categories-total">-</strong> категорий
+                </div>
+            </div>
         </div>
-        <div class="module-stat">
-            <strong id="categories-total">-</strong> категорий
-        </div>
-    </div>
-</div>
         
         <!-- Здоровье -->
         <div class="module-card" onclick="openModule('health')">
@@ -262,26 +232,120 @@
         </div>
     </div>
     
-    <div class="quick-actions">
-        <h3>Быстрые действия</h3>
-        <div class="action-buttons">
-            <div class="action-btn" onclick="quickAction('log-expense')">
-                💳 Добавить расход
-            </div>
-            <div class="action-btn" onclick="quickAction('log-health')">
-                📝 Оценить самочувствие
-            </div>
-            <div class="action-btn" onclick="quickAction('log-activity')">
-                🏃 Записать тренировку
-            </div>
-            <div class="action-btn" onclick="quickAction('ask-doctor')">
-                💬 Спросить доктора
-            </div>
-        </div>
-    </div>
-    
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+    <script>
+        // Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.BackButton.hide();
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Загрузка приложения...');
+            
+            showGreeting();
+            await loadDashboardData();
+            
+            console.log('✅ Приложение готово');
+        });
+        
+        // Показать приветствие
+        function showGreeting() {
+            const user = tg.initDataUnsafe?.user;
+            const greetingEl = document.getElementById('greeting');
+            const userInfoEl = document.getElementById('user-info');
+            
+            if (user) {
+                const hour = new Date().getHours();
+                let greeting = 'Добрый день';
+                if (hour < 6) greeting = 'Доброй ночи';
+                else if (hour < 12) greeting = 'Доброе утро';
+                else if (hour < 18) greeting = 'Добрый день';
+                else greeting = 'Добрый вечер';
+                
+                greetingEl.textContent = `${greeting}, ${user.first_name}! 👋`;
+                userInfoEl.textContent = `@${user.username || 'user'}`;
+            } else {
+                greetingEl.textContent = 'Добро пожаловать! 👋';
+                userInfoEl.textContent = 'Telegram Mini App';
+            }
+        }
+        
+        // Загрузить данные dashboard
+        async function loadDashboardData() {
+            // Бюджет
+            try {
+                const stats = await API.getStatistics();
+                document.getElementById('budget-total').textContent = formatCurrency(stats.total_spent);
+                document.getElementById('budget-purchases').textContent = stats.total_purchases || 0;
+            } catch (error) {
+                console.error('Ошибка загрузки бюджета:', error);
+                document.getElementById('budget-total').textContent = 'Ошибка';
+                document.getElementById('budget-purchases').textContent = '-';
+            }
+            
+            // Товары и категории
+            try {
+                const [products, categories] = await Promise.all([
+                    API.getProducts(null, null, 1),
+                    API.getCategories()
+                ]);
+                
+                // Для получения общего количества товаров делаем отдельный запрос
+                const allProducts = await API.getProducts(null, null, 500);
+                
+                document.getElementById('products-total').textContent = allProducts.length || 0;
+                document.getElementById('categories-total').textContent = categories.length || 0;
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error);
+                document.getElementById('products-total').textContent = '-';
+                document.getElementById('categories-total').textContent = '-';
+            }
+            
+            // Здоровье (заглушка)
+            document.getElementById('health-today').textContent = '😊';
+            document.getElementById('health-week').textContent = '4.2/5';
+            
+            // Активность (заглушка)
+            document.getElementById('activity-steps').textContent = '8.5K';
+            document.getElementById('activity-workouts').textContent = '3';
+        }
+        
+        // Открыть модуль
+        function openModule(moduleName) {
+            tg.HapticFeedback.impactOccurred('light');
+            
+            const modulePages = {
+                'budget': 'pages/budget.html',
+                'products': 'pages/products.html',
+                'health': 'pages/health.html',
+                'activity': 'pages/activity.html',
+                'doctor': 'pages/doctor.html'
+            };
+            
+            const page = modulePages[moduleName];
+            if (page) {
+                window.location.href = page;
+            } else {
+                tg.showAlert('Модуль в разработке');
+            }
+        }
+        
+        // Форматировать валюту
+        function formatCurrency(amount) {
+            if (!amount) return '0 ₲';
+            
+            if (amount >= 1000000) {
+                return `${(amount / 1000000).toFixed(1)}M ₲`;
+            } else if (amount >= 1000) {
+                return `${(amount / 1000).toFixed(1)}K ₲`;
+            }
+            
+            return `${Math.round(amount).toLocaleString('ru-RU')} ₲`;
+        }
+        
+        console.log('✅ App.js загружен');
+    </script>
 </body>
 </html>
