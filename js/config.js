@@ -2,11 +2,18 @@ const CONFIG = {
     API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app',
     
     ENDPOINTS: {
+        // Существующие
         STATISTICS: '/statistics',
         PRICE_TRENDS: '/prices/trends',
         PRICE_COMPARE: '/prices/compare',
         PRODUCTS_SEARCH: '/products/search',
-        PRICE_ANALYSIS: '/reports/price-analysis'
+        PRICE_ANALYSIS: '/reports/price-analysis',
+        
+        // Новые
+        CATEGORIES: '/categories',
+        PRODUCTS: '/products',
+        PRODUCT_DETAILS: '/products',
+        UPDATE_PRODUCT_CATEGORY: '/products/category'
     },
     
     SETTINGS: {
