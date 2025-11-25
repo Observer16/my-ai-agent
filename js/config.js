@@ -17,7 +17,10 @@ const CONFIG = {
         CREATE_PRODUCT: '/products/create',
         STORES: '/stores',
         CREATE_STORE: '/stores',
-        CREATE_EXPENSE: '/expenses/manual'
+        CREATE_EXPENSE: '/expenses/manual',
+        
+        // Добавлено: последние покупки
+        RECENT_PURCHASES: '/purchases/recent'
     },
     
     SETTINGS: {
