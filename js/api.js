@@ -167,6 +167,14 @@ const API = {
         });
     },
     
+    // Обновление штрих-кода товара
+    updateProductBarcode: (productId, barcode) => {
+        return api.put(CONFIG.ENDPOINTS.UPDATE_PRODUCT_BARCODE, {
+            product_id: productId,
+            barcode: barcode
+        });
+    },
+    
     createProduct: (name, categoryId = null, brand = null, unit = 'unidad', barcode = null) => {
         return api.post(CONFIG.ENDPOINTS.CREATE_PRODUCT, {
             name,
