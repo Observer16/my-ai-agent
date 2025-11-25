@@ -73,6 +73,7 @@ function openModule(moduleName) {
     
     const modulePages = {
         'budget': 'pages/budget.html',
+        'products': 'pages/products.html',
         'health': 'pages/health.html',
         'activity': 'pages/activity.html',
         'doctor': 'pages/doctor.html'
