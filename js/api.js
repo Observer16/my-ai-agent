@@ -115,7 +115,6 @@ class APIClient {
 const api = new APIClient();
 
 const API = {
-    // Существующие методы...
     getStatistics: () => api.get(CONFIG.ENDPOINTS.STATISTICS),
     getPriceTrends: (days = 30, productPattern = null, limit = 20) => {
         const params = { days, limit };
@@ -130,7 +129,7 @@ const API = {
     searchProduct: (name) => api.get(CONFIG.ENDPOINTS.PRODUCTS_SEARCH, { name }),
     getPriceAnalysis: (days = 30) => api.get(CONFIG.ENDPOINTS.PRICE_ANALYSIS, { days }),
     
-    // Новые методы для категорий
+    // Методы для категорий
     getCategories: () => api.get(CONFIG.ENDPOINTS.CATEGORIES),
     
     createCategory: (name, description = null, parentId = null) => {
@@ -145,7 +144,7 @@ const API = {
         return api.delete(CONFIG.ENDPOINTS.CATEGORIES + '/' + categoryId);
     },
     
-    // Новые методы для товаров
+    // Методы для товаров
     getProducts: (categoryId = null, search = null, limit = 100) => {
         const params = { limit };
         if (categoryId) params.category_id = categoryId;
@@ -161,6 +160,71 @@ const API = {
         return api.put(CONFIG.ENDPOINTS.UPDATE_PRODUCT_CATEGORY, {
             product_id: productId,
             category_id: categoryId
+        });
+    },
+
+    // Товары
+    getProducts: (categoryId = null, search = null, limit = 100) => {
+        const params = { limit };
+        if (categoryId) params.category_id = categoryId;
+        if (search) params.search = search;
+        return api.get(CONFIG.ENDPOINTS.PRODUCTS, params);
+    },
+    
+    getProductDetails: (productId) => {
+        return api.get(CONFIG.ENDPOINTS.PRODUCT_DETAILS + '/' + productId);
+    },
+    
+    updateProductCategory: (productId, categoryId) => {
+        return api.put(CONFIG.ENDPOINTS.UPDATE_PRODUCT_CATEGORY, {
+            product_id: productId,
+            category_id: categoryId
+        });
+    },
+    
+    createProduct: (name, categoryId = null, brand = null, unit = 'unidad', barcode = null) => {
+        return api.post(CONFIG.ENDPOINTS.CREATE_PRODUCT, {
+            name,
+            category_id: categoryId,
+            brand,
+            unit,
+            barcode
+        });
+    },
+    
+    // Категории
+    getCategories: () => api.get(CONFIG.ENDPOINTS.CATEGORIES),
+    
+    createCategory: (name, description = null, parentId = null) => {
+        return api.post(CONFIG.ENDPOINTS.CATEGORIES, {
+            name,
+            description,
+            parent_id: parentId
+        });
+    },
+    
+    deleteCategory: (categoryId) => {
+        return api.delete(CONFIG.ENDPOINTS.CATEGORIES + '/' + categoryId);
+    },
+    
+    // Магазины
+    getStores: () => api.get(CONFIG.ENDPOINTS.STORES),
+    
+    createStore: (name, storeType = 'Магазин') => {
+        return api.post(CONFIG.ENDPOINTS.CREATE_STORE, {
+            name,
+            store_type: storeType
+        });
+    },
+    
+    // Расходы
+    createExpense: (storeId, productId, quantity, unitPrice, purchaseDate = null) => {
+        return api.post(CONFIG.ENDPOINTS.CREATE_EXPENSE, {
+            store_id: storeId,
+            product_id: productId,
+            quantity,
+            unit_price: unitPrice,
+            purchase_date: purchaseDate
         });
     }
 };
