@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить расход</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, sans-serif;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding-bottom: 100px;
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+        }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        
+        .form {
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.7;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 14px;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #3390ec);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            margin-top: 8px;
+            display: none;
+        }
+        .search-results.active {
+            display: block;
+        }
+        .search-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+        }
+        .search-item:last-child {
+            border-bottom: none;
+        }
+        .search-item:active {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+        .search-item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .search-item-info {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .summary {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #3390ec);
+            padding-top: 8px;
+            border-top: 1px solid var(--tg-theme-bg-color, #fff);
+        }
+        .create-link {
+            color: var(--tg-theme-button-color, #3390ec);
+            text-decoration: none;
+            font-size: 13px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .loading { text-align: center; padding: 40px 20px; opacity: 0.5; }
+        .error { background: #fee; color: #c00; padding: 15px; border-radius: 10px; margin: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💳 Добавить расход</h1>
+        <p>Ручное внесение покупки</p>
+    </div>
+    
+    <div class="form">
+        <!-- Магазин -->
+        <div class="form-group">
+            <label class="form-label">Магазин *</label>
+            <select class="form-select" id="store-select" onchange="onStoreChange()">
+                <option value="">Выберите магазин...</option>
+            </select>
+            <a href="#" class="create-link" onclick="showCreateStore()">+ Создать новый магазин</a>
+        </div>
+        
+        <!-- Товар -->
+        <div class="form-group">
+            <label class="form-label">Товар *</label>
+            <input type="text" class="form-input" id="product-search" 
+                   placeholder="Начните вводить название..." 
+                   onkeyup="searchProducts(this.value)">
+            <div class="search-results" id="product-results"></div>
+            <a href="#" class="create-link" onclick="showCreateProduct()">+ Создать новый товар</a>
+        </div>
+        
+        <input type="hidden" id="selected-product-id">
+        <input type="hidden" id="selected-product-name">
+        
+        <!-- Количество и цена -->
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Количество *</label>
+                <input type="number" class="form-input" id="quantity" 
+                       value="1" min="0.01" step="0.01" onchange="updateSummary()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цена за ед. *</label>
+                <input type="number" class="form-input" id="unit-price" 
+                       min="0" step="0.01" placeholder="0" onchange="updateSummary()">
+            </div>
+        </div>
+        
+        <!-- Дата -->
+        <div class="form-group">
+            <label class="form-label">Дата покупки</label>
+            <input type="date" class="form-input" id="purchase-date">
+        </div>
+        
+        <!-- Итого -->
+        <div class="summary">
+            <div class="summary-row">
+                <span>Товар:</span>
+                <span id="summary-product">-</span>
+            </div>
+            <div class="summary-row">
+                <span>Магазин:</span>
+                <span id="summary-store">-</span>
+            </div>
+            <div class="summary-row">
+                <span>Количество:</span>
+                <span id="summary-quantity">-</span>
+            </div>
+            <div class="summary-row total">
+                <span>Итого:</span>
+                <span id="summary-total">0 ₲</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => window.history.back());
+        
+        let stores = [];
+        let products = [];
+        
+        // Инициализация
+        async function init() {
+            try {
+                // Загрузить магазины
+                stores = await API.getStores();
+                renderStores();
+                
+                // Установить сегодняшнюю дату
+                document.getElementById('purchase-date').valueAsDate = new Date();
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                console.error('Init error:', error);
+            }
+        }
+        
+        // Рендеринг магазинов
+        function renderStores() {
+            const select = document.getElementById('store-select');
+            const options = stores.map(s => 
+                `<option value="${s.id}">${s.name}</option>`
+            ).join('');
+            select.innerHTML = '<option value="">Выберите магазин...</option>' + options;
+        }
+        
+        // Поиск товаров
+        let searchTimeout;
+        async function searchProducts(query) {
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                document.getElementById('product-results').classList.remove('active');
+                return;
+            }
+            
+            searchTimeout = setTimeout(async () => {
+                try {
+                    products = await API.getProducts(null, query, 20);
+                    renderProductResults(products);
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            }, 300);
+        }
+        
+        // Рендеринг результатов поиска
+        function renderProductResults(products) {
+            const container = document.getElementById('product-results');
+            
+            if (!products || products.length === 0) {
+                container.innerHTML = '<div class="search-item">Товары не найдены</div>';
+                container.classList.add('active');
+                return;
+            }
+            
+            const html = products.map(p => `
+                <div class="search-item" onclick="selectProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')">
+                    <div class="search-item-name">${p.name}</div>
+                    <div class="search-item-info">
+                        ${p.category_name || 'Без категории'}
+                        ${p.min_price ? ` • ${p.min_price.toFixed(0)} - ${p.max_price.toFixed(0)} ₲` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+            container.classList.add('active');
+        }
+        
+        // Выбрать товар
+        function selectProduct(productId, productName) {
+            document.getElementById('selected-product-id').value = productId;
+            document.getElementById('selected-product-name').value = productName;
+            document.getElementById('product-search').value = productName;
+            document.getElementById('product-results').classList.remove('active');
+            
+            updateSummary();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        // Изменение магазина
+        function onStoreChange() {
+            updateSummary();
+        }
+        
+        // Обновить сводку
+        function updateSummary() {
+            const storeId = document.getElementById('store-select').value;
+            const productName = document.getElementById('selected-product-name').value;
+            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+            const unitPrice = parseFloat(document.getElementById('unit-price').value) || 0;
+            
+            const store = stores.find(s => s.id === storeId);
+            
+            document.getElementById('summary-store').textContent = store ? store.name : '-';
+            document.getElementById('summary-product').textContent = productName || '-';
+            document.getElementById('summary-quantity').textContent = quantity > 0 ? quantity : '-';
+            
+            const total = quantity * unitPrice;
+            document.getElementById('summary-total').textContent = 
+                total > 0 ? `${Math.round(total).toLocaleString('ru-RU')} ₲` : '0 ₲';
+        }
+        
+        // Создать магазин
+        function showCreateStore() {
+            event.preventDefault();
+            const name = prompt('Введите название магазина:');
+            
+            if (name && name.trim()) {
+                createStore(name.trim());
+            }
+        }
+        
+        async function createStore(name) {
+            try {
+                const result = await API.createStore(name);
+                
+                // Перезагрузить магазины
+                stores = await API.getStores();
+                renderStores();
+                
+                // Выбрать новый магазин
+                document.getElementById('store-select').value = result.store_id;
+                onStoreChange();
+                
+                tg.showPopup({
+                    title: 'Успех',
+                    message: `Магазин "${name}" создан`,
+                    buttons: [{type: 'ok'}]
+                });
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                tg.showAlert('Ошибка создания магазина: ' + error.message);
+            }
+        }
+        
+        // Создать товар
+        function showCreateProduct() {
+            event.preventDefault();
+            const name = prompt('Введите название товара:');
+            
+            if (name && name.trim()) {
+                createProduct(name.trim());
+            }
+        }
+        
+        async function createProduct(name) {
+            try {
+                const result = await API.createProduct(name);
+                
+                // Выбрать новый товар
+                selectProduct(result.product_id, name);
+                
+                tg.showPopup({
+                    title: 'Успех',
+                    message: `Товар "${name}" создан`,
+                    buttons: [{type: 'ok'}]
+                });
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                tg.showAlert('Ошибка создания товара: ' + error.message);
+            }
+        }
+        
+        // Сохранить расход
+        async function saveExpense() {
+            const storeId = document.getElementById('store-select').value;
+            const productId = document.getElementById('selected-product-id').value;
+            const quantity = parseFloat(document.getElementById('quantity').value);
+            const unitPrice = parseFloat(document.getElementById('unit-price').value);
+            const purchaseDate = document.getElementById('purchase-date').value;
+            
+            // Валидация
+            if (!storeId) {
+                tg.showAlert('Выберите магазин');
+                return;
+            }
+            
+            if (!productId) {
+                tg.showAlert('Выберите товар');
+                return;
+            }
+            
+            if (!quantity || quantity <= 0) {
+                tg.showAlert('Введите количество');
+                return;
+            }
+            
+            if (!unitPrice || unitPrice <= 0) {
+                tg.showAlert('Введите цену');
+                return;
+            }
+            
+            try {
+                tg.MainButton.showProgress();
+                
+                await API.createExpense(
+                    storeId,
+                    productId,
+                    quantity,
+                    unitPrice,
+                    purchaseDate ? new Date(purchaseDate).toISOString() : null
+                );
+                
+                tg.MainButton.hideProgress();
+                
+                tg.showPopup({
+                    title: 'Успех',
+                    message: 'Расход добавлен',
+                    buttons: [{type: 'ok'}]
+                }, () => {
+                    window.location.href = '../index.html';
+                });
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                tg.MainButton.hideProgress();
+                tg.showAlert('Ошибка сохранения: ' + error.message);
+            }
+        }
+        
+        // Запуск
+        init();
+        
+        // Main Button
+        tg.MainButton.setText('💾 Сохранить расход');
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => {
+            saveExpense();
+        });
+    </script>
+</body>
+</html>
