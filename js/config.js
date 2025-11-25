@@ -8,12 +8,16 @@ const CONFIG = {
         PRICE_COMPARE: '/prices/compare',
         PRODUCTS_SEARCH: '/products/search',
         PRICE_ANALYSIS: '/reports/price-analysis',
-        
-        // Новые
         CATEGORIES: '/categories',
         PRODUCTS: '/products',
         PRODUCT_DETAILS: '/products',
-        UPDATE_PRODUCT_CATEGORY: '/products/category'
+        UPDATE_PRODUCT_CATEGORY: '/products/category',
+        
+        // Новые
+        CREATE_PRODUCT: '/products/create',
+        STORES: '/stores',
+        CREATE_STORE: '/stores',
+        CREATE_EXPENSE: '/expenses/manual'
     },
     
     SETTINGS: {
