@@ -54,6 +54,48 @@ class APIClient {
             throw new Error('Ошибка подключения к серверу');
         }
     }
+
+    async put(endpoint, body = {}) {
+        const url = this.baseURL + endpoint;
+        
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw new Error('Ошибка подключения к серверу');
+        }
+    }
+    
+    async delete(endpoint) {
+        const url = this.baseURL + endpoint;
+        
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                mode: 'cors',
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw new Error('Ошибка подключения к серверу');
+        }
+    }
     
     buildURL(endpoint, params = {}) {
         const url = new URL(this.baseURL + endpoint);
