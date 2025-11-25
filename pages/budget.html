@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Покупки в супермаркетах</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Стили остаются без изменений -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -20,7 +22,6 @@
         }
         .header h1 { font-size: 20px; margin-bottom: 5px; }
         .header p { font-size: 13px; opacity: 0.9; }
-        
         .tabs {
             display: flex;
             background: var(--tg-theme-secondary-bg-color);
@@ -43,15 +44,13 @@
             background: var(--tg-theme-button-color);
             color: var(--tg-theme-button-text-color);
         }
-        
-        .content { display: none; }
+        .content { display: none; padding: 15px; }
         .content.active { display: block; }
-        
         .stats {
-            padding: 15px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+            margin-bottom: 20px;
         }
         .stat {
             background: var(--tg-theme-secondary-bg-color);
@@ -69,32 +68,11 @@
             opacity: 0.7;
             margin-top: 5px;
         }
-        
-        .section {
-            padding: 15px;
-        }
         .section-title {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-        
-        .search-box {
-            margin-bottom: 15px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 10px;
-            background: var(--tg-theme-secondary-bg-color);
-            color: var(--tg-theme-text-color);
-            font-size: 14px;
-        }
-        
         .card {
             background: var(--tg-theme-secondary-bg-color);
             padding: 12px;
@@ -104,28 +82,11 @@
         .card.up { border-left: 3px solid #ef4444; }
         .card.down { border-left: 3px solid #10b981; }
         .card.new { border-left: 3px solid #3b82f6; }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 8px;
-        }
         .product-name {
             font-weight: 600;
             font-size: 14px;
-            flex: 1;
+            margin-bottom: 5px;
         }
-        .trend-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .trend-badge.up { background: #fee; color: #c00; }
-        .trend-badge.down { background: #efe; color: #060; }
-        .trend-badge.new { background: #eef; color: #06c; }
-        
         .store {
             font-size: 12px;
             opacity: 0.7;
@@ -145,38 +106,6 @@
             opacity: 0.5;
             text-decoration: line-through;
         }
-        
-        .comparison-card {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-        .comparison-header {
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        .comparison-stores {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .store-price {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            background: var(--tg-theme-bg-color);
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        .store-price.best {
-            border: 2px solid #10b981;
-        }
-        .store-name { flex: 1; }
-        .store-price-value { font-weight: 700; }
-        
         .loading {
             text-align: center;
             padding: 40px 20px;
@@ -186,28 +115,9 @@
             background: #fee;
             color: #c00;
             padding: 15px;
-            margin: 15px;
             border-radius: 10px;
             text-align: center;
-        }
-        
-        .filters {
-            display: flex;
-            gap: 8px;
-            padding: 0 15px 15px;
-            overflow-x: auto;
-        }
-        .filter-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: var(--tg-theme-secondary-bg-color);
-            font-size: 13px;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-        .filter-btn.active {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -244,62 +154,53 @@
             </div>
         </div>
         
-        <div class="section">
-            <div class="section-title">📈 Последние изменения</div>
-            <div id="quick-trends"></div>
-        </div>
+        <div class="section-title">📈 Последние изменения</div>
+        <div id="quick-trends"></div>
     </div>
     
     <!-- Тренды -->
     <div id="tab-trends" class="content">
-        <div class="filters">
-            <div class="filter-btn active" onclick="filterTrends(7)">7 дней</div>
-            <div class="filter-btn" onclick="filterTrends(30)">30 дней</div>
-            <div class="filter-btn" onclick="filterTrends(90)">90 дней</div>
-        </div>
-        
-        <div class="section">
-            <div class="search-box">
-                <input type="text" id="search-trends" placeholder="🔍 Поиск товара..." 
-                       onkeyup="searchTrends(this.value)">
-            </div>
-            <div id="trends-list"></div>
-        </div>
+        <div id="trends-list"></div>
     </div>
     
     <!-- Сравнение -->
     <div id="tab-compare" class="content">
-        <div class="section">
-            <div class="search-box">
-                <input type="text" id="search-compare" placeholder="🔍 Поиск товара..." 
-                       onkeyup="searchCompare(this.value)">
-            </div>
-            <div id="compare-list"></div>
-        </div>
+        <div id="compare-list"></div>
     </div>
     
+    <!-- КРИТИЧНО: Загрузка скриптов в правильном порядке -->
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script>
+        // Проверка загрузки API
+        if (typeof API === 'undefined') {
+            document.body.innerHTML = '<div class="error">❌ Ошибка загрузки API. Обновите страницу.</div>';
+            throw new Error('API не загружен');
+        }
+        
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.BackButton.show();
         tg.BackButton.onClick(() => window.location.href = '../index.html');
         
-        let currentTrendsDays = 7;
         let allTrends = [];
         let allComparisons = [];
         
         // === ИНИЦИАЛИЗАЦИЯ ===
-        
         async function init() {
-            await loadOverview();
-            tg.HapticFeedback.notificationOccurred('success');
+            try {
+                await loadOverview();
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                console.error('Init error:', error);
+                showError('quick-trends', error.message);
+            }
         }
         
         // === ЗАГРУЗКА ДАННЫХ ===
-        
         async function loadOverview() {
+            document.getElementById('quick-trends').innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+            
             try {
                 // Статистика
                 const stats = await API.getStatistics();
@@ -312,70 +213,70 @@
                 const trends = await API.getPriceTrends(7, null, 5);
                 renderQuickTrends(trends);
             } catch (error) {
+                console.error('loadOverview error:', error);
                 showError('quick-trends', error.message);
             }
         }
         
-        async function loadTrends(days = 7, search = null) {
+        async function loadTrends(days = 7) {
             document.getElementById('trends-list').innerHTML = '<div class="loading">⏳ Загрузка...</div>';
             
             try {
-                allTrends = await API.getPriceTrends(days, search, 50);
+                allTrends = await API.getPriceTrends(days, null, 50);
                 renderTrends(allTrends);
             } catch (error) {
+                console.error('loadTrends error:', error);
                 showError('trends-list', error.message);
             }
         }
         
-        async function loadComparisons(search = null) {
+        async function loadComparisons() {
             document.getElementById('compare-list').innerHTML = '<div class="loading">⏳ Загрузка...</div>';
             
             try {
-                allComparisons = await API.comparePrices(search, 50);
+                allComparisons = await API.comparePrices(null, 50);
                 renderComparisons(allComparisons);
             } catch (error) {
+                console.error('loadComparisons error:', error);
                 showError('compare-list', error.message);
             }
         }
         
         // === РЕНДЕРИНГ ===
-        
         function renderQuickTrends(trends) {
-            const html = trends.map(t => `
-                <div class="card ${t.trend_direction}">
-                    <div class="card-header">
-                        <div class="product-name">${t.product_name}</div>
-                        <div class="trend-badge ${t.trend_direction}">
-                            ${getTrendIcon(t.trend_direction)} ${getTrendText(t)}
-                        </div>
-                    </div>
-                    <div class="store">🏪 ${t.store_name}</div>
-                    <div class="prices">
-                        <span class="price-current">${t.current_price.toFixed(0)} ₲</span>
-                        ${t.previous_price ? `
-                            <span class="price-old">${t.previous_price.toFixed(0)} ₲</span>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('quick-trends').innerHTML = html || '<div class="loading">Нет данных</div>';
-        }
-        
-        function renderTrends(trends) {
-            if (!trends.length) {
-                document.getElementById('trends-list').innerHTML = '<div class="loading">📊 Нет данных за выбранный период</div>';
+            if (!trends || trends.length === 0) {
+                document.getElementById('quick-trends').innerHTML = '<div class="loading">📊 Нет данных</div>';
                 return;
             }
             
             const html = trends.map(t => `
                 <div class="card ${t.trend_direction}">
-                    <div class="card-header">
-                        <div class="product-name">${t.product_name}</div>
-                        <div class="trend-badge ${t.trend_direction}">
-                            ${getTrendIcon(t.trend_direction)} ${getTrendText(t)}
-                        </div>
+                    <div class="product-name">${t.product_name}</div>
+                    <div class="store">🏪 ${t.store_name}</div>
+                    <div class="prices">
+                        <span class="price-current">${t.current_price.toFixed(0)} ₲</span>
+                        ${t.previous_price ? `
+                            <span class="price-old">${t.previous_price.toFixed(0)} ₲</span>
+                            <span style="color:${t.trend_direction==='up'?'#ef4444':'#10b981'}">
+                                ${t.trend_direction==='up'?'📈':'📉'} ${Math.abs(t.percent_change || 0).toFixed(1)}%
+                            </span>
+                        ` : '<span>🆕</span>'}
                     </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('quick-trends').innerHTML = html;
+        }
+        
+        function renderTrends(trends) {
+            if (!trends || trends.length === 0) {
+                document.getElementById('trends-list').innerHTML = '<div class="loading">📊 Нет данных</div>';
+                return;
+            }
+            
+            const html = trends.map(t => `
+                <div class="card ${t.trend_direction}">
+                    <div class="product-name">${t.product_name}</div>
                     <div class="store">🏪 ${t.store_name}</div>
                     <div class="prices">
                         <span class="price-current">${t.current_price.toFixed(0)} ₲</span>
@@ -390,27 +291,20 @@
         }
         
         function renderComparisons(comparisons) {
-            if (!comparisons.length) {
-                document.getElementById('compare-list').innerHTML = '<div class="loading">🏪 Нет данных для сравнения</div>';
+            if (!comparisons || comparisons.length === 0) {
+                document.getElementById('compare-list').innerHTML = '<div class="loading">🏪 Нет данных</div>';
                 return;
             }
             
             const html = comparisons.map(c => `
-                <div class="comparison-card">
-                    <div class="comparison-header">🛒 ${c.product_name}</div>
-                    <div class="comparison-stores">
-                        ${c.stores.map(s => `
-                            <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
-                                <span class="store-name">
-                                    ${s.store_name === c.cheapest_store ? '🏆' : '🏪'} ${s.store_name}
-                                </span>
-                                <span class="store-price-value">${s.price.toFixed(0)} ₲</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="margin-top:10px;font-size:12px;opacity:0.7;text-align:center">
-                        💰 Разница: ${c.price_difference.toFixed(0)} ₲ (${c.savings_potential.toFixed(1)}%)
-                    </div>
+                <div class="card">
+                    <div class="product-name">🛒 ${c.product_name}</div>
+                    ${c.stores.map(s => `
+                        <div class="store">
+                            ${s.store_name === c.cheapest_store ? '🏆' : '🏪'} ${s.store_name}: 
+                            <strong>${s.price.toFixed(0)} ₲</strong>
+                        </div>
+                    `).join('')}
                 </div>
             `).join('');
             
@@ -418,19 +312,15 @@
         }
         
         // === ПЕРЕКЛЮЧЕНИЕ ТАБОВ ===
-        
         function switchTab(tab) {
-            // Убрать активные
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
             
-            // Активировать
             event.target.classList.add('active');
             document.getElementById(`tab-${tab}`).classList.add('active');
             
-            // Загрузить данные
             if (tab === 'trends' && !allTrends.length) {
-                loadTrends(currentTrendsDays);
+                loadTrends(7);
             } else if (tab === 'compare' && !allComparisons.length) {
                 loadComparisons();
             }
@@ -438,55 +328,7 @@
             tg.HapticFeedback.impactOccurred('light');
         }
         
-        // === ФИЛЬТРЫ И ПОИСК ===
-        
-        function filterTrends(days) {
-            currentTrendsDays = days;
-            
-            // Обновить активный фильтр
-            document.querySelectorAll('.filters .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            loadTrends(days);
-            tg.HapticFeedback.impactOccurred('light');
-        }
-        
-        let searchTrendsTimeout;
-        function searchTrends(query) {
-            clearTimeout(searchTrendsTimeout);
-            searchTrendsTimeout = setTimeout(() => {
-                loadTrends(currentTrendsDays, query || null);
-            }, 500);
-        }
-        
-        let searchCompareTimeout;
-        function searchCompare(query) {
-            clearTimeout(searchCompareTimeout);
-            searchCompareTimeout = setTimeout(() => {
-                loadComparisons(query || null);
-            }, 500);
-        }
-        
         // === УТИЛИТЫ ===
-        
-        function getTrendIcon(direction) {
-            const icons = {
-                up: '📈',
-                down: '📉',
-                new: '🆕',
-                same: '➡️'
-            };
-            return icons[direction] || '❓';
-        }
-        
-        function getTrendText(trend) {
-            if (trend.trend_direction === 'new') return 'Новый';
-            if (!trend.percent_change) return '';
-            return `${Math.abs(trend.percent_change).toFixed(1)}%`;
-        }
-        
         function formatCurrency(amount) {
             if (!amount) return '0 ₲';
             if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M ₲`;
@@ -495,8 +337,10 @@
         }
         
         function showError(elementId, message) {
-            document.getElementById(elementId).innerHTML = 
-                `<div class="error">❌ ${message}</div>`;
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = `<div class="error">❌ ${message}</div>`;
+            }
         }
         
         // Запуск
@@ -506,7 +350,9 @@
         tg.MainButton.setText('🔄 Обновить');
         tg.MainButton.show();
         tg.MainButton.onClick(() => {
-            api.clearCache();
+            if (typeof api !== 'undefined') {
+                api.clearCache();
+            }
             init();
             tg.HapticFeedback.impactOccurred('medium');
         });
