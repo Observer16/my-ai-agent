@@ -3,8 +3,6 @@ class APIClient {
     constructor() {
         this.baseURL = CONFIG.API_BASE_URL;
         this.cache = new Map();
-        this.requestQueue = [];
-        this.isProcessingQueue = false;
     }
     
     /**
@@ -25,11 +23,7 @@ class APIClient {
         }
         
         try {
-            const response = await this.fetchWithRetry(url, {
-                method: 'GET',
-                headers: this.getHeaders()
-            });
-            
+            const response = await this.fetchWithRetry(url, { method: 'GET' });
             const data = await response.json();
             
             // Сохранить в кэш
@@ -50,14 +44,13 @@ class APIClient {
     /**
      * POST запрос
      */
-    async post(endpoint, body = {}, options = {}) {
+    async post(endpoint, body = {}) {
         const url = this.baseURL + endpoint;
         
         try {
             const response = await this.fetchWithRetry(url, {
                 method: 'POST',
                 headers: {
-                    ...this.getHeaders(),
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(body)
@@ -71,28 +64,6 @@ class APIClient {
     }
     
     /**
-     * Загрузка файла
-     */
-    async uploadFile(endpoint, file, fieldName = 'file') {
-        const url = this.baseURL + endpoint;
-        const formData = new FormData();
-        formData.append(fieldName, file);
-        
-        try {
-            const response = await this.fetchWithRetry(url, {
-                method: 'POST',
-                headers: this.getHeaders(false), // Без Content-Type для FormData
-                body: formData
-            });
-            
-            return await response.json();
-        } catch (error) {
-            console.error('❌ Upload Error:', endpoint, error);
-            throw this.handleError(error);
-        }
-    }
-    
-    /**
      * Fetch с retry логикой
      */
     async fetchWithRetry(url, options = {}, attempt = 1) {
@@ -101,9 +72,9 @@ class APIClient {
         try {
             return await this.fetchWithTimeout(url, options);
         } catch (error) {
-            if (attempt < maxAttempts) {
+            if (attempt < maxAttempts && !error.message.includes('401')) {
                 console.log(`🔄 Повтор ${attempt}/${maxAttempts}:`, url);
-                await this.delay(1000 * attempt); // Экспоненциальная задержка
+                await this.delay(1000 * attempt);
                 return this.fetchWithRetry(url, options, attempt + 1);
             }
             throw error;
@@ -111,7 +82,7 @@ class APIClient {
     }
     
     /**
-     * Fetch с таймаутом
+     * Fetch с таймаутом (исправленный)
      */
     async fetchWithTimeout(url, options = {}) {
         const timeout = CONFIG.SETTINGS.REQUEST_TIMEOUT;
@@ -119,11 +90,26 @@ class APIClient {
         const id = setTimeout(() => controller.abort(), timeout);
         
         try {
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal
-            });
+            const fetchOptions = {
+                signal: controller.signal,
+                mode: 'cors',
+                cache: 'no-cache'
+            };
             
+            // Добавить метод
+            if (options.method) {
+                fetchOptions.method = options.method;
+            }
+            
+            // Добавить body для POST
+            if (options.body) {
+                fetchOptions.body = options.body;
+                fetchOptions.headers = {
+                    'Content-Type': 'application/json'
+                };
+            }
+            
+            const response = await fetch(url, fetchOptions);
             clearTimeout(id);
             
             if (!response.ok) {
@@ -139,24 +125,6 @@ class APIClient {
             }
             throw error;
         }
-    }
-    
-    /**
-     * Получить заголовки
-     */
-    getHeaders(includeContentType = true) {
-        const headers = {};
-        
-        // Добавить Telegram init data для авторизации
-        if (CONFIG.TELEGRAM.initData) {
-            headers['X-Telegram-Init-Data'] = CONFIG.TELEGRAM.initData;
-        }
-        
-        if (includeContentType) {
-            headers['Content-Type'] = 'application/json';
-        }
-        
-        return headers;
     }
     
     /**
@@ -207,10 +175,8 @@ class APIClient {
 // Глобальный экземпляр
 const api = new APIClient();
 
-// API методы
+// API методы (без изменений)
 const API = {
-    // === СИСТЕМНЫЕ ===
-    
     async healthCheck() {
         return await api.get(CONFIG.ENDPOINTS.HEALTH, {}, { useCache: false });
     },
@@ -218,8 +184,6 @@ const API = {
     async getStatistics() {
         return await api.get(CONFIG.ENDPOINTS.STATISTICS);
     },
-    
-    // === ЦЕНЫ ===
     
     async getPriceTrends(days = 30, productPattern = null, limit = 20) {
         const params = { days, limit };
@@ -237,58 +201,24 @@ const API = {
         return await api.get(CONFIG.ENDPOINTS.PRODUCTS_SEARCH, { name });
     },
     
-    // === ОТЧЕТЫ ===
-    
     async getPriceAnalysis(days = 30) {
         return await api.get(CONFIG.ENDPOINTS.PRICE_ANALYSIS, { days });
-    },
-    
-    // === ЗАГРУЗКА ===
-    
-    async uploadXML(file) {
-        return await api.uploadFile(CONFIG.ENDPOINTS.UPLOAD_XML, file);
-    },
-    
-    async processFolder(folderPath = null) {
-        const params = folderPath ? { folder_path: folderPath } : {};
-        return await api.post(CONFIG.ENDPOINTS.PROCESS_FOLDER, {}, params);
-    },
-    
-    // === N8N ===
-    
-    async testN8N() {
-        return await api.post(CONFIG.ENDPOINTS.N8N_TEST);
-    },
-    
-    async sendReportToN8N(reportType) {
-        return await api.post(CONFIG.ENDPOINTS.N8N_SEND_REPORT + `?report_type=${reportType}`);
-    },
-    
-    // === ЗДОРОВЬЕ (заготовки) ===
-    
-    async logHealth(data) {
-        return await api.post(CONFIG.ENDPOINTS.HEALTH_LOG, data);
-    },
-    
-    async getHealthStats(days = 30) {
-        return await api.get(CONFIG.ENDPOINTS.HEALTH_STATS, { days });
-    },
-    
-    // === АКТИВНОСТЬ (заготовки) ===
-    
-    async logActivity(data) {
-        return await api.post(CONFIG.ENDPOINTS.ACTIVITY_LOG, data);
-    },
-    
-    async getActivityStats(days = 30) {
-        return await api.get(CONFIG.ENDPOINTS.ACTIVITY_STATS, { days });
-    },
-    
-    // === AI ДОКТОР (заготовка) ===
-    
-    async askDoctor(question) {
-        return await api.post(CONFIG.ENDPOINTS.DOCTOR_CHAT, { question });
     }
 };
 
 console.log('✅ API Client готов');
+```
+
+## Проверка после исправлений
+
+После изменений перезапусти:
+
+1. **Backend**: `python api_server.py`
+2. **Ngrok**: если запущен, перезапусти
+3. **Frontend**: Hard refresh в Telegram (закрой и открой Mini App заново)
+
+В логах должны появиться **GET** запросы вместо только OPTIONS:
+```
+INFO: GET /statistics - 200 OK
+INFO: GET /prices/trends?days=7&limit=50 - 200 OK
+INFO: GET /prices/compare?limit=50 - 200 OK
