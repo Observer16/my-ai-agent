@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Добавить расход</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Библиотека для сканирования штрих-кодов -->
@@ -43,7 +43,7 @@
             border-radius: 10px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             color: var(--tg-theme-text-color, #000);
-            font-size: 14px;
+            font-size: 16px; /* Увеличил для iOS */
         }
         .form-input:focus, .form-select:focus {
             outline: none;
@@ -55,7 +55,7 @@
             gap: 10px;
         }
         
-        /* Стили для выбора магазина */
+        /* Магазины */
         .custom-select-wrapper {
             position: relative;
         }
@@ -126,7 +126,7 @@
             border-radius: 4px;
         }
         
-        /* Tabs для поиска товара */
+        /* Tabs */
         .search-tabs {
             display: flex;
             gap: 5px;
@@ -208,7 +208,7 @@
             opacity: 0.8;
         }
         
-        /* Модальное окно сканера */
+        /* ====== УЛУЧШЕННЫЙ СКАНЕР ====== */
         .scanner-modal {
             display: none;
             position: fixed;
@@ -216,7 +216,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.95);
+            background: #000;
             z-index: 9999;
             flex-direction: column;
         }
@@ -225,11 +225,16 @@
         }
         .scanner-header {
             padding: 15px 20px;
-            background: var(--tg-theme-button-color, #3390ec);
+            background: rgba(0,0,0,0.8);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
         }
         .scanner-header h3 {
             font-size: 16px;
@@ -238,64 +243,133 @@
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .scanner-container {
-            flex: 1;
+        
+        /* Контейнер камеры на весь экран */
+        #scanner-reader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #scanner-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+        
+        /* Рамка прицела */
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            pointer-events: none;
+            z-index: 5;
         }
-        #scanner-reader {
+        .scanner-frame {
+            width: 280px;
+            height: 150px;
+            border: 3px solid #fff;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+        }
+        .scanner-frame::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            right: 10px;
+            height: 2px;
+            background: #ef4444;
+            animation: scanLine 2s ease-in-out infinite;
+        }
+        @keyframes scanLine {
+            0%, 100% { top: 20%; }
+            50% { top: 80%; }
+        }
+        .scanner-corners {
+            position: absolute;
             width: 100%;
-            max-width: 400px;
-            border-radius: 12px;
-            overflow: hidden;
+            height: 100%;
         }
-        #scanner-reader video {
-            border-radius: 12px;
+        .scanner-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #10b981;
         }
+        .scanner-corner.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+        .scanner-corner.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+        .scanner-corner.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+        .scanner-corner.br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+        
         .scanner-hint {
             color: white;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
             font-size: 14px;
-            opacity: 0.8;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .scanner-hint-focus {
+            color: #fbbf24;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        /* Нижняя панель сканера */
+        .scanner-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: rgba(0,0,0,0.8);
+            z-index: 10;
         }
         .scanner-result {
             background: #10b981;
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
-            margin-top: 15px;
             text-align: center;
+            margin-bottom: 15px;
             display: none;
         }
         .scanner-result.active {
             display: block;
         }
+        .scanner-result-code {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 5px;
+            font-family: monospace;
+        }
         .scanner-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 400px;
         }
         .scanner-btn {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
         }
@@ -306,6 +380,33 @@
         .scanner-btn.secondary {
             background: rgba(255,255,255,0.2);
             color: white;
+        }
+        .scanner-btn.cancel {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        /* Ручной ввод в сканере */
+        .scanner-manual {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .scanner-manual input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+        }
+        .scanner-manual button {
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
         }
         
         /* Переключатель весовой товар */
@@ -370,7 +471,7 @@
             background: rgba(51, 144, 236, 0.1);
         }
         
-        /* Информация о выбранном товаре */
+        /* Выбранный товар */
         .selected-product-info {
             background: #e8f5e9;
             border: 1px solid #a5d6a7;
@@ -397,7 +498,7 @@
             font-size: 18px;
         }
         
-        /* Поле для добавления штрих-кода */
+        /* Поле штрих-кода */
         .barcode-field {
             display: none;
             margin-top: 10px;
@@ -470,14 +571,12 @@
                 </div>
             </div>
             
-            <!-- Поиск по названию -->
             <div id="search-by-name">
                 <input type="text" class="form-input" id="product-search" 
                        placeholder="Начните вводить название..." 
                        onkeyup="searchProducts(this.value)">
             </div>
             
-            <!-- Поиск по штрих-коду -->
             <div id="search-by-barcode" style="display: none;">
                 <div class="barcode-input-wrapper">
                     <input type="text" class="form-input" id="barcode-search" 
@@ -490,7 +589,6 @@
             
             <div class="search-results" id="product-results"></div>
             
-            <!-- Информация о выбранном товаре -->
             <div class="selected-product-info" id="selected-product-info">
                 <span class="selected-product-clear" onclick="clearSelectedProduct()">✕</span>
                 <div class="selected-product-name" id="selected-product-display-name">-</div>
@@ -500,12 +598,10 @@
             <a href="#" class="create-link" onclick="showCreateProduct()">+ Создать новый товар</a>
         </div>
         
-        <!-- Скрытые поля -->
         <input type="hidden" id="selected-product-id">
         <input type="hidden" id="selected-product-name">
         <input type="hidden" id="selected-product-barcode">
         
-        <!-- Поле для добавления штрих-кода -->
         <div class="barcode-field" id="add-barcode-field">
             <div class="form-group">
                 <label class="form-label">📊 Добавить штрих-код к товару</label>
@@ -521,13 +617,11 @@
             </div>
         </div>
         
-        <!-- Весовой товар -->
         <div class="toggle-container">
             <span class="toggle-label">⚖️ Весовой товар</span>
             <div class="toggle-switch" id="weight-toggle" onclick="toggleWeightMode()"></div>
         </div>
         
-        <!-- Единица измерения -->
         <div class="form-group" id="unit-selector-group" style="display: none;">
             <label class="form-label">Единица измерения</label>
             <div class="unit-selector">
@@ -538,7 +632,6 @@
             </div>
         </div>
         
-        <!-- Количество и цена -->
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label" id="quantity-label">Количество *</label>
@@ -552,13 +645,11 @@
             </div>
         </div>
         
-        <!-- Дата -->
         <div class="form-group">
             <label class="form-label">Дата покупки</label>
             <input type="date" class="form-input" id="purchase-date" style="width: 100%;">
         </div>
         
-        <!-- Итого -->
         <div class="summary">
             <div class="summary-row">
                 <span>Товар:</span>
@@ -579,24 +670,52 @@
         </div>
     </div>
     
-    <!-- Модальное окно сканера -->
+    <!-- ====== УЛУЧШЕННЫЙ СКАНЕР ====== -->
     <div class="scanner-modal" id="scanner-modal">
         <div class="scanner-header">
             <h3>📷 Сканер штрих-кода</h3>
             <button class="scanner-close" onclick="closeScanner()">✕</button>
         </div>
-        <div class="scanner-container">
-            <div id="scanner-reader"></div>
+        
+        <!-- Область камеры -->
+        <div id="scanner-reader"></div>
+        
+        <!-- Наложение с рамкой -->
+        <div class="scanner-overlay">
+            <div class="scanner-frame">
+                <div class="scanner-corners">
+                    <div class="scanner-corner tl"></div>
+                    <div class="scanner-corner tr"></div>
+                    <div class="scanner-corner bl"></div>
+                    <div class="scanner-corner br"></div>
+                </div>
+            </div>
             <div class="scanner-hint">
-                Наведите камеру на штрих-код товара
+                Поместите штрих-код в рамку
+                <div class="scanner-hint-focus">💡 Держите телефон на расстоянии 15-20 см</div>
             </div>
+        </div>
+        
+        <!-- Нижняя панель -->
+        <div class="scanner-bottom">
             <div class="scanner-result" id="scanner-result">
-                <div>✅ Код найден:</div>
-                <div id="scanned-code" style="font-size: 18px; font-weight: bold; margin-top: 5px;">-</div>
+                <div>✅ Штрих-код найден:</div>
+                <div class="scanner-result-code" id="scanned-code">-</div>
             </div>
-            <div class="scanner-buttons" id="scanner-buttons" style="display: none;">
+            
+            <div class="scanner-buttons" id="scanner-buttons-found" style="display: none;">
                 <button class="scanner-btn secondary" onclick="rescanBarcode()">🔄 Ещё раз</button>
                 <button class="scanner-btn primary" onclick="useScannedBarcode()">✓ Использовать</button>
+            </div>
+            
+            <div class="scanner-buttons" id="scanner-buttons-default">
+                <button class="scanner-btn cancel" onclick="closeScanner()">Отмена</button>
+            </div>
+            
+            <!-- Ручной ввод -->
+            <div class="scanner-manual">
+                <input type="text" id="manual-barcode" placeholder="Или введите код вручную..." inputmode="numeric">
+                <button onclick="useManualBarcode()">OK</button>
             </div>
         </div>
     </div>
@@ -619,9 +738,9 @@
         // Сканер
         let html5QrCode = null;
         let lastScannedCode = '';
-        let scannerTarget = 'search'; // 'search' или 'newBarcode'
+        let scannerTarget = 'search';
+        let isScanning = false;
         
-        // Цвета для типов магазинов
         const storeTypeColors = {
             'Супермаркет': { bg: '#10b981', text: 'white' },
             'Аптека': { bg: '#ef4444', text: 'white' },
@@ -630,7 +749,7 @@
             'Магазин': { bg: '#8b5cf6', text: 'white' }
         };
         
-        // ==================== СКАНЕР ШТРИХ-КОДА ====================
+        // ==================== УЛУЧШЕННЫЙ СКАНЕР ====================
         
         function openScanner() {
             scannerTarget = 'search';
@@ -646,35 +765,55 @@
             const modal = document.getElementById('scanner-modal');
             modal.classList.add('active');
             
-            // Скрываем результат и кнопки
+            // Сброс UI
             document.getElementById('scanner-result').classList.remove('active');
-            document.getElementById('scanner-buttons').style.display = 'none';
+            document.getElementById('scanner-buttons-found').style.display = 'none';
+            document.getElementById('scanner-buttons-default').style.display = 'flex';
+            document.getElementById('manual-barcode').value = '';
             
             tg.HapticFeedback.impactOccurred('medium');
             
-            // Запускаем сканер
-            startScanner();
+            // Небольшая задержка для анимации
+            setTimeout(() => startScanner(), 300);
         }
         
         function closeScanner() {
             const modal = document.getElementById('scanner-modal');
             modal.classList.remove('active');
-            
-            // Останавливаем сканер
             stopScanner();
-            
             tg.HapticFeedback.impactOccurred('light');
         }
         
         async function startScanner() {
+            if (isScanning) return;
+            
             try {
-                // Создаём экземпляр сканера
                 html5QrCode = new Html5Qrcode("scanner-reader");
                 
+                // Получаем список камер
+                const cameras = await Html5Qrcode.getCameras();
+                
+                if (!cameras || cameras.length === 0) {
+                    throw new Error('Камеры не найдены');
+                }
+                
+                // Выбираем заднюю камеру
+                let cameraId = cameras[0].id;
+                for (const camera of cameras) {
+                    if (camera.label.toLowerCase().includes('back') || 
+                        camera.label.toLowerCase().includes('rear') ||
+                        camera.label.toLowerCase().includes('environment')) {
+                        cameraId = camera.id;
+                        break;
+                    }
+                }
+                
+                // Улучшенные настройки для фокусировки
                 const config = {
-                    fps: 10,
-                    qrbox: { width: 250, height: 150 },
-                    aspectRatio: 1.0,
+                    fps: 15,
+                    qrbox: { width: 280, height: 150 },
+                    aspectRatio: window.innerHeight / window.innerWidth,
+                    disableFlip: false,
                     formatsToSupport: [
                         Html5QrcodeSupportedFormats.EAN_13,
                         Html5QrcodeSupportedFormats.EAN_8,
@@ -682,45 +821,92 @@
                         Html5QrcodeSupportedFormats.UPC_E,
                         Html5QrcodeSupportedFormats.CODE_128,
                         Html5QrcodeSupportedFormats.CODE_39,
-                        Html5QrcodeSupportedFormats.CODE_93,
-                        Html5QrcodeSupportedFormats.ITF,
-                        Html5QrcodeSupportedFormats.QR_CODE
+                        Html5QrcodeSupportedFormats.ITF
+                    ],
+                    // Экспериментальные настройки для лучшего фокуса
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    }
+                };
+                
+                // Продвинутые настройки камеры с фокусом
+                const cameraConfig = {
+                    facingMode: "environment",
+                    advanced: [
+                        { focusMode: "continuous" },
+                        { autoFocus: "continuous" },
+                        { exposureMode: "continuous" },
+                        { whiteBalanceMode: "continuous" }
                     ]
                 };
                 
                 await html5QrCode.start(
-                    { facingMode: "environment" }, // Задняя камера
+                    cameraConfig,
                     config,
                     onScanSuccess,
                     onScanFailure
                 );
                 
-                console.log('✅ Сканер запущен');
+                isScanning = true;
+                console.log('✅ Сканер запущен с улучшенным фокусом');
+                
+                // Пробуем применить дополнительные настройки фокуса
+                try {
+                    const videoElement = document.querySelector('#scanner-reader video');
+                    if (videoElement && videoElement.srcObject) {
+                        const track = videoElement.srcObject.getVideoTracks()[0];
+                        const capabilities = track.getCapabilities();
+                        
+                        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+                            await track.applyConstraints({
+                                advanced: [{ focusMode: 'continuous' }]
+                            });
+                            console.log('✅ Непрерывный автофокус включен');
+                        }
+                        
+                        // Если поддерживается ручной фокус на близкое расстояние
+                        if (capabilities.focusDistance) {
+                            // Фокус на близкое расстояние (для штрих-кодов)
+                            const minFocus = capabilities.focusDistance.min || 0;
+                            const focusDistance = Math.max(minFocus, 0.1); // 10-20 см
+                            await track.applyConstraints({
+                                advanced: [{ focusDistance: focusDistance }]
+                            });
+                            console.log('✅ Фокус настроен на близкое расстояние:', focusDistance);
+                        }
+                    }
+                } catch (e) {
+                    console.log('ℹ️ Дополнительные настройки фокуса не поддерживаются:', e.message);
+                }
                 
             } catch (error) {
                 console.error('❌ Ошибка запуска сканера:', error);
                 
-                // Проверяем тип ошибки
+                let message = 'Не удалось запустить камеру';
+                
                 if (error.name === 'NotAllowedError') {
-                    tg.showAlert('Для сканирования нужен доступ к камере.\n\nРазрешите доступ в настройках браузера.');
+                    message = 'Разрешите доступ к камере в настройках браузера';
                 } else if (error.name === 'NotFoundError') {
-                    tg.showAlert('Камера не найдена на устройстве.');
-                } else {
-                    tg.showAlert('Не удалось запустить сканер: ' + error.message);
+                    message = 'Камера не найдена на устройстве';
+                } else if (error.name === 'NotReadableError') {
+                    message = 'Камера занята другим приложением';
                 }
                 
+                tg.showAlert(message);
                 closeScanner();
             }
         }
         
         function stopScanner() {
-            if (html5QrCode) {
+            if (html5QrCode && isScanning) {
                 html5QrCode.stop().then(() => {
                     html5QrCode.clear();
                     html5QrCode = null;
+                    isScanning = false;
                     console.log('🛑 Сканер остановлен');
                 }).catch(err => {
                     console.warn('Ошибка остановки сканера:', err);
+                    isScanning = false;
                 });
             }
         }
@@ -736,37 +922,45 @@
             // Показываем результат
             document.getElementById('scanned-code').textContent = decodedText;
             document.getElementById('scanner-result').classList.add('active');
-            document.getElementById('scanner-buttons').style.display = 'flex';
+            document.getElementById('scanner-buttons-found').style.display = 'flex';
+            document.getElementById('scanner-buttons-default').style.display = 'none';
             
-            // Вибрация
+            // Вибрация успеха
             tg.HapticFeedback.notificationOccurred('success');
         }
         
         function onScanFailure(error) {
-            // Тихо игнорируем ошибки сканирования (это нормально, когда код не в кадре)
+            // Игнорируем - это нормально когда код не в кадре
         }
         
         function rescanBarcode() {
-            // Скрываем результат
             document.getElementById('scanner-result').classList.remove('active');
-            document.getElementById('scanner-buttons').style.display = 'none';
-            
-            // Запускаем сканер заново
+            document.getElementById('scanner-buttons-found').style.display = 'none';
+            document.getElementById('scanner-buttons-default').style.display = 'flex';
             startScanner();
-            
             tg.HapticFeedback.impactOccurred('light');
         }
         
         function useScannedBarcode() {
             if (!lastScannedCode) return;
-            
+            applyBarcode(lastScannedCode);
+        }
+        
+        function useManualBarcode() {
+            const code = document.getElementById('manual-barcode').value.trim();
+            if (!code) {
+                tg.showAlert('Введите штрих-код');
+                return;
+            }
+            applyBarcode(code);
+        }
+        
+        function applyBarcode(code) {
             if (scannerTarget === 'search') {
-                // Вставляем в поле поиска и ищем
-                document.getElementById('barcode-search').value = lastScannedCode;
-                searchByBarcode(lastScannedCode);
+                document.getElementById('barcode-search').value = code;
+                searchByBarcode(code);
             } else if (scannerTarget === 'newBarcode') {
-                // Вставляем в поле нового штрих-кода
-                document.getElementById('new-barcode').value = lastScannedCode;
+                document.getElementById('new-barcode').value = code;
             }
             
             closeScanner();
