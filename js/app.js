@@ -43,7 +43,7 @@ function showGreeting() {
  * Загрузить данные для dashboard
  */
 async function loadDashboardData() {
-    // Загрузить данные бюджета
+    // Загрузить данные покупки в супермаркетах
     try {
         const stats = await API.getStatistics();
         document.getElementById('budget-total').textContent = 
