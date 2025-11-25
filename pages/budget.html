@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Покупки в супермаркетах</title>
+    <title>Покупки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,7 +11,6 @@
             font-family: -apple-system, sans-serif;
             background: var(--tg-theme-bg-color, #fff);
             color: var(--tg-theme-text-color, #000);
-            padding-bottom: 70px;
         }
         .header {
             background: linear-gradient(135deg, #667eea, #764ba2);
@@ -19,15 +18,11 @@
             padding: 20px;
         }
         .header h1 { font-size: 20px; margin-bottom: 5px; }
-        .header p { font-size: 13px; opacity: 0.9; }
         .tabs {
             display: flex;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 5px;
             gap: 5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
         .tab {
             flex: 1;
@@ -39,7 +34,7 @@
         }
         .tab.active {
             background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #fff);
+            color: white;
         }
         .content { display: none; padding: 15px; }
         .content.active { display: block; }
@@ -60,16 +55,7 @@
             font-weight: bold;
             color: var(--tg-theme-button-color, #3390ec);
         }
-        .stat .label {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
+        .stat .label { font-size: 12px; opacity: 0.7; margin-top: 5px; }
         .card {
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 12px;
@@ -78,33 +64,14 @@
         }
         .card.up { border-left: 3px solid #ef4444; }
         .card.down { border-left: 3px solid #10b981; }
-        .card.new { border-left: 3px solid #3b82f6; }
-        .product-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .store {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-bottom: 8px;
-        }
-        .prices {
-            display: flex;
-            gap: 12px;
-            font-size: 13px;
-        }
+        .product-name { font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+        .store { font-size: 12px; opacity: 0.7; margin-bottom: 8px; }
+        .prices { display: flex; gap: 12px; font-size: 13px; }
         .price-current { font-weight: 700; font-size: 16px; }
         .price-old { opacity: 0.5; text-decoration: line-through; }
         .loading { text-align: center; padding: 40px 20px; opacity: 0.5; }
-        .error {
-            background: #fee;
-            color: #c00;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 10px 0;
-        }
+        .error { background: #fee; color: #c00; padding: 15px; border-radius: 10px; margin: 10px 0; }
+        .debug { background: #ffe; padding: 10px; margin: 10px; border-radius: 5px; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -120,6 +87,7 @@
     </div>
     
     <div id="tab-overview" class="content active">
+        <div id="debug" class="debug"></div>
         <div class="stats">
             <div class="stat">
                 <div class="value" id="total">-</div>
@@ -138,7 +106,7 @@
                 <div class="label">Магазинов</div>
             </div>
         </div>
-        <div class="section-title">📈 Последние изменения</div>
+        <div style="font-weight: 600; margin-bottom: 10px;">📈 Последние изменения</div>
         <div id="quick-trends"><div class="loading">⏳ Загрузка...</div></div>
     </div>
     
@@ -151,86 +119,82 @@
     </div>
     
     <script>
-        // ВСТРОЕННАЯ КОНФИГУРАЦИЯ
+        // КОНФИГУРАЦИЯ
         const CONFIG = {
-            API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app',
+            API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app/', // ← ЗАМЕНИ НА СВОЙ!
             ENDPOINTS: {
                 STATISTICS: '/statistics',
                 PRICE_TRENDS: '/prices/trends',
                 PRICE_COMPARE: '/prices/compare'
-            },
-            SETTINGS: {
-                CACHE_TIMEOUT: 5 * 60 * 1000,
-                REQUEST_TIMEOUT: 10000,
-                RETRY_ATTEMPTS: 3
             }
         };
         
-        // ВСТРОЕННЫЙ API CLIENT
+        // DEBUG
+        function debug(msg) {
+            console.log(msg);
+            const el = document.getElementById('debug');
+            if (el) el.innerHTML += msg + '<br>';
+        }
+        
+        debug('🔧 API URL: ' + CONFIG.API_BASE_URL);
+        
+        // API CLIENT
         class APIClient {
             constructor() {
                 this.baseURL = CONFIG.API_BASE_URL;
-                this.cache = new Map();
             }
             
             async get(endpoint, params = {}) {
                 const url = this.buildURL(endpoint, params);
-                const cacheKey = url;
-                
-                if (this.cache.has(cacheKey)) {
-                    const cached = this.cache.get(cacheKey);
-                    if (Date.now() - cached.timestamp < CONFIG.SETTINGS.CACHE_TIMEOUT) {
-                        return cached.data;
-                    }
-                }
+                debug('📡 Запрос: ' + url);
                 
                 try {
                     const response = await fetch(url, {
                         method: 'GET',
                         mode: 'cors',
-                        cache: 'no-cache'
+                        headers: {
+                            'ngrok-skip-browser-warning': 'true'
+                        }
                     });
                     
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    debug('✅ Ответ: ' + response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
                     
                     const data = await response.json();
-                    this.cache.set(cacheKey, { data, timestamp: Date.now() });
+                    debug('📦 Данные получены');
                     return data;
                 } catch (error) {
-                    console.error('API Error:', error);
-                    throw new Error('Ошибка подключения к серверу');
+                    debug('❌ Ошибка: ' + error.message);
+                    throw error;
                 }
             }
             
             buildURL(endpoint, params = {}) {
                 const url = new URL(this.baseURL + endpoint);
                 Object.keys(params).forEach(key => {
-                    if (params[key] !== undefined && params[key] !== null) {
+                    if (params[key] != null) {
                         url.searchParams.append(key, params[key]);
                     }
                 });
                 return url.toString();
             }
-            
-            clearCache() {
-                this.cache.clear();
-            }
         }
         
         const api = new APIClient();
         const API = {
-            async getStatistics() {
-                return await api.get(CONFIG.ENDPOINTS.STATISTICS);
-            },
-            async getPriceTrends(days = 30, productPattern = null, limit = 20) {
+            getStatistics: () => api.get(CONFIG.ENDPOINTS.STATISTICS),
+            getPriceTrends: (days, pattern, limit) => {
                 const params = { days, limit };
-                if (productPattern) params.product_pattern = productPattern;
-                return await api.get(CONFIG.ENDPOINTS.PRICE_TRENDS, params);
+                if (pattern) params.product_pattern = pattern;
+                return api.get(CONFIG.ENDPOINTS.PRICE_TRENDS, params);
             },
-            async comparePrices(productPattern = null, limit = 20) {
+            comparePrices: (pattern, limit) => {
                 const params = { limit };
-                if (productPattern) params.product_pattern = productPattern;
-                return await api.get(CONFIG.ENDPOINTS.PRICE_COMPARE, params);
+                if (pattern) params.product_pattern = pattern;
+                return api.get(CONFIG.ENDPOINTS.PRICE_COMPARE, params);
             }
         };
         
@@ -240,60 +204,47 @@
         tg.BackButton.show();
         tg.BackButton.onClick(() => window.history.back());
         
-        let allTrends = [];
-        let allComparisons = [];
-        
+        // ЗАГРУЗКА
         async function init() {
             try {
-                await loadOverview();
-                tg.HapticFeedback.notificationOccurred('success');
-            } catch (error) {
-                console.error('Init error:', error);
-                showError('quick-trends', error.message);
-            }
-        }
-        
-        async function loadOverview() {
-            try {
                 const stats = await API.getStatistics();
-                document.getElementById('total').textContent = formatCurrency(stats.total_spent);
+                document.getElementById('total').textContent = formatMoney(stats.total_spent);
                 document.getElementById('purchases').textContent = stats.total_purchases;
                 document.getElementById('products').textContent = stats.unique_products;
                 document.getElementById('stores').textContent = stats.unique_stores;
                 
                 const trends = await API.getPriceTrends(7, null, 5);
-                renderQuickTrends(trends);
+                renderTrends(trends, 'quick-trends');
+                
+                tg.HapticFeedback.notificationOccurred('success');
             } catch (error) {
                 showError('quick-trends', error.message);
             }
         }
         
-        async function loadTrends(days = 7) {
-            document.getElementById('trends-list').innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+        async function loadTrends() {
             try {
-                allTrends = await API.getPriceTrends(days, null, 50);
-                renderTrends(allTrends);
+                const trends = await API.getPriceTrends(30, null, 50);
+                renderTrends(trends, 'trends-list');
             } catch (error) {
                 showError('trends-list', error.message);
             }
         }
         
-        async function loadComparisons() {
-            document.getElementById('compare-list').innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+        async function loadCompare() {
             try {
-                allComparisons = await API.comparePrices(null, 50);
-                renderComparisons(allComparisons);
+                const data = await API.comparePrices(null, 50);
+                renderCompare(data, 'compare-list');
             } catch (error) {
                 showError('compare-list', error.message);
             }
         }
         
-        function renderQuickTrends(trends) {
-            if (!trends || trends.length === 0) {
-                document.getElementById('quick-trends').innerHTML = '<div class="loading">📊 Нет данных</div>';
+        function renderTrends(trends, elId) {
+            if (!trends?.length) {
+                document.getElementById(elId).innerHTML = '<div class="loading">📊 Нет данных</div>';
                 return;
             }
-            
             const html = trends.map(t => `
                 <div class="card ${t.trend_direction}">
                     <div class="product-name">${t.product_name}</div>
@@ -303,39 +254,21 @@
                         ${t.previous_price ? `
                             <span class="price-old">${t.previous_price.toFixed(0)} ₲</span>
                             <span style="color:${t.trend_direction==='up'?'#ef4444':'#10b981'}">
-                                ${t.trend_direction==='up'?'📈':'📉'} ${Math.abs(t.percent_change || 0).toFixed(1)}%
+                                ${t.trend_direction==='up'?'📈':'📉'} ${Math.abs(t.percent_change||0).toFixed(1)}%
                             </span>
-                        ` : '<span>🆕</span>'}
+                        ` : '🆕'}
                     </div>
                 </div>
             `).join('');
-            document.getElementById('quick-trends').innerHTML = html;
+            document.getElementById(elId).innerHTML = html;
         }
         
-        function renderTrends(trends) {
-            if (!trends || trends.length === 0) {
-                document.getElementById('trends-list').innerHTML = '<div class="loading">📊 Нет данных</div>';
+        function renderCompare(data, elId) {
+            if (!data?.length) {
+                document.getElementById(elId).innerHTML = '<div class="loading">🏪 Нет данных</div>';
                 return;
             }
-            const html = trends.map(t => `
-                <div class="card ${t.trend_direction}">
-                    <div class="product-name">${t.product_name}</div>
-                    <div class="store">🏪 ${t.store_name}</div>
-                    <div class="prices">
-                        <span class="price-current">${t.current_price.toFixed(0)} ₲</span>
-                        ${t.previous_price ? `<span class="price-old">${t.previous_price.toFixed(0)} ₲</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('trends-list').innerHTML = html;
-        }
-        
-        function renderComparisons(comparisons) {
-            if (!comparisons || comparisons.length === 0) {
-                document.getElementById('compare-list').innerHTML = '<div class="loading">🏪 Нет данных</div>';
-                return;
-            }
-            const html = comparisons.map(c => `
+            const html = data.map(c => `
                 <div class="card">
                     <div class="product-name">🛒 ${c.product_name}</div>
                     ${c.stores.map(s => `
@@ -346,7 +279,7 @@
                     `).join('')}
                 </div>
             `).join('');
-            document.getElementById('compare-list').innerHTML = html;
+            document.getElementById(elId).innerHTML = html;
         }
         
         function switchTab(tab) {
@@ -355,22 +288,21 @@
             event.target.classList.add('active');
             document.getElementById(`tab-${tab}`).classList.add('active');
             
-            if (tab === 'trends' && !allTrends.length) loadTrends(7);
-            else if (tab === 'compare' && !allComparisons.length) loadComparisons();
+            if (tab === 'trends') loadTrends();
+            else if (tab === 'compare') loadCompare();
             
             tg.HapticFeedback.impactOccurred('light');
         }
         
-        function formatCurrency(amount) {
-            if (!amount) return '0 ₲';
-            if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M ₲`;
-            if (amount >= 1000) return `${(amount / 1000).toFixed(0)}K ₲`;
-            return `${Math.round(amount).toLocaleString('ru-RU')} ₲`;
+        function formatMoney(n) {
+            if (!n) return '0 ₲';
+            if (n >= 1000000) return `${(n/1000000).toFixed(1)}M ₲`;
+            if (n >= 1000) return `${(n/1000).toFixed(0)}K ₲`;
+            return `${Math.round(n).toLocaleString('ru')} ₲`;
         }
         
-        function showError(elementId, message) {
-            const el = document.getElementById(elementId);
-            if (el) el.innerHTML = `<div class="error">❌ ${message}</div>`;
+        function showError(id, msg) {
+            document.getElementById(id).innerHTML = `<div class="error">❌ ${msg}</div>`;
         }
         
         init();
@@ -378,9 +310,7 @@
         tg.MainButton.setText('🔄 Обновить');
         tg.MainButton.show();
         tg.MainButton.onClick(() => {
-            api.clearCache();
-            init();
-            tg.HapticFeedback.impactOccurred('medium');
+            location.reload();
         });
     </script>
 </body>
