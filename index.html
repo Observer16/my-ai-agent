@@ -98,6 +98,7 @@
             display: flex;
             gap: 15px;
             font-size: 13px;
+            flex-wrap: wrap;
         }
         
         .module-stat {
@@ -108,6 +109,40 @@
         
         .module-stat strong {
             color: var(--tg-theme-button-color, #3390ec);
+        }
+        
+        .quick-actions {
+            padding: 0 20px 20px;
+        }
+        
+        .quick-actions h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #fff);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 8px rgba(51, 144, 236, 0.3);
+        }
+        
+        .action-btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
         }
         
         .loading {
@@ -231,26 +266,25 @@
             </div>
         </div>
     </div>
-
-        
-        <!-- Быстрые действия -->
-        <div class="quick-actions">
-    <h3>Быстрые действия</h3>
-    <div class="action-buttons">
-        <div class="action-btn" onclick="openModule('add-expense')">
-            💳 Добавить расход
-        </div>
-        <div class="action-btn" onclick="openModule('products')">
-            📦 Управление товарами
-        </div>
-        <div class="action-btn" onclick="openModule('budget')">
-            📊 Анализ цен
-        </div>
-        <div class="action-btn" onclick="tg.showAlert('В разработке')">
-            📈 Отчеты
+    
+    <!-- Быстрые действия -->
+    <div class="quick-actions">
+        <h3>Быстрые действия</h3>
+        <div class="action-buttons">
+            <div class="action-btn" onclick="openModule('add-expense')">
+                💳 Добавить расход
+            </div>
+            <div class="action-btn" onclick="openModule('products')">
+                📦 Управление товарами
+            </div>
+            <div class="action-btn" onclick="openModule('budget')">
+                📊 Анализ цен
+            </div>
+            <div class="action-btn" onclick="tg.showAlert('В разработке')">
+                📈 Отчеты
+            </div>
         </div>
     </div>
-</div>
     
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
@@ -331,8 +365,6 @@
             document.getElementById('activity-steps').textContent = '8.5K';
             document.getElementById('activity-workouts').textContent = '3';
         }
-
-        
         
         // Открыть модуль
         function openModule(moduleName) {
