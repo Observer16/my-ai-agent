@@ -109,6 +109,47 @@
             color: white;
         }
         
+        /* Стили для карточки чека */
+        .receipt-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--tg-theme-button-color, #3390ec);
+        }
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .receipt-store {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .receipt-store-type {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+        .receipt-amount {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        .receipt-info {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            opacity: 0.7;
+            flex-wrap: wrap;
+        }
+        .receipt-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
         .card {
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 12px;
@@ -225,8 +266,8 @@
             </div>
         </div>
         
-        <div class="section-title">📈 Последние изменения (7 дней)</div>
-        <div id="quick-trends"></div>
+        <div class="section-title">🧾 Последние чеки</div>
+        <div id="recent-receipts"></div>
     </div>
     
     <!-- Тренды -->
@@ -278,17 +319,95 @@
         // Загрузка обзора
         async function loadOverview() {
             try {
+                // Загружаем статистику
                 const stats = await API.getStatistics();
                 document.getElementById('total').textContent = formatMoney(stats.total_spent);
                 document.getElementById('purchases').textContent = stats.total_purchases;
                 document.getElementById('products').textContent = stats.unique_products;
                 document.getElementById('stores').textContent = stats.unique_stores;
                 
-                const trends = await API.getPriceTrends(7, null, 5);
-                renderTrends(trends, 'quick-trends');
+                // Загружаем последние чеки
+                await loadRecentReceipts();
             } catch (error) {
-                showError('quick-trends', error.message);
+                showError('recent-receipts', error.message);
             }
+        }
+        
+        // Загрузка последних чеков
+        async function loadRecentReceipts() {
+            showLoading('recent-receipts');
+            try {
+                const receipts = await API.getRecentPurchases(7);
+                renderReceipts(receipts);
+            } catch (error) {
+                showError('recent-receipts', error.message);
+            }
+        }
+        
+        // Рендеринг последних чеков
+        function renderReceipts(receipts) {
+            const container = document.getElementById('recent-receipts');
+            
+            if (!receipts?.length) {
+                container.innerHTML = '<div class="empty">🧾 Нет данных о покупках</div>';
+                return;
+            }
+            
+            const html = receipts.map(r => {
+                const date = formatReceiptDate(r.purchase_date);
+                const time = formatReceiptTime(r.purchase_date);
+                
+                return `
+                    <div class="receipt-card">
+                        <div class="receipt-header">
+                            <div>
+                                <div class="receipt-store">🏪 ${r.store_name}</div>
+                                <div class="receipt-store-type">${r.store_type || 'Магазин'}</div>
+                            </div>
+                            <div class="receipt-amount">${formatMoney(r.total_amount)}</div>
+                        </div>
+                        <div class="receipt-info">
+                            <span>📅 ${date}</span>
+                            <span>🕐 ${time}</span>
+                            <span>📦 ${r.items_count} поз.</span>
+                            ${r.payment_method ? `<span>💳 ${r.payment_method}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        // Форматирование даты чека
+        function formatReceiptDate(dateStr) {
+            if (!dateStr) return '-';
+            
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffTime = now - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Сегодня';
+            if (diffDays === 1) return 'Вчера';
+            if (diffDays < 7) return `${diffDays} дн. назад`;
+            
+            return date.toLocaleDateString('ru-RU', { 
+                day: 'numeric', 
+                month: 'short',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+        
+        // Форматирование времени чека
+        function formatReceiptTime(dateStr) {
+            if (!dateStr) return '-';
+            
+            const date = new Date(dateStr);
+            return date.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
         }
         
         // Загрузка трендов
