@@ -12,6 +12,7 @@ const CONFIG = {
         PRODUCTS: '/products',
         PRODUCT_DETAILS: '/products',
         UPDATE_PRODUCT_CATEGORY: '/products/category',
+        UPDATE_PRODUCT_BARCODE: '/products/barcode',
         
         // Новые
         CREATE_PRODUCT: '/products/create',
