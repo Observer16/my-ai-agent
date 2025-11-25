@@ -1,25 +1,40 @@
 // Конфигурация Mini App
 const CONFIG = {
     // API endpoints
-    API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app', // ЗАМЕНИ на свой Static Domain!
+    API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app',
     
     // Endpoints
     ENDPOINTS: {
-        // Бюджет
+        // Системные
+        HEALTH: '/health',
         STATISTICS: '/statistics',
+        
+        // Загрузка файлов
+        UPLOAD_XML: '/upload/xml',
+        UPLOAD_XML_BATCH: '/upload/xml/batch',
+        PROCESS_FOLDER: '/process/folder',
+        
+        // Анализ цен
         PRICE_TRENDS: '/prices/trends',
         PRICE_COMPARE: '/prices/compare',
         PRODUCTS_SEARCH: '/products/search',
         
-        // Здоровье (добавишь позже)
+        // Отчеты
+        PRICE_ANALYSIS: '/reports/price-analysis',
+        
+        // N8n интеграция
+        N8N_TEST: '/n8n/test',
+        N8N_SEND_REPORT: '/n8n/send-report',
+        
+        // Здоровье (будущее)
         HEALTH_LOG: '/health/log',
         HEALTH_STATS: '/health/stats',
         
-        // Активность (добавишь позже)
+        // Активность (будущее)
         ACTIVITY_LOG: '/activity/log',
         ACTIVITY_STATS: '/activity/stats',
         
-        // AI Доктор (добавишь позже)
+        // AI Доктор (будущее)
         DOCTOR_CHAT: '/doctor/chat'
     },
     
@@ -27,7 +42,9 @@ const CONFIG = {
     SETTINGS: {
         CACHE_TIMEOUT: 5 * 60 * 1000, // 5 минут
         REQUEST_TIMEOUT: 10000, // 10 секунд
-        RETRY_ATTEMPTS: 3
+        RETRY_ATTEMPTS: 3,
+        DEFAULT_DAYS: 30,
+        DEFAULT_LIMIT: 20
     },
     
     // Локализация
@@ -36,9 +53,9 @@ const CONFIG = {
     
     // Telegram WebApp
     TELEGRAM: {
-        // Будет заполнено автоматически
         user: null,
-        theme: null
+        theme: null,
+        initData: null
     }
 };
 
@@ -46,14 +63,13 @@ const CONFIG = {
 if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
     
-    // Развернуть на весь экран
     tg.expand();
+    tg.enableClosingConfirmation();
     
-    // Сохранить данные пользователя
     CONFIG.TELEGRAM.user = tg.initDataUnsafe.user;
     CONFIG.TELEGRAM.theme = tg.themeParams;
+    CONFIG.TELEGRAM.initData = tg.initData;
     
-    // Показать кнопку "Назад"
     tg.BackButton.show();
     tg.BackButton.onClick(() => {
         if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
@@ -63,9 +79,5 @@ if (window.Telegram && window.Telegram.WebApp) {
         }
     });
     
-    // Включить подтверждение закрытия
-    tg.enableClosingConfirmation();
-    
     console.log('✅ Telegram WebApp инициализирован');
-    console.log('User:', CONFIG.TELEGRAM.user);
 }
