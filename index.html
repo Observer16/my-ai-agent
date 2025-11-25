@@ -231,6 +231,26 @@
             </div>
         </div>
     </div>
+
+        
+        <!-- Быстрые действия -->
+        <div class="quick-actions">
+    <h3>Быстрые действия</h3>
+    <div class="action-buttons">
+        <div class="action-btn" onclick="openModule('add-expense')">
+            💳 Добавить расход
+        </div>
+        <div class="action-btn" onclick="openModule('products')">
+            📦 Управление товарами
+        </div>
+        <div class="action-btn" onclick="openModule('budget')">
+            📊 Анализ цен
+        </div>
+        <div class="action-btn" onclick="tg.showAlert('В разработке')">
+            📈 Отчеты
+        </div>
+    </div>
+</div>
     
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
@@ -311,6 +331,8 @@
             document.getElementById('activity-steps').textContent = '8.5K';
             document.getElementById('activity-workouts').textContent = '3';
         }
+
+        
         
         // Открыть модуль
         function openModule(moduleName) {
@@ -319,6 +341,7 @@
             const modulePages = {
                 'budget': 'pages/budget.html',
                 'products': 'pages/products.html',
+                'add-expense': 'pages/add-expense.html',
                 'health': 'pages/health.html',
                 'activity': 'pages/activity.html',
                 'doctor': 'pages/doctor.html'
