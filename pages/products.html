@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление товарами</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, sans-serif;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding-bottom: 70px;
+        }
+        .header {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            padding: 20px;
+        }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        
+        .tabs {
+            display: flex;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 5px;
+            gap: 5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .tab.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+        }
+        
+        .content { display: none; padding: 15px; }
+        .content.active { display: block; }
+        
+        .search {
+            margin-bottom: 15px;
+        }
+        .search input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 14px;
+        }
+        
+        .filter-section {
+            margin-bottom: 15px;
+        }
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.7;
+        }
+        .category-filter {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .category-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .category-chip.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+        }
+        
+        .product-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        .product-card:active {
+            opacity: 0.7;
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .product-name {
+            font-weight: 600;
+            font-size: 15px;
+            flex: 1;
+        }
+        .product-category {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        .product-info {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+        .product-prices {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+        .price-badge {
+            background: var(--tg-theme-bg-color, #fff);
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+        .price-badge strong {
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        
+        .category-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .category-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .category-count {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .category-description {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+        .category-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .category-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+        }
+        .category-btn.edit {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+        }
+        .category-btn.delete {
+            background: #fee;
+            color: #c00;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 100;
+        }
+        .fab:active {
+            transform: scale(0.95);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--tg-theme-bg-color, #fff);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.7;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 14px;
+        }
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 14px;
+        }
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 14px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        .modal-btn.primary {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+        }
+        .modal-btn.secondary {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+        }
+        
+        .loading { text-align: center; padding: 40px 20px; opacity: 0.5; }
+        .error { background: #fee; color: #c00; padding: 15px; border-radius: 10px; margin: 10px 0; }
+        .empty { text-align: center; padding: 40px 20px; opacity: 0.5; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 Управление товарами</h1>
+        <p>Товары и категории</p>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('products')">🛒 Товары</div>
+        <div class="tab" onclick="switchTab('categories')">📂 Категории</div>
+    </div>
+    
+    <!-- Товары -->
+    <div id="tab-products" class="content active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-products">-</div>
+                <div class="stat-label">Товаров</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-categories">-</div>
+                <div class="stat-label">Категорий</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uncategorized">-</div>
+                <div class="stat-label">Без категории</div>
+            </div>
+        </div>
+        
+        <div class="search">
+            <input type="text" id="product-search" placeholder="🔍 Поиск товара..." 
+                   onkeyup="searchProducts(this.value)">
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-label">Категория</div>
+            <div class="category-filter" id="category-filters"></div>
+        </div>
+        
+        <div id="products-list"></div>
+    </div>
+    
+    <!-- Категории -->
+    <div id="tab-categories" class="content">
+        <div id="categories-list"></div>
+    </div>
+    
+    <!-- FAB кнопка -->
+    <div class="fab" onclick="showCreateCategoryModal()">+</div>
+    
+    <!-- Модальное окно создания категории -->
+    <div class="modal" id="create-category-modal">
+        <div class="modal-content">
+            <div class="modal-header">Новая категория</div>
+            <div class="form-group">
+                <label class="form-label">Название *</label>
+                <input type="text" class="form-input" id="new-category-name" 
+                       placeholder="Например: Фрукты">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Описание</label>
+                <textarea class="form-textarea" id="new-category-description" 
+                          placeholder="Описание категории (опционально)"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Родительская категория</label>
+                <select class="form-select" id="new-category-parent">
+                    <option value="">Нет (основная категория)</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal('create-category-modal')">
+                    Отмена
+                </button>
+                <button class="modal-btn primary" onclick="createCategory()">
+                    Создать
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно редактирования товара -->
+    <div class="modal" id="edit-product-modal">
+        <div class="modal-content">
+            <div class="modal-header">Изменить категорию</div>
+            <div id="edit-product-info" style="margin-bottom: 15px;"></div>
+            <div class="form-group">
+                <label class="form-label">Категория</label>
+                <select class="form-select" id="edit-product-category"></select>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal('edit-product-modal')">
+                    Отмена
+                </button>
+                <button class="modal-btn primary" onclick="updateProductCategory()">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => window.location.href = '../index.html');
+        
+        let allProducts = [];
+        let allCategories = [];
+        let currentCategoryFilter = null;
+        let currentProductEdit = null;
+        
+        // Инициализация
+        async function init() {
+            try {
+                await loadCategories();
+                await loadProducts();
+                updateStats();
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                console.error('Init error:', error);
+            }
+        }
+        
+        // Загрузка категорий
+        async function loadCategories() {
+            try {
+                allCategories = await API.getCategories();
+                renderCategoryFilters();
+                renderCategoriesList();
+                populateCategorySelects();
+            } catch (error) {
+                console.error('Ошибка загрузки категорий:', error);
+            }
+        }
+        
+        // Загрузка товаров
+        async function loadProducts(categoryId = null, search = null) {
+            showLoading('products-list');
+            try {
+                allProducts = await API.getProducts(categoryId, search, 200);
+                renderProducts(allProducts);
+            } catch (error) {
+                showError('products-list', error.message);
+            }
+        }
+        
+        // Рендеринг фильтров категорий
+        function renderCategoryFilters() {
+            const container = document.getElementById('category-filters');
+            
+            const mainCategories = allCategories.filter(c => !c.parent_id);
+            
+            const html = `
+                <div class="category-chip ${!currentCategoryFilter ? 'active' : ''}" 
+                     onclick="filterByCategory(null)">
+                    Все
+                </div>
+                ${mainCategories.map(cat => `
+                    <div class="category-chip ${currentCategoryFilter === cat.id ? 'active' : ''}" 
+                         onclick="filterByCategory(${cat.id})">
+                        ${cat.name} (${cat.products_count})
+                    </div>
+                `).join('')}
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Рендеринг товаров
+        function renderProducts(products) {
+            const container = document.getElementById('products-list');
+            
+            if (!products?.length) {
+                container.innerHTML = '<div class="empty">📦 Товары не найдены</div>';
+                return;
+            }
+            
+            const html = products.map(p => `
+                <div class="product-card" onclick="showEditProductModal('${p.id}', '${p.name}', ${p.category_id})">
+                    <div class="product-header">
+                        <div class="product-name">${p.name}</div>
+                        ${p.category_name ? `
+                            <div class="product-category">${p.category_name}</div>
+                        ` : ''}
+                    </div>
+                    <div class="product-info">
+                        ${p.brand ? `<span>🏷️ ${p.brand}</span>` : ''}
+                        ${p.stores_count ? `<span>🏪 ${p.stores_count} магазинов</span>` : ''}
+                        ${p.last_purchase_date ? `<span>📅 ${formatDate(p.last_purchase_date)}</span>` : ''}
+                    </div>
+                    ${p.min_price ? `
+                        <div class="product-prices">
+                            <div class="price-badge">
+                                <strong>${p.min_price.toFixed(0)} ₲</strong> мин
+                            </div>
+                            <div class="price-badge">
+                                <strong>${p.max_price.toFixed(0)} ₲</strong> макс
+                            </div>
+                            ${p.avg_price ? `
+                                <div class="price-badge">
+                                    <strong>${p.avg_price.toFixed(0)} ₲</strong> сред
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        // Рендеринг списка категорий
+        function renderCategoriesList() {
+            const container = document.getElementById('categories-list');
+            
+            if (!allCategories?.length) {
+                container.innerHTML = '<div class="empty">📂 Категории не найдены</div>';
+                return;
+            }
+            
+            const html = allCategories.map(cat => `
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-name">
+                            ${cat.name}
+                            ${cat.parent_name ? `<div style="font-size:11px;opacity:0.6;margin-top:2px;">↳ ${cat.parent_name}</div>` : ''}
+                        </div>
+                        <div class="category-count">${cat.products_count}</div>
+                    </div>
+                    ${cat.description ? `
+                        <div class="category-description">${cat.description}</div>
+                    ` : ''}
+                    <div class="category-actions">
+                        <button class="category-btn edit" onclick="filterByCategory(${cat.id}); switchTab('products')">
+                            👁️ Товары
+                        </button>
+                        ${cat.products_count === 0 ? `
+                            <button class="category-btn delete" onclick="deleteCategory(${cat.id}, '${cat.name}')">
+                                🗑️ Удалить
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        // Заполнение селектов категорий
+        function populateCategorySelects() {
+            const mainCategories = allCategories.filter(c => !c.parent_id);
+            
+            // Для создания новой категории
+            const parentSelect = document.getElementById('new-category-parent');
+            parentSelect.innerHTML = '<option value="">Нет (основная категория)</option>' +
+                mainCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            
+            // Для редактирования товара
+            const editSelect = document.getElementById('edit-product-category');
+            editSelect.innerHTML = '<option value="">Без категории</option>' +
+                allCategories.map(cat => `
+                    <option value="${cat.id}">
+                        ${cat.parent_name ? '  ↳ ' : ''}${cat.name}
+                    </option>
+                `).join('');
+        }
+        
+        // Фильтр по категории
+        function filterByCategory(categoryId) {
+            currentCategoryFilter = categoryId;
+            loadProducts(categoryId);
+            renderCategoryFilters();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        // Поиск товаров
+        let searchTimeout;
+        function searchProducts(query) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadProducts(currentCategoryFilter, query || null);
+            }, 500);
+        }
+        
+        // Показать модальное окно создания категории
+        function showCreateCategoryModal() {
+            document.getElementById('new-category-name').value = '';
+            document.getElementById('new-category-description').value = '';
+            document.getElementById('new-category-parent').value = '';
+            openModal('create-category-modal');
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+        
+        // Создать категорию
+        async function createCategory() {
+            const name = document.getElementById('new-category-name').value.trim();
+            
+            if (!name) {
+                tg.showAlert('Введите название категории');
+                return;
+            }
+            
+            try {
+                const description = document.getElementById('new-category-description').value.trim() || null;
+                const parentId = document.getElementById('new-category-parent').value || null;
+                
+                await API.createCategory(name, description, parentId ? parseInt(parentId) : null);
+                
+                closeModal('create-category-modal');
+                await loadCategories();
+                switchTab('categories');
+                
+                tg.showPopup({
+                    title: 'Успех',
+                    message: `Категория "${name}" создана`,
+                    buttons: [{type: 'ok'}]
+                });
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                tg.showAlert('Ошибка создания категории: ' + error.message);
+            }
+        }
+        
+        // Удалить категорию
+        async function deleteCategory(categoryId, categoryName) {
+            tg.showConfirm(
+                `Удалить категорию "${categoryName}"?`,
+                async (confirmed) => {
+                    if (confirmed) {
+                        try {
+                            await API.deleteCategory(categoryId);
+                            await loadCategories();
+                            tg.HapticFeedback.notificationOccurred('success');
+                        } catch (error) {
+                            tg.showAlert('Ошибка удаления: ' + error.message);
+                        }
+                    }
+                }
+            );
+        }
+        
+        // Показать модальное окно редактирования товара
+        function showEditProductModal(productId, productName, categoryId) {
+            currentProductEdit = productId;
+            
+            document.getElementById('edit-product-info').innerHTML = `
+                <div style="font-weight:600;margin-bottom:5px;">${productName}</div>
+                <div style="font-size:12px;opacity:0.7;">ID: ${productId}</div>
+            `;
+            
+            const select = document.getElementById('edit-product-category');
+            select.value = categoryId || '';
+            
+            openModal('edit-product-modal');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        // Обновить категорию товара
+        async function updateProductCategory() {
+            const categoryId = document.getElementById('edit-product-category').value;
+            
+            if (!categoryId) {
+                tg.showAlert('Выберите категорию');
+                return;
+            }
+            
+            try {
+                await API.updateProductCategory(currentProductEdit, parseInt(categoryId));
+                
+                closeModal('edit-product-modal');
+                await loadProducts(currentCategoryFilter);
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                tg.showAlert('Ошибка обновления: ' + error.message);
+            }
+        }
+        
+        // Переключение табов
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        // Обновить статистику
+        function updateStats() {
+            const total = allProducts.length;
+            const categories = allCategories.length;
+            const uncategorized = allProducts.filter(p => !p.category_id).length;
+            
+            document.getElementById('total-products').textContent = total;
+            document.getElementById('total-categories').textContent = categories;
+            document.getElementById('uncategorized').textContent = uncategorized;
+        }
+        
+        // Утилиты
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Сегодня';
+            if (diffDays === 1) return 'Вчера';
+            if (diffDays < 7) return `${diffDays} дн. назад`;
+            
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+        
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        
+        function showLoading(id) {
+            document.getElementById(id).innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+        }
+        
+        function showError(id, msg) {
+            document.getElementById(id).innerHTML = `<div class="error">❌ ${msg}</div>`;
+        }
+        
+        // Запуск
+        init();
+        
+        // Main Button
+        tg.MainButton.setText('➕ Создать категорию');
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => {
+            showCreateCategoryModal();
+        });
+    </script>
+</body>
+</html>
