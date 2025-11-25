@@ -1,7 +1,7 @@
 // Конфигурация Mini App
 const CONFIG = {
     // API endpoints
-    API_BASE_URL: 'https://f07b045a5174.ngrok-free.app', // ЗАМЕНИ на свой Static Domain!
+    API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app', // ЗАМЕНИ на свой Static Domain!
     
     // Endpoints
     ENDPOINTS: {
@@ -9,6 +9,7 @@ const CONFIG = {
         STATISTICS: '/statistics',
         PRICE_TRENDS: '/prices/trends',
         PRICE_COMPARE: '/prices/compare',
+        PRODUCTS_SEARCH: '/products/search',
         
         // Здоровье (добавишь позже)
         HEALTH_LOG: '/health/log',
