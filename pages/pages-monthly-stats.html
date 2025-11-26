@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика за месяц</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, sans-serif;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding-bottom: 70px;
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+        }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        
+        .period-selector {
+            padding: 15px 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .period-display {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .period-nav {
+            display: flex;
+            gap: 10px;
+        }
+        .period-nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 20px;
+        }
+        .summary-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #3390ec);
+            margin-bottom: 5px;
+        }
+        .summary-label {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .section {
+            padding: 20px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+        
+        .category-card, .store-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .card-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .card-amount {
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        .card-bar {
+            height: 4px;
+            background: var(--tg-theme-bg-color, #fff);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .card-bar-fill {
+            height: 100%;
+            background: var(--tg-theme-button-color, #3390ec);
+            transition: width 0.3s;
+        }
+        .card-details {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .chart-container {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .day-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--tg-theme-bg-color, #fff);
+        }
+        .day-row:last-child { border-bottom: none; }
+        .day-date {
+            font-size: 13px;
+            min-width: 60px;
+        }
+        .day-bar {
+            flex: 1;
+            height: 20px;
+            background: var(--tg-theme-bg-color, #fff);
+            border-radius: 4px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        .day-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.3s;
+        }
+        .day-amount {
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 70px;
+            text-align: right;
+        }
+        
+        .loading { text-align: center; padding: 40px; opacity: 0.5; }
+        .error { background: #fee; color: #c00; padding: 15px; margin: 20px; border-radius: 10px; }
+        .empty { text-align: center; padding: 40px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Статистика за месяц</h1>
+        <p>Детальный анализ расходов</p>
+    </div>
+    
+    <div class="period-selector">
+        <button class="period-nav-btn" onclick="previousMonth()">←</button>
+        <div class="period-display" id="period-display">-</div>
+        <button class="period-nav-btn" onclick="nextMonth()">→</button>
+    </div>
+    
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-value" id="total-spent">-</div>
+            <div class="summary-label">Всего потрачено</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" id="avg-purchase">-</div>
+            <div class="summary-label">Средний чек</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" id="total-purchases">-</div>
+            <div class="summary-label">Покупок</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" id="unique-stores">-</div>
+            <div class="summary-label">Магазинов</div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">📈 Расходы по дням</div>
+        <div class="chart-container" id="daily-chart"></div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">🏷️ Топ категорий</div>
+        <div id="categories-list"></div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">🏪 Топ магазинов</div>
+        <div id="stores-list"></div>
+    </div>
+    
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => window.history.back());
+        
+        let currentYear, currentMonth;
+        
+        async function init() {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth() + 1;
+            
+            await loadMonthlyData();
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+        
+        async function loadMonthlyData() {
+            try {
+                const stats = await API.getMonthlyStatistics(currentYear, currentMonth);
+                
+                // Отображаем период
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                document.getElementById('period-display').textContent = 
+                    `${monthNames[currentMonth - 1]} ${currentYear}`;
+                
+                // Общая сводка
+                document.getElementById('total-spent').textContent = formatMoney(stats.summary.total_spent);
+                document.getElementById('avg-purchase').textContent = formatMoney(stats.summary.avg_purchase);
+                document.getElementById('total-purchases').textContent = stats.summary.total_purchases;
+                document.getElementById('unique-stores').textContent = stats.summary.unique_stores;
+                
+                // График по дням
+                renderDailyChart(stats.daily_spending, stats.summary.total_spent);
+                
+                // Топ категорий
+                renderTopCategories(stats.top_categories, stats.summary.total_spent);
+                
+                // Топ магазинов
+                renderTopStores(stats.top_stores, stats.summary.total_spent);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+                showError();
+            }
+        }
+        
+        function renderDailyChart(dailyData, totalSpent) {
+            const container = document.getElementById('daily-chart');
+            
+            if (!dailyData || dailyData.length === 0) {
+                container.innerHTML = '<div class="empty">Нет данных за этот период</div>';
+                return;
+            }
+            
+            const maxAmount = Math.max(...dailyData.map(d => d.day_spent));
+            
+            const html = dailyData.slice(-14).map(day => {
+                const date = new Date(day.purchase_day);
+                const dateStr = `${date.getDate()} ${['янв', 'фев', 'мар', 'апр', 'май', 'июн',
+                                                      'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'][date.getMonth()]}`;
+                const percent = (day.day_spent / maxAmount) * 100;
+                
+                return `
+                    <div class="day-row">
+                        <div class="day-date">${dateStr}</div>
+                        <div class="day-bar">
+                            <div class="day-bar-fill" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="day-amount">${formatMoney(day.day_spent)}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function renderTopCategories(categories, totalSpent) {
+            const container = document.getElementById('categories-list');
+            
+            if (!categories || categories.length === 0) {
+                container.innerHTML = '<div class="empty">Нет данных о категориях</div>';
+                return;
+            }
+            
+            const html = categories.map(cat => {
+                const percent = totalSpent > 0 ? (cat.category_spent / totalSpent) * 100 : 0;
+                
+                return `
+                    <div class="category-card">
+                        <div class="card-header">
+                            <div class="card-name">${cat.category_name}</div>
+                            <div class="card-amount">${formatMoney(cat.category_spent)}</div>
+                        </div>
+                        <div class="card-bar">
+                            <div class="card-bar-fill" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="card-details">
+                            ${cat.items_count} позиций • ${percent.toFixed(1)}% от общей суммы
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function renderTopStores(stores, totalSpent) {
+            const container = document.getElementById('stores-list');
+            
+            if (!stores || stores.length === 0) {
+                container.innerHTML = '<div class="empty">Нет данных о магазинах</div>';
+                return;
+            }
+            
+            const html = stores.map(store => {
+                const percent = totalSpent > 0 ? (store.store_spent / totalSpent) * 100 : 0;
+                
+                return `
+                    <div class="store-card">
+                        <div class="card-header">
+                            <div class="card-name">🏪 ${store.store_name}</div>
+                            <div class="card-amount">${formatMoney(store.store_spent)}</div>
+                        </div>
+                        <div class="card-bar">
+                            <div class="card-bar-fill" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="card-details">
+                            ${store.visits_count} визитов • ${percent.toFixed(1)}% от общей суммы
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        async function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 1) {
+                currentMonth = 12;
+                currentYear--;
+            }
+            await loadMonthlyData();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        async function nextMonth() {
+            const now = new Date();
+            const currentYearNow = now.getFullYear();
+            const currentMonthNow = now.getMonth() + 1;
+            
+            // Не даем переходить в будущее
+            if (currentYear === currentYearNow && currentMonth === currentMonthNow) {
+                return;
+            }
+            
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+            await loadMonthlyData();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        function formatMoney(amount) {
+            if (!amount) return '0 ₲';
+            if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M ₲`;
+            if (amount >= 1000) return `${(amount / 1000).toFixed(0)}K ₲`;
+            return `${Math.round(amount).toLocaleString('ru-RU')} ₲`;
+        }
+        
+        function showError() {
+            document.body.innerHTML += '<div class="error">❌ Ошибка загрузки данных</div>';
+        }
+        
+        init();
+    </script>
+</body>
+</html>
