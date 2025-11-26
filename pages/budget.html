@@ -21,6 +21,50 @@
         .header h1 { font-size: 20px; margin-bottom: 5px; }
         .header p { font-size: 13px; opacity: 0.9; }
         
+        /* Баннер месячных расходов */
+        .monthly-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .monthly-banner:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        .monthly-banner-header {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .monthly-banner-arrow {
+            font-size: 20px;
+        }
+        
+        .monthly-banner-amount {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .monthly-banner-details {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            opacity: 0.9;
+            flex-wrap: wrap;
+        }
+        
         .tabs {
             display: flex;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -239,6 +283,20 @@
         <p>Анализ цен и экономия</p>
     </div>
     
+    <!-- Баннер месячных расходов -->
+    <div class="monthly-banner" id="monthly-banner" onclick="openMonthlyStats()">
+        <div class="monthly-banner-header">
+            <span>💰 Расходы за текущий месяц</span>
+            <span class="monthly-banner-arrow">→</span>
+        </div>
+        <div class="monthly-banner-amount" id="monthly-banner-amount">-</div>
+        <div class="monthly-banner-details">
+            <span>📅 <span id="monthly-banner-period">-</span></span>
+            <span>🧾 <span id="monthly-banner-purchases">-</span> покупок</span>
+            <span>🏪 <span id="monthly-banner-stores">-</span> магазинов</span>
+        </div>
+    </div>
+    
     <div class="tabs">
         <div class="tab active" onclick="switchTab('overview')">📊 Обзор</div>
         <div class="tab" onclick="switchTab('trends')">📈 Тренды</div>
@@ -310,10 +368,44 @@
         async function init() {
             try {
                 await loadOverview();
+                await loadMonthlyBanner();
                 tg.HapticFeedback.notificationOccurred('success');
             } catch (error) {
                 console.error('Init error:', error);
             }
+        }
+        
+        // Загрузка баннера месячных расходов
+        async function loadMonthlyBanner() {
+            try {
+                const stats = await API.getMonthlyStatistics();
+                
+                // Форматируем сумму
+                document.getElementById('monthly-banner-amount').textContent = formatMoney(stats.summary.total_spent);
+                
+                // Период
+                const now = new Date();
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                document.getElementById('monthly-banner-period').textContent = monthNames[now.getMonth()];
+                
+                // Количество покупок
+                document.getElementById('monthly-banner-purchases').textContent = stats.summary.total_purchases;
+                
+                // Количество магазинов
+                document.getElementById('monthly-banner-stores').textContent = stats.summary.unique_stores;
+                
+            } catch (error) {
+                console.error('Ошибка загрузки месячной статистики:', error);
+                // Скрываем баннер при ошибке
+                document.getElementById('monthly-banner').style.display = 'none';
+            }
+        }
+        
+        // Открыть статистику за месяц
+        function openMonthlyStats() {
+            tg.HapticFeedback.impactOccurred('medium');
+            window.location.href = 'monthly-stats.html';
         }
         
         // Загрузка обзора
