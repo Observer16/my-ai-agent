@@ -1,8 +1,11 @@
+// Обновленный js/config.js с поддержкой авторизации
+
 const CONFIG = {
     API_BASE_URL: 'https://c053e0b76144.ngrok-free.app',
     
     ENDPOINTS: {
         STATISTICS: '/statistics',
+        MONTHLY_STATISTICS: '/statistics/monthly',
         PRICE_TRENDS: '/prices/trends',
         PRICE_COMPARE: '/prices/compare',
         PRODUCTS_SEARCH: '/products/search',
@@ -14,11 +17,14 @@ const CONFIG = {
         UPDATE_PRODUCT_BARCODE: '/products/barcode',
         CREATE_PRODUCT: '/products/create',
         STORES: '/stores',
-        MONTHLY_STATISTICS: '/statistics/monthly',
         CREATE_STORE: '/stores',
         CREATE_EXPENSE: '/expenses/manual',
         RECENT_PURCHASES: '/purchases/recent',
-        PRODUCT_BY_BARCODE: '/products/by-barcode'
+        PRODUCT_BY_BARCODE: '/products/by-barcode',
+        
+        // Новые endpoints для управления доступом
+        CHECK_ACCESS: '/auth/check',
+        GET_USER_INFO: '/auth/user',
     },
     
     SETTINGS: {
@@ -30,13 +36,28 @@ const CONFIG = {
     },
     
     LOCALE: 'ru-RU',
-    CURRENCY: '₲'
+    CURRENCY: '₲',
+    
+    // Telegram WebApp
+    TELEGRAM: {
+        user: null,
+        initData: null,
+        initDataUnsafe: null,
+    }
 };
 
+// Инициализация Telegram WebApp
 if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.enableClosingConfirmation();
+    
+    // Сохраняем данные пользователя
+    CONFIG.TELEGRAM.user = tg.initDataUnsafe?.user;
+    CONFIG.TELEGRAM.initData = tg.initData;
+    CONFIG.TELEGRAM.initDataUnsafe = tg.initDataUnsafe;
+    
+    console.log('✅ Telegram User ID:', CONFIG.TELEGRAM.user?.id);
 }
 
 console.log('✅ Config загружен');
