@@ -14,6 +14,7 @@ const CONFIG = {
         UPDATE_PRODUCT_BARCODE: '/products/barcode',
         CREATE_PRODUCT: '/products/create',
         STORES: '/stores',
+        MONTHLY_STATISTICS: '/statistics/monthly',
         CREATE_STORE: '/stores',
         CREATE_EXPENSE: '/expenses/manual',
         RECENT_PURCHASES: '/purchases/recent',
