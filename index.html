@@ -52,6 +52,42 @@
             opacity: 0.7;
         }
         
+        /* Месячные расходы */
+        .monthly-summary {
+            padding: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            margin: 15px 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .monthly-summary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        .monthly-summary-header {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .monthly-summary-amount {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .monthly-summary-details {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
         .modules {
             padding: 20px;
         }
@@ -173,6 +209,16 @@
         <p id="user-info"></p>
     </div>
     
+    <!-- Месячные расходы -->
+    <div class="monthly-summary" onclick="openMonthlyStats()">
+        <div class="monthly-summary-header">💰 Расходы за текущий месяц</div>
+        <div class="monthly-summary-amount" id="monthly-total">-</div>
+        <div class="monthly-summary-details">
+            <span>📅 <span id="monthly-period">-</span></span>
+            <span>🧾 <span id="monthly-purchases">-</span> покупок</span>
+        </div>
+    </div>
+    
     <div class="modules">
         <!-- Покупки в супермаркетах -->
         <div class="module-card" onclick="openModule('budget')">
@@ -185,7 +231,7 @@
             </div>
             <div class="module-stats">
                 <div class="module-stat">
-                    <strong id="budget-total">-</strong> за месяц
+                    <strong id="budget-total">-</strong> всего
                 </div>
                 <div class="module-stat">
                     <strong id="budget-purchases">-</strong> покупок
@@ -328,6 +374,9 @@
         
         // Загрузить данные dashboard
         async function loadDashboardData() {
+            // Загрузка месячной статистики
+            await loadMonthlyStats();
+            
             // Бюджет
             try {
                 const stats = await API.getStatistics();
@@ -364,6 +413,37 @@
             // Активность (заглушка)
             document.getElementById('activity-steps').textContent = '8.5K';
             document.getElementById('activity-workouts').textContent = '3';
+        }
+        
+        // Загрузка месячной статистики
+        async function loadMonthlyStats() {
+            try {
+                const stats = await API.getMonthlyStatistics();
+                
+                // Форматируем сумму
+                document.getElementById('monthly-total').textContent = formatCurrency(stats.summary.total_spent);
+                
+                // Период
+                const now = new Date();
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                document.getElementById('monthly-period').textContent = monthNames[now.getMonth()];
+                
+                // Количество покупок
+                document.getElementById('monthly-purchases').textContent = stats.summary.total_purchases;
+                
+            } catch (error) {
+                console.error('Ошибка загрузки месячной статистики:', error);
+                document.getElementById('monthly-total').textContent = 'Ошибка';
+                document.getElementById('monthly-period').textContent = '-';
+                document.getElementById('monthly-purchases').textContent = '-';
+            }
+        }
+        
+        // Открыть статистику за месяц
+        function openMonthlyStats() {
+            tg.HapticFeedback.impactOccurred('medium');
+            window.location.href = 'pages/monthly-stats.html';
         }
         
         // Открыть модуль
