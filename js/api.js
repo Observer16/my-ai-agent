@@ -195,6 +195,11 @@ const API = {
         });
     },
     
+    // Поиск по штрих
+    getProductByBarcode: (barcode) => {
+        return api.get(CONFIG.ENDPOINTS.PRODUCT_BY_BARCODE + '/' + barcode);
+    },
+    
     // Расходы
     createExpense: (storeId, productId, quantity, unitPrice, purchaseDate = null) => {
         return api.post(CONFIG.ENDPOINTS.CREATE_EXPENSE, {
