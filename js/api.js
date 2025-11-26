@@ -129,6 +129,14 @@ const API = {
     },
     searchProduct: (name) => api.get(CONFIG.ENDPOINTS.PRODUCTS_SEARCH, { name }),
     getPriceAnalysis: (days = 30) => api.get(CONFIG.ENDPOINTS.PRICE_ANALYSIS, { days }),
+
+    // МЕТОДЫ для месячной статистики
+    getMonthlyStatistics: (year = null, month = null) => {
+        const params = {};
+        if (year) params.year = year;
+        if (month) params.month = month;
+        return api.get(CONFIG.ENDPOINTS.MONTHLY_STATISTICS, params);
+    },
     
     // Последние покупки (НОВОЕ)
     getRecentPurchases: (limit = 10) => api.get(CONFIG.ENDPOINTS.RECENT_PURCHASES, { limit }),
