@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Добавить расход</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Библиотека для сканирования штрих-кодов -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,12 +22,8 @@
         .header h1 { font-size: 20px; margin-bottom: 5px; }
         .header p { font-size: 13px; opacity: 0.9; }
         
-        .form {
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form { padding: 20px; }
+        .form-group { margin-bottom: 20px; }
         .form-label {
             display: block;
             font-size: 13px;
@@ -43,7 +38,7 @@
             border-radius: 10px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             color: var(--tg-theme-text-color, #000);
-            font-size: 16px; /* Увеличил для iOS */
+            font-size: 16px;
         }
         .form-input:focus, .form-select:focus {
             outline: none;
@@ -55,10 +50,7 @@
             gap: 10px;
         }
         
-        /* Магазины */
-        .custom-select-wrapper {
-            position: relative;
-        }
+        .custom-select-wrapper { position: relative; }
         .custom-select {
             width: 100%;
             padding: 12px;
@@ -94,9 +86,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-top: 4px;
         }
-        .store-list.active {
-            display: block;
-        }
+        .store-list.active { display: block; }
         .store-list-item {
             padding: 12px 15px;
             display: flex;
@@ -105,28 +95,21 @@
             cursor: pointer;
             border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
         }
-        .store-list-item:last-child {
-            border-bottom: none;
-        }
-        .store-list-item:active {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        }
+        .store-list-item:last-child { border-bottom: none; }
+        .store-list-item:active { background: var(--tg-theme-secondary-bg-color, #f0f0f0); }
         .store-type-indicator {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             flex-shrink: 0;
         }
-        .store-name {
-            flex: 1;
-        }
+        .store-name { flex: 1; }
         .store-type-badge {
             font-size: 10px;
             padding: 2px 6px;
             border-radius: 4px;
         }
         
-        /* Tabs */
         .search-tabs {
             display: flex;
             gap: 5px;
@@ -155,42 +138,27 @@
             margin-top: 8px;
             display: none;
         }
-        .search-results.active {
-            display: block;
-        }
+        .search-results.active { display: block; }
         .search-item {
             padding: 12px;
             cursor: pointer;
             border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
         }
-        .search-item:last-child {
-            border-bottom: none;
-        }
-        .search-item:active {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        }
-        .search-item-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .search-item-info {
-            font-size: 12px;
-            opacity: 0.7;
-        }
+        .search-item:last-child { border-bottom: none; }
+        .search-item:active { background: var(--tg-theme-secondary-bg-color, #f0f0f0); }
+        .search-item-name { font-weight: 600; margin-bottom: 4px; }
+        .search-item-info { font-size: 12px; opacity: 0.7; }
         .search-item-barcode {
             font-size: 11px;
             color: var(--tg-theme-button-color, #3390ec);
             margin-top: 2px;
         }
         
-        /* Кнопка сканера */
         .barcode-input-wrapper {
             display: flex;
             gap: 8px;
         }
-        .barcode-input-wrapper input {
-            flex: 1;
-        }
+        .barcode-input-wrapper input { flex: 1; }
         .scan-btn {
             padding: 12px 16px;
             background: var(--tg-theme-button-color, #3390ec);
@@ -199,16 +167,11 @@
             border-radius: 10px;
             font-size: 18px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             min-width: 50px;
         }
-        .scan-btn:active {
-            opacity: 0.8;
-        }
+        .scan-btn:active { opacity: 0.8; }
         
-        /* ====== УЛУЧШЕННЫЙ СКАНЕР ====== */
+        /* СКАНЕР */
         .scanner-modal {
             display: none;
             position: fixed;
@@ -220,25 +183,18 @@
             z-index: 9999;
             flex-direction: column;
         }
-        .scanner-modal.active {
-            display: flex;
-        }
+        .scanner-modal.active { display: flex; }
+        
         .scanner-header {
             padding: 15px 20px;
-            background: rgba(0,0,0,0.8);
+            background: linear-gradient(135deg, #3390ec, #667eea);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
             z-index: 10;
         }
-        .scanner-header h3 {
-            font-size: 16px;
-        }
+        .scanner-header h3 { font-size: 16px; }
         .scanner-close {
             background: rgba(255,255,255,0.2);
             border: none;
@@ -248,26 +204,31 @@
             border-radius: 50%;
             font-size: 24px;
             cursor: pointer;
+        }
+        
+        .scanner-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            position: relative;
+        }
+        
+        .scanner-video-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        /* Контейнер камеры на весь экран */
-        #scanner-reader {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #scanner-video {
             width: 100%;
             height: 100%;
-        }
-        #scanner-reader video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
+            object-fit: cover;
         }
         
-        /* Рамка прицела */
         .scanner-overlay {
             position: absolute;
             top: 0;
@@ -279,87 +240,62 @@
             align-items: center;
             justify-content: center;
             pointer-events: none;
-            z-index: 5;
         }
+        
         .scanner-frame {
             width: 280px;
-            height: 150px;
-            border: 3px solid #fff;
+            height: 120px;
+            border: 3px solid rgba(255,255,255,0.8);
             border-radius: 12px;
             position: relative;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.6);
         }
         .scanner-frame::before {
             content: '';
             position: absolute;
             top: 50%;
-            left: 10px;
-            right: 10px;
+            left: 5%;
+            right: 5%;
             height: 2px;
             background: #ef4444;
             animation: scanLine 2s ease-in-out infinite;
         }
         @keyframes scanLine {
-            0%, 100% { top: 20%; }
-            50% { top: 80%; }
+            0%, 100% { top: 15%; }
+            50% { top: 85%; }
         }
-        .scanner-corners {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-        .scanner-corner {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 4px solid #10b981;
-        }
-        .scanner-corner.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
-        .scanner-corner.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
-        .scanner-corner.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
-        .scanner-corner.br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
         
         .scanner-hint {
             color: white;
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
             font-size: 14px;
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-        .scanner-hint-focus {
-            color: #fbbf24;
-            font-size: 12px;
-            margin-top: 8px;
+            padding: 0 20px;
         }
         
-        /* Нижняя панель сканера */
         .scanner-bottom {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
             padding: 20px;
-            background: rgba(0,0,0,0.8);
-            z-index: 10;
+            background: rgba(0,0,0,0.9);
         }
+        
         .scanner-result {
             background: #10b981;
             color: white;
-            padding: 15px 20px;
+            padding: 15px;
             border-radius: 10px;
             text-align: center;
             margin-bottom: 15px;
             display: none;
         }
-        .scanner-result.active {
-            display: block;
-        }
+        .scanner-result.active { display: block; }
         .scanner-result-code {
             font-size: 20px;
             font-weight: bold;
             margin-top: 5px;
             font-family: monospace;
         }
+        
         .scanner-buttons {
             display: flex;
             gap: 10px;
@@ -381,12 +317,7 @@
             background: rgba(255,255,255,0.2);
             color: white;
         }
-        .scanner-btn.cancel {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
         
-        /* Ручной ввод в сканере */
         .scanner-manual {
             margin-top: 15px;
             display: flex;
@@ -398,7 +329,6 @@
             border: none;
             border-radius: 8px;
             font-size: 16px;
-            background: rgba(255,255,255,0.9);
         }
         .scanner-manual button {
             padding: 12px 20px;
@@ -409,7 +339,17 @@
             font-weight: 600;
         }
         
-        /* Переключатель весовой товар */
+        .scanner-error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+        .scanner-error.active { display: block; }
+        
         .toggle-container {
             display: flex;
             align-items: center;
@@ -419,10 +359,7 @@
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             border-radius: 10px;
         }
-        .toggle-label {
-            font-size: 13px;
-            flex: 1;
-        }
+        .toggle-label { font-size: 13px; flex: 1; }
         .toggle-switch {
             position: relative;
             width: 50px;
@@ -432,9 +369,7 @@
             cursor: pointer;
             transition: background 0.3s;
         }
-        .toggle-switch.active {
-            background: var(--tg-theme-button-color, #3390ec);
-        }
+        .toggle-switch.active { background: var(--tg-theme-button-color, #3390ec); }
         .toggle-switch::after {
             content: '';
             position: absolute;
@@ -447,15 +382,9 @@
             transition: transform 0.3s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .toggle-switch.active::after {
-            transform: translateX(24px);
-        }
+        .toggle-switch.active::after { transform: translateX(24px); }
         
-        /* Единица измерения */
-        .unit-selector {
-            display: flex;
-            gap: 5px;
-        }
+        .unit-selector { display: flex; gap: 5px; }
         .unit-btn {
             flex: 1;
             padding: 10px;
@@ -471,7 +400,6 @@
             background: rgba(51, 144, 236, 0.1);
         }
         
-        /* Выбранный товар */
         .selected-product-info {
             background: #e8f5e9;
             border: 1px solid #a5d6a7;
@@ -480,17 +408,9 @@
             margin-top: 10px;
             display: none;
         }
-        .selected-product-info.active {
-            display: block;
-        }
-        .selected-product-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .selected-product-details {
-            font-size: 12px;
-            opacity: 0.7;
-        }
+        .selected-product-info.active { display: block; }
+        .selected-product-name { font-weight: 600; margin-bottom: 4px; }
+        .selected-product-details { font-size: 12px; opacity: 0.7; }
         .selected-product-clear {
             float: right;
             color: #c00;
@@ -498,14 +418,8 @@
             font-size: 18px;
         }
         
-        /* Поле штрих-кода */
-        .barcode-field {
-            display: none;
-            margin-top: 10px;
-        }
-        .barcode-field.active {
-            display: block;
-        }
+        .barcode-field { display: none; margin-top: 10px; }
+        .barcode-field.active { display: block; }
         
         .summary {
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -532,9 +446,6 @@
             display: inline-block;
             margin-top: 8px;
         }
-        
-        .loading { text-align: center; padding: 40px 20px; opacity: 0.5; }
-        .error { background: #fee; color: #c00; padding: 15px; border-radius: 10px; margin: 20px; }
     </style>
 </head>
 <body>
@@ -544,7 +455,6 @@
     </div>
     
     <div class="form">
-        <!-- Магазин -->
         <div class="form-group">
             <label class="form-label">Магазин *</label>
             <div class="custom-select-wrapper">
@@ -558,17 +468,11 @@
             <a href="#" class="create-link" onclick="showCreateStore()">+ Создать новый магазин</a>
         </div>
         
-        <!-- Товар -->
         <div class="form-group">
             <label class="form-label">Товар *</label>
-            
             <div class="search-tabs">
-                <div class="search-tab active" onclick="switchSearchMode('name')">
-                    🔤 По названию
-                </div>
-                <div class="search-tab" onclick="switchSearchMode('barcode')">
-                    📊 По штрих-коду
-                </div>
+                <div class="search-tab active" onclick="switchSearchMode('name')">🔤 По названию</div>
+                <div class="search-tab" onclick="switchSearchMode('barcode')">📊 По штрих-коду</div>
             </div>
             
             <div id="search-by-name">
@@ -580,7 +484,7 @@
             <div id="search-by-barcode" style="display: none;">
                 <div class="barcode-input-wrapper">
                     <input type="text" class="form-input" id="barcode-search" 
-                           placeholder="Введите или отсканируйте штрих-код..."
+                           placeholder="Введите или отсканируйте..."
                            onkeyup="searchByBarcode(this.value)"
                            inputmode="numeric">
                     <button class="scan-btn" onclick="openScanner()">📷</button>
@@ -606,13 +510,8 @@
             <div class="form-group">
                 <label class="form-label">📊 Добавить штрих-код к товару</label>
                 <div class="barcode-input-wrapper">
-                    <input type="text" class="form-input" id="new-barcode" 
-                           placeholder="Введите штрих-код..."
-                           inputmode="numeric">
+                    <input type="text" class="form-input" id="new-barcode" placeholder="Введите штрих-код..." inputmode="numeric">
                     <button class="scan-btn" onclick="openScannerForNewBarcode()">📷</button>
-                </div>
-                <div style="font-size: 11px; opacity: 0.6; margin-top: 4px;">
-                    У этого товара нет штрих-кода. Вы можете добавить его.
                 </div>
             </div>
         </div>
@@ -635,13 +534,11 @@
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label" id="quantity-label">Количество *</label>
-                <input type="number" class="form-input" id="quantity" 
-                       value="1" min="0.001" step="1" onchange="updateSummary()" oninput="updateSummary()">
+                <input type="number" class="form-input" id="quantity" value="1" min="0.001" step="1" onchange="updateSummary()" oninput="updateSummary()">
             </div>
             <div class="form-group">
                 <label class="form-label">Цена за ед. *</label>
-                <input type="number" class="form-input" id="unit-price" 
-                       min="0" step="1" placeholder="0" onchange="updateSummary()" oninput="updateSummary()">
+                <input type="number" class="form-input" id="unit-price" min="0" step="1" placeholder="0" onchange="updateSummary()" oninput="updateSummary()">
             </div>
         </div>
         
@@ -651,55 +548,40 @@
         </div>
         
         <div class="summary">
-            <div class="summary-row">
-                <span>Товар:</span>
-                <span id="summary-product">-</span>
-            </div>
-            <div class="summary-row">
-                <span>Магазин:</span>
-                <span id="summary-store">-</span>
-            </div>
-            <div class="summary-row">
-                <span>Количество:</span>
-                <span id="summary-quantity">-</span>
-            </div>
-            <div class="summary-row total">
-                <span>Итого:</span>
-                <span id="summary-total">0 ₲</span>
-            </div>
+            <div class="summary-row"><span>Товар:</span><span id="summary-product">-</span></div>
+            <div class="summary-row"><span>Магазин:</span><span id="summary-store">-</span></div>
+            <div class="summary-row"><span>Количество:</span><span id="summary-quantity">-</span></div>
+            <div class="summary-row total"><span>Итого:</span><span id="summary-total">0 ₲</span></div>
         </div>
     </div>
     
-    <!-- ====== УЛУЧШЕННЫЙ СКАНЕР ====== -->
+    <!-- СКАНЕР -->
     <div class="scanner-modal" id="scanner-modal">
         <div class="scanner-header">
             <h3>📷 Сканер штрих-кода</h3>
             <button class="scanner-close" onclick="closeScanner()">✕</button>
         </div>
         
-        <!-- Область камеры -->
-        <div id="scanner-reader"></div>
-        
-        <!-- Наложение с рамкой -->
-        <div class="scanner-overlay">
-            <div class="scanner-frame">
-                <div class="scanner-corners">
-                    <div class="scanner-corner tl"></div>
-                    <div class="scanner-corner tr"></div>
-                    <div class="scanner-corner bl"></div>
-                    <div class="scanner-corner br"></div>
+        <div class="scanner-body">
+            <div class="scanner-video-container">
+                <video id="scanner-video" autoplay playsinline muted></video>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                    <div class="scanner-hint">
+                        Наведите камеру на штрих-код<br>
+                        <small style="opacity: 0.7;">Держите на расстоянии 10-20 см</small>
+                    </div>
                 </div>
-            </div>
-            <div class="scanner-hint">
-                Поместите штрих-код в рамку
-                <div class="scanner-hint-focus">💡 Держите телефон на расстоянии 15-20 см</div>
             </div>
         </div>
         
-        <!-- Нижняя панель -->
         <div class="scanner-bottom">
+            <div class="scanner-error" id="scanner-error">
+                ⚠️ <span id="scanner-error-text">Ошибка камеры</span>
+            </div>
+            
             <div class="scanner-result" id="scanner-result">
-                <div>✅ Штрих-код найден:</div>
+                <div>✅ Найден код:</div>
                 <div class="scanner-result-code" id="scanned-code">-</div>
             </div>
             
@@ -709,12 +591,11 @@
             </div>
             
             <div class="scanner-buttons" id="scanner-buttons-default">
-                <button class="scanner-btn cancel" onclick="closeScanner()">Отмена</button>
+                <button class="scanner-btn secondary" onclick="closeScanner()">Отмена</button>
             </div>
             
-            <!-- Ручной ввод -->
             <div class="scanner-manual">
-                <input type="text" id="manual-barcode" placeholder="Или введите код вручную..." inputmode="numeric">
+                <input type="text" id="manual-barcode" placeholder="Или введите вручную..." inputmode="numeric">
                 <button onclick="useManualBarcode()">OK</button>
             </div>
         </div>
@@ -729,17 +610,16 @@
         tg.BackButton.onClick(() => window.history.back());
         
         let stores = [];
-        let products = [];
         let isWeightMode = false;
         let currentUnit = 'unidad';
         let searchMode = 'name';
         let selectedProductHasBarcode = true;
         
-        // Сканер
-        let html5QrCode = null;
+        // Сканер - простая реализация через getUserMedia
+        let videoStream = null;
+        let scannerInterval = null;
         let lastScannedCode = '';
         let scannerTarget = 'search';
-        let isScanning = false;
         
         const storeTypeColors = {
             'Супермаркет': { bg: '#10b981', text: 'white' },
@@ -749,7 +629,7 @@
             'Магазин': { bg: '#8b5cf6', text: 'white' }
         };
         
-        // ==================== УЛУЧШЕННЫЙ СКАНЕР ====================
+        // ==================== СКАНЕР ====================
         
         function openScanner() {
             scannerTarget = 'search';
@@ -761,183 +641,203 @@
             showScannerModal();
         }
         
-        function showScannerModal() {
+        async function showScannerModal() {
             const modal = document.getElementById('scanner-modal');
             modal.classList.add('active');
             
             // Сброс UI
             document.getElementById('scanner-result').classList.remove('active');
+            document.getElementById('scanner-error').classList.remove('active');
             document.getElementById('scanner-buttons-found').style.display = 'none';
             document.getElementById('scanner-buttons-default').style.display = 'flex';
             document.getElementById('manual-barcode').value = '';
             
             tg.HapticFeedback.impactOccurred('medium');
             
-            // Небольшая задержка для анимации
-            setTimeout(() => startScanner(), 300);
+            await startCamera();
         }
         
-        function closeScanner() {
-            const modal = document.getElementById('scanner-modal');
-            modal.classList.remove('active');
-            stopScanner();
-            tg.HapticFeedback.impactOccurred('light');
-        }
-        
-        async function startScanner() {
-            if (isScanning) return;
+        async function startCamera() {
+            const video = document.getElementById('scanner-video');
             
             try {
-                html5QrCode = new Html5Qrcode("scanner-reader");
-                
-                // Получаем список камер
-                const cameras = await Html5Qrcode.getCameras();
-                
-                if (!cameras || cameras.length === 0) {
-                    throw new Error('Камеры не найдены');
-                }
-                
-                // Выбираем заднюю камеру
-                let cameraId = cameras[0].id;
-                for (const camera of cameras) {
-                    if (camera.label.toLowerCase().includes('back') || 
-                        camera.label.toLowerCase().includes('rear') ||
-                        camera.label.toLowerCase().includes('environment')) {
-                        cameraId = camera.id;
-                        break;
-                    }
-                }
-                
-                // Улучшенные настройки для фокусировки
-                const config = {
-                    fps: 15,
-                    qrbox: { width: 280, height: 150 },
-                    aspectRatio: window.innerHeight / window.innerWidth,
-                    disableFlip: false,
-                    formatsToSupport: [
-                        Html5QrcodeSupportedFormats.EAN_13,
-                        Html5QrcodeSupportedFormats.EAN_8,
-                        Html5QrcodeSupportedFormats.UPC_A,
-                        Html5QrcodeSupportedFormats.UPC_E,
-                        Html5QrcodeSupportedFormats.CODE_128,
-                        Html5QrcodeSupportedFormats.CODE_39,
-                        Html5QrcodeSupportedFormats.ITF
-                    ],
-                    // Экспериментальные настройки для лучшего фокуса
-                    experimentalFeatures: {
-                        useBarCodeDetectorIfSupported: true
-                    }
+                // Простой запрос камеры
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
                 };
                 
-                // Продвинутые настройки камеры с фокусом
-                const cameraConfig = {
-                    facingMode: "environment",
-                    advanced: [
-                        { focusMode: "continuous" },
-                        { autoFocus: "continuous" },
-                        { exposureMode: "continuous" },
-                        { whiteBalanceMode: "continuous" }
-                    ]
+                console.log('📷 Запрос доступа к камере...');
+                
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                console.log('✅ Камера получена');
+                
+                video.srcObject = videoStream;
+                
+                // Ждём загрузки видео
+                video.onloadedmetadata = () => {
+                    console.log('✅ Видео загружено');
+                    video.play();
+                    startBarcodeDetection();
                 };
-                
-                await html5QrCode.start(
-                    cameraConfig,
-                    config,
-                    onScanSuccess,
-                    onScanFailure
-                );
-                
-                isScanning = true;
-                console.log('✅ Сканер запущен с улучшенным фокусом');
-                
-                // Пробуем применить дополнительные настройки фокуса
-                try {
-                    const videoElement = document.querySelector('#scanner-reader video');
-                    if (videoElement && videoElement.srcObject) {
-                        const track = videoElement.srcObject.getVideoTracks()[0];
-                        const capabilities = track.getCapabilities();
-                        
-                        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-                            await track.applyConstraints({
-                                advanced: [{ focusMode: 'continuous' }]
-                            });
-                            console.log('✅ Непрерывный автофокус включен');
-                        }
-                        
-                        // Если поддерживается ручной фокус на близкое расстояние
-                        if (capabilities.focusDistance) {
-                            // Фокус на близкое расстояние (для штрих-кодов)
-                            const minFocus = capabilities.focusDistance.min || 0;
-                            const focusDistance = Math.max(minFocus, 0.1); // 10-20 см
-                            await track.applyConstraints({
-                                advanced: [{ focusDistance: focusDistance }]
-                            });
-                            console.log('✅ Фокус настроен на близкое расстояние:', focusDistance);
-                        }
-                    }
-                } catch (e) {
-                    console.log('ℹ️ Дополнительные настройки фокуса не поддерживаются:', e.message);
-                }
                 
             } catch (error) {
-                console.error('❌ Ошибка запуска сканера:', error);
-                
-                let message = 'Не удалось запустить камеру';
-                
-                if (error.name === 'NotAllowedError') {
-                    message = 'Разрешите доступ к камере в настройках браузера';
-                } else if (error.name === 'NotFoundError') {
-                    message = 'Камера не найдена на устройстве';
-                } else if (error.name === 'NotReadableError') {
-                    message = 'Камера занята другим приложением';
-                }
-                
-                tg.showAlert(message);
-                closeScanner();
+                console.error('❌ Ошибка камеры:', error);
+                showScannerError(error);
             }
         }
         
-        function stopScanner() {
-            if (html5QrCode && isScanning) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear();
-                    html5QrCode = null;
-                    isScanning = false;
-                    console.log('🛑 Сканер остановлен');
-                }).catch(err => {
-                    console.warn('Ошибка остановки сканера:', err);
-                    isScanning = false;
+        function showScannerError(error) {
+            let message = 'Не удалось запустить камеру';
+            
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                message = 'Нет разрешения на использование камеры. Разрешите в настройках браузера.';
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                message = 'Камера не найдена на устройстве';
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                message = 'Камера занята другим приложением. Закройте другие приложения и попробуйте снова.';
+            } else if (error.name === 'OverconstrainedError') {
+                message = 'Камера не поддерживает нужные настройки';
+            } else if (error.name === 'SecurityError') {
+                message = 'Требуется HTTPS для работы камеры';
+            }
+            
+            document.getElementById('scanner-error-text').textContent = message;
+            document.getElementById('scanner-error').classList.add('active');
+        }
+        
+        function startBarcodeDetection() {
+            // Используем BarcodeDetector API если доступен (Chrome, Edge)
+            if ('BarcodeDetector' in window) {
+                console.log('✅ Используем BarcodeDetector API');
+                startNativeBarcodeDetection();
+            } else {
+                console.log('ℹ️ BarcodeDetector недоступен, используем html5-qrcode');
+                startHtml5QrcodeDetection();
+            }
+        }
+        
+        async function startNativeBarcodeDetection() {
+            const video = document.getElementById('scanner-video');
+            
+            try {
+                const barcodeDetector = new BarcodeDetector({
+                    formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'qr_code']
                 });
+                
+                scannerInterval = setInterval(async () => {
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        try {
+                            const barcodes = await barcodeDetector.detect(video);
+                            if (barcodes.length > 0) {
+                                onBarcodeDetected(barcodes[0].rawValue);
+                            }
+                        } catch (e) {
+                            // Игнорируем ошибки детекции
+                        }
+                    }
+                }, 200);
+                
+            } catch (error) {
+                console.error('Ошибка BarcodeDetector:', error);
+                startHtml5QrcodeDetection();
             }
         }
         
-        function onScanSuccess(decodedText, decodedResult) {
-            console.log('✅ Код отсканирован:', decodedText);
+        function startHtml5QrcodeDetection() {
+            const video = document.getElementById('scanner-video');
             
-            lastScannedCode = decodedText;
+            // Создаём canvas для анализа кадров
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
             
-            // Останавливаем сканер
-            stopScanner();
+            scannerInterval = setInterval(() => {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0);
+                    
+                    // Используем html5-qrcode для декодирования
+                    const imageData = canvas.toDataURL('image/png');
+                    
+                    Html5Qrcode.scanFile(dataURLtoFile(imageData, 'frame.png'), true)
+                        .then(result => {
+                            onBarcodeDetected(result);
+                        })
+                        .catch(err => {
+                            // Код не найден - это нормально
+                        });
+                }
+            }, 500);
+        }
+        
+        function dataURLtoFile(dataurl, filename) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], filename, { type: mime });
+        }
+        
+        function onBarcodeDetected(code) {
+            if (!code || code === lastScannedCode) return;
+            
+            console.log('✅ Штрих-код найден:', code);
+            lastScannedCode = code;
+            
+            // Останавливаем сканирование
+            if (scannerInterval) {
+                clearInterval(scannerInterval);
+                scannerInterval = null;
+            }
             
             // Показываем результат
-            document.getElementById('scanned-code').textContent = decodedText;
+            document.getElementById('scanned-code').textContent = code;
             document.getElementById('scanner-result').classList.add('active');
             document.getElementById('scanner-buttons-found').style.display = 'flex';
             document.getElementById('scanner-buttons-default').style.display = 'none';
             
-            // Вибрация успеха
             tg.HapticFeedback.notificationOccurred('success');
         }
         
-        function onScanFailure(error) {
-            // Игнорируем - это нормально когда код не в кадре
+        function stopCamera() {
+            if (scannerInterval) {
+                clearInterval(scannerInterval);
+                scannerInterval = null;
+            }
+            
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            
+            const video = document.getElementById('scanner-video');
+            video.srcObject = null;
+            
+            lastScannedCode = '';
+        }
+        
+        function closeScanner() {
+            stopCamera();
+            document.getElementById('scanner-modal').classList.remove('active');
+            tg.HapticFeedback.impactOccurred('light');
         }
         
         function rescanBarcode() {
+            lastScannedCode = '';
             document.getElementById('scanner-result').classList.remove('active');
             document.getElementById('scanner-buttons-found').style.display = 'none';
             document.getElementById('scanner-buttons-default').style.display = 'flex';
-            startScanner();
+            startBarcodeDetection();
             tg.HapticFeedback.impactOccurred('light');
         }
         
@@ -959,15 +859,14 @@
             if (scannerTarget === 'search') {
                 document.getElementById('barcode-search').value = code;
                 searchByBarcode(code);
-            } else if (scannerTarget === 'newBarcode') {
+            } else {
                 document.getElementById('new-barcode').value = code;
             }
-            
             closeScanner();
             tg.HapticFeedback.notificationOccurred('success');
         }
         
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        // ==================== ОСТАЛЬНОЙ КОД ====================
         
         async function init() {
             try {
@@ -980,11 +879,8 @@
             }
         }
         
-        // ==================== МАГАЗИНЫ ====================
-        
         function renderStoreList() {
             const container = document.getElementById('store-list');
-            
             const grouped = {};
             stores.forEach(s => {
                 const type = s.store_type || 'Магазин';
@@ -993,26 +889,17 @@
             });
             
             let html = '';
-            const typeOrder = ['Супермаркет', 'Аптека', 'Ресторан', 'Заправка', 'Магазин'];
-            const sortedTypes = Object.keys(grouped).sort((a, b) => {
-                const indexA = typeOrder.indexOf(a);
-                const indexB = typeOrder.indexOf(b);
-                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-            });
-            
-            sortedTypes.forEach(type => {
-                const color = storeTypeColors[type] || storeTypeColors['Магазин'];
+            ['Супермаркет', 'Аптека', 'Ресторан', 'Заправка', 'Магазин'].forEach(type => {
+                if (!grouped[type]) return;
+                const color = storeTypeColors[type];
                 grouped[type].forEach(store => {
-                    html += `
-                        <div class="store-list-item" onclick="selectStore('${store.id}', '${store.name.replace(/'/g, "\\'")}', '${type}')">
-                            <div class="store-type-indicator" style="background: ${color.bg}"></div>
-                            <span class="store-name">${store.name}</span>
-                            <span class="store-type-badge" style="background: ${color.bg}; color: ${color.text}">${type}</span>
-                        </div>
-                    `;
+                    html += `<div class="store-list-item" onclick="selectStore('${store.id}', '${store.name.replace(/'/g, "\\'")}', '${type}')">
+                        <div class="store-type-indicator" style="background: ${color.bg}"></div>
+                        <span class="store-name">${store.name}</span>
+                        <span class="store-type-badge" style="background: ${color.bg}; color: ${color.text}">${type}</span>
+                    </div>`;
                 });
             });
-            
             container.innerHTML = html;
         }
         
@@ -1023,16 +910,10 @@
         
         function selectStore(storeId, storeName, storeType) {
             document.getElementById('selected-store-id').value = storeId;
-            const color = storeTypeColors[storeType] || storeTypeColors['Магазин'];
-            document.getElementById('store-display-text').innerHTML = `
-                <span style="display: inline-flex; align-items: center; gap: 8px;">
-                    <span style="background: ${color.bg}; width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
-                    ${storeName}
-                </span>
-            `;
+            const color = storeTypeColors[storeType];
+            document.getElementById('store-display-text').innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;"><span style="background:${color.bg};width:10px;height:10px;border-radius:50%;"></span>${storeName}</span>`;
             document.getElementById('store-list').classList.remove('active');
             updateSummary();
-            tg.HapticFeedback.impactOccurred('light');
         }
         
         document.addEventListener('click', (e) => {
@@ -1042,307 +923,186 @@
             }
         });
         
-        // ==================== ПОИСК ТОВАРОВ ====================
-        
         function switchSearchMode(mode) {
             searchMode = mode;
-            document.querySelectorAll('.search-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            
             document.getElementById('search-by-name').style.display = mode === 'name' ? 'block' : 'none';
             document.getElementById('search-by-barcode').style.display = mode === 'barcode' ? 'block' : 'none';
             document.getElementById('product-results').classList.remove('active');
-            
-            tg.HapticFeedback.impactOccurred('light');
         }
         
         let searchTimeout;
         async function searchProducts(query) {
             clearTimeout(searchTimeout);
-            if (query.length < 2) {
-                document.getElementById('product-results').classList.remove('active');
-                return;
-            }
+            if (query.length < 2) { document.getElementById('product-results').classList.remove('active'); return; }
             searchTimeout = setTimeout(async () => {
                 try {
-                    products = await API.getProducts(null, query, 20);
+                    const products = await API.getProducts(null, query, 20);
                     renderProductResults(products);
-                } catch (error) {
-                    console.error('Search error:', error);
-                }
+                } catch (e) { console.error(e); }
             }, 300);
         }
         
-        let barcodeSearchTimeout;
+        let barcodeTimeout;
         async function searchByBarcode(barcode) {
-            clearTimeout(barcodeSearchTimeout);
-            if (barcode.length < 4) {
-                document.getElementById('product-results').classList.remove('active');
-                return;
-            }
-            barcodeSearchTimeout = setTimeout(async () => {
+            clearTimeout(barcodeTimeout);
+            if (barcode.length < 4) { document.getElementById('product-results').classList.remove('active'); return; }
+            barcodeTimeout = setTimeout(async () => {
                 try {
-                    products = await API.getProducts(null, barcode, 20);
-                    renderProductResults(products, true);
-                } catch (error) {
-                    console.error('Barcode search error:', error);
-                }
+                    const products = await API.getProducts(null, barcode, 20);
+                    renderProductResults(products);
+                } catch (e) { console.error(e); }
             }, 300);
         }
         
-        function renderProductResults(products, isBarcodeSearch = false) {
+        function renderProductResults(products) {
             const container = document.getElementById('product-results');
-            
-            if (!products || products.length === 0) {
-                container.innerHTML = `
-                    <div class="search-item">
-                        <div class="search-item-name">Товары не найдены</div>
-                        <div class="search-item-info">Нажмите "Создать новый товар"</div>
-                    </div>
-                `;
+            if (!products?.length) {
+                container.innerHTML = '<div class="search-item"><div class="search-item-name">Не найдено</div></div>';
                 container.classList.add('active');
                 return;
             }
-            
-            const html = products.map(p => {
-                const hasBarcode = p.barcode && p.barcode.length > 0;
-                return `
-                    <div class="search-item" onclick="selectProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${p.barcode || ''}', '${p.unit || 'unidad'}')">
-                        <div class="search-item-name">${p.name}</div>
-                        <div class="search-item-info">
-                            ${p.category_name || 'Без категории'}
-                            ${p.min_price ? ` • ${p.min_price.toFixed(0)} - ${p.max_price.toFixed(0)} ₲` : ''}
-                        </div>
-                        ${hasBarcode ? `<div class="search-item-barcode">📊 ${p.barcode}</div>` : ''}
-                    </div>
-                `;
-            }).join('');
-            
-            container.innerHTML = html;
+            container.innerHTML = products.map(p => `<div class="search-item" onclick="selectProduct('${p.id}','${p.name.replace(/'/g,"\\'")}','${p.barcode||''}','${p.unit||'unidad'}')">
+                <div class="search-item-name">${p.name}</div>
+                <div class="search-item-info">${p.category_name||''}${p.min_price?` • ${p.min_price.toFixed(0)}-${p.max_price.toFixed(0)} ₲`:''}</div>
+                ${p.barcode?`<div class="search-item-barcode">📊 ${p.barcode}</div>`:''}
+            </div>`).join('');
             container.classList.add('active');
         }
         
-        function selectProduct(productId, productName, barcode, unit) {
-            document.getElementById('selected-product-id').value = productId;
-            document.getElementById('selected-product-name').value = productName;
+        function selectProduct(id, name, barcode, unit) {
+            document.getElementById('selected-product-id').value = id;
+            document.getElementById('selected-product-name').value = name;
             document.getElementById('selected-product-barcode').value = barcode;
-            document.getElementById('product-search').value = productName;
+            document.getElementById('product-search').value = name;
             document.getElementById('barcode-search').value = barcode || '';
             document.getElementById('product-results').classList.remove('active');
-            
-            document.getElementById('selected-product-display-name').textContent = productName;
-            document.getElementById('selected-product-display-details').textContent = 
-                barcode ? `Штрих-код: ${barcode}` : 'Штрих-код не указан';
+            document.getElementById('selected-product-display-name').textContent = name;
+            document.getElementById('selected-product-display-details').textContent = barcode ? `Штрих-код: ${barcode}` : 'Без штрих-кода';
             document.getElementById('selected-product-info').classList.add('active');
-            
-            selectedProductHasBarcode = barcode && barcode.length > 0;
+            selectedProductHasBarcode = !!barcode;
             document.getElementById('add-barcode-field').classList.toggle('active', !selectedProductHasBarcode);
-            
-            if (unit && unit !== 'unidad') {
-                setWeightMode(true, unit);
-            }
-            
+            if (unit && unit !== 'unidad') setWeightMode(true, unit);
             updateSummary();
-            tg.HapticFeedback.impactOccurred('light');
         }
         
         function clearSelectedProduct() {
-            document.getElementById('selected-product-id').value = '';
-            document.getElementById('selected-product-name').value = '';
-            document.getElementById('selected-product-barcode').value = '';
-            document.getElementById('product-search').value = '';
-            document.getElementById('barcode-search').value = '';
+            ['selected-product-id','selected-product-name','selected-product-barcode','product-search','barcode-search'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('selected-product-info').classList.remove('active');
             document.getElementById('add-barcode-field').classList.remove('active');
             updateSummary();
-            tg.HapticFeedback.impactOccurred('light');
         }
-        
-        // ==================== ВЕСОВОЙ ТОВАР ====================
         
         function toggleWeightMode() {
             isWeightMode = !isWeightMode;
             setWeightMode(isWeightMode);
-            tg.HapticFeedback.impactOccurred('light');
         }
         
         function setWeightMode(enabled, unit = 'kg') {
             isWeightMode = enabled;
-            const toggle = document.getElementById('weight-toggle');
-            const unitGroup = document.getElementById('unit-selector-group');
-            const quantityInput = document.getElementById('quantity');
-            const quantityLabel = document.getElementById('quantity-label');
-            
+            document.getElementById('weight-toggle').classList.toggle('active', enabled);
+            document.getElementById('unit-selector-group').style.display = enabled ? 'block' : 'none';
+            const q = document.getElementById('quantity');
+            q.step = enabled ? '0.001' : '1';
+            q.value = enabled ? '1.000' : '1';
+            document.getElementById('quantity-label').textContent = enabled ? 'Вес / Объём *' : 'Количество *';
+            currentUnit = enabled ? unit : 'unidad';
             if (enabled) {
-                toggle.classList.add('active');
-                unitGroup.style.display = 'block';
-                quantityInput.step = '0.001';
-                quantityInput.value = '1.000';
-                quantityLabel.textContent = 'Вес / Объём *';
-                currentUnit = unit;
-                
-                document.querySelectorAll('.unit-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    const btnUnit = btn.textContent.toLowerCase();
-                    if ((unit === 'kg' && btnUnit === 'кг') ||
-                        (unit === 'g' && btnUnit === 'грамм') ||
-                        (unit === 'l' && btnUnit === 'литр') ||
-                        (unit === 'ml' && btnUnit === 'мл')) {
-                        btn.classList.add('active');
-                    }
+                document.querySelectorAll('.unit-btn').forEach(b => {
+                    b.classList.remove('active');
+                    if ((unit==='kg'&&b.textContent==='кг')||(unit==='g'&&b.textContent==='грамм')||(unit==='l'&&b.textContent==='литр')||(unit==='ml'&&b.textContent==='мл')) b.classList.add('active');
                 });
-            } else {
-                toggle.classList.remove('active');
-                unitGroup.style.display = 'none';
-                quantityInput.step = '1';
-                quantityInput.value = '1';
-                quantityLabel.textContent = 'Количество *';
-                currentUnit = 'unidad';
             }
             updateSummary();
         }
         
-        function selectUnit(unit, element) {
-            document.querySelectorAll('.unit-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
+        function selectUnit(unit, el) {
+            document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
             currentUnit = unit;
             updateSummary();
-            tg.HapticFeedback.impactOccurred('light');
         }
-        
-        // ==================== ИТОГО ====================
         
         function updateSummary() {
-            const storeId = document.getElementById('selected-store-id').value;
-            const productName = document.getElementById('selected-product-name').value;
-            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
-            const unitPrice = parseFloat(document.getElementById('unit-price').value) || 0;
-            
-            const store = stores.find(s => s.id === storeId);
-            
-            document.getElementById('summary-store').textContent = store ? store.name : '-';
-            document.getElementById('summary-product').textContent = productName || '-';
-            
-            let quantityText = '-';
-            if (quantity > 0) {
-                if (isWeightMode) {
-                    const unitLabels = { 'kg': 'кг', 'g': 'г', 'l': 'л', 'ml': 'мл' };
-                    quantityText = `${quantity.toFixed(3)} ${unitLabels[currentUnit] || currentUnit}`;
-                } else {
-                    quantityText = `${quantity} шт.`;
-                }
-            }
-            document.getElementById('summary-quantity').textContent = quantityText;
-            
-            const total = quantity * unitPrice;
-            document.getElementById('summary-total').textContent = 
-                total > 0 ? `${Math.round(total).toLocaleString('ru-RU')} ₲` : '0 ₲';
+            const store = stores.find(s => s.id === document.getElementById('selected-store-id').value);
+            const name = document.getElementById('selected-product-name').value;
+            const qty = parseFloat(document.getElementById('quantity').value) || 0;
+            const price = parseFloat(document.getElementById('unit-price').value) || 0;
+            document.getElementById('summary-store').textContent = store?.name || '-';
+            document.getElementById('summary-product').textContent = name || '-';
+            const units = {kg:'кг',g:'г',l:'л',ml:'мл'};
+            document.getElementById('summary-quantity').textContent = qty > 0 ? (isWeightMode ? `${qty.toFixed(3)} ${units[currentUnit]||currentUnit}` : `${qty} шт.`) : '-';
+            document.getElementById('summary-total').textContent = qty*price > 0 ? `${Math.round(qty*price).toLocaleString('ru-RU')} ₲` : '0 ₲';
         }
-        
-        // ==================== СОЗДАНИЕ ====================
         
         function showCreateStore() {
             event.preventDefault();
-            tg.showPopup({
-                title: 'Тип магазина',
-                message: 'Выберите тип:',
-                buttons: [
-                    { id: 'supermarket', type: 'default', text: '🛒 Супермаркет' },
-                    { id: 'pharmacy', type: 'default', text: '💊 Аптека' },
-                    { id: 'other', type: 'default', text: '🏪 Другой' },
-                    { type: 'cancel' }
-                ]
-            }, (btnId) => {
-                if (btnId && btnId !== 'cancel') {
-                    const typeMap = { 'supermarket': 'Супермаркет', 'pharmacy': 'Аптека', 'other': 'Магазин' };
-                    const name = prompt('Название магазина:');
-                    if (name && name.trim()) {
-                        createStore(name.trim(), typeMap[btnId]);
-                    }
+            tg.showPopup({title:'Тип',message:'Выберите тип:',buttons:[{id:'s',type:'default',text:'🛒 Супермаркет'},{id:'p',type:'default',text:'💊 Аптека'},{id:'o',type:'default',text:'🏪 Другой'},{type:'cancel'}]}, b => {
+                if (b && b!=='cancel') {
+                    const t = {s:'Супермаркет',p:'Аптека',o:'Магазин'}[b];
+                    const n = prompt('Название:');
+                    if (n?.trim()) createStore(n.trim(), t);
                 }
             });
         }
         
-        async function createStore(name, storeType) {
+        async function createStore(name, type) {
             try {
-                const result = await API.createStore(name, storeType);
+                const r = await API.createStore(name, type);
                 stores = await API.getStores();
                 renderStoreList();
-                selectStore(result.store_id, name, storeType);
-                tg.showPopup({ title: 'Успех', message: `Магазин "${name}" создан`, buttons: [{type: 'ok'}] });
-                tg.HapticFeedback.notificationOccurred('success');
-            } catch (error) {
-                tg.showAlert('Ошибка: ' + error.message);
-            }
+                selectStore(r.store_id, name, type);
+                tg.showPopup({title:'✅',message:`${name} создан`,buttons:[{type:'ok'}]});
+            } catch (e) { tg.showAlert('Ошибка: '+e.message); }
         }
         
         function showCreateProduct() {
             event.preventDefault();
-            const name = prompt('Название товара:');
-            if (name && name.trim()) {
-                createProduct(name.trim());
-            }
+            const n = prompt('Название товара:');
+            if (n?.trim()) createProduct(n.trim());
         }
         
         async function createProduct(name) {
             try {
-                const barcode = document.getElementById('barcode-search').value || null;
-                const result = await API.createProduct(name, null, null, isWeightMode ? currentUnit : 'unidad', barcode);
-                selectProduct(result.product_id, name, barcode, isWeightMode ? currentUnit : 'unidad');
-                tg.showPopup({ title: 'Успех', message: `Товар "${name}" создан`, buttons: [{type: 'ok'}] });
-                tg.HapticFeedback.notificationOccurred('success');
-            } catch (error) {
-                tg.showAlert('Ошибка: ' + error.message);
-            }
+                const bc = document.getElementById('barcode-search').value || null;
+                const r = await API.createProduct(name, null, null, isWeightMode?currentUnit:'unidad', bc);
+                selectProduct(r.product_id, name, bc, isWeightMode?currentUnit:'unidad');
+                tg.showPopup({title:'✅',message:`${name} создан`,buttons:[{type:'ok'}]});
+            } catch (e) { tg.showAlert('Ошибка: '+e.message); }
         }
-        
-        // ==================== СОХРАНЕНИЕ ====================
         
         async function saveExpense() {
             const storeId = document.getElementById('selected-store-id').value;
             const productId = document.getElementById('selected-product-id').value;
-            const quantity = parseFloat(document.getElementById('quantity').value);
-            const unitPrice = parseFloat(document.getElementById('unit-price').value);
-            const purchaseDate = document.getElementById('purchase-date').value;
-            const newBarcode = document.getElementById('new-barcode').value;
+            const qty = parseFloat(document.getElementById('quantity').value);
+            const price = parseFloat(document.getElementById('unit-price').value);
+            const date = document.getElementById('purchase-date').value;
+            const newBc = document.getElementById('new-barcode').value;
             
             if (!storeId) { tg.showAlert('Выберите магазин'); return; }
             if (!productId) { tg.showAlert('Выберите товар'); return; }
-            if (!quantity || quantity <= 0) { tg.showAlert('Введите количество'); return; }
-            if (!unitPrice || unitPrice <= 0) { tg.showAlert('Введите цену'); return; }
+            if (!qty || qty <= 0) { tg.showAlert('Введите количество'); return; }
+            if (!price || price <= 0) { tg.showAlert('Введите цену'); return; }
             
             try {
                 tg.MainButton.showProgress();
-                
-                if (!selectedProductHasBarcode && newBarcode && newBarcode.trim()) {
-                    try {
-                        await API.updateProductBarcode(productId, newBarcode.trim());
-                    } catch (e) {
-                        console.warn('Не удалось обновить штрих-код:', e);
-                    }
+                if (!selectedProductHasBarcode && newBc?.trim()) {
+                    try { await API.updateProductBarcode(productId, newBc.trim()); } catch(e) {}
                 }
-                
-                await API.createExpense(
-                    storeId, productId, quantity, unitPrice,
-                    purchaseDate ? new Date(purchaseDate).toISOString() : null
-                );
-                
+                await API.createExpense(storeId, productId, qty, price, date ? new Date(date).toISOString() : null);
                 tg.MainButton.hideProgress();
-                tg.showPopup({ title: 'Успех', message: 'Расход добавлен', buttons: [{type: 'ok'}] },
-                    () => { window.location.href = '../index.html'; });
-                tg.HapticFeedback.notificationOccurred('success');
-            } catch (error) {
+                tg.showPopup({title:'✅',message:'Расход добавлен',buttons:[{type:'ok'}]}, () => window.location.href = '../index.html');
+            } catch (e) {
                 tg.MainButton.hideProgress();
-                tg.showAlert('Ошибка: ' + error.message);
+                tg.showAlert('Ошибка: '+e.message);
             }
         }
         
-        // Запуск
         init();
-        
         tg.MainButton.setText('💾 Сохранить расход');
         tg.MainButton.show();
-        tg.MainButton.onClick(() => saveExpense());
+        tg.MainButton.onClick(saveExpense);
     </script>
 </body>
 </html>
