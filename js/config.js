@@ -1,5 +1,5 @@
 const CONFIG = {
-    API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app',
+    API_BASE_URL: 'https://c053e0b76144.ngrok-free.app',
     
     ENDPOINTS: {
         STATISTICS: '/statistics',
