@@ -682,7 +682,7 @@
         }
         
         // ПОИСК ПО ШТРИХ-КОДУ - локальный!
-        function searchByBarcode(barcode) {
+        async function searchByBarcode(barcode) {
             if (barcode.length < 4) { 
                 document.getElementById('product-results').classList.remove('active'); 
                 return; 
@@ -690,18 +690,34 @@
             
             console.log(`🔍 Ищем штрих-код: ${barcode}`);
             
-            // Ищем в загруженных товарах
-            const found = allProducts.filter(p => {
+            // ШАГ 1: Локальный поиск (быстро)
+            const localFound = allProducts.filter(p => {
                 if (!p.barcode) return false;
                 return p.barcode.includes(barcode) || barcode.includes(p.barcode);
             });
             
-            console.log(`📊 Найдено товаров: ${found.length}`);
+            if (localFound.length > 0) {
+                console.log(`✅ Найдено локально: ${localFound.length}`);
+                renderProductResults(localFound, barcode);
+                return;
+            }
             
-            if (found.length > 0) {
-                renderProductResults(found, barcode);
-            } else {
-                // Показываем что не найдено и предлагаем создать
+            // ШАГ 2: Серверный поиск (если локально не нашли)
+            console.log('🌐 Ищем на сервере...');
+            
+            try {
+                const serverProduct = await API.getProductByBarcode(barcode);
+                console.log('✅ Найдено на сервере:', serverProduct);
+                
+                // Добавляем в локальный кэш для последующих поисков
+                allProducts.push(serverProduct);
+                
+                renderProductResults([serverProduct], barcode);
+                
+            } catch (error) {
+                // Не найдено ни локально, ни на сервере
+                console.log('❌ Не найдено:', error);
+                
                 const container = document.getElementById('product-results');
                 container.innerHTML = `
                     <div class="not-found-msg">
@@ -709,7 +725,8 @@
                         <div class="barcode-value">${barcode}</div>
                         <div>не найден в базе</div>
                         <div style="margin-top: 10px;">
-                            <a href="#" onclick="showCreateProductWithBarcode('${barcode}')" style="color: var(--tg-theme-button-color, #3390ec);">
+                            <a href="#" onclick="showCreateProductWithBarcode('${barcode}')" 
+                               style="color: var(--tg-theme-button-color, #3390ec);">
                                 + Создать новый товар
                             </a>
                         </div>
