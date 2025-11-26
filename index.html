@@ -200,7 +200,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>🤖 Мой Агент</h1>
+        <h1>🤖 Мой AI Агент</h1>
         <p>Умный помощник для жизни</p>
     </div>
     
@@ -224,7 +224,7 @@
         <div class="module-card" onclick="openModule('budget')">
             <div class="module-header">
                 <div class="module-icon">💰</div>
-                <div class="module-title">Ведение расходов</div>
+                <div class="module-title">Покупки в супермаркетах</div>
             </div>
             <div class="module-description">
                 Анализ цен и умные рекомендации по экономии
@@ -469,15 +469,24 @@
         
         // Форматировать валюту
         function formatCurrency(amount) {
-            if (!amount) return '0 ₲';
+            if (!amount || amount === 0) return '0 ₲';
             
-            if (amount >= 1000000) {
-                return `${(amount / 1000000).toFixed(1)}M ₲`;
-            } else if (amount >= 1000) {
-                return `${(amount / 1000).toFixed(1)}K ₲`;
+            const rounded = Math.round(amount);
+            
+            // Для сумм >= 1 000 000 (миллион)
+            if (rounded >= 1000000) {
+                const thousands = Math.round(rounded / 1000);
+                return `${thousands.toLocaleString('ru-RU')}K ₲`;
+            } 
+            // Для сумм >= 1 000 (тысяча)
+            else if (rounded >= 1000) {
+                const thousands = Math.round(rounded / 1000);
+                return `${thousands.toLocaleString('ru-RU')}K ₲`;
             }
-            
-            return `${Math.round(amount).toLocaleString('ru-RU')} ₲`;
+            // Для сумм < 1 000
+            else {
+                return `${rounded.toLocaleString('ru-RU')} ₲`;
+            }
         }
         
         console.log('✅ App.js загружен');
