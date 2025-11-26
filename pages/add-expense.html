@@ -739,23 +739,40 @@
             
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
                 });
                 video.srcObject = videoStream;
-                video.play();
+                await video.play();
                 
                 status.textContent = 'Наведите на штрих-код...';
-                
+        
                 codeReader = new ZXing.BrowserMultiFormatReader();
+        
+                // Правильные настройки для Telegram WebApp
+                const hints = new Map();
+                hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+                    ZXing.BarcodeFormat.EAN_13,
+                    ZXing.BarcodeFormat.EAN_8,
+                    ZXing.BarcodeFormat.CODE_128,
+                    ZXing.BarcodeFormat.CODE_39,
+                    ZXing.BarcodeFormat.UPC_A,
+                    ZXing.BarcodeFormat.UPC_E
+                ]);
+        
                 codeReader.decodeFromVideoDevice(null, 'scanner-video', (result, err) => {
                     if (result) {
                         onBarcodeDetected(result.getText());
+                        codeReader.reset(); // Важно! Останавливаем сканирование
                     }
-                });
-                
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.error('ZXing error:', err);
+                    }
+                }, hints);
+        
             } catch (err) {
                 status.textContent = 'Ошибка камеры. Введите вручную.';
-                console.error(err);
+                console.error('Camera error:', err);
             }
         }
         
@@ -771,8 +788,14 @@
         }
         
         function stopCamera() {
-            if (codeReader) { codeReader.reset(); codeReader = null; }
-            if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+            if (codeReader) {
+                codeReader.reset();
+                codeReader = null;
+            }
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
             lastScannedCode = '';
         }
         
