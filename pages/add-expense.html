@@ -6,8 +6,8 @@
     <title>Добавить расход</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- html5-qrcode - стабильная библиотека для штрих-кодов -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script></script>
+    <!-- Quagga.js - лучшая библиотека для штрих-кодов (не QR) -->
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -204,23 +204,76 @@
             cursor: pointer;
         }
         
-        .scanner-body { flex: 1; position: relative; background: #000; }
+        .scanner-body { flex: 1; position: relative; background: #000; overflow: hidden; }
         
-        /* Стили для html5-qrcode */
+        /* Стили для Quagga.js */
         #scanner-video-container {
             position: relative;
+            width: 100%;
+            height: 100%;
         }
         #scanner-video-container video {
             width: 100% !important;
             height: 100% !important;
             object-fit: cover;
         }
-        /* Скрываем стандартные кнопки html5-qrcode */
-        #scanner-video-container button {
-            display: none !important;
+        #scanner-video-container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
         }
-        #scanner-video-container select {
-            display: none !important;
+        /* Скрываем отладочный canvas если есть */
+        #scanner-video-container canvas.drawingBuffer {
+            display: none;
+        }
+        
+        /* Визуальная подсказка поверх видео */
+        .scanner-guide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .scanner-frame-guide {
+            width: 280px;
+            height: 120px;
+            border: 3px solid rgba(16, 185, 129, 0.8);
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+        .scanner-frame-guide::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: #10b981;
+            animation: scanLineAnim 2s ease-in-out infinite;
+        }
+        @keyframes scanLineAnim {
+            0%, 100% { top: 15%; }
+            50% { top: 85%; }
+        }
+        .scanner-hint-text {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 8px;
         }
         
         .scanner-hint {
@@ -531,8 +584,14 @@
         </div>
         
         <div class="scanner-body">
-            <!-- Контейнер для html5-qrcode -->
-            <div id="scanner-video-container" style="width: 100%; height: 100%;"></div>
+            <!-- Контейнер для Quagga.js -->
+            <div id="scanner-video-container"></div>
+            
+            <!-- Визуальная подсказка -->
+            <div class="scanner-guide">
+                <div class="scanner-frame-guide"></div>
+                <div class="scanner-hint-text">Наведите на штрих-код</div>
+            </div>
         </div>
         
         <div class="scanner-bottom">
@@ -574,10 +633,11 @@
         let searchMode = 'name';
         let selectedProductHasBarcode = true;
         
-        // Переменные сканера (html5-qrcode)
-        let html5QrcodeScanner = null;
+        // Переменные сканера (Quagga.js)
+        let isQuaggaRunning = false;
         let lastScannedCode = '';
         let scannerTarget = 'search';
+        let detectionCount = {}; // Счётчик для фильтрации ложных срабатываний
 
         const storeTypeColors = {
             'Супермаркет': { bg: '#10b981', text: 'white' },
@@ -714,53 +774,101 @@
             
             try {
                 status.textContent = 'Инициализация камеры...';
-                console.log('🔍 Запуск html5-qrcode сканера...');
+                console.log('🔍 Запуск Quagga сканера...');
                 
-                // Создаём экземпляр Html5Qrcode
-                html5QrcodeScanner = new Html5Qrcode("scanner-video-container");
+                // Сбрасываем счётчик обнаружений
+                detectionCount = {};
                 
-                // Конфигурация сканера
+                // Конфигурация Quagga
                 const config = {
-                    fps: 20,    // Кадров в секунду
-                    qrbox: { width: 280, height: 120 },  // Область сканирования
-                    aspectRatio: 1.777778,  // 16:9
-                    formatsToSupport: [
-                        Html5QrcodeSupportedFormats.EAN_13,
-                        Html5QrcodeSupportedFormats.EAN_8,
-                        Html5QrcodeSupportedFormats.UPC_A,
-                        Html5QrcodeSupportedFormats.UPC_E,
-                        Html5QrcodeSupportedFormats.CODE_128,
-                        Html5QrcodeSupportedFormats.CODE_39,
-                        Html5QrcodeSupportedFormats.ITF
-                    ]
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: document.getElementById('scanner-video-container'),
+                        constraints: {
+                            facingMode: "environment", // Задняя камера
+                            width: { min: 640, ideal: 1280, max: 1920 },
+                            height: { min: 480, ideal: 720, max: 1080 }
+                        },
+                        area: { // Область сканирования (% от видео)
+                            top: "30%",
+                            right: "10%",
+                            left: "10%",
+                            bottom: "30%"
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "ean_reader",       // EAN-13, EAN-8
+                            "ean_8_reader",     // EAN-8 специально
+                            "code_128_reader",  // CODE-128
+                            "code_39_reader",   // CODE-39
+                            "upc_reader",       // UPC-A, UPC-E
+                            "upc_e_reader"      // UPC-E специально
+                        ],
+                        debug: {
+                            drawBoundingBox: true,
+                            showFrequency: false,
+                            drawScanline: true,
+                            showPattern: false
+                        },
+                        multiple: false  // Ищем только один код за раз
+                    },
+                    locate: true,  // Автопоиск штрих-кода в кадре
+                    frequency: 10  // Частота сканирования (раз в секунду)
                 };
                 
+                // Инициализируем Quagga
+                await new Promise((resolve, reject) => {
+                    Quagga.init(config, (err) => {
+                        if (err) {
+                            console.error('❌ Quagga init error:', err);
+                            reject(err);
+                            return;
+                        }
+                        resolve();
+                    });
+                });
+                
                 // Запускаем сканирование
-                await html5QrcodeScanner.start(
-                    { facingMode: "environment" },  // Задняя камера
-                    config,
-                    (decodedText, decodedResult) => {
-                        // Успешное сканирование
-                        console.log('✅ Код найден:', decodedText);
-                        onBarcodeDetected(decodedText);
-                    },
-                    (errorMessage) => {
-                        // Код не найден в кадре - это нормально, игнорируем
+                Quagga.start();
+                isQuaggaRunning = true;
+                
+                // Обработчик обнаружения
+                Quagga.onDetected((result) => {
+                    if (!isQuaggaRunning) return;
+                    
+                    const code = result.codeResult.code;
+                    
+                    // Фильтрация: требуем минимум 3 успешных обнаружения одного кода
+                    if (!detectionCount[code]) {
+                        detectionCount[code] = 1;
+                    } else {
+                        detectionCount[code]++;
                     }
-                );
+                    
+                    console.log(`📊 Обнаружение ${code}: ${detectionCount[code]} раз`);
+                    
+                    // Подтверждённый код (обнаружен 3+ раз)
+                    if (detectionCount[code] >= 3) {
+                        console.log('✅ Код подтверждён:', code);
+                        onBarcodeDetected(code);
+                    }
+                });
                 
                 status.textContent = 'Камера готова. Наведите на штрих-код...';
-                console.log('✅ Сканер запущен');
+                console.log('✅ Quagga запущен');
                 
                 // Индикация попыток
                 let scanAttempts = 0;
                 const statusInterval = setInterval(() => {
-                    if (!html5QrcodeScanner || !html5QrcodeScanner.getState()) {
+                    if (!isQuaggaRunning) {
                         clearInterval(statusInterval);
                         return;
                     }
                     scanAttempts++;
-                    status.textContent = `Сканирование... (попытка ${scanAttempts})`;
+                    const totalDetections = Object.values(detectionCount).reduce((a, b) => a + b, 0);
+                    status.textContent = `Сканирование... (попытка ${scanAttempts}, найдено: ${totalDetections})`;
                 }, 2000);
         
             } catch (err) {
@@ -768,9 +876,10 @@
                 console.error('❌ Camera error:', err);
                 
                 // Детальные сообщения об ошибках
-                if (err.toString().includes('NotAllowedError')) {
+                const errMsg = err.toString().toLowerCase();
+                if (errMsg.includes('notallowed') || errMsg.includes('permission')) {
                     tg.showAlert('Разрешите доступ к камере в настройках браузера');
-                } else if (err.toString().includes('NotFoundError')) {
+                } else if (errMsg.includes('notfound') || errMsg.includes('device')) {
                     tg.showAlert('Камера не найдена на устройстве');
                 } else {
                     tg.showAlert('Ошибка камеры. Используйте ручной ввод.');
@@ -781,17 +890,11 @@
         function onBarcodeDetected(code) {
             if (!code || code === lastScannedCode) return;
             
-            console.log('✅ Штрих-код обнаружен:', code);
+            console.log('✅ Штрих-код подтверждён:', code);
             lastScannedCode = code;
             
             // Останавливаем сканирование
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    console.log('⏸️ Сканирование остановлено');
-                }).catch(err => {
-                    console.warn('Ошибка остановки сканера:', err);
-                });
-            }
+            stopCamera();
             
             // Вибрация и звук успеха
             tg.HapticFeedback.notificationOccurred('success');
@@ -805,17 +908,13 @@
         }
         
         function stopCamera() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner.clear();
-                    html5QrcodeScanner = null;
-                    console.log('🛑 Сканер остановлен и очищен');
-                }).catch(err => {
-                    console.warn('Ошибка остановки сканера:', err);
-                    html5QrcodeScanner = null;
-                });
+            if (isQuaggaRunning) {
+                Quagga.stop();
+                isQuaggaRunning = false;
+                console.log('🛑 Quagga остановлен');
             }
             lastScannedCode = '';
+            detectionCount = {};
         }
         
         function closeScanner() {
