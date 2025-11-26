@@ -2,7 +2,6 @@ const CONFIG = {
     API_BASE_URL: 'https://14f66ed9f07e.ngrok-free.app',
     
     ENDPOINTS: {
-        // Существующие
         STATISTICS: '/statistics',
         PRICE_TRENDS: '/prices/trends',
         PRICE_COMPARE: '/prices/compare',
@@ -13,15 +12,12 @@ const CONFIG = {
         PRODUCT_DETAILS: '/products',
         UPDATE_PRODUCT_CATEGORY: '/products/category',
         UPDATE_PRODUCT_BARCODE: '/products/barcode',
-        
-        // Новые
         CREATE_PRODUCT: '/products/create',
         STORES: '/stores',
         CREATE_STORE: '/stores',
         CREATE_EXPENSE: '/expenses/manual',
-        
-        // Добавлено: последние покупки
-        RECENT_PURCHASES: '/purchases/recent'
+        RECENT_PURCHASES: '/purchases/recent',
+        PRODUCT_BY_BARCODE: '/products/by-barcode'
     },
     
     SETTINGS: {
