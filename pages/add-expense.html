@@ -780,15 +780,15 @@
                 detectionCount = {};
                 
                 // Конфигурация Quagga
-        const config = {
+                const config = {
                     inputStream: {
                         name: "Live",
                         type: "LiveStream",
                         target: document.getElementById('scanner-video-container'),
                         constraints: {
                             facingMode: "environment", // Задняя камера
-                            width: { min: 1280, ideal: 1280, max: 1920 },
-                            height: { min: 720, ideal: 720, max: 1080 }
+                            width: { min: 640, ideal: 1280, max: 1920 },
+                            height: { min: 480, ideal: 720, max: 1080 }
                         },
                         area: { // Область сканирования (% от видео)
                             top: "30%",
@@ -840,7 +840,7 @@
                     
                     const code = result.codeResult.code;
                     
-                    // Фильтрация: требуем минимум 4 успешных обнаружения одного кода
+                    // Фильтрация: требуем минимум 3 успешных обнаружения одного кода
                     if (!detectionCount[code]) {
                         detectionCount[code] = 1;
                     } else {
@@ -849,8 +849,8 @@
                     
                     console.log(`📊 Обнаружение ${code}: ${detectionCount[code]} раз`);
                     
-                    // Подтверждённый код (обнаружен 4+ раз)
-                    if (detectionCount[code] >= 4) {
+                    // Подтверждённый код (обнаружен 3+ раз)
+                    if (detectionCount[code] >= 3) {
                         console.log('✅ Код подтверждён:', code);
                         onBarcodeDetected(code);
                     }
