@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Добавить расход</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- РАБОЧИЙ ZXing (поддерживает все штрих-коды в Telegram WebApp) -->
-    <script src="https://unpkg.com/@zxing/library@0.20.0/dist/index.min.js"></script>
+    
+    <!-- html5-qrcode - стабильная библиотека для штрих-кодов -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -205,42 +205,22 @@
         }
         
         .scanner-body { flex: 1; position: relative; background: #000; }
-        #scanner-video {
-            width: 100%;
-            height: 100%;
+        
+        /* Стили для html5-qrcode */
+        #scanner-video-container {
+            position: relative;
+        }
+        #scanner-video-container video {
+            width: 100% !important;
+            height: 100% !important;
             object-fit: cover;
         }
-        
-        .scanner-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
+        /* Скрываем стандартные кнопки html5-qrcode */
+        #scanner-video-container button {
+            display: none !important;
         }
-        .scanner-frame {
-            width: 280px;
-            height: 120px;
-            border: 3px solid rgba(255,255,255,0.8);
-            border-radius: 12px;
-            position: relative;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.6);
-        }
-        .scanner-frame::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 5%;
-            right: 5%;
-            height: 2px;
-            background: #ef4444;
-            animation: scanLine 2s ease-in-out infinite;
-        }
-        @keyframes scanLine {
-            0%, 100% { top: 15%; }
-            50% { top: 85%; }
+        #scanner-video-container select {
+            display: none !important;
         }
         
         .scanner-hint {
@@ -551,16 +531,8 @@
         </div>
         
         <div class="scanner-body">
-            <div class="scanner-video-container">
-                <video id="scanner-video" autoplay playsinline muted></video>
-                <div class="scanner-overlay">
-                    <div class="scanner-frame"></div>
-                    <div class="scanner-hint">
-                        Наведите камеру на штрих-код<br>
-                        <small style="opacity: 0.7;">Держите на расстоянии 10-20 см</small>
-                    </div>
-                </div>
-            </div>
+            <!-- Контейнер для html5-qrcode -->
+            <div id="scanner-video-container" style="width: 100%; height: 100%;"></div>
         </div>
         
         <div class="scanner-bottom">
@@ -602,10 +574,10 @@
         let searchMode = 'name';
         let selectedProductHasBarcode = true;
         
-        let codeReader = null;
+        // Переменные сканера (html5-qrcode)
+        let html5QrcodeScanner = null;
         let lastScannedCode = '';
         let scannerTarget = 'search';
-        let videoStream = null;
 
         const storeTypeColors = {
             'Супермаркет': { bg: '#10b981', text: 'white' },
@@ -738,75 +710,52 @@
         }
         
         async function startCamera() {
-            const video = document.getElementById('scanner-video');
             const status = document.getElementById('scanner-status');
             
             try {
-                status.textContent = 'Запрос доступа к камере...';
+                status.textContent = 'Инициализация камеры...';
+                console.log('🔍 Запуск html5-qrcode сканера...');
                 
-                // Запрашиваем камеру с улучшенными настройками
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1920, max: 1920 },
-                        height: { ideal: 1080, max: 1080 }
+                // Создаём экземпляр Html5Qrcode
+                html5QrcodeScanner = new Html5Qrcode("scanner-video-container");
+                
+                // Конфигурация сканера
+                const config = {
+                    fps: 10,    // Кадров в секунду
+                    qrbox: { width: 280, height: 120 },  // Область сканирования
+                    aspectRatio: 1.777778,  // 16:9
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.ITF
+                    ]
+                };
+                
+                // Запускаем сканирование
+                await html5QrcodeScanner.start(
+                    { facingMode: "environment" },  // Задняя камера
+                    config,
+                    (decodedText, decodedResult) => {
+                        // Успешное сканирование
+                        console.log('✅ Код найден:', decodedText);
+                        onBarcodeDetected(decodedText);
                     },
-                    audio: false
-                });
-                
-                video.srcObject = videoStream;
-                
-                // Ждём полной загрузки видео
-                await new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        video.play();
-                        resolve();
-                    };
-                });
-                
-                status.textContent = 'Камера готова. Наведите на штрих-код...';
-                console.log('✅ Камера запущена');
-        
-                // Инициализируем ZXing с оптимальными настройками
-                codeReader = new ZXing.BrowserMultiFormatReader();
-                
-                // Настраиваем hints для лучшего распознавания
-                const hints = new Map();
-                hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-                hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-                    ZXing.BarcodeFormat.EAN_13,
-                    ZXing.BarcodeFormat.EAN_8,
-                    ZXing.BarcodeFormat.CODE_128,
-                    ZXing.BarcodeFormat.CODE_39,
-                    ZXing.BarcodeFormat.UPC_A,
-                    ZXing.BarcodeFormat.UPC_E,
-                    ZXing.BarcodeFormat.ITF
-                ]);
-                
-                console.log('🔍 Запуск сканирования...');
-                
-                // Запускаем непрерывное сканирование
-                codeReader.decodeFromVideoDevice(
-                    null, // Используем текущую камеру
-                    'scanner-video',
-                    (result, err) => {
-                        if (result) {
-                            const code = result.getText();
-                            console.log('✅ Код найден:', code);
-                            onBarcodeDetected(code);
-                        }
-                        if (err && !(err instanceof ZXing.NotFoundException)) {
-                            // Игнорируем NotFoundException (это нормально - код просто не найден в кадре)
-                            console.warn('ZXing error:', err);
-                        }
-                    },
-                    hints
+                    (errorMessage) => {
+                        // Код не найден в кадре - это нормально, игнорируем
+                    }
                 );
                 
-                // Обновляем статус каждые 2 секунды
+                status.textContent = 'Камера готова. Наведите на штрих-код...';
+                console.log('✅ Сканер запущен');
+                
+                // Индикация попыток
                 let scanAttempts = 0;
                 const statusInterval = setInterval(() => {
-                    if (!codeReader) {
+                    if (!html5QrcodeScanner || !html5QrcodeScanner.getState()) {
                         clearInterval(statusInterval);
                         return;
                     }
@@ -815,16 +764,16 @@
                 }, 2000);
         
             } catch (err) {
-                status.textContent = 'Ошибка доступа к камере. Введите код вручную.';
+                status.textContent = 'Ошибка доступа к камере';
                 console.error('❌ Camera error:', err);
                 
-                // Показываем пользователю детали ошибки
-                if (err.name === 'NotAllowedError') {
+                // Детальные сообщения об ошибках
+                if (err.toString().includes('NotAllowedError')) {
                     tg.showAlert('Разрешите доступ к камере в настройках браузера');
-                } else if (err.name === 'NotFoundError') {
+                } else if (err.toString().includes('NotFoundError')) {
                     tg.showAlert('Камера не найдена на устройстве');
                 } else {
-                    tg.showAlert('Ошибка камеры: ' + err.message);
+                    tg.showAlert('Ошибка камеры. Используйте ручной ввод.');
                 }
             }
         }
@@ -836,8 +785,12 @@
             lastScannedCode = code;
             
             // Останавливаем сканирование
-            if (codeReader) {
-                codeReader.reset();
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    console.log('⏸️ Сканирование остановлено');
+                }).catch(err => {
+                    console.warn('Ошибка остановки сканера:', err);
+                });
             }
             
             // Вибрация и звук успеха
@@ -852,13 +805,15 @@
         }
         
         function stopCamera() {
-            if (codeReader) {
-                codeReader.reset();
-                codeReader = null;
-            }
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner.clear();
+                    html5QrcodeScanner = null;
+                    console.log('🛑 Сканер остановлен и очищен');
+                }).catch(err => {
+                    console.warn('Ошибка остановки сканера:', err);
+                    html5QrcodeScanner = null;
+                });
             }
             lastScannedCode = '';
         }
