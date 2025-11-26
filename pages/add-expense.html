@@ -888,10 +888,19 @@
         }
         
         function onBarcodeDetected(code) {
-            if (!code || code === lastScannedCode) return;
+            if (!code) {
+                console.warn('⚠️ onBarcodeDetected: код пустой');
+                return;
+            }
+            
+            if (code === lastScannedCode) {
+                console.log('⚠️ onBarcodeDetected: код уже обработан');
+                return;
+            }
             
             console.log('✅ Штрих-код подтверждён:', code);
             lastScannedCode = code;
+            console.log('✅ Сохранён в lastScannedCode:', lastScannedCode);
             
             // Останавливаем сканирование
             stopCamera();
@@ -905,6 +914,8 @@
             document.getElementById('scanner-buttons-found').style.display = 'flex';
             document.getElementById('scanner-buttons-default').style.display = 'none';
             document.getElementById('scanner-status').textContent = '✅ Код успешно считан!';
+            
+            console.log('✅ UI обновлён, lastScannedCode сейчас:', lastScannedCode);
         }
         
         function stopCamera() {
@@ -913,13 +924,16 @@
                 isQuaggaRunning = false;
                 console.log('🛑 Quagga остановлен');
             }
-            lastScannedCode = '';
+            // НЕ очищаем lastScannedCode здесь!
+            // Код должен сохраниться для кнопки "Использовать"
             detectionCount = {};
         }
         
         function closeScanner() {
             stopCamera();
             document.getElementById('scanner-modal').classList.remove('active');
+            // Очищаем код только при закрытии модального окна
+            lastScannedCode = '';
         }
         
         function rescanBarcode() {
@@ -931,7 +945,16 @@
         }
         
         function useScannedBarcode() {
-            if (lastScannedCode) applyBarcode(lastScannedCode);
+            console.log('🔵 Нажата кнопка "Использовать"');
+            console.log('🔵 lastScannedCode:', lastScannedCode);
+            console.log('🔵 scannerTarget:', scannerTarget);
+            
+            if (lastScannedCode) {
+                applyBarcode(lastScannedCode);
+            } else {
+                console.error('❌ lastScannedCode пуст!');
+                tg.showAlert('Код не найден. Попробуйте ещё раз.');
+            }
         }
         
         function useManualBarcode() {
@@ -941,12 +964,19 @@
         }
         
         function applyBarcode(code) {
+            console.log('🟢 applyBarcode вызван с кодом:', code);
+            console.log('🟢 scannerTarget:', scannerTarget);
+            
             if (scannerTarget === 'search') {
+                console.log('🟢 Применяю код к полю barcode-search');
                 document.getElementById('barcode-search').value = code;
                 searchByBarcode(code);
             } else {
+                console.log('🟢 Применяю код к полю new-barcode');
                 document.getElementById('new-barcode').value = code;
             }
+            
+            console.log('🟢 Закрываю сканер');
             closeScanner();
         }
         
