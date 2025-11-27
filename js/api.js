@@ -3,26 +3,28 @@
  * Версия: 4.0.0 - Поддержка семейной системы
  */
 
-class API {
+class APIClient {
     constructor() {
-        // Базовый URL API (можно настроить через CONFIG)
+        // Базовый URL API
         this.baseURL = window.CONFIG?.API_URL;
         
         // Telegram User ID из Telegram Web App
         this.telegramUserId = null;
         
-        // Инициализация Telegram Web App
-        if (window.Telegram?.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.ready();
-            
-            // Получаем данные пользователя
-            if (tg.initDataUnsafe?.user) {
-                this.telegramUserId = tg.initDataUnsafe.user.id;
-                console.log('✅ Telegram User ID:', this.telegramUserId);
-            } else {
-                console.warn('⚠️ Telegram User ID не найден');
-            }
+        // Инициализация
+        this.init();
+    }
+
+    /**
+     * Инициализация API клиента
+     */
+    init() {
+        // Получаем данные пользователя
+        if (window.CONFIG?.TELEGRAM?.user) {
+            this.telegramUserId = window.CONFIG.TELEGRAM.user.id;
+            CONFIG.log('info', '✅ Telegram User ID:', this.telegramUserId);
+        } else {
+            CONFIG.log('warn', '⚠️ Telegram User ID не найден');
         }
     }
 
@@ -38,32 +40,66 @@ class API {
         
         // Добавляем Telegram User ID если есть
         if (this.telegramUserId) {
-            headers['X-Telegram-User-Id'] = this.telegramUserId;
+            headers['X-Telegram-User-Id'] = this.telegramUserId.toString();
         }
         
+        CONFIG.log('debug', '📤 Заголовки запроса:', headers);
         return headers;
+    }
+
+    /**
+     * Обработка ошибок
+     */
+    async handleResponse(response) {
+        CONFIG.log('debug', '📥 Ответ API:', {
+            status: response.status,
+            url: response.url,
+            ok: response.ok
+        });
+
+        if (!response.ok) {
+            let errorMessage = 'Ошибка запроса';
+            
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorData.message || errorMessage;
+                CONFIG.log('error', '❌ Ошибка API:', errorData);
+            } catch (e) {
+                CONFIG.log('error', '❌ Ошибка парсинга ошибки:', e);
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            
+            throw new Error(errorMessage);
+        }
+
+        try {
+            const data = await response.json();
+            CONFIG.log('debug', '✅ Успешный ответ:', data);
+            return data;
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка парсинга ответа:', error);
+            throw new Error('Ошибка обработки ответа сервера');
+        }
     }
 
     /**
      * Базовый метод для GET запросов
      */
     async get(endpoint, includeAuth = true) {
+        const url = `${this.baseURL}${endpoint}`;
+        CONFIG.log('info', '📤 GET запрос:', url);
+        
         try {
             const headers = includeAuth ? this.getHeaders(false) : {};
             
-            const response = await fetch(`${this.baseURL}${endpoint}`, {
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: headers
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка запроса');
-            }
-
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
-            console.error(`GET ${endpoint} error:`, error);
+            CONFIG.log('error', `❌ GET ${endpoint} ошибка:`, error);
             throw error;
         }
     }
@@ -72,21 +108,19 @@ class API {
      * Базовый метод для POST запросов
      */
     async post(endpoint, data = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        CONFIG.log('info', '📤 POST запрос:', url, data);
+        
         try {
-            const response = await fetch(`${this.baseURL}${endpoint}`, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: this.getHeaders(),
                 body: JSON.stringify(data)
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка запроса');
-            }
-
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
-            console.error(`POST ${endpoint} error:`, error);
+            CONFIG.log('error', `❌ POST ${endpoint} ошибка:`, error);
             throw error;
         }
     }
@@ -95,21 +129,19 @@ class API {
      * Базовый метод для PUT запросов
      */
     async put(endpoint, data = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        CONFIG.log('info', '📤 PUT запрос:', url, data);
+        
         try {
-            const response = await fetch(`${this.baseURL}${endpoint}`, {
+            const response = await fetch(url, {
                 method: 'PUT',
                 headers: this.getHeaders(),
                 body: JSON.stringify(data)
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка запроса');
-            }
-
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
-            console.error(`PUT ${endpoint} error:`, error);
+            CONFIG.log('error', `❌ PUT ${endpoint} ошибка:`, error);
             throw error;
         }
     }
@@ -118,20 +150,18 @@ class API {
      * Базовый метод для DELETE запросов
      */
     async delete(endpoint) {
+        const url = `${this.baseURL}${endpoint}`;
+        CONFIG.log('info', '📤 DELETE запрос:', url);
+        
         try {
-            const response = await fetch(`${this.baseURL}${endpoint}`, {
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: this.getHeaders(false)
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка запроса');
-            }
-
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
-            console.error(`DELETE ${endpoint} error:`, error);
+            CONFIG.log('error', `❌ DELETE ${endpoint} ошибка:`, error);
             throw error;
         }
     }
@@ -151,23 +181,46 @@ class API {
      * Получить общую статистику
      */
     async getStatistics() {
-        return this.get('/statistics');
+        try {
+            return await this.get('/statistics');
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки статистики:', error);
+            // Возвращаем заглушку при ошибке
+            return {
+                total_spent: 0,
+                total_purchases: 0,
+                average_per_day: 0
+            };
+        }
     }
 
     /**
      * Получить месячную статистику
      */
     async getMonthlyStatistics(year = null, month = null) {
-        let endpoint = '/statistics/monthly';
-        const params = new URLSearchParams();
-        
-        if (year) params.append('year', year);
-        if (month) params.append('month', month);
-        
-        const query = params.toString();
-        if (query) endpoint += `?${query}`;
-        
-        return this.get(endpoint);
+        try {
+            let endpoint = '/statistics/monthly';
+            const params = new URLSearchParams();
+            
+            if (year) params.append('year', year);
+            if (month) params.append('month', month);
+            
+            const query = params.toString();
+            if (query) endpoint += `?${query}`;
+            
+            return await this.get(endpoint);
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки месячной статистики:', error);
+            // Возвращаем заглушку при ошибке
+            return {
+                summary: {
+                    total_spent: 0,
+                    total_purchases: 0,
+                    average_per_day: 0
+                },
+                daily_stats: []
+            };
+        }
     }
 
     // ============================================================================
@@ -178,17 +231,22 @@ class API {
      * Получить список продуктов
      */
     async getProducts(search = null, categoryId = null, limit = 100) {
-        let endpoint = '/products';
-        const params = new URLSearchParams();
-        
-        if (search) params.append('search', search);
-        if (categoryId) params.append('category_id', categoryId);
-        if (limit) params.append('limit', limit);
-        
-        const query = params.toString();
-        if (query) endpoint += `?${query}`;
-        
-        return this.get(endpoint);
+        try {
+            let endpoint = '/products';
+            const params = new URLSearchParams();
+            
+            if (search) params.append('search', search);
+            if (categoryId) params.append('category_id', categoryId);
+            if (limit) params.append('limit', limit);
+            
+            const query = params.toString();
+            if (query) endpoint += `?${query}`;
+            
+            return await this.get(endpoint);
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки продуктов:', error);
+            return [];
+        }
     }
 
     /**
@@ -230,7 +288,12 @@ class API {
      * Получить список магазинов
      */
     async getStores() {
-        return this.get('/stores');
+        try {
+            return await this.get('/stores');
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки магазинов:', error);
+            return [];
+        }
     }
 
     /**
@@ -248,7 +311,12 @@ class API {
      * Получить список категорий
      */
     async getCategories() {
-        return this.get('/categories');
+        try {
+            return await this.get('/categories');
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки категорий:', error);
+            return [];
+        }
     }
 
     /**
@@ -325,14 +393,9 @@ class API {
                 body: formData
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка загрузки');
-            }
-
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
-            console.error('Upload XML error:', error);
+            CONFIG.log('error', 'Upload XML error:', error);
             throw error;
         }
     }
@@ -356,14 +419,9 @@ class API {
                 body: formData
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка загрузки');
-            }
-
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
-            console.error('Upload multiple XML error:', error);
+            CONFIG.log('error', 'Upload multiple XML error:', error);
             throw error;
         }
     }
@@ -376,7 +434,12 @@ class API {
      * Получить информацию о текущей семье
      */
     async getFamilyInfo() {
-        return this.get('/family/info');
+        try {
+            return await this.get('/family/info');
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки информации о семье:', error);
+            return null;
+        }
     }
 
     /**
@@ -407,7 +470,12 @@ class API {
      * Получить входящие приглашения
      */
     async getPendingInvites() {
-        return this.get('/family/invites/pending');
+        try {
+            return await this.get('/family/invites/pending');
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка загрузки приглашений:', error);
+            return [];
+        }
     }
 
     /**
@@ -446,37 +514,21 @@ class API {
      * Форматирование суммы в валюту
      */
     formatCurrency(amount, currency = 'PYG') {
-        return new Intl.NumberFormat('es-PY', {
-            style: 'currency',
-            currency: currency,
-            minimumFractionDigits: 0
-        }).format(amount);
+        return CONFIG.formatCurrency(amount);
     }
 
     /**
      * Форматирование даты
      */
     formatDate(dateString) {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('es-PY', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        }).format(date);
+        return CONFIG.formatDate(dateString);
     }
 
     /**
      * Форматирование даты и времени
      */
     formatDateTime(dateString) {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('es-PY', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
+        return CONFIG.formatDateTime(dateString);
     }
 
     /**
@@ -492,10 +544,24 @@ class API {
     isAuthenticated() {
         return this.telegramUserId !== null;
     }
+
+    /**
+     * Проверка подключения к API
+     */
+    async testConnection() {
+        try {
+            const result = await this.health();
+            CONFIG.log('info', '✅ Подключение к API успешно');
+            return true;
+        } catch (error) {
+            CONFIG.log('error', '❌ Ошибка подключения к API:', error);
+            return false;
+        }
+    }
 }
 
 // Создаём глобальный экземпляр API
-const API = new API();
+const API = new APIClient();
 
 // Экспортируем для использования в модулях
 if (typeof module !== 'undefined' && module.exports) {
@@ -504,3 +570,5 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Делаем API глобально доступным
 window.API = API;
+
+CONFIG.log('info', '✅ API клиент инициализирован');
