@@ -520,7 +520,19 @@
                 compareData = await API.comparePrices(search, 50);
                 renderCompare(compareData);
             } catch (error) {
-                showError('compare-list', error.message);
+                console.error('Ошибка загрузки сравнения:', error);
+                
+                let errorMessage = 'Произошла ошибка при загрузке данных';
+                
+                if (error.message.includes('403') || error.message.includes('Доступ запрещен')) {
+                    errorMessage = '🔒 Недостаточно прав для просмотра сравнения';
+                } else if (error.message.includes('401') || error.message.includes('авторизац')) {
+                    errorMessage = '🔑 Требуется авторизация в Telegram';
+                } else if (error.message) {
+                    errorMessage = `Ошибка: ${error.message}`;
+                }
+                
+                showError('compare-list', errorMessage);
             }
         }
         
@@ -557,10 +569,21 @@
         function renderCompare(data) {
             const container = document.getElementById('compare-list');
             
-            if (!data?.length) {
-                container.innerHTML = '<div class="empty">🏪 Нет данных для сравнения</div>';
-                return;
-            }
+        if (!data?.length) {
+            container.innerHTML = `
+                <div class="empty">
+                    <div style="font-size: 48px; margin-bottom: 10px;">🏪</div>
+                    <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">
+                        Нет данных для сравнения
+                    </div>
+                    <div style="font-size: 13px; opacity: 0.7; line-height: 1.5;">
+                        Для сравнения нужны покупки одного товара<br>
+                        в разных магазинах
+                    </div>
+                </div>
+            `;
+            return;
+        }
             
             const html = data.map(c => `
                 <div class="comparison-card">
@@ -571,11 +594,11 @@
                                 ${s.store_name === c.cheapest_store ? '🏆' : '🏪'} 
                                 ${s.store_name}
                             </span>
-                            <strong>${s.price.toFixed(0)} ₲</strong>
+                            <strong>${formatMoney(s.price)}</strong>
                         </div>
                     `).join('')}
                     <div style="margin-top:10px; text-align:center; font-size:12px; opacity:0.7">
-                        💰 Разница: ${c.price_difference.toFixed(0)} ₲ 
+                        💰 Разница: ${formatMoney(c.price_difference)}
                         (${c.savings_potential.toFixed(1)}%)
                     </div>
                 </div>
@@ -594,8 +617,8 @@
             
             if (tab === 'trends' && !trendsData.length) {
                 loadTrends(currentDays);
-            } else if (tab === 'compare' && !compareData.length) {
-                loadCompare();
+            } else if (tab === 'compare') {
+                loadCompare();  // Всегда загружать при открытии
             }
             
             tg.HapticFeedback.impactOccurred('light');
