@@ -1,331 +1,503 @@
-// Обновленный js/api.js с поддержкой авторизации
-// Версия 3.2 - Telegram WebApp Auth
+/**
+ * API клиент для системы семейного бюджета
+ * Версия: 4.0.0 - Поддержка семейной системы
+ */
 
-const API = {
-    cache: new Map(),
-    cacheTimeout: CONFIG.SETTINGS.CACHE_TIMEOUT,
-    
-    /**
-     * Получить Telegram User ID из WebApp
-     */
-    getTelegramUserId() {
-        return CONFIG.TELEGRAM.user?.id || null;
-    },
-    
-    /**
-     * Получить заголовки с авторизацией
-     */
-    getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
-        };
+class API {
+    constructor() {
+        // Базовый URL API (можно настроить через CONFIG)
+        this.baseURL = window.CONFIG?.API_URL || 'http://localhost:8000';
         
-        // Добавляем Telegram User ID если доступен
-        const userId = this.getTelegramUserId();
-        if (userId) {
-            headers['X-Telegram-User-Id'] = userId.toString();
+        // Telegram User ID из Telegram Web App
+        this.telegramUserId = null;
+        
+        // Инициализация Telegram Web App
+        if (window.Telegram?.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            
+            // Получаем данные пользователя
+            if (tg.initDataUnsafe?.user) {
+                this.telegramUserId = tg.initDataUnsafe.user.id;
+                console.log('✅ Telegram User ID:', this.telegramUserId);
+            } else {
+                console.warn('⚠️ Telegram User ID не найден');
+            }
+        }
+    }
+
+    /**
+     * Получение заголовков для запросов
+     */
+    getHeaders(includeContentType = true) {
+        const headers = {};
+        
+        if (includeContentType) {
+            headers['Content-Type'] = 'application/json';
+        }
+        
+        // Добавляем Telegram User ID если есть
+        if (this.telegramUserId) {
+            headers['X-Telegram-User-Id'] = this.telegramUserId;
         }
         
         return headers;
-    },
-    
+    }
+
     /**
-     * Базовый метод для запросов
+     * Базовый метод для GET запросов
      */
-    async request(endpoint, options = {}) {
-        const url = `${CONFIG.API_BASE_URL}${endpoint}`;
-        
-        const defaultOptions = {
-            headers: this.getHeaders(),
-            ...options
-        };
-        
+    async get(endpoint, includeAuth = true) {
         try {
-            console.log(`🌐 API Request: ${options.method || 'GET'} ${endpoint}`);
+            const headers = includeAuth ? this.getHeaders(false) : {};
             
-            const response = await fetch(url, defaultOptions);
-            
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'GET',
+                headers: headers
+            });
+
             if (!response.ok) {
-                const error = await response.json().catch(() => ({ 
-                    detail: `HTTP ${response.status}` 
-                }));
-                
-                // Обработка ошибок авторизации
-                if (response.status === 401) {
-                    console.error('❌ Требуется авторизация');
-                    throw new Error('Требуется авторизация в Telegram');
-                }
-                
-                if (response.status === 403) {
-                    console.error('❌ Доступ запрещен');
-                    throw new Error(error.detail || 'Недостаточно прав доступа');
-                }
-                
-                throw new Error(error.detail || `Ошибка: ${response.status}`);
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка запроса');
             }
-            
-            const data = await response.json();
-            console.log(`✅ API Response: ${endpoint}`, data);
-            return data;
-            
+
+            return await response.json();
         } catch (error) {
-            console.error(`❌ API Error: ${endpoint}`, error);
+            console.error(`GET ${endpoint} error:`, error);
             throw error;
         }
-    },
-    
+    }
+
     /**
-     * GET запрос с кэшированием
+     * Базовый метод для POST запросов
      */
-    async get(endpoint, useCache = true) {
-        const cacheKey = endpoint;
-        
-        if (useCache && this.cache.has(cacheKey)) {
-            const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheTimeout) {
-                console.log(`📦 Cache hit: ${endpoint}`);
-                return cached.data;
-            }
-        }
-        
-        const data = await this.request(endpoint, { method: 'GET' });
-        
-        if (useCache) {
-            this.cache.set(cacheKey, {
-                data,
-                timestamp: Date.now()
+    async post(endpoint, data = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: JSON.stringify(data)
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка запроса');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`POST ${endpoint} error:`, error);
+            throw error;
         }
-        
-        return data;
-    },
-    
+    }
+
     /**
-     * POST запрос
+     * Базовый метод для PUT запросов
      */
-    async post(endpoint, body) {
-        return this.request(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(body)
-        });
-    },
-    
+    async put(endpoint, data = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'PUT',
+                headers: this.getHeaders(),
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка запроса');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`PUT ${endpoint} error:`, error);
+            throw error;
+        }
+    }
+
     /**
-     * PUT запрос
-     */
-    async put(endpoint, body) {
-        return this.request(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(body)
-        });
-    },
-    
-    /**
-     * DELETE запрос
+     * Базовый метод для DELETE запросов
      */
     async delete(endpoint) {
-        return this.request(endpoint, {
-            method: 'DELETE'
-        });
-    },
-    
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'DELETE',
+                headers: this.getHeaders(false)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка запроса');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`DELETE ${endpoint} error:`, error);
+            throw error;
+        }
+    }
+
+    // ============================================================================
+    // БАЗОВЫЕ ENDPOINTS
+    // ============================================================================
+
     /**
-     * Очистить кэш
+     * Проверка здоровья API
      */
-    clearCache() {
-        this.cache.clear();
-        console.log('🗑️ Cache cleared');
-    },
-    
-    // ==================== AUTH ENDPOINTS ====================
-    
+    async health() {
+        return this.get('/health', false);
+    }
+
     /**
-     * Получить информацию о текущем пользователе
+     * Получить общую статистику
      */
-    async getUserInfo() {
-        return this.get(CONFIG.ENDPOINTS.GET_USER_INFO, false);
-    },
-    
-    /**
-     * Проверить доступ к ресурсу
-     */
-    async checkAccess(resource, action = 'read') {
-        return this.get(
-            `${CONFIG.ENDPOINTS.CHECK_ACCESS}?resource=${resource}&action=${action}`,
-            false
-        );
-    },
-    
-    /**
-     * Зарегистрировать пользователя
-     */
-    async registerUser(username, firstName, lastName) {
-        const params = new URLSearchParams();
-        if (username) params.append('username', username);
-        if (firstName) params.append('first_name', firstName);
-        if (lastName) params.append('last_name', lastName);
-        
-        return this.post(
-            `/auth/register?${params.toString()}`,
-            {}
-        );
-    },
-    
-    // ==================== STATISTICS ====================
-    
     async getStatistics() {
-        return this.get(CONFIG.ENDPOINTS.STATISTICS);
-    },
-    
-    async getMonthlyStatistics(year, month) {
-        let endpoint = CONFIG.ENDPOINTS.MONTHLY_STATISTICS;
+        return this.get('/statistics');
+    }
+
+    /**
+     * Получить месячную статистику
+     */
+    async getMonthlyStatistics(year = null, month = null) {
+        let endpoint = '/statistics/monthly';
         const params = new URLSearchParams();
         
         if (year) params.append('year', year);
         if (month) params.append('month', month);
         
-        if (params.toString()) {
-            endpoint += `?${params.toString()}`;
-        }
+        const query = params.toString();
+        if (query) endpoint += `?${query}`;
         
         return this.get(endpoint);
-    },
-    
-    // ==================== PRICES ====================
-    
-    async getPriceTrends(days = 30, search = null, limit = 50) {
-        const params = new URLSearchParams({ days, limit });
-        if (search) params.append('search', search);
+    }
+
+    // ============================================================================
+    // ПРОДУКТЫ
+    // ============================================================================
+
+    /**
+     * Получить список продуктов
+     */
+    async getProducts(search = null, categoryId = null, limit = 100) {
+        let endpoint = '/products';
+        const params = new URLSearchParams();
         
-        return this.get(`${CONFIG.ENDPOINTS.PRICE_TRENDS}?${params.toString()}`);
-    },
-    
-    async comparePrices(search = null, limit = 50) {
-        const params = new URLSearchParams({ limit });
         if (search) params.append('search', search);
-        
-        return this.get(`${CONFIG.ENDPOINTS.PRICE_COMPARE}?${params.toString()}`);
-    },
-    
-    // ==================== PRODUCTS ====================
-    
-    async getProducts(categoryId = null, search = null, limit = 100) {
-        const params = new URLSearchParams({ limit });
         if (categoryId) params.append('category_id', categoryId);
-        if (search) params.append('search', search);
+        if (limit) params.append('limit', limit);
         
-        return this.get(`${CONFIG.ENDPOINTS.PRODUCTS}?${params.toString()}`);
-    },
-    
-    async getProductDetails(productId) {
-        return this.get(`${CONFIG.ENDPOINTS.PRODUCT_DETAILS}/${productId}`);
-    },
-    
+        const query = params.toString();
+        if (query) endpoint += `?${query}`;
+        
+        return this.get(endpoint);
+    }
+
+    /**
+     * Получить информацию о продукте
+     */
+    async getProduct(productId) {
+        return this.get(`/products/${productId}`);
+    }
+
+    /**
+     * Создать продукт
+     */
+    async createProduct(productData) {
+        return this.post('/products/create', productData);
+    }
+
+    /**
+     * Поиск продукта
+     */
+    async searchProduct(query) {
+        return this.get(`/products/search?query=${encodeURIComponent(query)}`);
+    }
+
+    /**
+     * Обновить категорию продукта
+     */
     async updateProductCategory(productId, categoryId) {
-        return this.put(CONFIG.ENDPOINTS.UPDATE_PRODUCT_CATEGORY, {
+        return this.put('/products/category', {
             product_id: productId,
             category_id: categoryId
         });
-    },
-    
-    async createProduct(productData) {
-        return this.post(CONFIG.ENDPOINTS.CREATE_PRODUCT, productData);
-    },
-    
-    // ==================== CATEGORIES ====================
-    
-    async getCategories() {
-        return this.get(CONFIG.ENDPOINTS.CATEGORIES);
-    },
-    
-    async createCategory(name, description, parentId) {
-        return this.post(CONFIG.ENDPOINTS.CATEGORIES, {
-            name,
-            description,
-            parent_id: parentId
-        });
-    },
-    
-    // ==================== STORES ====================
-    
+    }
+
+    // ============================================================================
+    // МАГАЗИНЫ
+    // ============================================================================
+
+    /**
+     * Получить список магазинов
+     */
     async getStores() {
-        return this.get(CONFIG.ENDPOINTS.STORES);
-    },
-    
-    async createStore(name, storeType) {
-        return this.post(CONFIG.ENDPOINTS.CREATE_STORE, {
-            name,
-            store_type: storeType
-        });
-    },
-    
-    // ==================== EXPENSES ====================
-    
-    async createExpense(expenseData) {
-        return this.post(CONFIG.ENDPOINTS.CREATE_EXPENSE, expenseData);
-    },
-    
-    async getRecentPurchases(days = 7) {
-        return this.get(`${CONFIG.ENDPOINTS.RECENT_PURCHASES}?days=${days}`);
-    },
-    
-    // ==================== ADMIN ====================
-    
-    async getAllUsers() {
-        return this.get('/admin/users', false);
-    },
-    
-    async updateUserRole(userTelegramId, newRole) {
-        return this.put(
-            `/admin/users/${userTelegramId}/role?new_role=${newRole}`,
-            {}
-        );
+        return this.get('/stores');
     }
-};
 
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
-
-// Проверяем авторизацию при загрузке
-document.addEventListener('DOMContentLoaded', async () => {
-    const userId = API.getTelegramUserId();
-    
-    if (!userId) {
-        console.warn('⚠️ Telegram User ID не найден');
-        return;
+    /**
+     * Создать магазин
+     */
+    async createStore(storeData) {
+        return this.post('/stores', storeData);
     }
-    
-    console.log('✅ Telegram User ID:', userId);
-    
-    // Пытаемся получить информацию о пользователе
-    try {
-        const userInfo = await API.getUserInfo();
-        console.log('✅ User info:', userInfo);
-        
-        // Сохраняем в глобальную переменную
-        window.currentUser = userInfo;
-        
-        // Показываем роль пользователя в консоли
-        console.log(`👤 Роль: ${userInfo.role}`);
-        
-    } catch (error) {
-        console.warn('⚠️ Ошибка получения информации о пользователе:', error);
-        
-        // Если пользователь не найден, пытаемся зарегистрировать
-        if (error.message.includes('не найден')) {
-            try {
-                const user = CONFIG.TELEGRAM.user;
-                await API.registerUser(
-                    user.username,
-                    user.first_name,
-                    user.last_name
-                );
-                console.log('✅ Пользователь зарегистрирован как guest');
-            } catch (registerError) {
-                console.error('❌ Ошибка регистрации:', registerError);
+
+    // ============================================================================
+    // КАТЕГОРИИ
+    // ============================================================================
+
+    /**
+     * Получить список категорий
+     */
+    async getCategories() {
+        return this.get('/categories');
+    }
+
+    /**
+     * Создать категорию
+     */
+    async createCategory(categoryData) {
+        return this.post('/categories', categoryData);
+    }
+
+    /**
+     * Удалить категорию
+     */
+    async deleteCategory(categoryId) {
+        return this.delete(`/categories/${categoryId}`);
+    }
+
+    // ============================================================================
+    // ПОКУПКИ
+    // ============================================================================
+
+    /**
+     * Получить последние покупки
+     */
+    async getRecentPurchases(limit = 20) {
+        return this.get(`/purchases/recent?limit=${limit}`);
+    }
+
+    /**
+     * Создать покупку вручную
+     */
+    async createManualExpense(expenseData) {
+        return this.post('/expenses/manual', expenseData);
+    }
+
+    // ============================================================================
+    // АНАЛИЗ ЦЕН
+    // ============================================================================
+
+    /**
+     * Получить тренды цен
+     */
+    async getPriceTrends(days = 30, limit = 20) {
+        return this.get(`/prices/trends?days=${days}&limit=${limit}`);
+    }
+
+    /**
+     * Сравнить цены по магазинам
+     */
+    async comparePrices(productName = null, limit = 10) {
+        let endpoint = `/prices/compare?limit=${limit}`;
+        if (productName) {
+            endpoint += `&product_name=${encodeURIComponent(productName)}`;
+        }
+        return this.get(endpoint);
+    }
+
+    // ============================================================================
+    // ЗАГРУЗКА ФАЙЛОВ
+    // ============================================================================
+
+    /**
+     * Загрузить XML файл
+     */
+    async uploadXML(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${this.baseURL}/upload/xml`, {
+                method: 'POST',
+                headers: {
+                    'X-Telegram-User-Id': this.telegramUserId
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка загрузки');
             }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Upload XML error:', error);
+            throw error;
         }
     }
-});
 
-console.log('✅ API module loaded (with auth)');
+    /**
+     * Загрузить несколько XML файлов
+     */
+    async uploadMultipleXML(files) {
+        const formData = new FormData();
+        
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        try {
+            const response = await fetch(`${this.baseURL}/upload/xml/batch`, {
+                method: 'POST',
+                headers: {
+                    'X-Telegram-User-Id': this.telegramUserId
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка загрузки');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Upload multiple XML error:', error);
+            throw error;
+        }
+    }
+
+    // ============================================================================
+    // СЕМЕЙНАЯ СИСТЕМА (НОВОЕ!)
+    // ============================================================================
+
+    /**
+     * Получить информацию о текущей семье
+     */
+    async getFamilyInfo() {
+        return this.get('/family/info');
+    }
+
+    /**
+     * Создать семью
+     */
+    async createFamily(name = 'Моя семья') {
+        return this.post('/family/create', { name });
+    }
+
+    /**
+     * Получить список участников семьи
+     */
+    async getFamilyMembers() {
+        return this.get('/family/members');
+    }
+
+    /**
+     * Пригласить пользователя в семью
+     */
+    async inviteToFamily(telegramId, message = null) {
+        return this.post('/family/invite', {
+            telegram_id: telegramId,
+            message: message
+        });
+    }
+
+    /**
+     * Получить входящие приглашения
+     */
+    async getPendingInvites() {
+        return this.get('/family/invites/pending');
+    }
+
+    /**
+     * Принять приглашение
+     */
+    async acceptInvite(inviteToken) {
+        return this.post(`/family/invites/${inviteToken}/accept`, {});
+    }
+
+    /**
+     * Отклонить приглашение
+     */
+    async declineInvite(inviteToken) {
+        return this.post(`/family/invites/${inviteToken}/decline`, {});
+    }
+
+    /**
+     * Выйти из семьи
+     */
+    async leaveFamily() {
+        return this.post('/family/leave', {});
+    }
+
+    /**
+     * Исключить участника из семьи
+     */
+    async removeFamilyMember(telegramId) {
+        return this.delete(`/family/members/${telegramId}`);
+    }
+
+    // ============================================================================
+    // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+    // ============================================================================
+
+    /**
+     * Форматирование суммы в валюту
+     */
+    formatCurrency(amount, currency = 'PYG') {
+        return new Intl.NumberFormat('es-PY', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: 0
+        }).format(amount);
+    }
+
+    /**
+     * Форматирование даты
+     */
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('es-PY', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).format(date);
+    }
+
+    /**
+     * Форматирование даты и времени
+     */
+    formatDateTime(dateString) {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('es-PY', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(date);
+    }
+
+    /**
+     * Получить Telegram User ID
+     */
+    getTelegramUserId() {
+        return this.telegramUserId;
+    }
+
+    /**
+     * Проверка авторизации
+     */
+    isAuthenticated() {
+        return this.telegramUserId !== null;
+    }
+}
+
+// Создаём глобальный экземпляр API
+const API = new API();
+
+// Экспортируем для использования в модулях
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = API;
+}
