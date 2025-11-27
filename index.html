@@ -457,8 +457,9 @@
         </div>
     </div>
     
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+        <script src="config.js"></script>   <!-- 1. CONFIG -->
+        <script src="api.js"></script>      <!-- 2. API (зависит от CONFIG) -->
+        <script src="app.js"></script>      <!-- 3. Твоя логика (зависит от API) -->
     <script>
         // Telegram WebApp
         const tg = window.Telegram.WebApp;
