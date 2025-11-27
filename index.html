@@ -598,6 +598,37 @@
                 tg.showAlert('Ошибка: ' + error.message);
             }
         }
+
+        // Добавление пользователя
+        async function updateUserInfo() {
+            const user = window.Telegram.WebApp.initDataUnsafe?.user;
+            
+            if (!user) {
+                console.error('Нет данных пользователя');
+                return;
+            }
+            
+            try {
+                const result = await API.post('/user/update-info', {
+                    first_name: user.first_name,
+                    username: user.username,
+                    language_code: user.language_code
+                });
+                
+                console.log('✅ Информация обновлена:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Ошибка обновления:', error);
+                throw error;
+            }
+        }
+        
+        // Вызов при загрузке приложения
+        document.addEventListener('DOMContentLoaded', async () => {
+            await updateUserInfo();
+            await loadDashboardData();
+        });
         
         // ЗАГРУЗИТЬ ИНФОРМАЦИЮ О СЕМЬЕ
         async function loadFamilyInfo() {
@@ -623,8 +654,22 @@
             }
         }
         
-        // Загрузить данные dashboard
-        async function loadDashboardData() {
+            // Загрузить данные dashboard
+            async function loadDashboardData() {
+            // Обновляем информацию о пользователе
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                try {
+                    await API.post('/user/update-info', {
+                        first_name: user.first_name,
+                        username: user.username,
+                        language_code: user.language_code
+                    });
+                } catch (error) {
+                    console.warn('Не удалось обновить информацию:', error);
+                }
+            }
+                
             // Загружаем информацию о семье
             await loadFamilyInfo();
             
