@@ -141,7 +141,10 @@ const CONFIG = {
         SHOW_MAIN_BUTTON: false,
         
         // Цвет главной кнопки
-        MAIN_BUTTON_COLOR: '#3b82f6'
+        MAIN_BUTTON_COLOR: '#3b82f6',
+        
+        // Данные пользователя
+        user: null
     },
     
     // Настройки кэширования
@@ -172,12 +175,12 @@ const CONFIG = {
     },
     
     // Режим разработки
-    DEBUG: false,
+    DEBUG: true,
     
     // Логирование
     LOGGING: {
         ENABLED: true,
-        LEVEL: 'info', // 'debug', 'info', 'warn', 'error'
+        LEVEL: 'debug', // 'debug', 'info', 'warn', 'error'
         LOG_API_CALLS: true,
         LOG_ERRORS: true
     }
@@ -210,7 +213,8 @@ CONFIG.log = function(level, ...args) {
     const currentLevel = levels.indexOf(level);
     
     if (currentLevel >= minLevel) {
-        console[level](...args);
+        const timestamp = new Date().toISOString();
+        console[level](`[${timestamp}]`, ...args);
     }
 };
 
@@ -218,6 +222,8 @@ CONFIG.log = function(level, ...args) {
  * Форматирование валюты
  */
 CONFIG.formatCurrency = function(amount) {
+    if (amount === null || amount === undefined) return '0 ₲';
+    
     return new Intl.NumberFormat(this.UI.LOCALE, {
         style: 'currency',
         currency: this.UI.CURRENCY,
@@ -229,6 +235,8 @@ CONFIG.formatCurrency = function(amount) {
  * Форматирование даты
  */
 CONFIG.formatDate = function(dateString) {
+    if (!dateString) return '-';
+    
     const date = new Date(dateString);
     return new Intl.DateTimeFormat(this.UI.LOCALE, {
         year: 'numeric',
@@ -241,6 +249,8 @@ CONFIG.formatDate = function(dateString) {
  * Форматирование даты и времени
  */
 CONFIG.formatDateTime = function(dateString) {
+    if (!dateString) return '-';
+    
     const date = new Date(dateString);
     return new Intl.DateTimeFormat(this.UI.LOCALE, {
         year: 'numeric',
@@ -256,6 +266,29 @@ CONFIG.formatDateTime = function(dateString) {
  */
 CONFIG.getThemeColor = function(colorName) {
     return this.UI.THEME_COLORS[colorName] || this.UI.THEME_COLORS.primary;
+};
+
+// Инициализация Telegram WebApp
+CONFIG.initTelegram = function() {
+    if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        // Сохраняем данные пользователя
+        this.TELEGRAM.user = tg.initDataUnsafe?.user;
+        this.TELEGRAM.tg = tg;
+        
+        this.log('info', '✅ Telegram WebApp инициализирован', {
+            user: this.TELEGRAM.user,
+            theme: tg.themeParams
+        });
+        
+        return true;
+    } else {
+        this.log('warn', '⚠️ Telegram WebApp не обнаружен, работаем в режиме браузера');
+        return false;
+    }
 };
 
 // Загрузка конфигурации из localStorage (если есть)
