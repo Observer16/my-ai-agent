@@ -21,10 +21,18 @@ const CONFIG = {
         CREATE_EXPENSE: '/expenses/manual',
         RECENT_PURCHASES: '/purchases/recent',
         PRODUCT_BY_BARCODE: '/products/by-barcode',
+
+        // Family endpoints:
+        FAMILY_INFO: '/family/info',
+        FAMILY_CREATE: '/family/create',
+        FAMILY_MEMBERS: '/family/members',
+        FAMILY_INVITE: '/family/invite',
+        FAMILY_INVITES_PENDING: '/family/invites/pending',
+        FAMILY_INVITE_ACCEPT: '/family/invites',  // + /{token}/accept
+        FAMILY_INVITE_DECLINE: '/family/invites', // + /{token}/decline
+        FAMILY_LEAVE: '/family/leave',
+        FAMILY_REMOVE_MEMBER: '/family/members',  // + /{telegram_id}
         
-        // Новые endpoints для управления доступом
-        CHECK_ACCESS: '/auth/check',
-        GET_USER_INFO: '/auth/user',
     },
     
     SETTINGS: {
