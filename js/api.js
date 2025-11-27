@@ -1,6 +1,6 @@
 /**
  * API клиент для системы семейного бюджета
- * Версия: 4.0.0 - Поддержка семейной системы
+ * Версия: 4.1.0 - Исправлена интеграция с реальным бэкендом
  */
 
 class APIClient {
@@ -233,13 +233,14 @@ class APIClient {
 
     /**
      * Получить список продуктов
+     * ✅ Параметры в правильном порядке согласно бэкенду
      */
-    async getProducts(search = null, categoryId = null, limit = 100) {
+    async getProducts(category_id = null, search = null, limit = 100) {
         let endpoint = '/products';
         const params = new URLSearchParams();
         
+        if (category_id) params.append('category_id', category_id);
         if (search) params.append('search', search);
-        if (categoryId) params.append('category_id', categoryId);
         if (limit) params.append('limit', limit);
         
         const query = params.toString();
@@ -257,16 +258,36 @@ class APIClient {
 
     /**
      * Создать продукт
+     * ✅ Поддержка двух форматов: объект ИЛИ параметры
      */
-    async createProduct(productData) {
-        return this.post('/products/create', productData);
+    async createProduct(nameOrData, categoryId = null, brand = null, unit = 'unidad', barcode = null) {
+        // Если первый параметр - объект, используем его
+        if (typeof nameOrData === 'object') {
+            return this.post('/products/create', nameOrData);
+        }
+        
+        // Иначе создаём объект из параметров
+        return this.post('/products/create', {
+            name: nameOrData,
+            category_id: categoryId,
+            brand: brand,
+            unit: unit,
+            barcode: barcode
+        });
+    }
+
+    /**
+     * ✅ НОВОЕ: Получить продукт по штрих-коду
+     */
+    async getProductByBarcode(barcode) {
+        return this.get(`/products/by-code/${encodeURIComponent(barcode)}`);
     }
 
     /**
      * Поиск продукта
      */
     async searchProduct(query) {
-        return this.get(`/products/search?query=${encodeURIComponent(query)}`);
+        return this.get(`/products/search?name=${encodeURIComponent(query)}`);
     }
 
     /**
@@ -277,6 +298,14 @@ class APIClient {
             product_id: productId,
             category_id: categoryId
         });
+    }
+
+    /**
+     * ✅ НОВОЕ: Обновить штрих-код продукта
+     * Бэкенд ожидает Query параметры, а не Body
+     */
+    async updateProductBarcode(productId, barcode) {
+        return this.put(`/products/barcode?product_id=${encodeURIComponent(productId)}&barcode=${encodeURIComponent(barcode)}`);
     }
 
     // ============================================================================
@@ -292,9 +321,19 @@ class APIClient {
 
     /**
      * Создать магазин
+     * ✅ Поддержка двух форматов: объект ИЛИ параметры
      */
-    async createStore(storeData) {
-        return this.post('/stores', storeData);
+    async createStore(nameOrData, storeType = 'Магазин') {
+        // Если первый параметр - объект, используем его
+        if (typeof nameOrData === 'object') {
+            return this.post('/stores', nameOrData);
+        }
+        
+        // Иначе создаём объект из параметров
+        return this.post('/stores', {
+            name: nameOrData,
+            store_type: storeType
+        });
     }
 
     // ============================================================================
@@ -310,9 +349,20 @@ class APIClient {
 
     /**
      * Создать категорию
+     * ✅ Поддержка двух форматов: объект ИЛИ параметры
      */
-    async createCategory(categoryData) {
-        return this.post('/categories', categoryData);
+    async createCategory(nameOrData, description = null, parentId = null) {
+        // Если первый параметр - объект, используем его
+        if (typeof nameOrData === 'object') {
+            return this.post('/categories', nameOrData);
+        }
+        
+        // Иначе создаём объект из параметров
+        return this.post('/categories', {
+            name: nameOrData,
+            description: description,
+            parent_id: parentId
+        });
     }
 
     /**
@@ -334,7 +384,20 @@ class APIClient {
     }
 
     /**
-     * Создать покупку вручную
+     * ✅ НОВОЕ: Создать расход (новое название метода)
+     */
+    async createExpense(storeId, productId, quantity, unitPrice, purchaseDate = null) {
+        return this.post('/expenses/manual', {
+            store_id: storeId,
+            product_id: productId,
+            quantity: quantity,
+            unit_price: unitPrice,
+            purchase_date: purchaseDate || new Date().toISOString()
+        });
+    }
+
+    /**
+     * Создать покупку вручную (старое название для обратной совместимости)
      */
     async createManualExpense(expenseData) {
         return this.post('/expenses/manual', expenseData);
@@ -346,9 +409,14 @@ class APIClient {
 
     /**
      * Получить тренды цен
+     * ✅ Исправлено: параметр product_pattern вместо search
      */
-    async getPriceTrends(days = 30, limit = 20) {
-        return this.get(`/prices/trends?days=${days}&limit=${limit}`);
+    async getPriceTrends(days = 30, search = null, limit = 20) {
+        let endpoint = `/prices/trends?days=${days}&limit=${limit}`;
+        if (search) {
+            endpoint += `&product_pattern=${encodeURIComponent(search)}`;
+        }
+        return this.get(endpoint);
     }
 
     /**
@@ -357,7 +425,7 @@ class APIClient {
     async comparePrices(productName = null, limit = 10) {
         let endpoint = `/prices/compare?limit=${limit}`;
         if (productName) {
-            endpoint += `&product_name=${encodeURIComponent(productName)}`;
+            endpoint += `&search=${encodeURIComponent(productName)}`;
         }
         return this.get(endpoint);
     }
@@ -444,7 +512,7 @@ class APIClient {
     }
 
     // ============================================================================
-    // СЕМЕЙНАЯ СИСТЕМА (НОВОЕ!)
+    // СЕМЕЙНАЯ СИСТЕМА
     // ============================================================================
 
     /**
@@ -580,7 +648,7 @@ if (typeof module !== 'undefined' && module.exports) {
 // Делаем API глобально доступным
 window.API = API;
 
-console.log('✅ API клиент инициализирован', {
+console.log('✅ API клиент инициализирован v4.1.0', {
     baseURL: API.baseURL,
     telegramUserId: API.telegramUserId
 });
