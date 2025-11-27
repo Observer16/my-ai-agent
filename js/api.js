@@ -501,3 +501,6 @@ const API = new API();
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = API;
 }
+
+// Делаем API глобально доступным
+window.API = API;
