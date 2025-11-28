@@ -11,53 +11,9 @@ class APIClient {
         // Telegram User ID из Telegram Web App
         this.telegramUserId = null;
 
-        this.ngrokVerified = false;
-
         // Инициализация Telegram Web App
         this.initTelegram();
-
-        this.verifyNgrokAccess();
     }
-
-        /**
-     * Проверка доступа к NGROK
-     */
-    async verifyNgrokAccess() {
-        try {
-            const response = await fetch(this.baseURL + '/health', {
-                method: 'GET',
-                mode: 'no-cors'
-            });
-            this.ngrokVerified = true;
-        } catch (error) {
-            console.warn('⚠️ NGROK доступ требует подтверждения');
-            this.showNgrokWarning();
-        }
-    }
-
-    /**
-     * Показать предупреждение о NGROK
-     */
-    showNgrokWarning() {
-        if (confirm('Для работы приложения требуется доступ к NGROK. Нажмите OK чтобы продолжить.')) {
-            window.open(this.baseURL + '/health', '_blank');
-            this.ngrokVerified = true;
-        }
-    }
-
-    /**
-     * Обёртка для всех запросов с проверкой NGROK
-     */
-    async makeRequest(method, endpoint, data = null) {
-        if (!this.ngrokVerified) {
-            await this.verifyNgrokAccess();
-        }
-
-        // Оригинальная логика запросов...
-        return this[method.toLowerCase()](endpoint, data);
-    }
-}
-
 
     /**
      * Инициализация Telegram Web App
@@ -94,6 +50,7 @@ class APIClient {
             headers['X-Telegram-User-Id'] = this.telegramUserId;
         }
 
+        // ✅ NGROK FIX: пропускаем warning страницу
         headers['ngrok-skip-browser-warning'] = 'true';
 
         return headers;
