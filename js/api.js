@@ -104,7 +104,9 @@ class APIClient {
      */
     async get(endpoint, includeAuth = true) {
         try {
-            const headers = includeAuth ? this.getHeaders(false) : {};
+            const headers = includeAuth ? this.getHeaders(false) : {
+                'ngrok-skip-browser-warning': 'true'
+            };
 
             const fullUrl = `${this.baseURL}${endpoint}`;
             console.log(`🌐 GET ${fullUrl}`);
