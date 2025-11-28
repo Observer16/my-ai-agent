@@ -45,11 +45,6 @@ class APIClient {
             headers['Content-Type'] = 'application/json';
         }
         
-        // Добавляем Telegram User ID если есть
-        if (this.telegramUserId) {
-            headers['X-Telegram-User-Id'] = this.telegramUserId;
-        }
-        
         return headers;
     }
 
