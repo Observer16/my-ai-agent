@@ -48,6 +48,11 @@ class APIClient {
         return headers;
     }
 
+        // Добавляем Telegram User ID если есть
+        if (this.telegramUserId) {
+            headers['X-Telegram-User-Id'] = this.telegramUserId;
+        }
+  
     /**
      * Базовый метод для GET запросов
      */
