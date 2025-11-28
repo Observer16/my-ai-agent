@@ -44,14 +44,14 @@ class APIClient {
         if (includeContentType) {
             headers['Content-Type'] = 'application/json';
         }
-        
-        return headers;
-    }
 
         // Добавляем Telegram User ID если есть
         if (this.telegramUserId) {
             headers['X-Telegram-User-Id'] = this.telegramUserId;
         }
+        
+        return headers;
+    }
   
     /**
      * Базовый метод для GET запросов
