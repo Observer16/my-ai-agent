@@ -1,63 +1,14 @@
-/**
- * API клиент для системы семейного бюджета
- * Версия: 4.1.0 - Исправлена интеграция с реальным бэкендом
- */
+// API клиент для системы семейного бюджета - УПРОЩЕННАЯ ВЕРСИЯ
+// Версия: 4.1.1 - Возврат к работающему подходу
 
 class APIClient {
     constructor() {
-        // Базовый URL API из CONFIG
         this.baseURL = window.CONFIG ? window.CONFIG.API_URL : 'https://c053e0b76144.ngrok-free.app';
-        
-        // Telegram User ID из Telegram Web App
         this.telegramUserId = null;
+        this.cache = new Map();
 
-        this.ngrokVerified = false;
-        
-        // Инициализация Telegram Web App
         this.initTelegram();
-
-        this.verifyNgrokAccess();
     }
-
-        /**
-     * Проверка доступа к NGROK
-     */
-    async verifyNgrokAccess() {
-        try {
-            const response = await fetch(this.baseURL + '/health', {
-                method: 'GET',
-                mode: 'no-cors'
-            });
-            this.ngrokVerified = true;
-        } catch (error) {
-            console.warn('⚠️ NGROK доступ требует подтверждения');
-            this.showNgrokWarning();
-        }
-    }
-
-    /**
-     * Показать предупреждение о NGROK
-     */
-    showNgrokWarning() {
-        if (confirm('Для работы приложения требуется доступ к NGROK. Нажмите OK чтобы продолжить.')) {
-            window.open(this.baseURL + '/health', '_blank');
-            this.ngrokVerified = true;
-        }
-    }
-
-    /**
-     * Обёртка для всех запросов с проверкой NGROK
-     */
-    async makeRequest(method, endpoint, data = null) {
-        if (!this.ngrokVerified) {
-            await this.verifyNgrokAccess();
-        }
-        
-        // Оригинальная логика запросов...
-        return this[method.toLowerCase()](endpoint, data);
-    }
-}
-
 
     /**
      * Инициализация Telegram Web App
@@ -66,67 +17,42 @@ class APIClient {
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.ready();
-            
-            // Получаем данные пользователя
+
             if (tg.initDataUnsafe?.user) {
                 this.telegramUserId = tg.initDataUnsafe.user.id;
                 console.log('✅ Telegram User ID:', this.telegramUserId);
-            } else {
-                console.warn('⚠️ Telegram User ID не найден');
             }
-        } else {
-            console.warn('⚠️ Telegram WebApp не обнаружен');
         }
     }
 
     /**
-     * Получение заголовков для запросов
+     * GET запрос с кэшированием (как в рабочем коде)
      */
-    getHeaders(includeContentType = true) {
-        const headers = {};
-        
-        if (includeContentType) {
-            headers['Content-Type'] = 'application/json';
+    async get(endpoint, params = {}, useCache = true) {
+        const url = this.buildURL(endpoint, params);
+        const cacheKey = url;
+
+        // Проверить кэш
+        if (useCache && this.cache.has(cacheKey)) {
+            const cached = this.cache.get(cacheKey);
+            if (Date.now() - cached.timestamp < (5 * 60 * 1000)) { // 5 минут
+                return cached.data;
+            }
         }
 
-        // Добавляем Telegram User ID если есть
-        if (this.telegramUserId) {
-            headers['X-Telegram-User-Id'] = this.telegramUserId;
-        }
-        
-        return headers;
-    }
-  
-    /**
-     * Базовый метод для GET запросов
-     */
-    async get(endpoint, includeAuth = true) {
         try {
-            const headers = includeAuth ? this.getHeaders(false) : {};
-            
-            const fullUrl = `${this.baseURL}${endpoint}`;
-            console.log(`🌐 GET ${fullUrl}`);
-            
-            const response = await fetch(fullUrl, {
-                method: 'GET',
-                headers: headers
-            });
+            const response = await this.fetchWithRetry(url, { method: 'GET' });
+            const data = await response.json();
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка запроса';
-                
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-                
-                throw new Error(errorDetail);
+            // Сохранить в кэш
+            if (useCache) {
+                this.cache.set(cacheKey, {
+                    data: data,
+                    timestamp: Date.now()
+                });
             }
 
-            return await response.json();
+            return data;
         } catch (error) {
             console.error(`GET ${endpoint} error:`, error);
             throw error;
@@ -134,32 +60,19 @@ class APIClient {
     }
 
     /**
-     * Базовый метод для POST запросов
+     * POST запрос (упрощенный)
      */
     async post(endpoint, data = {}) {
+        const url = this.baseURL + endpoint;
+
         try {
-            const fullUrl = `${this.baseURL}${endpoint}`;
-            console.log(`🌐 POST ${fullUrl}`, data);
-            
-            const response = await fetch(fullUrl, {
+            const response = await this.fetchWithRetry(url, {
                 method: 'POST',
-                headers: this.getHeaders(),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка запроса';
-                
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-                
-                throw new Error(errorDetail);
-            }
 
             return await response.json();
         } catch (error) {
@@ -169,32 +82,19 @@ class APIClient {
     }
 
     /**
-     * Базовый метод для PUT запросов
+     * PUT запрос
      */
     async put(endpoint, data = {}) {
+        const url = this.baseURL + endpoint;
+
         try {
-            const fullUrl = `${this.baseURL}${endpoint}`;
-            console.log(`🌐 PUT ${fullUrl}`, data);
-            
-            const response = await fetch(fullUrl, {
+            const response = await this.fetchWithRetry(url, {
                 method: 'PUT',
-                headers: this.getHeaders(),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка запроса';
-                
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-                
-                throw new Error(errorDetail);
-            }
 
             return await response.json();
         } catch (error) {
@@ -204,31 +104,15 @@ class APIClient {
     }
 
     /**
-     * Базовый метод для DELETE запросов
+     * DELETE запрос
      */
     async delete(endpoint) {
-        try {
-            const fullUrl = `${this.baseURL}${endpoint}`;
-            console.log(`🌐 DELETE ${fullUrl}`);
-            
-            const response = await fetch(fullUrl, {
-                method: 'DELETE',
-                headers: this.getHeaders(false)
-            });
+        const url = this.baseURL + endpoint;
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка запроса';
-                
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-                
-                throw new Error(errorDetail);
-            }
+        try {
+            const response = await this.fetchWithRetry(url, {
+                method: 'DELETE'
+            });
 
             return await response.json();
         } catch (error) {
@@ -237,82 +121,139 @@ class APIClient {
         }
     }
 
-    // ============================================================================
-    // БАЗОВЫЕ ENDPOINTS
-    // ============================================================================
-
     /**
-     * Проверка здоровья API
+     * Fetch с retry логикой (из рабочего кода)
      */
-    async health() {
-        return this.get('/health', false);
+    async fetchWithRetry(url, options = {}, attempt = 1) {
+        const maxAttempts = 3;
+
+        try {
+            return await this.fetchWithTimeout(url, options);
+        } catch (error) {
+            if (attempt < maxAttempts && !error.message.includes('401')) {
+                console.log(`🔄 Повтор ${attempt}/${maxAttempts}:`, url);
+                await this.delay(1000 * attempt);
+                return this.fetchWithRetry(url, options, attempt + 1);
+            }
+            throw error;
+        }
     }
 
     /**
-     * Получить общую статистику
+     * Fetch с таймаутом (из рабочего кода)
      */
+    async fetchWithTimeout(url, options = {}) {
+        const timeout = 10000; // 10 секунд
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            // Базовые опции - ВАЖНО: не добавляем лишние заголовки
+            const fetchOptions = {
+                signal: controller.signal,
+                // НЕ добавляем mode: 'cors' явно - пусть браузер сам решает
+                // НЕ добавляем лишние заголовки кроме Content-Type для POST/PUT
+            };
+
+            // Копируем метод
+            if (options.method) {
+                fetchOptions.method = options.method;
+            }
+
+            // Копируем body и headers
+            if (options.body) {
+                fetchOptions.body = options.body;
+            }
+            if (options.headers) {
+                fetchOptions.headers = options.headers;
+            }
+
+            // Добавляем Telegram User ID если есть
+            if (this.telegramUserId && !fetchOptions.headers?.['X-Telegram-User-Id']) {
+                if (!fetchOptions.headers) fetchOptions.headers = {};
+                fetchOptions.headers['X-Telegram-User-Id'] = this.telegramUserId;
+            }
+
+            const response = await fetch(url, fetchOptions);
+            clearTimeout(id);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorDetail = 'Ошибка запроса';
+
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorDetail = errorJson.detail || errorDetail;
+                } catch (e) {
+                    errorDetail = errorText || `HTTP ${response.status}`;
+                }
+
+                throw new Error(errorDetail);
+            }
+
+            return response;
+        } catch (error) {
+            clearTimeout(id);
+            if (error.name === 'AbortError') {
+                throw new Error('Превышен таймаут запроса');
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Построить URL с параметрами (из рабочего кода)
+     */
+    buildURL(endpoint, params = {}) {
+        const url = new URL(this.baseURL + endpoint);
+        Object.keys(params).forEach(key => {
+            if (params[key] !== undefined && params[key] !== null) {
+                url.searchParams.append(key, params[key]);
+            }
+        });
+        return url.toString();
+    }
+
+    /**
+     * Задержка
+     */
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // ============================================================================
+    // ОСНОВНЫЕ ENDPOINTS (упрощенные)
+    // ============================================================================
+
+    async health() {
+        return this.get('/health', {}, false);
+    }
+
     async getStatistics() {
         return this.get('/statistics');
     }
 
-    /**
-     * Получить месячную статистику
-     */
     async getMonthlyStatistics(year = null, month = null) {
-        let endpoint = '/statistics/monthly';
-        const params = new URLSearchParams();
-        
-        if (year) params.append('year', year);
-        if (month) params.append('month', month);
-        
-        const query = params.toString();
-        if (query) endpoint += `?${query}`;
-        
-        return this.get(endpoint);
+        const params = {};
+        if (year) params.year = year;
+        if (month) params.month = month;
+        return this.get('/statistics/monthly', params);
     }
 
-    // ============================================================================
-    // ПРОДУКТЫ
-    // ============================================================================
-
-    /**
-     * Получить список продуктов
-     * ✅ Параметры в правильном порядке согласно бэкенду
-     */
     async getProducts(category_id = null, search = null, limit = 100) {
-        let endpoint = '/products';
-        const params = new URLSearchParams();
-        
-        if (category_id) params.append('category_id', category_id);
-        if (search) params.append('search', search);
-        if (limit) params.append('limit', limit);
-        
-        const query = params.toString();
-        if (query) endpoint += `?${query}`;
-        
-        return this.get(endpoint);
+        const params = { limit };
+        if (category_id) params.category_id = category_id;
+        if (search) params.search = search;
+        return this.get('/products', params);
     }
 
-    /**
-     * Получить информацию о продукте
-     */
     async getProduct(productId) {
         return this.get(`/products/${productId}`);
     }
 
-    /**
-     * Создать продукт
-     * ✅ Поддержка двух форматов: объект ИЛИ параметры
-     */
-    async createProduct(nameOrData, categoryId = null, brand = null, unit = 'unidad', barcode = null) {
-        // Если первый параметр - объект, используем его
-        if (typeof nameOrData === 'object') {
-            return this.post('/products/create', nameOrData);
-        }
-        
-        // Иначе создаём объект из параметров
+    async createProduct(name, categoryId = null, brand = null, unit = 'unidad', barcode = null) {
         return this.post('/products/create', {
-            name: nameOrData,
+            name: name,
             category_id: categoryId,
             brand: brand,
             unit: unit,
@@ -320,116 +261,37 @@ class APIClient {
         });
     }
 
-    /**
-     * ✅ НОВОЕ: Получить продукт по штрих-коду
-     */
     async getProductByBarcode(barcode) {
         return this.get(`/products/by-code/${encodeURIComponent(barcode)}`);
     }
 
-    /**
-     * Поиск продукта
-     */
-    async searchProduct(query) {
-        return this.get(`/products/search?name=${encodeURIComponent(query)}`);
-    }
-
-    /**
-     * Обновить категорию продукта
-     */
-    async updateProductCategory(productId, categoryId) {
-        return this.put('/products/category', {
-            product_id: productId,
-            category_id: categoryId
-        });
-    }
-
-    /**
-     * ✅ НОВОЕ: Обновить штрих-код продукта
-     * Бэкенд ожидает Query параметры, а не Body
-     */
-    async updateProductBarcode(productId, barcode) {
-        return this.put(`/products/barcode?product_id=${encodeURIComponent(productId)}&barcode=${encodeURIComponent(barcode)}`);
-    }
-
-    // ============================================================================
-    // МАГАЗИНЫ
-    // ============================================================================
-
-    /**
-     * Получить список магазинов
-     */
     async getStores() {
         return this.get('/stores');
     }
 
-    /**
-     * Создать магазин
-     * ✅ Поддержка двух форматов: объект ИЛИ параметры
-     */
-    async createStore(nameOrData, storeType = 'Магазин') {
-        // Если первый параметр - объект, используем его
-        if (typeof nameOrData === 'object') {
-            return this.post('/stores', nameOrData);
-        }
-        
-        // Иначе создаём объект из параметров
+    async createStore(name, storeType = 'Магазин') {
         return this.post('/stores', {
-            name: nameOrData,
+            name: name,
             store_type: storeType
         });
     }
 
-    // ============================================================================
-    // КАТЕГОРИИ
-    // ============================================================================
-
-    /**
-     * Получить список категорий
-     */
     async getCategories() {
         return this.get('/categories');
     }
 
-    /**
-     * Создать категорию
-     * ✅ Поддержка двух форматов: объект ИЛИ параметры
-     */
-    async createCategory(nameOrData, description = null, parentId = null) {
-        // Если первый параметр - объект, используем его
-        if (typeof nameOrData === 'object') {
-            return this.post('/categories', nameOrData);
-        }
-        
-        // Иначе создаём объект из параметров
+    async createCategory(name, description = null, parentId = null) {
         return this.post('/categories', {
-            name: nameOrData,
+            name: name,
             description: description,
             parent_id: parentId
         });
     }
 
-    /**
-     * Удалить категорию
-     */
-    async deleteCategory(categoryId) {
-        return this.delete(`/categories/${categoryId}`);
-    }
-
-    // ============================================================================
-    // ПОКУПКИ
-    // ============================================================================
-
-    /**
-     * Получить последние покупки
-     */
     async getRecentPurchases(limit = 20) {
-        return this.get(`/purchases/recent?limit=${limit}`);
+        return this.get('/purchases/recent', { limit });
     }
 
-    /**
-     * ✅ НОВОЕ: Создать расход (новое название метода)
-     */
     async createExpense(storeId, productId, quantity, unitPrice, purchaseDate = null) {
         return this.post('/expenses/manual', {
             store_id: storeId,
@@ -440,198 +302,23 @@ class APIClient {
         });
     }
 
-    /**
-     * Создать покупку вручную (старое название для обратной совместимости)
-     */
-    async createManualExpense(expenseData) {
-        return this.post('/expenses/manual', expenseData);
-    }
-
-    // ============================================================================
-    // АНАЛИЗ ЦЕН
-    // ============================================================================
-
-    /**
-     * Получить тренды цен
-     * ✅ Исправлено: параметр product_pattern вместо search
-     */
     async getPriceTrends(days = 30, search = null, limit = 20) {
-        let endpoint = `/prices/trends?days=${days}&limit=${limit}`;
-        if (search) {
-            endpoint += `&product_pattern=${encodeURIComponent(search)}`;
-        }
-        return this.get(endpoint);
+        const params = { days, limit };
+        if (search) params.product_pattern = search;
+        return this.get('/prices/trends', params);
     }
 
-    /**
-     * Сравнить цены по магазинам
-     */
     async comparePrices(productName = null, limit = 10) {
-        let endpoint = `/prices/compare?limit=${limit}`;
-        if (productName) {
-            endpoint += `&search=${encodeURIComponent(productName)}`;
-        }
-        return this.get(endpoint);
+        const params = { limit };
+        if (productName) params.search = productName;
+        return this.get('/prices/compare', params);
     }
 
-    // ============================================================================
-    // ЗАГРУЗКА ФАЙЛОВ
-    // ============================================================================
-
-    /**
-     * Загрузить XML файл
-     */
-    async uploadXML(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch(`${this.baseURL}/upload/xml`, {
-                method: 'POST',
-                headers: {
-                    'X-Telegram-User-Id': this.telegramUserId
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка загрузки';
-                
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-                
-                throw new Error(errorDetail);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Upload XML error:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Загрузить несколько XML файлов
-     */
-    async uploadMultipleXML(files) {
-        const formData = new FormData();
-        
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
-
-        try {
-            const response = await fetch(`${this.baseURL}/upload/xml/batch`, {
-                method: 'POST',
-                headers: {
-                    'X-Telegram-User-Id': this.telegramUserId
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка загрузки';
-                
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-                
-                throw new Error(errorDetail);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Upload multiple XML error:', error);
-            throw error;
-        }
-    }
-
-    // ============================================================================
-    // СЕМЕЙНАЯ СИСТЕМА
-    // ============================================================================
-
-    /**
-     * Получить информацию о текущей семье
-     */
     async getFamilyInfo() {
         return this.get('/family/info');
     }
 
-    /**
-     * Создать семью
-     */
-    async createFamily(name = 'Моя семья') {
-        return this.post('/family/create', { name });
-    }
-
-    /**
-     * Получить список участников семьи
-     */
-    async getFamilyMembers() {
-        return this.get('/family/members');
-    }
-
-    /**
-     * Пригласить пользователя в семью
-     */
-    async inviteToFamily(telegramId, message = null) {
-        return this.post('/family/invite', {
-            telegram_id: telegramId,
-            message: message
-        });
-    }
-
-    /**
-     * Получить входящие приглашения
-     */
-    async getPendingInvites() {
-        return this.get('/family/invites/pending');
-    }
-
-    /**
-     * Принять приглашение
-     */
-    async acceptInvite(inviteToken) {
-        return this.post(`/family/invites/${inviteToken}/accept`, {});
-    }
-
-    /**
-     * Отклонить приглашение
-     */
-    async declineInvite(inviteToken) {
-        return this.post(`/family/invites/${inviteToken}/decline`, {});
-    }
-
-    /**
-     * Выйти из семьи
-     */
-    async leaveFamily() {
-        return this.post('/family/leave', {});
-    }
-
-    /**
-     * Исключить участника из семьи
-     */
-    async removeFamilyMember(telegramId) {
-        return this.delete(`/family/members/${telegramId}`);
-    }
-
-    // ============================================================================
-    // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-    // ============================================================================
-
-    /**
-     * Форматирование суммы в валюту
-     */
+    // Вспомогательные методы
     formatCurrency(amount, currency = 'PYG') {
         return new Intl.NumberFormat('es-PY', {
             style: 'currency',
@@ -640,9 +327,6 @@ class APIClient {
         }).format(amount);
     }
 
-    /**
-     * Форматирование даты
-     */
     formatDate(dateString) {
         const date = new Date(dateString);
         return new Intl.DateTimeFormat('es-PY', {
@@ -652,30 +336,6 @@ class APIClient {
         }).format(date);
     }
 
-    /**
-     * Форматирование даты и времени
-     */
-    formatDateTime(dateString) {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('es-PY', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
-    }
-
-    /**
-     * Получить Telegram User ID
-     */
-    getTelegramUserId() {
-        return this.telegramUserId;
-    }
-
-    /**
-     * Проверка авторизации
-     */
     isAuthenticated() {
         return this.telegramUserId !== null;
     }
@@ -684,15 +344,10 @@ class APIClient {
 // Создаём глобальный экземпляр API
 const API = new APIClient();
 
-// Экспортируем для использования в модулях
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = API;
-}
-
 // Делаем API глобально доступным
 window.API = API;
 
-console.log('✅ API клиент инициализирован v4.1.0', {
+console.log('✅ API клиент инициализирован v4.1.1', {
     baseURL: API.baseURL,
     telegramUserId: API.telegramUserId
 });
