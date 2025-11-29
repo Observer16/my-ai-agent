@@ -376,9 +376,6 @@
         <div id="categories-list"></div>
     </div>
     
-    <!-- FAB кнопка -->
-    <div class="fab" onclick="showCreateCategoryModal()">+</div>
-    
     <!-- Модальное окно создания категории -->
     <div class="modal" id="create-category-modal">
         <div class="modal-content">
@@ -471,7 +468,7 @@
         async function loadProducts(categoryId = null, search = null) {
             showLoading('products-list');
             try {
-                allProducts = await API.getProducts(categoryId, search, 200);
+                allProducts = await API.getProducts(categoryId, search, 50);
                 renderProducts(allProducts);
             } catch (error) {
                 showError('products-list', error.message);
