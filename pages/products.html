@@ -328,6 +328,34 @@
             opacity: 0.7;
             margin-top: 4px;
         }
+
+        /* Кнопки создания внизу */
+        .create-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 99;
+        }
+        .create-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);
+        }
+        .create-btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -376,6 +404,12 @@
         <div id="categories-list"></div>
     </div>
     
+    <!-- Кнопки создания внизу -->
+    <div class="create-buttons">
+        <button class="create-btn" onclick="showCreateProductModal()">📦 Создать товар</button>
+        <button class="create-btn" onclick="showCreateCategoryModal()">📂 Создать категорию</button>
+    </div>
+    
     <!-- Модальное окно создания категории -->
     <div class="modal" id="create-category-modal">
         <div class="modal-content">
@@ -401,6 +435,52 @@
                     Отмена
                 </button>
                 <button class="modal-btn primary" onclick="createCategory()">
+                    Создать
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно создания товара -->
+    <div class="modal" id="create-product-modal">
+        <div class="modal-content">
+            <div class="modal-header">Новый товар</div>
+            <div class="form-group">
+                <label class="form-label">Название *</label>
+                <input type="text" class="form-input" id="new-product-name" 
+                       placeholder="Например: Яблоки">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Бренд</label>
+                <input type="text" class="form-input" id="new-product-brand" 
+                       placeholder="Бренд (опционально)">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Категория</label>
+                <select class="form-select" id="new-product-category">
+                    <option value="">Без категории</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Единица измерения</label>
+                <select class="form-select" id="new-product-unit">
+                    <option value="unidad">Штука</option>
+                    <option value="kg">Килограмм</option>
+                    <option value="g">Грамм</option>
+                    <option value="l">Литр</option>
+                    <option value="ml">Миллилитр</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Штрих-код</label>
+                <input type="text" class="form-input" id="new-product-barcode" 
+                       placeholder="Штрих-код (опционально)" inputmode="numeric">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal('create-product-modal')">
+                    Отмена
+                </button>
+                <button class="modal-btn primary" onclick="createProduct()">
                     Создать
                 </button>
             </div>
@@ -443,12 +523,34 @@
         // Инициализация
         async function init() {
             try {
+                await loadStatistics();
                 await loadCategories();
                 await loadProducts();
-                updateStats();
                 tg.HapticFeedback.notificationOccurred('success');
             } catch (error) {
                 console.error('Init error:', error);
+            }
+        }
+        
+        // Загрузка статистики из ручки /statistics
+        async function loadStatistics() {
+            try {
+                const stats = await API.getStatistics();
+                
+                // Обновляем статистику в интерфейсе
+                document.getElementById('total-products').textContent = stats.unique_products || 0;
+                document.getElementById('total-categories').textContent = '-'; // Будет обновлено после загрузки категорий
+                
+                // Для uncategorized нужно посчитать отдельно
+                const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
+                document.getElementById('uncategorized').textContent = uncategorizedCount;
+                
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+                // В случае ошибки показываем прочерки
+                document.getElementById('total-products').textContent = '-';
+                document.getElementById('total-categories').textContent = '-';
+                document.getElementById('uncategorized').textContent = '-';
             }
         }
         
@@ -459,6 +561,10 @@
                 renderCategoryFilters();
                 renderCategoriesList();
                 populateCategorySelects();
+                
+                // Обновляем статистику категорий
+                document.getElementById('total-categories').textContent = allCategories.length;
+                
             } catch (error) {
                 console.error('Ошибка загрузки категорий:', error);
             }
@@ -470,6 +576,11 @@
             try {
                 allProducts = await API.getProducts(categoryId, search, 50);
                 renderProducts(allProducts);
+                
+                // Обновляем статистику uncategorized
+                const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
+                document.getElementById('uncategorized').textContent = uncategorizedCount;
+                
             } catch (error) {
                 showError('products-list', error.message);
             }
@@ -489,7 +600,7 @@
                 ${mainCategories.map(cat => `
                     <div class="category-chip ${currentCategoryFilter === cat.id ? 'active' : ''}" 
                          onclick="filterByCategory(${cat.id})">
-                        ${cat.name} (${cat.products_count})
+                        ${cat.name} (${cat.products_count || 0})
                     </div>
                 `).join('')}
             `;
@@ -556,7 +667,7 @@
                             ${cat.name}
                             ${cat.parent_name ? `<div style="font-size:11px;opacity:0.6;margin-top:2px;">↳ ${cat.parent_name}</div>` : ''}
                         </div>
-                        <div class="category-count">${cat.products_count}</div>
+                        <div class="category-count">${cat.products_count || 0}</div>
                     </div>
                     ${cat.description ? `
                         <div class="category-description">${cat.description}</div>
@@ -565,7 +676,7 @@
                         <button class="category-btn edit" onclick="filterByCategory(${cat.id}); switchTab('products')">
                             👁️ Товары
                         </button>
-                        ${cat.products_count === 0 ? `
+                        ${(cat.products_count || 0) === 0 ? `
                             <button class="category-btn delete" onclick="deleteCategory(${cat.id}, '${cat.name}')">
                                 🗑️ Удалить
                             </button>
@@ -585,6 +696,15 @@
             const parentSelect = document.getElementById('new-category-parent');
             parentSelect.innerHTML = '<option value="">Нет (основная категория)</option>' +
                 mainCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            
+            // Для создания товара
+            const productCategorySelect = document.getElementById('new-product-category');
+            productCategorySelect.innerHTML = '<option value="">Без категории</option>' +
+                allCategories.map(cat => `
+                    <option value="${cat.id}">
+                        ${cat.parent_name ? '  ↳ ' : ''}${cat.name}
+                    </option>
+                `).join('');
             
             // Для редактирования товара
             const editSelect = document.getElementById('edit-product-category');
@@ -622,6 +742,17 @@
             tg.HapticFeedback.impactOccurred('medium');
         }
         
+        // Показать модальное окно создания товара
+        function showCreateProductModal() {
+            document.getElementById('new-product-name').value = '';
+            document.getElementById('new-product-brand').value = '';
+            document.getElementById('new-product-category').value = '';
+            document.getElementById('new-product-unit').value = 'unidad';
+            document.getElementById('new-product-barcode').value = '';
+            openModal('create-product-modal');
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+        
         // Создать категорию
         async function createCategory() {
             const name = document.getElementById('new-category-name').value.trim();
@@ -650,6 +781,45 @@
                 tg.HapticFeedback.notificationOccurred('success');
             } catch (error) {
                 tg.showAlert('Ошибка создания категории: ' + error.message);
+            }
+        }
+        
+        // Создать товар
+        async function createProduct() {
+            const name = document.getElementById('new-product-name').value.trim();
+            
+            if (!name) {
+                tg.showAlert('Введите название товара');
+                return;
+            }
+            
+            try {
+                const brand = document.getElementById('new-product-brand').value.trim() || null;
+                const categoryId = document.getElementById('new-product-category').value || null;
+                const unit = document.getElementById('new-product-unit').value;
+                const barcode = document.getElementById('new-product-barcode').value.trim() || null;
+                
+                const result = await API.createProduct({
+                    name: name,
+                    brand: brand,
+                    category_id: categoryId ? parseInt(categoryId) : null,
+                    unit: unit,
+                    barcode: barcode
+                });
+                
+                closeModal('create-product-modal');
+                await loadProducts();
+                switchTab('products');
+                
+                tg.showPopup({
+                    title: 'Успех',
+                    message: `Товар "${name}" создан`,
+                    buttons: [{type: 'ok'}]
+                });
+                
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
+                tg.showAlert('Ошибка создания товара: ' + error.message);
             }
         }
         
@@ -719,17 +889,6 @@
             tg.HapticFeedback.impactOccurred('light');
         }
         
-        // Обновить статистику
-        function updateStats() {
-            const total = allProducts.length;
-            const categories = allCategories.length;
-            const uncategorized = allProducts.filter(p => !p.category_id).length;
-            
-            document.getElementById('total-products').textContent = total;
-            document.getElementById('total-categories').textContent = categories;
-            document.getElementById('uncategorized').textContent = uncategorized;
-        }
-        
         // Утилиты
         function formatDate(dateStr) {
             const date = new Date(dateStr);
@@ -761,13 +920,7 @@
         
         // Запуск
         init();
-        
-        // Main Button
-        tg.MainButton.setText('➕ Создать категорию');
-        tg.MainButton.show();
-        tg.MainButton.onClick(() => {
-            showCreateCategoryModal();
-        });
     </script>
 </body>
 </html>
+[file content end]
