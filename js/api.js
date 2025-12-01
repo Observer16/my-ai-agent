@@ -6,7 +6,7 @@
 class APIClient {
     constructor() {
         // Базовый URL API из CONFIG
-        this.baseURL = window.CONFIG ? window.CONFIG.API_URL : 'https://c053e0b76144.ngrok-free.app';
+        this.baseURL = window.CONFIG //? window.CONFIG.API_URL : 'https://c053e0b76144.ngrok-free.app';
 
         // Telegram User ID из Telegram Web App
         this.telegramUserId = null;
