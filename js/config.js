@@ -1,6 +1,6 @@
 /**
  * Конфигурация приложения
- * Версия: 4.0.1
+ * Версия: 4.1.2
  */
 
 const CONFIG = {
@@ -8,7 +8,7 @@ const CONFIG = {
     API_URL: 'https://dad337fead27.ngrok-free.app',
     
     // Версия приложения
-    VERSION: '4.0.0',
+    VERSION: '4.1.2',
     
     // Endpoints
     ENDPOINTS: {
