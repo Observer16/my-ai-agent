@@ -1,0 +1,269 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, sans-serif;
+    background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #000);
+    padding-bottom: 70px;
+}
+.header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+}
+.header h1 { font-size: 20px; margin-bottom: 5px; }
+.header p { font-size: 13px; opacity: 0.9; }
+
+/* Баннер месячных расходов */
+.monthly-banner {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 20px;
+    margin: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.monthly-banner:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.monthly-banner-header {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.monthly-banner-arrow {
+    font-size: 20px;
+}
+
+.monthly-banner-amount {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.monthly-banner-details {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    opacity: 0.9;
+    flex-wrap: wrap;
+}
+
+.tabs {
+    display: flex;
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 5px;
+    gap: 5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.tab.active {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+}
+
+.content { display: none; padding: 15px; }
+.content.active { display: block; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.stat {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+}
+.stat .value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--tg-theme-button-color, #3390ec);
+}
+.stat .label {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.search {
+    margin-bottom: 15px;
+}
+.search input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+    border-radius: 10px;
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    color: var(--tg-theme-text-color, #000);
+    font-size: 14px;
+}
+
+.filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    overflow-x: auto;
+}
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+}
+.filter-btn.active {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+}
+
+/* Стили для карточки чека */
+.receipt-card {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--tg-theme-button-color, #3390ec);
+}
+.receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+.receipt-store {
+    font-weight: 600;
+    font-size: 15px;
+}
+.receipt-store-type {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 2px;
+}
+.receipt-amount {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--tg-theme-button-color, #3390ec);
+}
+.receipt-info {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    opacity: 0.7;
+    flex-wrap: wrap;
+}
+.receipt-info span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.card.up { border-left: 3px solid #ef4444; }
+.card.down { border-left: 3px solid #10b981; }
+.card.new { border-left: 3px solid #3b82f6; }
+
+.product-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.store {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 8px;
+}
+.prices {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    align-items: center;
+}
+.price-current {
+    font-weight: 700;
+    font-size: 16px;
+}
+.price-old {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+.price-change {
+    font-weight: 600;
+}
+.price-change.up { color: #ef4444; }
+.price-change.down { color: #10b981; }
+
+.comparison-card {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+.comparison-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.store-price {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    margin-bottom: 5px;
+    background: var(--tg-theme-bg-color, #fff);
+    border-radius: 8px;
+    font-size: 13px;
+}
+.store-price.best {
+    border: 2px solid #10b981;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px 20px;
+    opacity: 0.5;
+}
+.error {
+    background: #fee;
+    color: #c00;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 10px 0;
+}
+.empty {
+    text-align: center;
+    padding: 40px 20px;
+    opacity: 0.5;
+}
