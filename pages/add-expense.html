@@ -798,61 +798,60 @@ try {
 
 // Функция для создания товара
 function showCreateProduct(e) {
-if (e) e.preventDefault();
+    if (e) e.preventDefault();
 
-// Создаём модальное окно для названия товара
-const modalHtml = `
-    <div id="create-product-name-modal" class="simple-modal">
-        <div class="simple-modal-content">
-            <h3>Новый товар</h3>
-            <input type="text" id="new-product-name-input"
-                   placeholder="Название товара"
-                   style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:15px;">
-            <div class="simple-modal-buttons">
-                <button onclick="createProductFromModal()">Создать</button>
-                <button onclick="closeSimpleModal('create-product-name-modal')" class="secondary">Отмена</button>
+    const modalHtml = `
+        <div id="create-product-name-modal" class="simple-modal">
+            <div class="simple-modal-content">
+                <h3>Новый товар</h3>
+                <input type="text" id="new-product-name-input"
+                       placeholder="Название товара"
+                       class="simple-modal-input">
+                <div class="simple-modal-buttons">
+                    <button onclick="createProductFromModal()">Создать</button>
+                    <button onclick="closeSimpleModal('create-product-name-modal')" class="secondary">Отмена</button>
+                </div>
             </div>
         </div>
-    </div>
-`;
+    `;
 
-document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-// Фокус на поле ввода
-setTimeout(() => {
-    const input = document.getElementById('new-product-name-input');
-    if (input) input.focus();
-}, 100);
+    // Фокус на поле ввода
+    setTimeout(() => {
+        const input = document.getElementById('new-product-name-input');
+        if (input) input.focus();
+    }, 100);
 
-tg.HapticFeedback.impactOccurred('light');
+    tg.HapticFeedback.impactOccurred('light');
 }
 
 // Функция для создания товара с штрих-кодом
 function showCreateProductWithBarcode(barcode) {
-const modalHtml = `
-    <div id="create-product-barcode-modal" class="simple-modal">
-        <div class="simple-modal-content">
-            <h3>Новый товар</h3>
-            <p style="margin-bottom:10px;font-size:12px;">Штрих-код: <strong>${barcode}</strong></p>
-            <input type="text" id="new-product-barcode-input"
-                   placeholder="Название товара"
-                   style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:15px;">
-            <div class="simple-modal-buttons">
-                <button onclick="createProductWithBarcodeFromModal('${barcode}')">Создать</button>
-                <button onclick="closeSimpleModal('create-product-barcode-modal')" class="secondary">Отмена</button>
+    const modalHtml = `
+        <div id="create-product-barcode-modal" class="simple-modal">
+            <div class="simple-modal-content">
+                <h3>Новый товар</h3>
+                <p class="simple-modal-text">Штрих-код: <strong>${barcode}</strong></p>
+                <input type="text" id="new-product-barcode-input"
+                       placeholder="Название товара"
+                       class="simple-modal-input">
+                <div class="simple-modal-buttons">
+                    <button onclick="createProductWithBarcodeFromModal('${barcode}')">Создать</button>
+                    <button onclick="closeSimpleModal('create-product-barcode-modal')" class="secondary">Отмена</button>
+                </div>
             </div>
         </div>
-    </div>
-`;
+    `;
 
-document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-setTimeout(() => {
-    const input = document.getElementById('new-product-barcode-input');
-    if (input) input.focus();
-}, 100);
+    setTimeout(() => {
+        const input = document.getElementById('new-product-barcode-input');
+        if (input) input.focus();
+    }, 100);
 
-tg.HapticFeedback.impactOccurred('light');
+    tg.HapticFeedback.impactOccurred('light');
 }
 
 // Вспомогательные функции

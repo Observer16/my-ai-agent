@@ -464,3 +464,26 @@ body {
     font-weight: bold;
     color: var(--tg-theme-text-color, #000);
 }
+
+.simple-modal-input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+    border-radius: 10px;
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    color: var(--tg-theme-text-color, #000);
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.simple-modal-input:focus {
+    outline: none;
+    border-color: var(--tg-theme-button-color, #3390ec);
+}
+
+.simple-modal-text {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--tg-theme-text-color, #000);
+    opacity: 0.8;
+}
