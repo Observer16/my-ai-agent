@@ -695,79 +695,25 @@
 
 // Функция для создания магазина
 function showCreateStore(e) {
-if (e) e.preventDefault();
+    if (e) e.preventDefault();
 
-// Создаём простое модальное окно выбора типа
-const modalHtml = `
-    <div id="create-store-type-modal" class="simple-modal">
-        <div class="simple-modal-content">
-            <h3>Тип магазина</h3>
-            <p>Выберите тип:</p>
-            <div class="simple-modal-buttons">
-                <button onclick="selectStoreType('Супермаркет')">🛒 Супермаркет</button>
-                <button onclick="selectStoreType('Аптека')">💊 Аптека</button>
-                <button onclick="selectStoreType('Магазин')">🏪 Другой</button>
-                <button onclick="closeSimpleModal('create-store-type-modal')" class="secondary">Отмена</button>
+    const modalHtml = `
+        <div id="create-store-type-modal" class="simple-modal">
+            <div class="simple-modal-content">
+                <h3>Тип магазина</h3>
+                <p>Выберите тип:</p>
+                <div class="simple-modal-buttons">
+                    <button onclick="selectStoreType('Супермаркет')">🛒 Супермаркет</button>
+                    <button onclick="selectStoreType('Аптека')">💊 Аптека</button>
+                    <button onclick="selectStoreType('Магазин')">🏪 Другой</button>
+                    <button onclick="closeSimpleModal('create-store-type-modal')" class="secondary">Отмена</button>
+                </div>
             </div>
         </div>
-    </div>
-`;
+    `;
 
-// Стили для модального окна
-const style = document.createElement('style');
-style.textContent = `
-    .simple-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-    .simple-modal-content {
-        background: var(--tg-theme-bg-color, #ffffff);
-        border-radius: 12px;
-        padding: 20px;
-        width: 90%;
-        max-width: 300px;
-    }
-    .simple-modal-content h3 {
-        margin: 0 0 10px 0;
-        color: var(--tg-theme-text-color, #000000);
-    }
-    .simple-modal-content p {
-        margin: 0 0 20px 0;
-        color: var(--tg-theme-hint-color, #999999);
-        font-size: 14px;
-    }
-    .simple-modal-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .simple-modal-buttons button {
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        background: var(--tg-theme-button-color, #3390ec);
-        color: var(--tg-theme-button-text-color, #ffffff);
-    }
-    .simple-modal-buttons button.secondary {
-        background: transparent;
-        color: var(--tg-theme-text-color, #000000);
-        border: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
-    }
-`;
-
-document.head.appendChild(style);
-document.body.insertAdjacentHTML('beforeend', modalHtml);
-tg.HapticFeedback.impactOccurred('light');
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    tg.HapticFeedback.impactOccurred('light');
 }
 
 // Функция создания магазина
@@ -861,26 +807,53 @@ if (modal) modal.remove();
 }
 
 function selectStoreType(type) {
-closeSimpleModal('create-store-type-modal');
+    closeSimpleModal('create-store-type-modal');
 
-// Показываем промпт для названия
-setTimeout(() => {
-    const name = prompt(`Введите название магазина (${type.toLowerCase()}):`);
-    if (name && name.trim()) {
-        createStore(name.trim(), type);
+    const modalHtml = `
+        <div id="create-store-name-modal" class="simple-modal">
+            <div class="simple-modal-content">
+                <h3>Новый ${type.toLowerCase()}</h3>
+                <p>Введите название магазина:</p>
+                <input type="text" id="new-store-name-input"
+                       placeholder="Например: ${type} у дома"
+                       class="simple-modal-input">
+                <div class="simple-modal-buttons">
+                    <button onclick="createStoreFromModal('${type}')">Создать</button>
+                    <button onclick="closeSimpleModal('create-store-name-modal')" class="secondary">Отмена</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Фокус на поле ввода
+    setTimeout(() => {
+        const input = document.getElementById('new-store-name-input');
+        if (input) input.focus();
+    }, 100);
+}
+
+function createStoreFromModal(type) {
+    const input = document.getElementById('new-store-name-input');
+    if (input && input.value.trim()) {
+        const name = input.value.trim();
+        closeSimpleModal('create-store-name-modal');
+        createStore(name, type);
+    } else {
+        tg.showAlert('Введите название магазина');
     }
-}, 100);
 }
 
 function createProductFromModal() {
 const input = document.getElementById('new-product-name-input');
-if (input && input.value.trim()) {
+    if (input && input.value.trim()) {
     const name = input.value.trim();
     closeSimpleModal('create-product-name-modal');
     createProduct(name);
-} else {
-    tg.showAlert('Введите название товара');
-}
+    } else {
+        tg.showAlert('Введите название товара');
+    }
 }
 
 function createProductWithBarcodeFromModal(barcode) {
