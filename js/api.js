@@ -1,12 +1,23 @@
 /**
  * API клиент для системы семейного бюджета
- * Версия: 4.1.2 - Исправлена интеграция с реальным бэкендом
+ * Версия: 4.1.3 - Исправлена интеграция с реальным бэкендом
  */
 
 class APIClient {
     constructor() {
-        // Базовый URL API из CONFIG
-        this.baseURL = window.CONFIG //? window.CONFIG.API_URL : 'https://c053e0b76144.ngrok-free.app';
+        // 🔴 ВАЖНО: проверяем что config.js загружен
+        if (typeof window.CONFIG === 'undefined') {
+            throw new Error('CONFIG не загружен. Загрузите config.js перед api.js');
+        }
+
+        // 🔴 ВАЖНО: проверяем что API_URL существует
+        if (!window.CONFIG.API_URL) {
+            throw new Error('API_URL не настроен в config.js');
+        }
+
+        // ✅ Используем URL ТОЛЬКО из config.js
+        this.baseURL = window.CONFIG.API_URL;
+        console.log('✅ API URL из config.js:', this.baseURL);
 
         // Telegram User ID из Telegram Web App
         this.telegramUserId = null;
