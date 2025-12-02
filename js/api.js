@@ -419,14 +419,14 @@ class APIClient {
      * ✅ НОВОЕ: Создать расход (новое название метода)
      */
     async createExpense(storeId, productId, quantity, unitPrice, purchaseDate = null) {
-        return this.post('/expenses/manual', {
-            store_id: storeId,
-            product_id: productId,
-            quantity: quantity,
-            unit_price: unitPrice,
-            purchase_date: purchaseDate || new Date().toISOString()
-        });
-    }
+    return this.post('/expenses/manual', {
+        store_id: storeId,
+        product_id: productId,
+        quantity: quantity,
+        unit_price: unitPrice,
+        purchase_date: purchaseDate || new Date().toISOString()  // ISO 8601 с таймзоной
+    });
+}
 
     /**
      * Создать покупку вручную (старое название для обратной совместимости)

@@ -906,64 +906,87 @@ try {
 
     // ==================== СОХРАНЕНИЕ ====================
 
-    async function saveExpense() {
-        const storeId = document.getElementById('selected-store-id').value;
-        const productId = document.getElementById('selected-product-id').value;
-        const qty = parseFloat(document.getElementById('quantity').value);
-        const date = document.getElementById('purchase-date').value;
-        const newBc = document.getElementById('new-barcode').value;
+async function saveExpense() {
+    const storeId = document.getElementById('selected-store-id').value;
+    const productId = document.getElementById('selected-product-id').value;
+    const qty = parseFloat(document.getElementById('quantity').value);
+    const dateInput = document.getElementById('purchase-date').value;
+    const newBc = document.getElementById('new-barcode').value;
 
-        // Вычисляем цену за единицу
-        let unitPrice;
-        if (isWeightMode) {
-            const totalPrice = parseFloat(document.getElementById('total-price').value);
-            if (!totalPrice || totalPrice <= 0) {
-                tg.showAlert('Введите общую сумму');
-                return;
-            }
-            // Вычисляем цену за единицу для сохранения в БД
-            unitPrice = totalPrice / qty;
-        } else {
-            unitPrice = parseFloat(document.getElementById('unit-price').value);
-            if (!unitPrice || unitPrice <= 0) {
-                tg.showAlert('Введите цену');
-                return;
-            }
-        }
-
-        if (!storeId) { tg.showAlert('Выберите магазин'); return; }
-        if (!productId) { tg.showAlert('Выберите товар'); return; }
-        if (!qty || qty <= 0) {
-            tg.showAlert(isWeightMode ? 'Введите вес/объём' : 'Введите количество');
+    // Вычисляем цену за единицу
+    let unitPrice;
+    if (isWeightMode) {
+        const totalPrice = parseFloat(document.getElementById('total-price').value);
+        if (!totalPrice || totalPrice <= 0) {
+            tg.showAlert('Введите общую сумму');
             return;
         }
-
-        try {
-            tg.MainButton.showProgress();
-
-            // Обновляем штрих-код если нужно
-            if (!selectedProductHasBarcode && newBc?.trim()) {
-                try {
-                    await API.updateProductBarcode(productId, newBc.trim());
-                } catch(e) {
-                    console.warn('Не удалось обновить штрих-код:', e);
-                }
-            }
-
-            // Сохраняем расход с вычисленной ценой за единицу
-            await API.createExpense(storeId, productId, qty, unitPrice, date ? new Date(date).toISOString() : null);
-
-            tg.MainButton.hideProgress();
-            tg.showPopup({
-                title:'✅',
-                message:'Расход добавлен',
-                buttons:[{type:'ok'}]
-            }, () => window.location.href = '../index.html');
-        } catch (e) {
-            tg.MainButton.hideProgress();
-            tg.showAlert('Ошибка: '+e.message);
+        // Вычисляем цену за единицу для сохранения в БД
+        unitPrice = totalPrice / qty;
+    } else {
+        unitPrice = parseFloat(document.getElementById('unit-price').value);
+        if (!unitPrice || unitPrice <= 0) {
+            tg.showAlert('Введите цену');
+            return;
         }
     }
+
+    if (!storeId) { tg.showAlert('Выберите магазин'); return; }
+    if (!productId) { tg.showAlert('Выберите товар'); return; }
+    if (!qty || qty <= 0) {
+        tg.showAlert(isWeightMode ? 'Введите вес/объём' : 'Введите количество');
+        return;
+    }
+
+    try {
+        tg.MainButton.showProgress();
+
+        // Обновляем штрих-код если нужно
+        if (!selectedProductHasBarcode && newBc?.trim()) {
+            try {
+                await API.updateProductBarcode(productId, newBc.trim());
+            } catch(e) {
+                console.warn('Не удалось обновить штрих-код:', e);
+            }
+        }
+
+        // ✅ ПРАВИЛЬНАЯ ОБРАБОТКА ДАТЫ С ТАЙМЗОНОЙ
+        let purchaseDate = null;
+
+        if (dateInput) {
+            // Создаём дату в локальной таймзоне пользователя
+            // dateInput.value формата "2025-12-02"
+            const localDate = new Date(dateInput + 'T00:00:00');
+
+            // Получаем смещение таймзоны в минутах
+            const timezoneOffset = -localDate.getTimezoneOffset();
+            const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
+            const offsetMins = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
+            const sign = timezoneOffset >= 0 ? '+' : '-';
+
+            // Формируем ISO 8601 с локальной таймзоной
+            // Например: "2025-12-02T00:00:00-03:00"
+            purchaseDate = `${dateInput}T00:00:00${sign}${offsetHours}:${offsetMins}`;
+
+            console.log('📅 Дата для отправки:', purchaseDate);
+        }
+
+        // Сохраняем расход с вычисленной ценой за единицу
+        await API.createExpense(storeId, productId, qty, unitPrice, purchaseDate);
+
+        tg.MainButton.hideProgress();
+        tg.showPopup({
+            title:'✅',
+            message:'Расход добавлен',
+            buttons:[{type:'ok'}]
+        }, () => window.location.href = '../index.html');
+
+    } catch (e) {
+        tg.MainButton.hideProgress();
+        console.error('❌ Ошибка сохранения расхода:', e);
+        tg.showAlert('Ошибка: '+e.message);
+    }
+}
 
     // Запуск
     init();
