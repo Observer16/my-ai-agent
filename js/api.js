@@ -667,9 +667,6 @@ class APIClient {
     isAuthenticated() {
         return this.telegramUserId !== null;
     }
-
-    updateUserInfo,
-    getCurrentUserInfo
 }
 
 // Создаём глобальный экземпляр API
