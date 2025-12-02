@@ -320,3 +320,239 @@ body {
     text-align: center;
     font-size: 13px;
 }
+
+/* Кнопки */
+.btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.btn-danger {
+    background: #fc8181;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #f56565;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+/* Карточка предупреждения */
+.warning-card {
+    background: #fffaf0;
+    border: 1px solid #fed7d7;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.warning-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.warning-text {
+    flex: 1;
+    font-size: 14px;
+    color: #744210;
+}
+
+/* Список действий */
+.actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.action-item {
+    padding: 16px;
+    background: #f7fafc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.action-item:hover {
+    background: #edf2f7;
+    transform: translateX(4px);
+}
+
+.action-icon {
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.action-content {
+    flex: 1;
+}
+
+.action-content h3 {
+    font-size: 16px;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+
+.action-content p {
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.4;
+}
+
+/* Список информации */
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.info-icon {
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    background: #bee3f8;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-text {
+    flex: 1;
+}
+
+.info-text strong {
+    display: block;
+    color: #2d3748;
+    margin-bottom: 4px;
+    font-size: 15px;
+}
+
+.info-text p {
+    color: #718096;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Кнопка с плавающим действием */
+.floating-action-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.floating-action-btn button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #4299e1;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+    transition: all 0.2s ease;
+}
+
+.floating-action-btn button:hover {
+    background: #3182ce;
+    transform: scale(1.1);
+}
+
+/* Ошибка */
+.error-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-icon {
+    font-size: 48px;
+    color: #fc8181;
+    margin-bottom: 20px;
+}
+
+.error-container h3 {
+    color: #2d3748;
+    margin-bottom: 10px;
+}
+
+.error-container p {
+    color: #718096;
+    margin-bottom: 20px;
+}
+
+/* Счетчики */
+.member-count,
+.invite-count {
+    background: #e2e8f0;
+    color: #4a5568;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Адаптивность для плавающей кнопки */
+@media (max-width: 480px) {
+    .floating-action-btn {
+        bottom: 15px;
+        right: 15px;
+    }
+
+    .floating-action-btn button {
+        width: 56px;
+        height: 56px;
+        font-size: 22px;
+    }
+}
