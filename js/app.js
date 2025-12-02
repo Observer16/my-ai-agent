@@ -371,8 +371,11 @@ function formatCurrency(amount) {
  */
 function openFamily() {
     tg.HapticFeedback.impactOccurred('light');
-    // Временно показываем alert
-    tg.showAlert('Страница управления семьёй в разработке.\nСоздай pages/family.html для полного функционала.');
+
+    // Проверяем, создана ли страница семьи
+    // Если страница существует, переходим на неё
+    window.location.href = 'pages/family.html';
+
 }
 
 /**
