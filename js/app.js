@@ -13,14 +13,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Показать приветствие
     showGreeting();
     
-    // ВАЖНО: Сначала проверяем приглашения
+    // ✅ ВАЖНО: Сначала обновляем информацию о пользователе
+    await updateUserOnFirstLogin();
+
+    // Затем проверяем приглашения
     await checkPendingInvites();
-    
+
     // Затем загружаем данные
     await loadDashboardData();
-    
+
     console.log('✅ Приложение готово');
 });
+
+/**
+ * Обновить информацию о пользователе при первом входе
+ */
+async function updateUserOnFirstLogin() {
+    const user = tg.initDataUnsafe?.user;
+    if (!user) {
+        console.warn('Нет данных пользователя из Telegram');
+        return;
+    }
+
+    console.log('📝 Обновление данных пользователя:', {
+        id: user.id,
+        first_name: user.first_name,
+        username: user.username,
+        last_name: user.last_name
+    });
+
+    try {
+        // Всегда отправляем данные из Telegram
+        const result = await API.updateUserInfo({
+            first_name: user.first_name || `User${user.id}`,
+            username: user.username || null,
+            last_name: user.last_name || null
+        });
+
+        console.log('✅ Информация пользователя обновлена:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Ошибка обновления пользователя:', error);
+        // Не прерываем работу приложения при ошибке обновления пользователя
+    }
+}
 
 /**
  * Показать приветствие пользователю
@@ -29,7 +65,7 @@ function showGreeting() {
     const user = tg.initDataUnsafe?.user;
     const greetingEl = document.getElementById('greeting');
     const userInfoEl = document.getElementById('user-info');
-    
+
     if (user) {
         const hour = new Date().getHours();
         let greeting = 'Добрый день';
@@ -37,7 +73,7 @@ function showGreeting() {
         else if (hour < 12) greeting = 'Доброе утро';
         else if (hour < 18) greeting = 'Добрый день';
         else greeting = 'Добрый вечер';
-        
+
         greetingEl.textContent = `${greeting}, ${user.first_name}! 👋`;
         userInfoEl.textContent = `@${user.username || 'user'}`;
     } else {
@@ -50,19 +86,6 @@ function showGreeting() {
  * Загрузить данные для dashboard
  */
 async function loadDashboardData() {
-    // Обновляем информацию о пользователе
-    const user = tg.initDataUnsafe?.user;
-    if (user) {
-        try {
-            await API.post('/user/update-info', {
-                first_name: user.first_name,
-                username: user.username
-            });
-        } catch (error) {
-            console.warn('Не удалось обновить информацию:', error);
-        }
-    }
-        
     // Загружаем информацию о семье
     await loadFamilyInfo();
     

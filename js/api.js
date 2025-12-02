@@ -209,6 +209,22 @@ class APIClient {
         }
     }
 
+    /**
+     * Обновить информацию о пользователе (для первого входа)
+     */
+    async updateUserInfo(userData) {
+        // ✅ Согласно OpenAPI, endpoint /auth/update-info
+        return this.post('/auth/update-info', userData);
+    }
+
+    /**
+     * Получить информацию о текущем пользователе
+     */
+    async getCurrentUserInfo() {
+        // ✅ Согласно OpenAPI, endpoint /auth/me
+        return this.get('/auth/me');
+    }
+
     // ============================================================================
     // БАЗОВЫЕ ENDPOINTS
     // ============================================================================
@@ -651,6 +667,9 @@ class APIClient {
     isAuthenticated() {
         return this.telegramUserId !== null;
     }
+
+    updateUserInfo,
+    getCurrentUserInfo
 }
 
 // Создаём глобальный экземпляр API
