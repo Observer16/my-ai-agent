@@ -92,7 +92,7 @@
                 <div class="day-bar">
                     <div class="day-bar-fill" style="width: ${percent}%"></div>
                 </div>
-                <div class="day-amount">${formatMoney(day.day_spent)}</div>
+                <div class="day-amount">${formatMoney(day.day_spent)}  </div>
                 <div class="day-count">${day.purchases_count} покупок</div>
             </div>
         `;
