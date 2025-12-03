@@ -17,12 +17,20 @@
     let detectionCount = {}; // Счётчик для фильтрации ложных срабатываний
 
     const storeTypeColors = {
-        'Супермаркет': { bg: '#10b981', text: 'white' },
-        'Аптека': { bg: '#ef4444', text: 'white' },
-        'Ресторан': { bg: '#f59e0b', text: 'white' },
-        'Заправка': { bg: '#6366f1', text: 'white' },
-        'Магазин': { bg: '#8b5cf6', text: 'white' }
-    };
+    'Супермаркет': { bg: '#10b981', text: 'white' },    // Зелёный
+    'Магазин': { bg: '#8b5cf6', text: 'white' },        // Фиолетовый
+    'Аптека': { bg: '#ef4444', text: 'white' },         // Красный
+    'Транспорт': { bg: '#3b82f6', text: 'white' },      // Синий
+    'Разное': { bg: '#6b7280', text: 'white' },         // Серый
+    'Ресторан': { bg: '#f59e0b', text: 'white' },       // Оранжевый
+    'Заправка': { bg: '#6366f1', text: 'white' },       // Индиго
+    'Кафе': { bg: '#f97316', text: 'white' },           // Тёмно-оранжевый
+    'Клиника': { bg: '#ec4899', text: 'white' },        // Розовый
+    'Для дома': { bg: '#a855f7', text: 'white' },       // Пурпурный
+    'Фитнес': { bg: '#14b8a6', text: 'white' },         // Бирюзовый
+    'Электроника': { bg: '#06b6d4', text: 'white' },    // Голубой
+    'Одежда': { bg: '#d946ef', text: 'white' }          // Маджента
+};
 
     async function init() {
         try {
@@ -360,28 +368,52 @@
     // ==================== МАГАЗИНЫ ====================
 
     function renderStoreList() {
-        const container = document.getElementById('store-list');
-        const grouped = {};
-        stores.forEach(s => {
-            const type = s.store_type || 'Магазин';
-            if (!grouped[type]) grouped[type] = [];
-            grouped[type].push(s);
-        });
+    const container = document.getElementById('store-list');
+    const grouped = {};
 
-        let html = '';
-        ['Супермаркет', 'Аптека', 'Ресторан', 'Заправка', 'Магазин'].forEach(type => {
-            if (!grouped[type]) return;
-            const color = storeTypeColors[type];
-            grouped[type].forEach(store => {
-                html += `<div class="store-list-item" onclick="selectStore('${store.id}', '${store.name.replace(/'/g, "\\'")}', '${type}')">
-                    <div class="store-type-indicator" style="background: ${color.bg}"></div>
-                    <span class="store-name">${store.name}</span>
-                    <span class="store-type-badge" style="background: ${color.bg}; color: ${color.text}">${type}</span>
-                </div>`;
-            });
+    stores.forEach(s => {
+        const type = s.store_type || 'Магазин';
+        if (!grouped[type]) grouped[type] = [];
+        grouped[type].push(s);
+    });
+
+    let html = '';
+
+    // Порядок отображения типов
+    const typeOrder = ['Супермаркет', 'Магазин', 'Аптека', 'Для дома', 'Транспорт', 'Кафе', 'Заправка', 'Разное'];
+
+    typeOrder.forEach(type => {
+        if (!grouped[type]) return;
+
+        // ✅ ЗАЩИТА: используем цвет по умолчанию
+        const color = storeTypeColors[type] || { bg: '#6b7280', text: 'white' };
+
+        grouped[type].forEach(store => {
+            html += `<div class="store-list-item" onclick="selectStore('${store.id}', '${store.name.replace(/'/g, "\\'")}', '${type}')">
+                <div class="store-type-indicator" style="background: ${color.bg}"></div>
+                <span class="store-name">${store.name}</span>
+                <span class="store-type-badge" style="background: ${color.bg}; color: ${color.text}">${type}</span>
+            </div>`;
         });
-        container.innerHTML = html;
-    }
+    });
+
+    // Добавляем остальные типы, которых нет в typeOrder
+    Object.keys(grouped).forEach(type => {
+        if (typeOrder.includes(type)) return;
+
+        const color = storeTypeColors[type] || { bg: '#6b7280', text: 'white' };
+
+        grouped[type].forEach(store => {
+            html += `<div class="store-list-item" onclick="selectStore('${store.id}', '${store.name.replace(/'/g, "\\'")}', '${type}')">
+                <div class="store-type-indicator" style="background: ${color.bg}"></div>
+                <span class="store-name">${store.name}</span>
+                <span class="store-type-badge" style="background: ${color.bg}; color: ${color.text}">${type}</span>
+            </div>`;
+        });
+    });
+
+    container.innerHTML = html;
+}
 
     function toggleStoreList() {
         document.getElementById('store-list').classList.toggle('active');
@@ -389,12 +421,21 @@
     }
 
     function selectStore(storeId, storeName, storeType) {
-        document.getElementById('selected-store-id').value = storeId;
-        const color = storeTypeColors[storeType];
-        document.getElementById('store-display-text').innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;"><span style="background:${color.bg};width:10px;height:10px;border-radius:50%;"></span>${storeName}</span>`;
-        document.getElementById('store-list').classList.remove('active');
-        updateSummary();
-    }
+    document.getElementById('selected-store-id').value = storeId;
+
+    // ✅ ЗАЩИТА: используем цвет по умолчанию, если тип не найден
+    const color = storeTypeColors[storeType] || { bg: '#6b7280', text: 'white' };
+
+    document.getElementById('store-display-text').innerHTML = `
+        <span style="display:inline-flex;align-items:center;gap:8px;">
+            <span style="background:${color.bg};width:10px;height:10px;border-radius:50%;"></span>
+            ${storeName}
+        </span>
+    `;
+
+    document.getElementById('store-list').classList.remove('active');
+    updateSummary();
+}
 
     document.addEventListener('click', (e) => {
         const wrapper = document.querySelector('.custom-select-wrapper');
