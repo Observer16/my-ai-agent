@@ -338,7 +338,7 @@ function formatCurrency(amount) {
     if (numAmount === 0) return '0 ₲';
 
     // Убираем округление для сумм < 1000
-    if (Math.abs(numAmount) < 100) {
+    if (Math.abs(numAmount) < 1000) {
         // Для целых чисел убираем дробную часть
         if (Number.isInteger(numAmount)) {
             return `${numAmount.toLocaleString('ru-RU')} ₲`;
@@ -352,7 +352,7 @@ function formatCurrency(amount) {
 
     // Для сумм >= 1 000 000 (миллион)
     if (Math.abs(numAmount) >= 1000000) {
-        const millions = (numAmount / 10000);
+        const millions = (numAmount / 1000000);
         // Показываем 1 знак после запятой только если есть дробная часть
         const formatted = millions % 1 === 0 ?
             millions.toLocaleString('ru-RU') :
