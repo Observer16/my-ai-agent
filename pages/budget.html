@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Покупки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- Подключаем внешний CSS файл -->
     <link rel="stylesheet" href="../css/budget.css">
 </head>
 <body>
@@ -69,7 +67,7 @@
     </div>
 
     <div class="search">
-        <input type="text" placeholder="🔍 Поиск товара..." onkeyup="searchTrends(this.value)">
+        <input type="text" id="trends-search" placeholder="🔍 Поиск товара..." onkeyup="searchTrends(this.value)">
     </div>
 
     <div id="trends-list"></div>
@@ -78,7 +76,7 @@
 <!-- Сравнение -->
 <div id="tab-compare" class="content">
     <div class="search">
-        <input type="text" placeholder="🔍 Поиск товара..." onkeyup="searchCompare(this.value)">
+        <input type="text" id="compare-search" placeholder="🔍 Поиск товара..." onkeyup="searchCompare(this.value)">
     </div>
 
     <div id="compare-list"></div>
@@ -204,40 +202,40 @@
     }
 
     // Форматирование даты чека
-function formatReceiptDate(dateStr) {
-if (!dateStr) return '-';
+    function formatReceiptDate(dateStr) {
+        if (!dateStr) return '-';
 
-// Парсим UTC дату
-const date = new Date(dateStr);
-const now = new Date();
+        // Парсим UTC дату
+        const date = new Date(dateStr);
+        const now = new Date();
 
-// Вычисляем разницу в днях
-const diffTime = now - date;
-const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        // Вычисляем разницу в днях
+        const diffTime = now - date;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-if (diffDays === 0) return 'Сегодня';
-if (diffDays === 1) return 'Вчера';
-if (diffDays < 7) return `${diffDays} дн. назад`;
+        if (diffDays === 0) return 'Сегодня';
+        if (diffDays === 1) return 'Вчера';
+        if (diffDays < 7) return `${diffDays} дн. назад`;
 
-// Форматируем в локальной таймзоне
-return date.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-});
-}
+        // Форматируем в локальной таймзоне
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'short',
+            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+        });
+    }
 
-function formatReceiptTime(dateStr) {
-if (!dateStr) return '-';
+    function formatReceiptTime(dateStr) {
+        if (!dateStr) return '-';
 
-const date = new Date(dateStr);
+        const date = new Date(dateStr);
 
-// Форматируем в локальной таймзоне
-return date.toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit'
-});
-}
+        // Форматируем в локальной таймзоне
+        return date.toLocaleTimeString('ru-RU', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
 
     // Загрузка трендов
     async function loadTrends(days = 7, search = null) {
@@ -302,61 +300,63 @@ return date.toLocaleTimeString('ru-RU', {
         container.innerHTML = html;
     }
 
-    // Функция для точного форматирования
-function formatPrice(price) {
-    if (!price && price !== 0) return '0 ₲';
+    // Функция для точного форматирования цен
+    function formatPrice(price) {
+        if (!price && price !== 0) return '0 ₲';
 
-    // Если price объект Decimal или число
-    const num = typeof price === 'object' && price.toString ?
-                parseFloat(price.toString()) :
-                Number(price);
+        // Если price объект Decimal или число
+        const num = typeof price === 'object' && price.toString ?
+                    parseFloat(price.toString()) :
+                    Number(price);
 
-    if (isNaN(num)) return '0 ₲';
+        if (isNaN(num)) return '0 ₲';
 
-    // Для целых чисел
-    if (Number.isInteger(num)) {
-        return num.toLocaleString('ru-RU') + ' ₲';
+        // Для целых чисел
+        if (Number.isInteger(num)) {
+            return num.toLocaleString('ru-RU') + ' ₲';
+        }
+
+        // Для чисел с плавающей точкой - 2 знака
+        return num.toLocaleString('ru-RU', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' ₲';
     }
-
-    // Для чисел с плавающей точкой - 2 знака
-    return num.toLocaleString('ru-RU', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }) + ' ₲';
-}
 
     // Рендеринг сравнения
     function renderCompare(data) {
         const container = document.getElementById('compare-list');
 
-    if (!data?.length) {
-        container.innerHTML = `
-            <div class="empty">
-                <div style="font-size: 48px; margin-bottom: 10px;">🏪</div>
-                <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">
-                    Нет данных для сравнения
+        if (!data?.length) {
+            container.innerHTML = `
+                <div class="empty">
+                    <div style="font-size: 48px; margin-bottom: 10px;">🏪</div>
+                    <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">
+                        Нет данных для сравнения
+                    </div>
+                    <div style="font-size: 13px; opacity: 0.7; line-height: 1.5;">
+                        Для сравнения нужны покупки одного товара<br>
+                        в разных магазинах
+                    </div>
                 </div>
-                <div style="font-size: 13px; opacity: 0.7; line-height: 1.5;">
-                    Для сравнения нужны покупки одного товара<br>
-                    в разных магазинах
-                </div>
-            </div>
-        `;
-        return;
-    }
+            `;
+            return;
+        }
 
         const html = data.map(c => `
-        <div class="comparison-card">
-            <div class="comparison-header">🛒 ${c.product_name}</div>
-            ${c.stores.map(s => `
-        <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
-            <span>
-                ${s.store_name === c.cheapest_store ? '🏆' : '🏪'}
-                ${s.store_name}
-            </span>
-            <strong>${formatPrice(s.price)}</strong>
-        </div>
-    `).join('');
+            <div class="comparison-card">
+                <div class="comparison-header">🛒 ${c.product_name}</div>
+                ${c.stores.map(s => `
+                    <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
+                        <span>
+                            ${s.store_name === c.cheapest_store ? '🏆' : '🏪'}
+                            ${s.store_name}
+                        </span>
+                        <strong>${formatPrice(s.price)}</strong>
+                    </div>
+                `).join('')}
+            </div>
+        `).join('');
 
         container.innerHTML = html;
     }
@@ -410,46 +410,37 @@ function formatPrice(price) {
     }
 
     // Утилиты
+    function formatMoney(amount) {
+        if (!amount && amount !== 0) return '0 ₲';
 
-function formatMoney(amount) {
-    if (!amount || amount === 0) return '0 ₲';
+        const numAmount = Number(amount);
+        if (isNaN(numAmount)) return '0 ₲';
 
-    // Если число целое, показываем как есть
-    if (Number.isInteger(amount)) {
-        const absAmount = Math.abs(amount);
+        if (numAmount === 0) return '0 ₲';
+
+        const absAmount = Math.abs(numAmount);
 
         // Для сумм >= 1 000 000 (миллион)
         if (absAmount >= 1000000) {
-            const millions = (amount / 1000000).toFixed(1);  // ✅ Исправлено
+            const millions = (numAmount / 1000000).toFixed(1);
             return `${millions}M ₲`;
         }
         // Для сумм >= 1 000 (тысяча)
         else if (absAmount >= 1000) {
-            const thousands = (amount / 1000).toFixed(1);  // ✅ Исправлено
+            const thousands = (numAmount / 1000).toFixed(1);
             return `${thousands}K ₲`;
         }
         // Для сумм < 1 000
         else {
-            return `${amount.toLocaleString('ru-RU')} ₲`;
+            // Проверяем, целое ли число
+            if (Number.isInteger(numAmount)) {
+                return `${numAmount.toLocaleString('ru-RU')} ₲`;
+            } else {
+                // Для дробных чисел показываем 2 знака
+                return `${numAmount.toFixed(2).replace('.', ',')} ₲`;
+            }
         }
     }
-
-    // Если число с плавающей точкой, показываем с 2 знаками
-    const absAmount = Math.abs(amount);
-
-    if (absAmount >= 1000000) {
-        const millions = (amount / 1000000).toFixed(1);
-        return `${millions}M ₲`;
-    }
-    else if (absAmount >= 1000) {
-        const thousands = (amount / 1000).toFixed(1);
-        return `${thousands}K ₲`;
-    }
-    else {
-        // Для маленьких сумм показываем с копейками
-        return `${amount.toFixed(2).replace('.', ',')} ₲`;
-    }
-}
 
     function showLoading(containerId) {
         const container = document.getElementById(containerId);
@@ -471,7 +462,6 @@ function formatMoney(amount) {
         `;
     }
 
-
     // Запуск
     init();
 
@@ -479,7 +469,9 @@ function formatMoney(amount) {
     tg.MainButton.setText('🔄 Обновить');
     tg.MainButton.show();
     tg.MainButton.onClick(() => {
-        api.clearCache();
+        if (typeof api !== 'undefined' && api.clearCache) {
+            api.clearCache();
+        }
         init();
         tg.HapticFeedback.impactOccurred('medium');
     });
