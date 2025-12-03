@@ -181,7 +181,7 @@ body {
     padding: 20px;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
-    margin: 15px 20px;
+    margin: 15px 5px;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     cursor: pointer;
@@ -220,7 +220,7 @@ body {
     background: var(--tg-theme-secondary-bg-color, #f8f9fa);
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 15px;
+    margin-bottom:  15px 5px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
