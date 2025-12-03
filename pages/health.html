@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Здоровье</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        p {
+            color: var(--tg-theme-hint-color, #999999);
+            margin: 0 0 30px 0;
+        }
+        .btn-back {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="icon">🩺</div>
+    <h2>Дневник здоровья</h2>
+    <p>Форма оценки самочувствия находится в стадии разработки. Скоро здесь появятся графики и чеклисты.</p>
+
+    <button class="btn-back" onclick="goBack()">Назад</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+
+        // Настройка нативной кнопки "Назад"
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            goBack();
+        });
+
+        function goBack() {
+            // Возврат на главную или закрытие, если истории нет
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '../index.html'; // Путь к главной странице
+            }
+        }
+    </script>
+</body>
+</html>
