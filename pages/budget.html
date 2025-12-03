@@ -323,23 +323,23 @@ return date.toLocaleTimeString('ru-RU', {
     }
 
         const html = data.map(c => `
-            <div class="comparison-card">
-                <div class="comparison-header">🛒 ${c.product_name}</div>
-                ${c.stores.map(s => `
-                    <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
-                        <span>
-                            ${s.store_name === c.cheapest_store ? '🏆' : '🏪'}
-                            ${s.store_name}
-                        </span>
-                        <strong>${formatMoney(s.price)}</strong>
-                    </div>
-                `).join('')}
-                <div style="margin-top:10px; text-align:center; font-size:12px; opacity:0.7">
-                    💰 Разница: ${formatMoney(c.price_difference)}
-                    (${c.savings_potential.toFixed(1)}%)
+        <div class="comparison-card">
+            <div class="comparison-header">🛒 ${c.product_name}</div>
+            ${c.stores.map(s => `
+                <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
+                    <span>
+                        ${s.store_name === c.cheapest_store ? '🏆' : '🏪'}
+                        ${s.store_name}
+                    </span>
+                    <strong>${formatMoney(s.price)}</strong>
                 </div>
+            `).join('')}
+            <div style="margin-top:10px; text-align:center; font-size:12px; opacity:0.7">
+                💰 Разница: ${formatMoney(c.price_difference)}
+                (${c.savings_potential.toFixed(1)}%)
             </div>
-        `).join('');
+        </div>
+    `).join('');
 
         container.innerHTML = html;
     }
