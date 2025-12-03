@@ -161,47 +161,46 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script>
+    // Глобальные переменные
     const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.BackButton.show();
-    tg.BackButton.onClick(() => window.location.href = '../index.html');
-
     let allProducts = [];
     let allCategories = [];
     let currentCategoryFilter = null;
     let currentProductEdit = null;
+    let searchTimeout = null;
 
-    // Инициализация
-    async function init() {
+    // Инициализация приложения
+    function init() {
+        tg.expand();
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => window.location.href = '../index.html');
+
+        loadData();
+    }
+
+    // Загрузка всех данных
+    async function loadData() {
         try {
-            await loadStatistics();
-            await loadCategories();
+            await Promise.all([
+                loadStatistics(),
+                loadCategories()
+            ]);
             await loadProducts();
             tg.HapticFeedback.notificationOccurred('success');
         } catch (error) {
-            console.error('Init error:', error);
+            console.error('Ошибка инициализации:', error);
+            tg.showAlert('Ошибка загрузки данных');
         }
     }
 
-    // Загрузка статистики из ручки /statistics
+    // Загрузка статистики
     async function loadStatistics() {
         try {
             const stats = await API.getStatistics();
-
-            // Обновляем статистику в интерфейсе
             document.getElementById('total-products').textContent = stats.unique_products || 0;
-            document.getElementById('total-categories').textContent = '-'; // Будет обновлено после загрузки категорий
-
-            // Для uncategorized нужно посчитать отдельно
-            const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
-            document.getElementById('uncategorized').textContent = uncategorizedCount;
-
         } catch (error) {
             console.error('Ошибка загрузки статистики:', error);
-            // В случае ошибки показываем прочерки
             document.getElementById('total-products').textContent = '-';
-            document.getElementById('total-categories').textContent = '-';
-            document.getElementById('uncategorized').textContent = '-';
         }
     }
 
@@ -209,15 +208,23 @@
     async function loadCategories() {
         try {
             allCategories = await API.getCategories();
+            updateCategoryStatistics();
             renderCategoryFilters();
             renderCategoriesList();
             populateCategorySelects();
-
-            // Обновляем статистику категорий
-            document.getElementById('total-categories').textContent = allCategories.length;
-
         } catch (error) {
             console.error('Ошибка загрузки категорий:', error);
+        }
+    }
+
+    // Обновление статистики категорий
+    function updateCategoryStatistics() {
+        document.getElementById('total-categories').textContent = allCategories.length;
+
+        // Обновляем uncategorized, если товары уже загружены
+        if (allProducts.length > 0) {
+            const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
+            document.getElementById('uncategorized').textContent = uncategorizedCount;
         }
     }
 
@@ -227,20 +234,22 @@
         try {
             allProducts = await API.getProducts(categoryId, search, 50);
             renderProducts(allProducts);
-
-            // Обновляем статистику uncategorized
-            const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
-            document.getElementById('uncategorized').textContent = uncategorizedCount;
-
+            updateUncategorizedCount();
         } catch (error) {
+            console.error('Ошибка загрузки товаров:', error);
             showError('products-list', error.message);
         }
+    }
+
+    // Обновление счетчика товаров без категории
+    function updateUncategorizedCount() {
+        const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
+        document.getElementById('uncategorized').textContent = uncategorizedCount;
     }
 
     // Рендеринг фильтров категорий
     function renderCategoryFilters() {
         const container = document.getElementById('category-filters');
-
         const mainCategories = allCategories.filter(c => !c.parent_id);
 
         const html = `
@@ -263,21 +272,27 @@
     function renderProducts(products) {
         const container = document.getElementById('products-list');
 
-        if (!products?.length) {
+        if (!products || products.length === 0) {
             container.innerHTML = '<div class="empty">📦 Товары не найдены</div>';
             return;
         }
 
-        const html = products.map(p => `
-            <div class="product-card" onclick="showEditProductModal('${p.id}', '${p.name}', ${p.category_id})">
+        const html = products.map(p => {
+            // Экранирование HTML для безопасности
+            const name = escapeHtml(p.name);
+            const categoryName = p.category_name ? escapeHtml(p.category_name) : '';
+            const brand = p.brand ? escapeHtml(p.brand) : '';
+
+            return `
+            <div class="product-card" onclick="showEditProductModal('${p.id}', '${name}', ${p.category_id || 'null'})">
                 <div class="product-header">
-                    <div class="product-name">${p.name}</div>
-                    ${p.category_name ? `
-                        <div class="product-category">${p.category_name}</div>
+                    <div class="product-name">${name}</div>
+                    ${categoryName ? `
+                        <div class="product-category">${categoryName}</div>
                     ` : ''}
                 </div>
                 <div class="product-info">
-                    ${p.brand ? `<span>🏷️ ${p.brand}</span>` : ''}
+                    ${brand ? `<span>🏷️ ${brand}</span>` : ''}
                     ${p.stores_count ? `<span>🏪 ${p.stores_count} магазинов</span>` : ''}
                     ${p.last_purchase_date ? `<span>📅 ${formatDate(p.last_purchase_date)}</span>` : ''}
                 </div>
@@ -297,7 +312,7 @@
                     </div>
                 ` : ''}
             </div>
-        `).join('');
+        `}).join('');
 
         container.innerHTML = html;
     }
@@ -306,35 +321,40 @@
     function renderCategoriesList() {
         const container = document.getElementById('categories-list');
 
-        if (!allCategories?.length) {
+        if (!allCategories || allCategories.length === 0) {
             container.innerHTML = '<div class="empty">📂 Категории не найдены</div>';
             return;
         }
 
-        const html = allCategories.map(cat => `
+        const html = allCategories.map(cat => {
+            const name = escapeHtml(cat.name);
+            const parentName = cat.parent_name ? escapeHtml(cat.parent_name) : '';
+            const description = cat.description ? escapeHtml(cat.description) : '';
+
+            return `
             <div class="category-card">
                 <div class="category-header">
                     <div class="category-name">
-                        ${cat.name}
-                        ${cat.parent_name ? `<div style="font-size:11px;opacity:0.6;margin-top:2px;">↳ ${cat.parent_name}</div>` : ''}
+                        ${name}
+                        ${parentName ? `<div style="font-size:11px;opacity:0.6;margin-top:2px;">↳ ${parentName}</div>` : ''}
                     </div>
                     <div class="category-count">${cat.products_count || 0}</div>
                 </div>
-                ${cat.description ? `
-                    <div class="category-description">${cat.description}</div>
+                ${description ? `
+                    <div class="category-description">${description}</div>
                 ` : ''}
                 <div class="category-actions">
                     <button class="category-btn edit" onclick="filterByCategory(${cat.id}); switchTab('products')">
                         👁️ Товары
                     </button>
                     ${(cat.products_count || 0) === 0 ? `
-                        <button class="category-btn delete" onclick="deleteCategory(${cat.id}, '${cat.name}')">
+                        <button class="category-btn delete" onclick="deleteCategory(${cat.id}, '${name}')">
                             🗑️ Удалить
                         </button>
                     ` : ''}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
 
         container.innerHTML = html;
     }
@@ -346,14 +366,14 @@
         // Для создания новой категории
         const parentSelect = document.getElementById('new-category-parent');
         parentSelect.innerHTML = '<option value="">Нет (основная категория)</option>' +
-            mainCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            mainCategories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`).join('');
 
         // Для создания товара
         const productCategorySelect = document.getElementById('new-product-category');
         productCategorySelect.innerHTML = '<option value="">Без категории</option>' +
             allCategories.map(cat => `
                 <option value="${cat.id}">
-                    ${cat.parent_name ? '  ↳ ' : ''}${cat.name}
+                    ${cat.parent_name ? '  ↳ ' : ''}${escapeHtml(cat.name)}
                 </option>
             `).join('');
 
@@ -362,7 +382,7 @@
         editSelect.innerHTML = '<option value="">Без категории</option>' +
             allCategories.map(cat => `
                 <option value="${cat.id}">
-                    ${cat.parent_name ? '  ↳ ' : ''}${cat.name}
+                    ${cat.parent_name ? '  ↳ ' : ''}${escapeHtml(cat.name)}
                 </option>
             `).join('');
     }
@@ -376,7 +396,6 @@
     }
 
     // Поиск товаров
-    let searchTimeout;
     function searchProducts(query) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
@@ -431,51 +450,49 @@
 
             tg.HapticFeedback.notificationOccurred('success');
         } catch (error) {
+            console.error('Ошибка создания категории:', error);
             tg.showAlert('Ошибка создания категории: ' + error.message);
         }
     }
 
     // Создать товар
     async function createProduct() {
-const name = document.getElementById('new-product-name').value.trim();
+        const name = document.getElementById('new-product-name').value.trim();
 
-if (!name) {
-    tg.showAlert('Введите название товара');
-    return;
-}
+        if (!name) {
+            tg.showAlert('Введите название товара');
+            return;
+        }
 
-try {
-    const brand = document.getElementById('new-product-brand').value.trim() || null;
-    const categoryId = document.getElementById('new-product-category').value || null;
-    const unit = document.getElementById('new-product-unit').value;
-    const barcode = document.getElementById('new-product-barcode').value.trim() || null;
+        try {
+            const brand = document.getElementById('new-product-brand').value.trim() || null;
+            const categoryId = document.getElementById('new-product-category').value || null;
+            const unit = document.getElementById('new-product-unit').value;
+            const barcode = document.getElementById('new-product-barcode').value.trim() || null;
 
-    // Используем правильный формат согласно OpenAPI
-    const productData = {
-        name: name,
-        category_id: categoryId ? parseInt(categoryId) : null,
-        brand: brand,
-        unit: unit,
-        barcode: barcode
-    };
+            const productData = {
+                name: name,
+                category_id: categoryId ? parseInt(categoryId) : null,
+                brand: brand,
+                unit: unit,
+                barcode: barcode
+            };
 
-    console.log('📦 Создаём товар (products.html):', productData);
+            console.log('📦 Создаём товар (products.html):', productData);
 
-    const result = await API.createProduct(productData);
+            await API.createProduct(productData);
 
-    closeModal('create-product-modal');
-    await loadProducts();
-    switchTab('products');
+            closeModal('create-product-modal');
+            await loadProducts();
+            switchTab('products');
 
-    // Используем showAlert вместо showPopup
-    tg.showAlert(`✅ Товар "${name}" создан`);
-
-    tg.HapticFeedback.notificationOccurred('success');
-} catch (error) {
-    console.error('❌ Ошибка создания товара:', error);
-    tg.showAlert('Ошибка создания товара: ' + error.message);
-}
-}
+            tg.showAlert(`✅ Товар "${name}" создан`);
+            tg.HapticFeedback.notificationOccurred('success');
+        } catch (error) {
+            console.error('❌ Ошибка создания товара:', error);
+            tg.showAlert('Ошибка создания товара: ' + error.message);
+        }
+    }
 
     // Удалить категорию
     async function deleteCategory(categoryId, categoryName) {
@@ -488,6 +505,7 @@ try {
                         await loadCategories();
                         tg.HapticFeedback.notificationOccurred('success');
                     } catch (error) {
+                        console.error('Ошибка удаления категории:', error);
                         tg.showAlert('Ошибка удаления: ' + error.message);
                     }
                 }
@@ -499,13 +517,25 @@ try {
     function showEditProductModal(productId, productName, categoryId) {
         currentProductEdit = productId;
 
-        document.getElementById('edit-product-info').innerHTML = `
-            <div style="font-weight:600;margin-bottom:5px;">${productName}</div>
-            <div style="font-size:12px;opacity:0.7;">ID: ${productId}</div>
-        `;
+        // Используем innerText вместо innerHTML для безопасности
+        const editInfo = document.getElementById('edit-product-info');
+        editInfo.innerHTML = ''; // Очищаем
+
+        const nameDiv = document.createElement('div');
+        nameDiv.style.fontWeight = '600';
+        nameDiv.style.marginBottom = '5px';
+        nameDiv.innerText = productName;
+
+        const idDiv = document.createElement('div');
+        idDiv.style.fontSize = '12px';
+        idDiv.style.opacity = '0.7';
+        idDiv.innerText = `ID: ${productId}`;
+
+        editInfo.appendChild(nameDiv);
+        editInfo.appendChild(idDiv);
 
         const select = document.getElementById('edit-product-category');
-        select.value = categoryId || '';
+        select.value = categoryId !== 'null' ? categoryId : '';
 
         openModal('edit-product-modal');
         tg.HapticFeedback.impactOccurred('light');
@@ -515,45 +545,61 @@ try {
     async function updateProductCategory() {
         const categoryId = document.getElementById('edit-product-category').value;
 
-        if (!categoryId) {
-            tg.showAlert('Выберите категорию');
+        if (!currentProductEdit) {
+            tg.showAlert('Ошибка: товар не выбран');
             return;
         }
 
         try {
-            await API.updateProductCategory(currentProductEdit, parseInt(categoryId));
+            await API.updateProductCategory(currentProductEdit, categoryId ? parseInt(categoryId) : null);
 
             closeModal('edit-product-modal');
             await loadProducts(currentCategoryFilter);
 
             tg.HapticFeedback.notificationOccurred('success');
         } catch (error) {
+            console.error('Ошибка обновления категории товара:', error);
             tg.showAlert('Ошибка обновления: ' + error.message);
         }
     }
 
     // Переключение табов
     function switchTab(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        // Находим активную кнопку таба
+        const tabs = document.querySelectorAll('.tab');
+        const clickedTab = event.target;
 
-        event.target.classList.add('active');
+        tabs.forEach(t => t.classList.remove('active'));
+        clickedTab.classList.add('active');
+
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.getElementById(`tab-${tab}`).classList.add('active');
 
         tg.HapticFeedback.impactOccurred('light');
     }
 
-    // Утилиты
+    // Вспомогательные функции
     function formatDate(dateStr) {
+        if (!dateStr) return '';
+
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+
         const now = new Date();
-        const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+        const diffTime = now - date;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 0) return 'Сегодня';
         if (diffDays === 1) return 'Вчера';
         if (diffDays < 7) return `${diffDays} дн. назад`;
 
         return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function openModal(id) {
@@ -565,14 +611,20 @@ try {
     }
 
     function showLoading(id) {
-        document.getElementById(id).innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+        const container = document.getElementById(id);
+        if (container) {
+            container.innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+        }
     }
 
     function showError(id, msg) {
-        document.getElementById(id).innerHTML = `<div class="error">❌ ${msg}</div>`;
+        const container = document.getElementById(id);
+        if (container) {
+            container.innerHTML = `<div class="error">❌ ${escapeHtml(msg)}</div>`;
+        }
     }
 
-    // Запуск
+    // Запуск приложения
     init();
 </script>
 </body>
