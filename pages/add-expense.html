@@ -691,60 +691,37 @@
             `${Math.round(totalAmount).toLocaleString('ru-RU')} ₲` : '0 ₲';
     }
 
-    // ==================== СОЗДАНИЕ ====================
+// ==================== СОЗДАНИЕ ====================
 
-// Функция для создания магазина
-function showCreateStore(e) {
-    if (e) e.preventDefault();
+// Переменная для хранения категорий
+let allCategories = [];
 
-    const modalHtml = `
-        <div id="create-store-type-modal" class="simple-modal">
-            <div class="simple-modal-content">
-                <h3>Тип магазина</h3>
-                <p>Выберите тип:</p>
-                <div class="simple-modal-buttons">
-                    <button onclick="selectStoreType('Супермаркет')">🛒 Супермаркет</button>
-                    <button onclick="selectStoreType('Аптека')">💊 Аптека</button>
-                    <button onclick="selectStoreType('Магазин')">🏪 Другой</button>
-                    <button onclick="closeSimpleModal('create-store-type-modal')" class="secondary">Отмена</button>
-                </div>
-            </div>
-        </div>
-    `;
+// Загрузка категорий при инициализации
+async function init() {
+    try {
+        stores = await API.getStores();
+        renderStoreList();
+        document.getElementById('purchase-date').valueAsDate = new Date();
+        allProducts = await API.getProducts(null, null, 1000);
 
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    tg.HapticFeedback.impactOccurred('light');
-}
+        // ✅ НОВОЕ: Загружаем категории
+        allCategories = await API.getCategories();
+        console.log('✅ Категории загружены:', allCategories.length);
 
-// Функция создания магазина
-async function createStore(name, type) {
-try {
-    // Используем правильный формат
-    const storeData = {
-        name: name,
-        store_type: type
-    };
-
-    console.log('🏪 Создаём магазин:', storeData);
-
-    const r = await API.createStore(storeData);
-    stores = await API.getStores();
-    renderStoreList();
-    selectStore(r.store_id, name, type);
-
-    // Используем showAlert вместо showPopup
-    tg.showAlert(`✅ Магазин "${name}" создан`);
-
-    tg.HapticFeedback.notificationOccurred('success');
-} catch (e) {
-    console.error('❌ Ошибка создания магазина:', e);
-    tg.showAlert('Ошибка: ' + e.message);
-}
+        tg.HapticFeedback.notificationOccurred('success');
+    } catch (e) {
+        console.error('Ошибка инициализации:', e);
+    }
 }
 
 // Функция для создания товара
 function showCreateProduct(e) {
     if (e) e.preventDefault();
+
+    // Формируем опции категорий
+    const categoryOptions = allCategories
+        .map(cat => `<option value="${cat.id}">${cat.name}</option>`)
+        .join('');
 
     const modalHtml = `
         <div id="create-product-name-modal" class="simple-modal">
@@ -753,6 +730,13 @@ function showCreateProduct(e) {
                 <input type="text" id="new-product-name-input"
                        placeholder="Название товара"
                        class="simple-modal-input">
+
+                <!-- ✅ НОВОЕ: Выбор категории -->
+                <select id="new-product-category-input" class="simple-modal-input" style="margin-top: 10px;">
+                    <option value="">Без категории</option>
+                    ${categoryOptions}
+                </select>
+
                 <div class="simple-modal-buttons">
                     <button onclick="createProductFromModal()">Создать</button>
                     <button onclick="closeSimpleModal('create-product-name-modal')" class="secondary">Отмена</button>
@@ -774,6 +758,11 @@ function showCreateProduct(e) {
 
 // Функция для создания товара с штрих-кодом
 function showCreateProductWithBarcode(barcode) {
+    // Формируем опции категорий
+    const categoryOptions = allCategories
+        .map(cat => `<option value="${cat.id}">${cat.name}</option>`)
+        .join('');
+
     const modalHtml = `
         <div id="create-product-barcode-modal" class="simple-modal">
             <div class="simple-modal-content">
@@ -782,6 +771,13 @@ function showCreateProductWithBarcode(barcode) {
                 <input type="text" id="new-product-barcode-input"
                        placeholder="Название товара"
                        class="simple-modal-input">
+
+                <!-- ✅ НОВОЕ: Выбор категории -->
+                <select id="new-product-barcode-category-input" class="simple-modal-input" style="margin-top: 10px;">
+                    <option value="">Без категории</option>
+                    ${categoryOptions}
+                </select>
+
                 <div class="simple-modal-buttons">
                     <button onclick="createProductWithBarcodeFromModal('${barcode}')">Создать</button>
                     <button onclick="closeSimpleModal('create-product-barcode-modal')" class="secondary">Отмена</button>
@@ -800,108 +796,71 @@ function showCreateProductWithBarcode(barcode) {
     tg.HapticFeedback.impactOccurred('light');
 }
 
-// Вспомогательные функции
-function closeSimpleModal(modalId) {
-const modal = document.getElementById(modalId);
-if (modal) modal.remove();
-}
+function createProductFromModal() {
+    const input = document.getElementById('new-product-name-input');
+    const categorySelect = document.getElementById('new-product-category-input');
 
-function selectStoreType(type) {
-    closeSimpleModal('create-store-type-modal');
-
-    const modalHtml = `
-        <div id="create-store-name-modal" class="simple-modal">
-            <div class="simple-modal-content">
-                <h3>Новый ${type.toLowerCase()}</h3>
-                <p>Введите название магазина:</p>
-                <input type="text" id="new-store-name-input"
-                       placeholder="Например: ${type} у дома"
-                       class="simple-modal-input">
-                <div class="simple-modal-buttons">
-                    <button onclick="createStoreFromModal('${type}')">Создать</button>
-                    <button onclick="closeSimpleModal('create-store-name-modal')" class="secondary">Отмена</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-    // Фокус на поле ввода
-    setTimeout(() => {
-        const input = document.getElementById('new-store-name-input');
-        if (input) input.focus();
-    }, 100);
-}
-
-function createStoreFromModal(type) {
-    const input = document.getElementById('new-store-name-input');
     if (input && input.value.trim()) {
         const name = input.value.trim();
-        closeSimpleModal('create-store-name-modal');
-        createStore(name, type);
-    } else {
-        tg.showAlert('Введите название магазина');
-    }
-}
-
-function createProductFromModal() {
-const input = document.getElementById('new-product-name-input');
-    if (input && input.value.trim()) {
-    const name = input.value.trim();
-    closeSimpleModal('create-product-name-modal');
-    createProduct(name);
+        const categoryId = categorySelect?.value || null;
+        closeSimpleModal('create-product-name-modal');
+        createProduct(name, null, categoryId);  // ← Передаём categoryId
     } else {
         tg.showAlert('Введите название товара');
     }
 }
 
 function createProductWithBarcodeFromModal(barcode) {
-const input = document.getElementById('new-product-barcode-input');
-if (input && input.value.trim()) {
-    const name = input.value.trim();
-    closeSimpleModal('create-product-barcode-modal');
-    createProduct(name, barcode);
-} else {
-    tg.showAlert('Введите название товара');
+    const input = document.getElementById('new-product-barcode-input');
+    const categorySelect = document.getElementById('new-product-barcode-category-input');
+
+    if (input && input.value.trim()) {
+        const name = input.value.trim();
+        const categoryId = categorySelect?.value || null;
+        closeSimpleModal('create-product-barcode-modal');
+        createProduct(name, barcode, categoryId);  // ← Передаём categoryId
+    } else {
+        tg.showAlert('Введите название товара');
+    }
 }
-}
 
-async function createProduct(name, barcode = null) {
-try {
-    const bc = barcode || document.getElementById('barcode-search').value || null;
+async function createProduct(name, barcode = null, categoryId = null) {
+    try {
+        const bc = barcode || document.getElementById('barcode-search').value || null;
 
-    // Используем формат, который ожидает бэкенд согласно OpenAPI
-    const productData = {
-        name: name,
-        category_id: null, // Можно добавить выбор категории если нужно
-        brand: null, // Можно добавить поле для бренда если нужно
-        unit: isWeightMode ? currentUnit : 'unidad',
-        barcode: bc
-    };
+        // ✅ ОБНОВЛЕНО: Добавлен category_id
+        const productData = {
+            name: name,
+            category_id: categoryId ? parseInt(categoryId) : null,  // ← Добавлено
+            brand: null,
+            unit: isWeightMode ? currentUnit : 'unidad',
+            barcode: bc
+        };
 
-    console.log('📦 Создаём товар:', productData);
+        console.log('📦 Создаём товар:', productData);
 
-    const r = await API.createProduct(productData); // Передаём объект
+        const r = await API.createProduct(productData);
 
-    // Добавляем в локальный кэш
-    allProducts.push({
-        id: r.product_id,
-        name: name,
-        barcode: bc,
-        unit: isWeightMode ? currentUnit : 'unidad'
-    });
+        // Добавляем в локальный кэш с информацией о категории
+        const category = allCategories.find(c => c.id == categoryId);
+        allProducts.push({
+            id: r.product_id,
+            name: name,
+            barcode: bc,
+            unit: isWeightMode ? currentUnit : 'unidad',
+            category_id: categoryId,
+            category_name: category ? category.name : null
+        });
 
-    selectProduct(r.product_id, name, bc, isWeightMode ? currentUnit : 'unidad');
+        selectProduct(r.product_id, name, bc, isWeightMode ? currentUnit : 'unidad');
 
-    // Используем showAlert вместо showPopup
-    tg.showAlert(`✅ Товар "${name}" создан`);
+        tg.showAlert(`✅ Товар "${name}" создан${category ? ' в категории "' + category.name + '"' : ''}`);
 
-    tg.HapticFeedback.notificationOccurred('success');
-} catch (e) {
-    console.error('❌ Ошибка создания товара:', e);
-    tg.showAlert('Ошибка создания товара: ' + e.message);
-}
+        tg.HapticFeedback.notificationOccurred('success');
+    } catch (e) {
+        console.error('❌ Ошибка создания товара:', e);
+        tg.showAlert('Ошибка создания товара: ' + e.message);
+    }
 }
 
     // ==================== СОХРАНЕНИЕ ====================
