@@ -302,6 +302,29 @@ return date.toLocaleTimeString('ru-RU', {
         container.innerHTML = html;
     }
 
+    // Функция для точного форматирования
+function formatPrice(price) {
+    if (!price && price !== 0) return '0 ₲';
+
+    // Если price объект Decimal или число
+    const num = typeof price === 'object' && price.toString ?
+                parseFloat(price.toString()) :
+                Number(price);
+
+    if (isNaN(num)) return '0 ₲';
+
+    // Для целых чисел
+    if (Number.isInteger(num)) {
+        return num.toLocaleString('ru-RU') + ' ₲';
+    }
+
+    // Для чисел с плавающей точкой - 2 знака
+    return num.toLocaleString('ru-RU', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + ' ₲';
+}
+
     // Рендеринг сравнения
     function renderCompare(data) {
         const container = document.getElementById('compare-list');
@@ -326,20 +349,14 @@ return date.toLocaleTimeString('ru-RU', {
         <div class="comparison-card">
             <div class="comparison-header">🛒 ${c.product_name}</div>
             ${c.stores.map(s => `
-                <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
-                    <span>
-                        ${s.store_name === c.cheapest_store ? '🏆' : '🏪'}
-                        ${s.store_name}
-                    </span>
-                    <strong>${formatMoney(s.price)}</strong>
-                </div>
-            `).join('')}
-            <div style="margin-top:10px; text-align:center; font-size:12px; opacity:0.7">
-                💰 Разница: ${formatMoney(c.price_difference)}
-                (${c.savings_potential.toFixed(1)}%)
-            </div>
+        <div class="store-price ${s.store_name === c.cheapest_store ? 'best' : ''}">
+            <span>
+                ${s.store_name === c.cheapest_store ? '🏆' : '🏪'}
+                ${s.store_name}
+            </span>
+            <strong>${formatPrice(s.price)}</strong>
         </div>
-    `).join('');
+    `).join('')}
 
         container.innerHTML = html;
     }
@@ -403,13 +420,13 @@ function formatMoney(amount) {
 
         // Для сумм >= 1 000 000 (миллион)
         if (absAmount >= 1000000) {
-            const millions = (amount / 1000000).toFixed(1);
+            const millions = (amount / 1000000).toFixed(1);  // ✅ Исправлено
             return `${millions}M ₲`;
         }
         // Для сумм >= 1 000 (тысяча)
         else if (absAmount >= 1000) {
-            const thousands = Math.round(amount / 1000);
-            return `${thousands.toLocaleString('ru-RU')}K ₲`;
+            const thousands = (amount / 1000).toFixed(1);  // ✅ Исправлено
+            return `${thousands}K ₲`;
         }
         // Для сумм < 1 000
         else {

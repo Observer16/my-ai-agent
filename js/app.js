@@ -348,21 +348,22 @@ function openModule(moduleName) {
 function formatCurrency(amount) {
     if (!amount || amount === 0) return '0 ₲';
     
-    const rounded = Math.round(amount);
-    
+    // Убираем округление, работаем с точным числом
+    const absAmount = Math.abs(amount);
+
     // Для сумм >= 1 000 000 (миллион)
-    if (rounded >= 1000000) {
-        const thousands = Math.round(rounded / 1000);
-        return `${thousands.toLocaleString('ru-RU')}K ₲`;
-    } 
+    if (absAmount >= 1000000) {
+        const millions = (amount / 1000000).toFixed(1);  // ✅ С десятыми
+        return `${millions}M ₲`;
+    }
     // Для сумм >= 1 000 (тысяча)
-    else if (rounded >= 1000) {
-        const thousands = Math.round(rounded / 1000);
-        return `${thousands.toLocaleString('ru-RU')}K ₲`;
+    else if (absAmount >= 1000) {
+        const thousands = (amount / 1000).toFixed(1);  // ✅ С десятыми
+        return `${thousands}K ₲`;
     }
     // Для сумм < 1 000
     else {
-        return `${rounded.toLocaleString('ru-RU')} ₲`;
+        return `${Math.round(amount).toLocaleString('ru-RU')} ₲`;
     }
 }
 
