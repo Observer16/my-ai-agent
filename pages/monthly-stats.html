@@ -135,40 +135,47 @@
     }
 
     function renderDailyChart(dailyData, totalSpent) {
-        const container = document.getElementById('daily-chart');
+    const container = document.getElementById('daily-chart');
 
-        if (!dailyData || dailyData.length === 0) {
-            container.innerHTML = '<div class="empty">Нет данных за этот период</div>';
-            return;
-        }
-
-        // Сортируем по дате
-        dailyData.sort((a, b) => new Date(a.purchase_day) - new Date(b.purchase_day));
-
-        // Берем последние 14 дней или все, если меньше
-        const daysToShow = dailyData.slice(-14);
-        const maxAmount = Math.max(...daysToShow.map(d => d.day_spent), 1);
-
-        const html = daysToShow.map(day => {
-            const date = new Date(day.purchase_day);
-            const dateStr = `${date.getDate()} ${['янв', 'фев', 'мар', 'апр', 'май', 'июн',
-                                                  'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'][date.getMonth()]}`;
-            const percent = (day.day_spent / maxAmount) * 100;
-
-            return `
-                <div class="day-row">
-                    <div class="day-date">${dateStr}</div>
-                    <div class="day-bar">
-                        <div class="day-bar-fill" style="width: ${percent}%"></div>
-                    </div>
-                    <div class="day-amount">${formatMoney(day.day_spent)}</div>
-                    <div class="day-count">${day.purchases_count} покупок</div>
-                </div>
-            `;
-        }).join('');
-
-        container.innerHTML = html;
+    if (!dailyData || dailyData.length === 0) {
+        container.innerHTML = '<div class="empty">Нет данных за этот период</div>';
+        return;
     }
+
+    // Сортируем по дате
+    dailyData.sort((a, b) => new Date(a.purchase_day) - new Date(b.purchase_day));
+
+    // Берем последние 14 дней или все, если меньше
+    const daysToShow = dailyData.slice(-14);
+    const maxAmount = Math.max(...daysToShow.map(d => d.day_spent), 1);
+
+    const html = daysToShow.map(day => {
+        // Парсим дату корректно, учитывая что purchase_day уже в формате YYYY-MM-DD
+        const [year, month, dayOfMonth] = day.purchase_day.split('-').map(Number);
+
+        // Создаем дату в UTC, чтобы избежать смещения из-за часового пояса
+        const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
+
+        const monthNames = ['янв', 'фев', 'мар', 'апр', 'май', 'июн',
+                           'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+        const dateStr = `${dayOfMonth} ${monthNames[month - 1]}`;
+
+        const percent = (day.day_spent / maxAmount) * 100;
+
+        return `
+            <div class="day-row">
+                <div class="day-date">${dateStr}</div>
+                <div class="day-bar">
+                    <div class="day-bar-fill" style="width: ${percent}%"></div>
+                </div>
+                <div class="day-amount">${formatMoney(day.day_spent)}</div>
+                <div class="day-count">${day.purchases_count} покупок</div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
 
     function renderTopCategories(categories, totalSpent) {
         const container = document.getElementById('categories-list');
