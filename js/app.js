@@ -55,6 +55,7 @@ async function updateUserOnFirstLogin() {
     } catch (error) {
         console.error('❌ Ошибка обновления пользователя:', error);
         // Не прерываем работу приложения при ошибке обновления пользователя
+        return null;
     }
 }
 
@@ -66,6 +67,8 @@ function showGreeting() {
     const greetingEl = document.getElementById('greeting');
     const userInfoEl = document.getElementById('user-info');
 
+    if (!greetingEl || !userInfoEl) return;
+
     if (user) {
         const hour = new Date().getHours();
         let greeting = 'Добрый день';
@@ -75,7 +78,7 @@ function showGreeting() {
         else greeting = 'Добрый вечер';
 
         greetingEl.textContent = `${greeting}, ${user.first_name}! 👋`;
-        userInfoEl.textContent = `@${user.username || 'user'}`;
+        userInfoEl.textContent = user.username ? `@${user.username}` : 'Telegram Mini App';
     } else {
         greetingEl.textContent = 'Добро пожаловать! 👋';
         userInfoEl.textContent = 'Telegram Mini App';
@@ -88,46 +91,46 @@ function showGreeting() {
 async function loadDashboardData() {
     // Загружаем информацию о семье
     await loadFamilyInfo();
-    
+
     // Загрузка месячной статистики
     await loadMonthlyStats();
-    
+
     // Бюджет
     try {
         const stats = await API.getStatistics();
-        document.getElementById('budget-total').textContent = formatCurrency(stats.total_spent);
-        document.getElementById('budget-purchases').textContent = stats.total_purchases || 0;
+        safeSetText('budget-total', formatCurrency(stats.total_spent));
+        safeSetText('budget-purchases', stats.total_purchases || 0);
     } catch (error) {
         console.error('Ошибка загрузки бюджета:', error);
-        document.getElementById('budget-total').textContent = 'Ошибка';
-        document.getElementById('budget-purchases').textContent = '-';
+        safeSetText('budget-total', 'Ошибка');
+        safeSetText('budget-purchases', '-');
     }
-    
+
     // Товары и категории
     try {
         const [products, categories] = await Promise.all([
             API.getProducts(null, null, 1),
             API.getCategories()
         ]);
-        
+
         // Для получения общего количества товаров делаем отдельный запрос
         const allProducts = await API.getProducts(null, null, 500);
-        
-        document.getElementById('products-total').textContent = allProducts.length || 0;
-        document.getElementById('categories-total').textContent = categories.length || 0;
+
+        safeSetText('products-total', allProducts.length || 0);
+        safeSetText('categories-total', categories.length || 0);
     } catch (error) {
         console.error('Ошибка загрузки товаров:', error);
-        document.getElementById('products-total').textContent = '-';
-        document.getElementById('categories-total').textContent = '-';
+        safeSetText('products-total', '-');
+        safeSetText('categories-total', '-');
     }
-    
+
     // Здоровье (заглушка)
-    document.getElementById('health-today').textContent = '😊';
-    document.getElementById('health-week').textContent = '4.2/5';
-    
+    safeSetText('health-today', '😊');
+    safeSetText('health-week', '4.2/5');
+
     // Активность (заглушка)
-    document.getElementById('activity-steps').textContent = '8.5K';
-    document.getElementById('activity-workouts').textContent = '3';
+    safeSetText('activity-steps', '8.5K');
+    safeSetText('activity-workouts', '3');
 }
 
 /**
@@ -136,24 +139,24 @@ async function loadDashboardData() {
 async function loadMonthlyStats() {
     try {
         const stats = await API.getMonthlyStatistics();
-        
+
         // Форматируем сумму
-        document.getElementById('monthly-total').textContent = formatCurrency(stats.summary.total_spent);
-        
+        safeSetText('monthly-total', formatCurrency(stats.summary.total_spent));
+
         // Период
         const now = new Date();
         const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
                            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-        document.getElementById('monthly-period').textContent = monthNames[now.getMonth()];
-        
+        safeSetText('monthly-period', monthNames[now.getMonth()]);
+
         // Количество покупок
-        document.getElementById('monthly-purchases').textContent = stats.summary.total_purchases;
-        
+        safeSetText('monthly-purchases', stats.summary.total_purchases);
+
     } catch (error) {
         console.error('Ошибка загрузки месячной статистики:', error);
-        document.getElementById('monthly-total').textContent = 'Ошибка';
-        document.getElementById('monthly-period').textContent = '-';
-        document.getElementById('monthly-purchases').textContent = '-';
+        safeSetText('monthly-total', 'Ошибка');
+        safeSetText('monthly-period', '-');
+        safeSetText('monthly-purchases', '-');
     }
 }
 
@@ -164,7 +167,9 @@ async function loadFamilyInfo() {
     try {
         const family = await API.getFamilyInfo();
         const container = document.getElementById('family-indicator');
-        
+
+        if (!container) return;
+
         if (family) {
             container.innerHTML = `
                 <div class="family-indicator" onclick="openFamily()">
@@ -190,7 +195,7 @@ async function checkPendingInvites() {
     try {
         console.log('📬 Проверка входящих приглашений...');
         const invites = await API.getPendingInvites();
-        
+
         if (invites && invites.length > 0) {
             console.log(`✅ Найдено приглашений: ${invites.length}`);
             allPendingInvites = invites;
@@ -208,28 +213,33 @@ async function checkPendingInvites() {
  */
 function showInviteModal(invite) {
     currentInvite = invite;
-    
+
     const inviterName = invite.invited_by_first_name || invite.invited_by_username || 'Пользователь';
     const familyName = invite.family_name || 'Без названия';
     const hoursLeft = Math.floor(invite.hours_remaining);
-    
-    document.getElementById('invite-text').innerHTML = `
+
+    const inviteTextEl = document.getElementById('invite-text');
+    const messageEl = document.getElementById('invite-message');
+    const expiryEl = document.getElementById('invite-expiry');
+    const modalEl = document.getElementById('invite-modal');
+
+    if (!inviteTextEl || !messageEl || !expiryEl || !modalEl) return;
+
+    inviteTextEl.innerHTML = `
         <strong>${inviterName}</strong> приглашает вас<br>
         в семью "<strong>${familyName}</strong>"
     `;
-    
-    const messageEl = document.getElementById('invite-message');
+
     if (invite.message) {
         messageEl.textContent = `💬 "${invite.message}"`;
         messageEl.style.display = 'block';
     } else {
         messageEl.style.display = 'none';
     }
-    
-    document.getElementById('invite-expiry').textContent = 
-        `⏳ Приглашение действительно ещё ${hoursLeft} ч.`;
-    
-    document.getElementById('invite-modal').classList.add('active');
+
+    expiryEl.textContent = `⏳ Приглашение действительно ещё ${hoursLeft} ч.`;
+
+    modalEl.classList.add('active');
     tg.HapticFeedback.notificationOccurred('success');
 }
 
@@ -238,13 +248,14 @@ function showInviteModal(invite) {
  */
 async function acceptCurrentInvite() {
     if (!currentInvite) return;
-    
+
     try {
         tg.HapticFeedback.impactOccurred('medium');
         const result = await API.acceptInvite(currentInvite.invite_token);
-        
-        document.getElementById('invite-modal').classList.remove('active');
-        
+
+        const modalEl = document.getElementById('invite-modal');
+        if (modalEl) modalEl.classList.remove('active');
+
         tg.showPopup({
             title: '✅ Успешно!',
             message: `Вы вступили в семью "${result.family_name}"!`,
@@ -263,17 +274,18 @@ async function acceptCurrentInvite() {
  */
 async function declineCurrentInvite() {
     if (!currentInvite) return;
-    
+
     try {
         tg.HapticFeedback.impactOccurred('light');
         await API.declineInvite(currentInvite.invite_token);
-        
-        document.getElementById('invite-modal').classList.remove('active');
-        
+
+        const modalEl = document.getElementById('invite-modal');
+        if (modalEl) modalEl.classList.remove('active');
+
         allPendingInvites = allPendingInvites.filter(
             inv => inv.invite_token !== currentInvite.invite_token
         );
-        
+
         if (allPendingInvites.length > 0) {
             setTimeout(() => {
                 showInviteModal(allPendingInvites[0]);
@@ -282,32 +294,6 @@ async function declineCurrentInvite() {
     } catch (error) {
         console.error('❌ Ошибка отклонения приглашения:', error);
         tg.showAlert('Ошибка: ' + error.message);
-    }
-}
-
-/**
- * Добавление пользователя
- */
-async function updateUserInfo() {
-    const user = window.Telegram.WebApp.initDataUnsafe?.user;
-    
-    if (!user) {
-        console.error('Нет данных пользователя');
-        return;
-    }
-    
-    try {
-        const result = await API.post('/user/update-info', {
-            first_name: user.first_name,
-            username: user.username
-        });
-        
-        console.log('✅ Информация обновлена:', result);
-        return result;
-        
-    } catch (error) {
-        console.error('❌ Ошибка обновления:', error);
-        throw error;
     }
 }
 
@@ -324,7 +310,7 @@ function openMonthlyStats() {
  */
 function openModule(moduleName) {
     tg.HapticFeedback.impactOccurred('light');
-    
+
     const modulePages = {
         'budget': 'pages/budget.html',
         'products': 'pages/products.html',
@@ -333,7 +319,7 @@ function openModule(moduleName) {
         'activity': 'pages/activity.html',
         'doctor': 'pages/doctor.html'
     };
-    
+
     const page = modulePages[moduleName];
     if (page) {
         window.location.href = page;
@@ -346,24 +332,47 @@ function openModule(moduleName) {
  * Форматировать валюту
  */
 function formatCurrency(amount) {
-    if (!amount || amount === 0) return '0 ₲';
-    
-    // Убираем округление, работаем с точным числом
-    const absAmount = Math.abs(amount);
+    if (amount === null || amount === undefined || isNaN(amount)) return '0 ₲';
+
+    const numAmount = Number(amount);
+    if (numAmount === 0) return '0 ₲';
+
+    // Убираем округление для сумм < 1000
+    if (Math.abs(numAmount) < 1000) {
+        // Для целых чисел убираем дробную часть
+        if (Number.isInteger(numAmount)) {
+            return `${numAmount.toLocaleString('ru-RU')} ₲`;
+        }
+        // Для дробных чисел показываем 1 знак после запятой
+        return `${numAmount.toLocaleString('ru-RU', {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} ₲`;
+    }
 
     // Для сумм >= 1 000 000 (миллион)
-    if (absAmount >= 1000000) {
-        const millions = (amount / 1000000).toFixed(1);  // ✅ С десятыми
-        return `${millions}M ₲`;
+    if (Math.abs(numAmount) >= 1000000) {
+        const millions = (numAmount / 1000000);
+        // Показываем 1 знак после запятой только если есть дробная часть
+        const formatted = millions % 1 === 0 ?
+            millions.toLocaleString('ru-RU') :
+            millions.toLocaleString('ru-RU', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+        return `${formatted}M ₲`;
     }
     // Для сумм >= 1 000 (тысяча)
-    else if (absAmount >= 1000) {
-        const thousands = (amount / 1000).toFixed(1);  // ✅ С десятыми
-        return `${thousands}K ₲`;
-    }
-    // Для сумм < 1 000
-    else {
-        return `${Math.round(amount).toLocaleString('ru-RU')} ₲`;
+    else if (Math.abs(numAmount) >= 1000) {
+        const thousands = (numAmount / 1000);
+        // Показываем 1 знак после запятой только если есть дробная часть
+        const formatted = thousands % 1 === 0 ?
+            thousands.toLocaleString('ru-RU') :
+            thousands.toLocaleString('ru-RU', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+        return `${formatted}K ₲`;
     }
 }
 
@@ -372,11 +381,7 @@ function formatCurrency(amount) {
  */
 function openFamily() {
     tg.HapticFeedback.impactOccurred('light');
-
-    // Проверяем, создана ли страница семьи
-    // Если страница существует, переходим на неё
     window.location.href = 'pages/family.html';
-
 }
 
 /**
@@ -384,7 +389,7 @@ function openFamily() {
  */
 function quickAction(action) {
     tg.HapticFeedback.impactOccurred('medium');
-    
+
     const actions = {
         'log-expense': () => {
             // Открыть форму добавления расхода
@@ -407,7 +412,7 @@ function quickAction(action) {
             window.location.href = 'pages/doctor.html';
         }
     };
-    
+
     const actionFn = actions[action];
     if (actionFn) {
         actionFn();
@@ -444,6 +449,16 @@ function showError(elementId, message) {
     const el = document.getElementById(elementId);
     if (el) {
         el.innerHTML = `<div class="error">❌ ${message}</div>`;
+    }
+}
+
+/**
+ * Безопасно установить текст в элемент
+ */
+function safeSetText(elementId, text) {
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.textContent = text;
     }
 }
 
