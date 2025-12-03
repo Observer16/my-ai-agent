@@ -23,7 +23,7 @@ const storeTypeColors = {
     'Аптека': { bg: '#ef4444', text: 'white' },         // Красный
     'Транспорт': { bg: '#3b82f6', text: 'white' },      // Синий
     'Разное': { bg: '#6b7280', text: 'white' },         // Серый
-    'Ресторан': { bg: '#f59e0b', text: 'white' },       // Оранжевый
+    'Фастфуд': { bg: '#f59e0b', text: 'white' },       // Оранжевый
     'Заправка': { bg: '#6366f1', text: 'white' },       // Индиго
     'Кафе': { bg: '#f97316', text: 'white' },           // Тёмно-оранжевый
     'Клиника': { bg: '#ec4899', text: 'white' },        // Розовый
@@ -412,7 +412,7 @@ function renderStoreList() {
     let html = '';
 
     // Порядок отображения типов
-    const typeOrder = ['Супермаркет', 'Магазин', 'Аптека', 'Для дома', 'Транспорт', 'Кафе', 'Заправка', 'Разное'];
+    const typeOrder = ['Супермаркет', 'Магазин', 'Для дома', 'Транспорт', 'Фастфуд', 'Аптека','Заправка', 'Разное'];
 
     typeOrder.forEach(type => {
         if (!grouped[type]) return;
@@ -744,10 +744,11 @@ function showCreateStore(e) {
                 <div class="simple-modal-buttons">
                     <button onclick="selectStoreType('Супермаркет')">🛒 Супермаркет</button>
                     <button onclick="selectStoreType('Магазин')">🏪 Магазин</button>
-                    <button onclick="selectStoreType('Аптека')">💊 Аптека</button>
+                    <button onclick="selectStoreType('Фастфуд')">🍽️ Фастфуд</button>
                     <button onclick="selectStoreType('Транспорт')">🚗 Транспорт</button>
                     <button onclick="selectStoreType('Разное')">🏬 Разное</button>
                     <button onclick="selectStoreType('Для дома')">🏠 Для дома</button>
+                    <button onclick="selectStoreType('Аптека')">💊 Аптека</button>
                     <button onclick="closeSimpleModal('create-store-type-modal')" class="secondary">❌ Отмена</button>
                 </div>
             </div>
