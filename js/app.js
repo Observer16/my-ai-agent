@@ -331,48 +331,63 @@ function openModule(moduleName) {
 /**
  * Форматировать валюту
  */
+
 function formatCurrency(amount) {
-    if (amount === null || amount === undefined || isNaN(amount)) return '0 ₲';
+    return formatCurrencyOptimized(amount);
+}
+
+function formatCurrencyOptimized(amount) {
+    if (amount == null || isNaN(amount)) return '0 ₲';
 
     const numAmount = Number(amount);
     if (numAmount === 0) return '0 ₲';
 
-    // Убираем округление для сумм < 1000
-    if (Math.abs(numAmount) < 1000) {
-        // Для целых чисел убираем дробную часть
+    const absAmount = Math.abs(numAmount);
+
+    // Для сумм >= 1000 всегда используем K (тысячи)
+    if (absAmount >= 1000) {
+        const thousands = numAmount / 1000;
+        const isInteger = thousands % 1 === 0;
+
+        if (isInteger) {
+            // Целые тысячи: 1 551 000 → 1 551K
+            const integerThousands = Math.floor(Math.abs(thousands));
+            const sign = numAmount < 0 ? '-' : '';
+            const formatted = formatNumberWithSpaces(integerThousands);
+            return `${sign}${formatted}K ₲`;
+        } else {
+            // Дробные тысячи: 1 600 000 → 1 600K (не 1,6M)
+            // Но на самом деле 1 600 000 / 1000 = 1600 (целое)
+            // Проверим, является ли число целым кратным 1000
+            if (numAmount % 1000 === 0) {
+                // Если кратно 1000, показываем как целое число тысяч
+                const integerThousands = Math.abs(numAmount) / 1000;
+                const sign = numAmount < 0 ? '-' : '';
+                const formatted = formatNumberWithSpaces(integerThousands);
+                return `${sign}${formatted}K ₲`;
+            } else {
+                // Не кратно 1000: 1 551 234 → 1 551.2K
+                const roundedThousands = Math.round(thousands * 10) / 10;
+                // Разделяем на целую и дробную части
+                const integerPart = Math.floor(Math.abs(roundedThousands));
+                const fractionalPart = Math.round((Math.abs(roundedThousands) - integerPart) * 10);
+                const sign = numAmount < 0 ? '-' : '';
+                const formattedInteger = formatNumberWithSpaces(integerPart);
+
+                return `${sign}${formattedInteger}.${fractionalPart}K ₲`;
+            }
+        }
+    }
+    // Для сумм < 1000
+    else {
         if (Number.isInteger(numAmount)) {
             return `${numAmount.toLocaleString('ru-RU')} ₲`;
+        } else {
+            return `${numAmount.toLocaleString('ru-RU', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            })} ₲`;
         }
-        // Для дробных чисел показываем 1 знак после запятой
-        return `${numAmount.toLocaleString('ru-RU', {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} ₲`;
-    }
-
-    // Для сумм >= 1 000 000 (миллион)
-    if (Math.abs(numAmount) >= 1000000) {
-        const millions = (numAmount / 1000000);
-        // Показываем 1 знак после запятой только если есть дробная часть
-        const formatted = millions % 1 === 0 ?
-            millions.toLocaleString('ru-RU') :
-            millions.toLocaleString('ru-RU', {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1
-            });
-        return `${formatted}M ₲`;
-    }
-    // Для сумм >= 1 000 (тысяча)
-    else if (Math.abs(numAmount) >= 1000) {
-        const thousands = (numAmount / 1000);
-        // Показываем 1 знак после запятой только если есть дробная часть
-        const formatted = thousands % 1 === 0 ?
-            thousands.toLocaleString('ru-RU') :
-            thousands.toLocaleString('ru-RU', {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1
-            });
-        return `${formatted}K ₲`;
     }
 }
 
