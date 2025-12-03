@@ -9,167 +9,128 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="header">
-        <h1>🤖 Мой AI Агент</h1>
-        <p>Умный помощник для жизни v0.2</p>
+<div class="header">
+    <h1>🤖 Мой AI Агент</h1>
+    <p>Умный помощник для жизни v0.2</p>
+</div>
+
+<div class="user-greeting">
+    <div class="user-greeting-text">
+        <h2 id="greeting">Загрузка...</h2>
+        <p id="user-info"></p>
     </div>
+    <div id="family-indicator"></div>
+</div>
 
-    <div class="user-greeting">
-        <div class="user-greeting-text">
-            <h2 id="greeting">Загрузка...</h2>
-            <p id="user-info"></p>
-        </div>
-        <div id="family-indicator"></div>
+<!-- Месячные расходы -->
+<div class="monthly-summary" onclick="openMonthlyStats()">
+    <div class="monthly-summary-header">💰 Расходы за текущий месяц</div>
+    <div class="monthly-summary-amount" id="monthly-total">-</div>
+    <div class="monthly-summary-details">
+        <span>📅 <span id="monthly-period">-</span></span>
+        <span>🧾 <span id="monthly-purchases">-</span> покупок</span>
     </div>
+</div>
 
-    <!-- Месячные расходы -->
-    <div class="monthly-summary" onclick="openMonthlyStats()">
-        <div class="monthly-summary-header">💰 Расходы за текущий месяц</div>
-        <div class="monthly-summary-amount" id="monthly-total">-</div>
-        <div class="monthly-summary-details">
-            <span>📅 <span id="monthly-period">-</span></span>
-            <span>🧾 <span id="monthly-purchases">-</span> покупок</span>
-        </div>
+<!-- Здоровье -->
+<div class="module-card" onclick="openModule('health')">
+    <div class="module-header">
+        <div class="module-icon">💪</div>
+        <div class="module-title">Здоровье</div>
     </div>
-
-    <div class="modules">
-        <!-- Покупки в супермаркетах -->
-        <div class="module-card" onclick="openModule('budget')">
-            <div class="module-header">
-                <div class="module-icon">💰</div>
-                <div class="module-title">Покупки в супермаркетах</div>
-            </div>
-            <div class="module-description">
-                Анализ цен и умные рекомендации по экономии
-            </div>
-            <div class="module-stats">
-                <div class="module-stat">
-                    <strong id="budget-total">-</strong> всего
-                </div>
-                <div class="module-stat">
-                    <strong id="budget-purchases">-</strong> покупок
-                </div>
-            </div>
+    <div class="module-description">
+        Ежедневная оценка самочувствия, трекинг симптомов и рекомендации
+    </div>
+    <div class="module-stats">
+        <div class="module-stat">
+            <strong id="health-today">-</strong> сегодня
         </div>
-
-        <!-- Управление товарами -->
-        <div class="module-card" onclick="openModule('products')">
-            <div class="module-header">
-                <div class="module-icon">📦</div>
-                <div class="module-title">Управление товарами</div>
-            </div>
-            <div class="module-description">
-                Категоризация товаров и управление каталогом
-            </div>
-            <div class="module-stats">
-                <div class="module-stat">
-                    <strong id="products-total">-</strong> товаров
-                </div>
-                <div class="module-stat">
-                    <strong id="categories-total">-</strong> категорий
-                </div>
-            </div>
-        </div>
-
-        <!-- Здоровье -->
-        <div class="module-card" onclick="openModule('health')">
-            <div class="module-header">
-                <div class="module-icon">💪</div>
-                <div class="module-title">Здоровье</div>
-            </div>
-            <div class="module-description">
-                Ежедневная оценка самочувствия, трекинг симптомов и рекомендации
-            </div>
-            <div class="module-stats">
-                <div class="module-stat">
-                    <strong id="health-today">-</strong> сегодня
-                </div>
-                <div class="module-stat">
-                    <strong id="health-week">-</strong> неделя
-                </div>
-            </div>
-        </div>
-
-        <!-- Физическая активность -->
-        <div class="module-card" onclick="openModule('activity')">
-            <div class="module-header">
-                <div class="module-icon">🏃</div>
-                <div class="module-title">Активность</div>
-            </div>
-            <div class="module-description">
-                Трекер тренировок, шагов и калорий с персональными планами
-            </div>
-            <div class="module-stats">
-                <div class="module-stat">
-                    <strong id="activity-steps">-</strong> шагов
-                </div>
-                <div class="module-stat">
-                    <strong id="activity-workouts">-</strong> тренировок
-                </div>
-            </div>
-        </div>
-
-        <!-- AI Консультант -->
-        <div class="module-card" onclick="openModule('doctor')">
-            <div class="module-header">
-                <div class="module-icon">🩺</div>
-                <div class="module-title">Медицинский консультант</div>
-            </div>
-            <div class="module-description">
-                AI-помощник для консультаций по здоровью и первой помощи
-            </div>
-            <div class="module-stats">
-                <div class="module-stat">
-                    Доступен 24/7
-                </div>
-            </div>
+        <div class="module-stat">
+            <strong id="health-week">-</strong> неделя
         </div>
     </div>
+</div>
 
-    <!-- Быстрые действия -->
-    <div class="quick-actions">
-        <h3>Быстрые действия</h3>
-        <div class="action-buttons">
-            <div class="action-btn" onclick="openModule('add-expense')">
-                💳 Добавить расход
-            </div>
-            <div class="action-btn" onclick="openModule('products')">
-                📦 Управление товарами
-            </div>
-            <div class="action-btn" onclick="openModule('budget')">
-                📊 Анализ цен
-            </div>
-            <div class="action-btn" onclick="openFamily()">
-                👥 Моя семья
-            </div>
+<!-- Физическая активность -->
+<div class="module-card" onclick="openModule('activity')">
+    <div class="module-header">
+        <div class="module-icon">🏃</div>
+        <div class="module-title">Активность</div>
+    </div>
+    <div class="module-description">
+        Трекер тренировок, шагов и калорий с персональными планами
+    </div>
+    <div class="module-stats">
+        <div class="module-stat">
+            <strong id="activity-steps">-</strong> шагов
+        </div>
+        <div class="module-stat">
+            <strong id="activity-workouts">-</strong> тренировок
         </div>
     </div>
+</div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ПРИГЛАШЕНИЯ -->
-    <div class="invite-modal" id="invite-modal">
-        <div class="invite-modal-content">
-            <div class="invite-modal-icon">👥</div>
-            <h2>Приглашение в семью</h2>
-            <div class="invite-modal-text" id="invite-text"></div>
-            <div class="invite-message" id="invite-message" style="display: none;"></div>
-            <div class="invite-warning">
-                ⚠️ Если вы уже состоите в семье, вы автоматически выйдете из неё
-            </div>
-            <div class="invite-expiry" id="invite-expiry"></div>
-            <div class="invite-modal-buttons">
-                <button class="invite-btn invite-btn-decline" onclick="declineCurrentInvite()">
-                    ❌ Отклонить
-                </button>
-                <button class="invite-btn invite-btn-accept" onclick="acceptCurrentInvite()">
-                    ✅ Принять
-                </button>
-            </div>
+<!-- AI Консультант -->
+<div class="module-card" onclick="openModule('doctor')">
+    <div class="module-header">
+        <div class="module-icon">🩺</div>
+        <div class="module-title">Медицинский консультант</div>
+    </div>
+    <div class="module-description">
+        AI-помощник для консультаций по здоровью и первой помощи
+    </div>
+    <div class="module-stats">
+        <div class="module-stat">
+            Доступен 24/7
         </div>
     </div>
+</div>
+</div>
 
-    <!-- Сначала конфиг, потом API, потом app -->
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+<!-- Быстрые действия -->
+<div class="quick-actions">
+    <h3>Быстрые действия</h3>
+    <div class="action-buttons">
+        <div class="action-btn" onclick="openModule('add-expense')">
+            💳 Добавить расход
+        </div>
+        <div class="action-btn" onclick="openModule('products')">
+            📦 Управление товарами
+        </div>
+        <div class="action-btn" onclick="openModule('budget')">
+            📊 Анализ цен
+        </div>
+        <div class="action-btn" onclick="openFamily()">
+            👥 Моя семья
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ПРИГЛАШЕНИЯ -->
+<div class="invite-modal" id="invite-modal">
+    <div class="invite-modal-content">
+        <div class="invite-modal-icon">👥</div>
+        <h2>Приглашение в семью</h2>
+        <div class="invite-modal-text" id="invite-text"></div>
+        <div class="invite-message" id="invite-message" style="display: none;"></div>
+        <div class="invite-warning">
+            ⚠️ Если вы уже состоите в семье, вы автоматически выйдете из неё
+        </div>
+        <div class="invite-expiry" id="invite-expiry"></div>
+        <div class="invite-modal-buttons">
+            <button class="invite-btn invite-btn-decline" onclick="declineCurrentInvite()">
+                ❌ Отклонить
+            </button>
+            <button class="invite-btn invite-btn-accept" onclick="acceptCurrentInvite()">
+                ✅ Принять
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Сначала конфиг, потом API, потом app -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
