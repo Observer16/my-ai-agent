@@ -724,8 +724,8 @@ function showCreateProduct(e) {
         .join('');
 
     const modalHtml = `
-        <div id="create-product-name-modal" class="simple-modal">
-            <div class="simple-modal-content">
+        <div id="create-product-name-modal" class="simple-modal" onclick="handleModalBackdropClick(event, 'create-product-name-modal')">
+            <div class="simple-modal-content" onclick="event.stopPropagation()">
                 <h3>Новый товар</h3>
                 <input type="text" id="new-product-name-input"
                        placeholder="Название товара"
@@ -754,6 +754,14 @@ function showCreateProduct(e) {
     }, 100);
 
     tg.HapticFeedback.impactOccurred('light');
+}
+
+// Новая функция для закрытия по клику на фон
+function handleModalBackdropClick(event, modalId) {
+    // Закрываем только если клик был именно на фон, а не на content
+    if (event.target.classList.contains('simple-modal')) {
+        closeSimpleModal(modalId);
+    }
 }
 
 // Функция для создания товара с штрих-кодом
@@ -860,6 +868,20 @@ async function createProduct(name, barcode = null, categoryId = null) {
     } catch (e) {
         console.error('❌ Ошибка создания товара:', e);
         tg.showAlert('Ошибка создания товара: ' + e.message);
+    }
+}
+
+function closeSimpleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        // Добавляем класс для анимации fade-out
+        modal.style.opacity = '0';
+        modal.querySelector('.simple-modal-content').style.transform = 'translateY(20px)';
+
+        // Удаляем модальное окно после анимации
+        setTimeout(() => {
+            modal.remove();
+        }, 200);
     }
 }
 

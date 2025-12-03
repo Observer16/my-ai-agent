@@ -499,6 +499,12 @@ body {
     justify-content: center;
     z-index: 10000;
     padding: 20px;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.simple-modal.hidden {
+    display: none !important;
 }
 
 .simple-modal-content {
@@ -508,6 +514,8 @@ body {
     width: 100%;
     max-width: 320px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(0);
+    transition: transform 0.2s ease;
 }
 
 .simple-modal-content h3 {
