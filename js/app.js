@@ -329,64 +329,77 @@ function openModule(moduleName) {
 }
 
 /**
- * Форматировать валюту
+ * Вспомогательная функция для форматирования чисел с пробелами тысяч
  */
+function formatNumberWithSpaces(number) {
+    if (number == null || isNaN(number)) return '0';
 
-function formatCurrency(amount) {
-    return formatCurrencyOptimized(amount);
+    const numStr = Math.abs(Math.floor(number)).toString();
+    let result = '';
+
+    // Разбиваем число на группы по 3 цифры с конца
+    for (let i = numStr.length - 1, count = 0; i >= 0; i--) {
+        result = numStr[i] + result;
+        count++;
+
+        // Добавляем пробел после каждых 3 цифр (но не перед первой цифрой)
+        if (count % 3 === 0 && i !== 0) {
+            result = ' ' + result;
+        }
+    }
+
+    return number < 0 ? '-' + result : result;
 }
 
-function formatCurrencyOptimized(amount) {
+/**
+ * Форматировать валюту
+ */
+function formatCurrency(amount) {
     if (amount == null || isNaN(amount)) return '0 ₲';
 
     const numAmount = Number(amount);
     if (numAmount === 0) return '0 ₲';
 
     const absAmount = Math.abs(numAmount);
+    const sign = numAmount < 0 ? '-' : '';
 
     // Для сумм >= 1000 всегда используем K (тысячи)
     if (absAmount >= 1000) {
         const thousands = numAmount / 1000;
-        const isInteger = thousands % 1 === 0;
 
-        if (isInteger) {
+        // Проверяем, является ли число тысяч целым
+        if (Math.abs(thousands) % 1 === 0) {
             // Целые тысячи: 1 551 000 → 1 551K
-            const integerThousands = Math.floor(Math.abs(thousands));
-            const sign = numAmount < 0 ? '-' : '';
+            const integerThousands = Math.abs(thousands);
             const formatted = formatNumberWithSpaces(integerThousands);
             return `${sign}${formatted}K ₲`;
         } else {
-            // Дробные тысячи: 1 600 000 → 1 600K (не 1,6M)
-            // Но на самом деле 1 600 000 / 1000 = 1600 (целое)
-            // Проверим, является ли число целым кратным 1000
-            if (numAmount % 1000 === 0) {
-                // Если кратно 1000, показываем как целое число тысяч
-                const integerThousands = Math.abs(numAmount) / 1000;
-                const sign = numAmount < 0 ? '-' : '';
-                const formatted = formatNumberWithSpaces(integerThousands);
-                return `${sign}${formatted}K ₲`;
-            } else {
-                // Не кратно 1000: 1 551 234 → 1 551.2K
-                const roundedThousands = Math.round(thousands * 10) / 10;
-                // Разделяем на целую и дробную части
-                const integerPart = Math.floor(Math.abs(roundedThousands));
-                const fractionalPart = Math.round((Math.abs(roundedThousands) - integerPart) * 10);
-                const sign = numAmount < 0 ? '-' : '';
-                const formattedInteger = formatNumberWithSpaces(integerPart);
+            // Дробные тысячи: 1 551 234 → 1 551.2K
+            // Округляем до одного знака после запятой
+            const rounded = Math.round(thousands * 10) / 10;
 
-                return `${sign}${formattedInteger}.${fractionalPart}K ₲`;
-            }
+            // Разделяем на целую и дробную части
+            const absRounded = Math.abs(rounded);
+            const integerPart = Math.floor(absRounded);
+            const fractionalPart = Math.round((absRounded - integerPart) * 10);
+
+            const formattedInteger = formatNumberWithSpaces(integerPart);
+
+            return `${sign}${formattedInteger}.${fractionalPart}K ₲`;
         }
     }
     // Для сумм < 1000
     else {
         if (Number.isInteger(numAmount)) {
-            return `${numAmount.toLocaleString('ru-RU')} ₲`;
+            return `${sign}${Math.abs(numAmount).toLocaleString('ru-RU')} ₲`;
         } else {
-            return `${numAmount.toLocaleString('ru-RU', {
+            // Для дробных чисел показываем 1 знак после запятой
+            const absNum = Math.abs(numAmount);
+            const formatted = absNum.toLocaleString('ru-RU', {
                 minimumFractionDigits: 1,
                 maximumFractionDigits: 1
-            })} ₲`;
+            });
+            return `${sign}${formatted} ₲`;
         }
     }
 }
