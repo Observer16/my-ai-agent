@@ -1,0 +1,305 @@
+/* Базовые стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #000);
+    padding-bottom: 80px;
+}
+
+/* Хедер */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Быстрая оценка */
+.quick-log-section {
+    padding: 20px;
+    background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    margin: 15px;
+    border-radius: 16px;
+}
+
+.quick-log-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.feeling-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.feeling-btn {
+    flex: 1;
+    font-size: 36px;
+    padding: 15px;
+    background: var(--tg-theme-bg-color, #fff);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feeling-btn:active {
+    transform: scale(0.95);
+    border-color: var(--tg-theme-button-color, #3390ec);
+}
+
+/* Статистика */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 0 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--tg-theme-button-color, #3390ec);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+/* История */
+.history-section {
+    padding: 0 15px;
+}
+
+.history-section h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    opacity: 0.7;
+}
+
+.entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.entry-card {
+    background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.entry-card:active {
+    transform: scale(0.98);
+}
+
+.entry-emoji {
+    font-size: 32px;
+}
+
+.entry-info {
+    flex: 1;
+}
+
+.entry-date {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.entry-notes {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 3px;
+}
+
+.entry-rating {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--tg-theme-button-color, #3390ec);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    opacity: 0.5;
+}
+
+/* Кнопка подробной записи */
+.btn-detailed {
+    position: fixed;
+    bottom: 20px;
+    left: 15px;
+    right: 15px;
+    background: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #fff);
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--tg-theme-bg-color, #fff);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-content label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 15px 0 10px 0;
+}
+
+.rating-scale {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.rating-btn {
+    flex: 1;
+    font-size: 32px;
+    padding: 12px;
+    background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rating-btn.selected {
+    border-color: var(--tg-theme-button-color, #3390ec);
+    background: rgba(51, 144, 236, 0.1);
+}
+
+.symptoms-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.symptom-chip {
+    padding: 8px 12px;
+    background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.symptom-chip.selected {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+    border-color: var(--tg-theme-button-color, #3390ec);
+}
+
+textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel,
+.btn-save {
+    flex: 1;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: var(--tg-theme-secondary-bg-color, #e0e0e0);
+    color: var(--tg-theme-text-color, #000);
+}
+
+.btn-save {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #fff);
+}

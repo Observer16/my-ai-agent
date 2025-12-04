@@ -3,73 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Здоровье</title>
+    <title>Дневник здоровья</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        .icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-        p {
-            color: var(--tg-theme-hint-color, #999999);
-            margin: 0 0 30px 0;
-        }
-        .btn-back {
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            max-width: 200px;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/health.css">
 </head>
 <body>
 
-    <div class="icon">🩺</div>
-    <h2>Дневник здоровья</h2>
-    <p>Форма оценки самочувствия находится в стадии разработки. Скоро здесь появятся графики и чеклисты.</p>
+<!-- ХЕДЕР -->
+<div class="header">
+    <h1>💪 Дневник здоровья</h1>
+    <p id="current-date"></p>
+</div>
 
-    <button class="btn-back" onclick="goBack()">Назад</button>
+<!-- БЫСТРАЯ ОЦЕНКА СЕГОДНЯ -->
+<div class="quick-log-section" id="quick-log-section">
+    <h3>Как вы себя чувствуете сегодня?</h3>
+    <div class="feeling-buttons">
+        <button class="feeling-btn" data-value="1" onclick="quickLog(1)">😢</button>
+        <button class="feeling-btn" data-value="2" onclick="quickLog(2)">😕</button>
+        <button class="feeling-btn" data-value="3" onclick="quickLog(3)">😐</button>
+        <button class="feeling-btn" data-value="4" onclick="quickLog(4)">🙂</button>
+        <button class="feeling-btn" data-value="5" onclick="quickLog(5)">😊</button>
+    </div>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+<!-- СТАТИСТИКА -->
+<div class="stats-section" id="stats-section">
+    <div class="stat-card">
+        <div class="stat-icon">😊</div>
+        <div class="stat-value" id="avg-feeling">-</div>
+        <div class="stat-label">Средняя оценка</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value" id="total-entries">-</div>
+        <div class="stat-label">Записей за месяц</div>
+    </div>
+</div>
 
-        // Настройка нативной кнопки "Назад"
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            goBack();
-        });
+<!-- ИСТОРИЯ ЗАПИСЕЙ -->
+<div class="history-section">
+    <h3>История записей</h3>
+    <div id="entries-list" class="entries-list"></div>
+</div>
 
-        function goBack() {
-            // Возврат на главную или закрытие, если истории нет
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.location.href = '../index.html'; // Путь к главной странице
-            }
-        }
-    </script>
+<!-- КНОПКА "ПОДРОБНАЯ ЗАПИСЬ" -->
+<button class="btn-detailed" onclick="openDetailedForm()">
+    ➕ Подробная запись
+</button>
+
+<!-- МОДАЛЬНОЕ ОКНО ПОДРОБНОЙ ФОРМЫ -->
+<div class="modal" id="detailed-modal">
+    <div class="modal-content">
+        <h2>Подробная оценка</h2>
+
+        <label>Общее самочувствие *</label>
+        <div class="rating-scale" id="overall-feeling"></div>
+
+        <label>Уровень энергии</label>
+        <div class="rating-scale" id="energy-level"></div>
+
+        <label>Качество сна</label>
+        <div class="rating-scale" id="sleep-quality"></div>
+
+        <label>Уровень стресса</label>
+        <div class="rating-scale" id="stress-level"></div>
+
+        <label>Симптомы (необязательно)</label>
+        <div class="symptoms-chips" id="symptoms-chips"></div>
+
+        <label>Заметки</label>
+        <textarea id="notes" placeholder="Дополнительные заметки..."></textarea>
+
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeDetailedForm()">Отмена</button>
+            <button class="btn-save" onclick="saveDetailedEntry()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ ПРАВИЛЬНЫЙ ПОРЯДОК ПОДКЛЮЧЕНИЯ СКРИПТОВ -->
+<script src="../js/config.js"></script>        <!-- 1. Конфигурация -->
+<script src="../js/api.js"></script>           <!-- 2. Базовый API -->
+<script src="../js/health-api.js"></script>    <!-- 3. Health API (НОВЫЙ!) -->
+<script src="../js/health.js"></script>        <!-- 4. Логика страницы -->
+
 </body>
 </html>

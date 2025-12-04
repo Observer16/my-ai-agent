@@ -124,9 +124,35 @@ async function loadDashboardData() {
         safeSetText('categories-total', '-');
     }
 
-    // Здоровье (заглушка)
-    safeSetText('health-today', '😊');
-    safeSetText('health-week', '4.2/5');
+    // Здоровье
+    try {
+        // ✅ Проверяем, что HealthAPI загружен
+        if (typeof HealthAPI !== 'undefined') {
+            const latestEntry = await HealthAPI.getLatestEntry();
+
+            if (latestEntry) {
+                const emoji = HealthAPI.getFeelingEmoji(latestEntry.overall_feeling);
+                safeSetText('health-today', emoji);
+            } else {
+                safeSetText('health-today', '—');
+            }
+
+            const stats = await HealthAPI.getStatistics(7);
+            safeSetText('health-week',
+                stats.avg_overall_feeling
+                    ? stats.avg_overall_feeling.toFixed(1) + '/5'
+                    : '—'
+            );
+        } else {
+            // Если HealthAPI не загружен, показываем заглушку
+            safeSetText('health-today', '💪');
+            safeSetText('health-week', '—');
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки здоровья:', error);
+        safeSetText('health-today', '—');
+        safeSetText('health-week', '—');
+    }
 
     // Активность (заглушка)
     safeSetText('activity-steps', '8.5K');
