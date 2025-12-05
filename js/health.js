@@ -869,10 +869,11 @@ async function saveDetailedEntry() {
 }
 
 // ==================== ПРОСМОТР И РЕДАКТИРОВАНИЕ ЗАПИСИ ====================
+// ==================== ПРОСМОТР И РЕДАКТИРОВАНИЕ ЗАПИСИ ====================
 async function viewEntry(entryId) {
     try {
-        // Находим запись в кэше
-        currentViewingEntry = allEntries.find(e => e.id === entryId);
+        // ✅ ИСПРАВЛЕНО: Используем новый endpoint GET /health/entries/{id}
+        currentViewingEntry = await HealthAPI.getEntry(entryId);
 
         if (!currentViewingEntry) {
             tg.showAlert('Запись не найдена');
@@ -955,7 +956,7 @@ async function viewEntry(entryId) {
 
     } catch (error) {
         console.error('Ошибка просмотра записи:', error);
-        tg.showAlert('Ошибка загрузки записи');
+        tg.showAlert('Ошибка загрузки записи: ' + error.message);
     }
 }
 
