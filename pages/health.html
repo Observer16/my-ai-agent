@@ -9,84 +9,262 @@
 </head>
 <body>
 
+<!-- ==================== МОДАЛЬНОЕ ОКНО: ВЫБОР ГЕНДЕРА (ПЕРВЫЙ ЗАПУСК) ==================== -->
+<div class="modal gender-modal" id="gender-setup-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>👤 Настройка профиля</h2>
+        </div>
+
+        <div class="modal-body">
+            <p class="gender-setup-text">
+                Для персонализации дневника здоровья, пожалуйста, укажите ваш пол.
+                Это поможет нам показывать релевантные симптомы и рекомендации.
+            </p>
+
+            <div class="gender-buttons">
+                <button class="gender-btn" data-gender="male" onclick="selectGenderSetup('male', this)">
+                    <div class="gender-icon">♂️</div>
+                    <div class="gender-label">Мужской</div>
+                </button>
+                <button class="gender-btn" data-gender="female" onclick="selectGenderSetup('female', this)">
+                    <div class="gender-icon">♀️</div>
+                    <div class="gender-label">Женский</div>
+                </button>
+                <button class="gender-btn" data-gender="other" onclick="selectGenderSetup('other', this)">
+                    <div class="gender-icon">⚧️</div>
+                    <div class="gender-label">Другой</div>
+                </button>
+            </div>
+
+            <div class="gender-setup-note">
+                ℹ️ Вы сможете изменить это позже в настройках профиля
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-save" onclick="saveGenderSetup()" id="save-gender-btn" disabled>
+                Продолжить
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
+<div id="main-content" style="display: none;">
+
 <!-- ХЕДЕР -->
 <div class="header">
     <h1>💪 Дневник здоровья</h1>
     <p id="current-date"></p>
+    <button class="btn-header-settings" onclick="openSettings()">⚙️</button>
 </div>
 
-<!-- БЫСТРАЯ ОЦЕНКА СЕГОДНЯ -->
+<!-- БЫСТРАЯ ОЦЕНКА -->
 <div class="quick-log-section" id="quick-log-section">
     <h3>Как вы себя чувствуете сегодня?</h3>
     <div class="feeling-buttons">
-        <button class="feeling-btn" data-value="1" onclick="quickLog(1)">😢</button>
-        <button class="feeling-btn" data-value="2" onclick="quickLog(2)">😕</button>
-        <button class="feeling-btn" data-value="3" onclick="quickLog(3)">😐</button>
-        <button class="feeling-btn" data-value="4" onclick="quickLog(4)">🙂</button>
-        <button class="feeling-btn" data-value="5" onclick="quickLog(5)">😊</button>
+        <button class="feeling-btn" data-value="1" onclick="quickLog(1)">
+            <div class="feeling-emoji">😢</div>
+            <div class="feeling-label">Плохо</div>
+        </button>
+        <button class="feeling-btn" data-value="2" onclick="quickLog(2)">
+            <div class="feeling-emoji">😕</div>
+            <div class="feeling-label">Неважно</div>
+        </button>
+        <button class="feeling-btn" data-value="3" onclick="quickLog(3)">
+            <div class="feeling-emoji">😐</div>
+            <div class="feeling-label">Норма</div>
+        </button>
+        <button class="feeling-btn" data-value="4" onclick="quickLog(4)">
+            <div class="feeling-emoji">🙂</div>
+            <div class="feeling-label">Хорошо</div>
+        </button>
+        <button class="feeling-btn" data-value="5" onclick="quickLog(5)">
+            <div class="feeling-emoji">😊</div>
+            <div class="feeling-label">Отлично</div>
+        </button>
+    </div>
+    <button class="btn-detailed-link" onclick="openDetailedForm()">
+        ➕ Подробная запись с заметками
+    </button>
+</div>
+
+<!-- СЕГОДНЯШНЯЯ ЗАПИСЬ (если есть) -->
+<div class="today-entry-section" id="today-entry-section" style="display: none;">
+    <div class="today-entry-card">
+        <div class="today-entry-header">
+            <h3>✅ Запись за сегодня</h3>
+            <button class="btn-edit-small" onclick="editTodayEntry()">✏️</button>
+        </div>
+        <div class="today-entry-body" id="today-entry-body">
+            <!-- Заполняется JS -->
+        </div>
+        <button class="btn-detailed-link" onclick="openDetailedForm()">
+            ➕ Добавить детали
+        </button>
     </div>
 </div>
 
+<!-- ФИЛЬТР ПЕРИОДА -->
+<div class="period-filter">
+    <button class="period-btn active" data-days="7" onclick="changePeriod(7, this)">Неделя</button>
+    <button class="period-btn" data-days="30" onclick="changePeriod(30, this)">Месяц</button>
+    <button class="period-btn" data-days="90" onclick="changePeriod(90, this)">3 месяца</button>
+</div>
+
 <!-- СТАТИСТИКА -->
-<div class="stats-section" id="stats-section">
-    <div class="stat-card">
+<div class="stats-grid">
+    <div class="stat-card large">
         <div class="stat-icon">😊</div>
         <div class="stat-value" id="avg-feeling">-</div>
         <div class="stat-label">Средняя оценка</div>
+        <div class="stat-trend" id="feeling-trend"></div>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value" id="avg-energy">-</div>
+        <div class="stat-label">Энергия</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">😴</div>
+        <div class="stat-value" id="avg-sleep">-</div>
+        <div class="stat-label">Качество сна</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">😰</div>
+        <div class="stat-value" id="avg-stress">-</div>
+        <div class="stat-label">Уровень стресса</div>
+    </div>
+
     <div class="stat-card">
         <div class="stat-icon">📝</div>
         <div class="stat-value" id="total-entries">-</div>
-        <div class="stat-label">Записей за месяц</div>
+        <div class="stat-label">Записей</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="streak">-</div>
+        <div class="stat-label">Дней подряд</div>
     </div>
 </div>
 
 <!-- ИСТОРИЯ ЗАПИСЕЙ -->
 <div class="history-section">
-    <h3>История записей</h3>
-    <div id="entries-list" class="entries-list"></div>
+    <div class="history-header">
+        <h3>📅 История записей</h3>
+    </div>
+
+    <div id="entries-list" class="entries-list">
+        <!-- Заполняется JS -->
+    </div>
+
+    <button class="btn-load-more" id="load-more-btn" onclick="loadMoreEntries()" style="display: none;">
+        Загрузить ещё
+    </button>
 </div>
 
-<!-- КНОПКА "ПОДРОБНАЯ ЗАПИСЬ" -->
-<button class="btn-detailed" onclick="openDetailedForm()">
-    ➕ Подробная запись
+<!-- ПЛАВАЮЩАЯ КНОПКА -->
+<button class="fab" onclick="openDetailedForm()" id="fab-btn">
+    ➕
 </button>
 
-<!-- МОДАЛЬНОЕ ОКНО ПОДРОБНОЙ ФОРМЫ -->
+</div>
+
+<!-- ==================== МОДАЛЬНОЕ ОКНО: ПОДРОБНАЯ ФОРМА ==================== -->
 <div class="modal" id="detailed-modal">
     <div class="modal-content">
-        <h2>Подробная оценка</h2>
+        <div class="modal-header">
+            <h2 id="modal-title">Новая запись</h2>
+            <button class="modal-close" onclick="closeDetailedForm()">✕</button>
+        </div>
 
-        <label>Общее самочувствие *</label>
-        <div class="rating-scale" id="overall-feeling"></div>
+        <div class="modal-body">
+            <!-- Дата записи -->
+            <div class="form-group">
+                <label>📅 Дата записи</label>
+                <input type="datetime-local" id="recorded-at" class="form-input">
+            </div>
 
-        <label>Уровень энергии</label>
-        <div class="rating-scale" id="energy-level"></div>
+            <!-- Общее самочувствие -->
+            <div class="form-group">
+                <label>😊 Общее самочувствие <span class="required">*</span></label>
+                <div class="rating-scale" id="overall-feeling"></div>
+                <div class="rating-description" id="overall-feeling-desc"></div>
+            </div>
 
-        <label>Качество сна</label>
-        <div class="rating-scale" id="sleep-quality"></div>
+            <!-- Уровень энергии -->
+            <div class="form-group">
+                <label>⚡ Уровень энергии</label>
+                <div class="rating-scale" id="energy-level"></div>
+                <div class="rating-description" id="energy-level-desc"></div>
+            </div>
 
-        <label>Уровень стресса</label>
-        <div class="rating-scale" id="stress-level"></div>
+            <!-- Качество сна -->
+            <div class="form-group">
+                <label>😴 Качество сна</label>
+                <div class="rating-scale" id="sleep-quality"></div>
+                <div class="rating-description" id="sleep-quality-desc"></div>
+            </div>
 
-        <label>Симптомы (необязательно)</label>
-        <div class="symptoms-chips" id="symptoms-chips"></div>
+            <!-- Уровень стресса -->
+            <div class="form-group">
+                <label>😰 Уровень стресса</label>
+                <div class="rating-scale" id="stress-level"></div>
+                <div class="rating-description" id="stress-level-desc"></div>
+            </div>
 
-        <label>Заметки</label>
-        <textarea id="notes" placeholder="Дополнительные заметки..."></textarea>
+            <!-- Симптомы -->
+            <div class="form-group">
+                <label>🩺 Симптомы (необязательно)</label>
+                <div class="symptoms-chips" id="symptoms-chips"></div>
+            </div>
 
-        <div class="modal-buttons">
+            <!-- Заметки -->
+            <div class="form-group">
+                <label>📝 Заметки</label>
+                <textarea id="notes" class="form-textarea" placeholder="Что вы хотите отметить?&#10;Например: хорошо спал, была головная боль после работы..."></textarea>
+                <div class="char-counter">
+                    <span id="notes-counter">0</span>/1000
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
             <button class="btn-cancel" onclick="closeDetailedForm()">Отмена</button>
             <button class="btn-save" onclick="saveDetailedEntry()">Сохранить</button>
         </div>
     </div>
 </div>
 
-<!-- ✅ ПРАВИЛЬНЫЙ ПОРЯДОК ПОДКЛЮЧЕНИЯ СКРИПТОВ -->
-<script src="../js/config.js"></script>        <!-- 1. Конфигурация -->
-<script src="../js/api.js"></script>           <!-- 2. Базовый API -->
-<script src="../js/health-api.js"></script>    <!-- 3. Health API (НОВЫЙ!) -->
-<script src="../js/health.js"></script>        <!-- 4. Логика страницы -->
+<!-- ==================== МОДАЛЬНОЕ ОКНО: ПРОСМОТР ЗАПИСИ ==================== -->
+<div class="modal" id="view-entry-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📋 Запись о здоровье</h2>
+            <button class="modal-close" onclick="closeViewModal()">✕</button>
+        </div>
+
+        <div class="modal-body" id="view-entry-body">
+            <!-- Заполняется JS -->
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-delete" onclick="confirmDeleteEntry()">🗑️ Удалить</button>
+            <button class="btn-edit" onclick="editCurrentEntry()">✏️ Редактировать</button>
+        </div>
+    </div>
+</div>
+
+<!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/health-api.js"></script>
+<script src="../js/health.js"></script>
 
 </body>
 </html>
