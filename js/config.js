@@ -1,14 +1,13 @@
 /**
  * Конфигурация приложения
- * Версия: 4.1.2
  */
 
 const CONFIG = {
     // API настройки
-    API_URL: 'https://d03b08413436.ngrok-free.app',
+    API_URL: 'https://279c938840ad.ngrok-free.app',
     
     // Версия приложения
-    VERSION: '4.1.2',
+    VERSION: '4.1.3',
     
     // Endpoints
     ENDPOINTS: {

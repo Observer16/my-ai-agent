@@ -1,14 +1,12 @@
 /**
- * Дневник здоровья - Полная реализация
- * Версия: 2.0.0
- *
- * Функционал:
- * - CRUD операции с записями
- * - Графики и визуализация трендов
- * - Генерация инсайтов на основе данных
- * - Фильтрация истории
- * - Подсчёт streak (дней подряд)
- * - Редактирование и удаление записей
+ * Дневник здоровья - Главный файл
+ * Версия: 3.0.0
+ * 
+ * Модульная архитектура:
+ * - health.js (этот файл) - инициализация и координация
+ * - health-ui.js - UI компоненты и рендеринг
+ * - health-stats.js - статистика и аналитика
+ * - health-forms.js - формы создания/редактирования
  */
 
 const tg = window.Telegram.WebApp;
@@ -16,48 +14,61 @@ tg.expand();
 tg.BackButton.show();
 tg.BackButton.onClick(() => window.history.back());
 
-// ==================== СОСТОЯНИЕ ПРИЛОЖЕНИЯ ====================
-let currentPeriodDays = 7;
-let currentEntryId = null;
-let currentViewingEntry = null;
-let selectedGenderSetup = null;
-let allEntries = [];
-let currentFilter = 'all';
-let loadedEntriesCount = 20;
-
-// Состояние формы
-let currentRatings = {
-    overall_feeling: null,
-    energy_level: null,
-    sleep_quality: null,
-    stress_level: null
+// ==================== ГЛОБАЛЬНОЕ СОСТОЯНИЕ ====================
+window.HealthApp = {
+    state: {
+        currentPeriodDays: 7,
+        todayEntry: null,
+        allEntries: [],
+        currentFilter: 'all',
+        loadedEntriesCount: 20,
+        isEditMode: false,
+        editingDate: null,
+        selectedGender: null
+    },
+    
+    // Подписка на изменения состояния
+    listeners: [],
+    
+    setState(updates) {
+        Object.assign(this.state, updates);
+        this.notifyListeners();
+    },
+    
+    subscribe(listener) {
+        this.listeners.push(listener);
+        return () => {
+            this.listeners = this.listeners.filter(l => l !== listener);
+        };
+    },
+    
+    notifyListeners() {
+        this.listeners.forEach(listener => listener(this.state));
+    }
 };
-let selectedSymptoms = [];
-let isEditMode = false;
-let editingEntryId = null;
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 async function init() {
     try {
-        // Проверяем, установлен ли гендер
+        // Проверяем гендер
         if (!HealthAPI.isGenderSet()) {
             console.log('ℹ️ Гендер не установлен, показываем форму выбора');
-            showGenderSetup();
+            HealthUI.showGenderSetup();
             return;
         }
 
-        // Гендер установлен — показываем основной контент
+        // Показываем основной контент
         document.getElementById('main-content').style.display = 'block';
 
         // Устанавливаем текущую дату
         updateCurrentDate();
 
-        // Проверяем, есть ли запись сегодня
+        // Проверяем запись за сегодня
         const hasTodayEntry = await HealthAPI.hasTodayEntry();
-
+        
         if (hasTodayEntry) {
             document.getElementById('quick-log-section').style.display = 'none';
-            await showTodayEntry();
+            await loadTodayEntry();
         }
 
         // Загружаем данные
@@ -81,41 +92,23 @@ function updateCurrentDate() {
 }
 
 async function loadAllData() {
+    const endDate = HealthAPI.getTodayDate();
+    const startDate = HealthAPI.getDateDaysAgo(HealthApp.state.currentPeriodDays);
+    
     await Promise.all([
-        loadStatistics(),
-        loadHistory(),
-        loadTrendChart(),
-        loadInsights(),
-        loadTopSymptoms()
+        loadStatistics(startDate, endDate),
+        loadHistory(startDate, endDate)
     ]);
 }
 
-// ==================== ВЫБОР ГЕНДЕРА (ПЕРВЫЙ ЗАПУСК) ====================
-function showGenderSetup() {
-    document.getElementById('gender-setup-modal').classList.add('active');
-    document.getElementById('main-content').style.display = 'none';
-}
-
-function selectGenderSetup(gender, element) {
-    selectedGenderSetup = gender;
-
-    document.querySelectorAll('#gender-setup-modal .gender-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    element.classList.add('selected');
-
-    document.getElementById('save-gender-btn').disabled = false;
-
-    tg.HapticFeedback.impactOccurred('light');
-}
-
-function saveGenderSetup() {
-    if (!selectedGenderSetup) {
+// ==================== ГЕНДЕР ====================
+async function saveGenderSetup() {
+    if (!HealthApp.state.selectedGender) {
         tg.showAlert('Пожалуйста, выберите пол');
         return;
     }
 
-    const success = HealthAPI.setGender(selectedGenderSetup);
+    const success = await HealthAPI.setGender(HealthApp.state.selectedGender);
 
     if (success) {
         document.getElementById('gender-setup-modal').classList.remove('active');
@@ -127,21 +120,31 @@ function saveGenderSetup() {
             buttons: [{ type: 'ok' }]
         });
 
-        // Инициализируем основной контент
         init();
     } else {
         tg.showAlert('Ошибка сохранения. Попробуйте ещё раз.');
     }
 }
 
+function selectGenderSetup(gender, element) {
+    HealthApp.setState({ selectedGender: gender });
+
+    document.querySelectorAll('#gender-setup-modal .gender-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    element.classList.add('selected');
+
+    document.getElementById('save-gender-btn').disabled = false;
+    tg.HapticFeedback.impactOccurred('light');
+}
+
 // ==================== БЫСТРАЯ ОЦЕНКА ====================
-async function quickLog(feeling) {
+async function quickLog(mood) {
     try {
         tg.HapticFeedback.impactOccurred('medium');
-
-        await HealthAPI.createEntry({
-            overall_feeling: feeling
-        });
+        
+        const today = HealthAPI.getTodayDate();
+        await HealthAPI.addMood(today, getMoodByFeeling(mood));
 
         tg.showPopup({
             title: '✅ Готово',
@@ -149,9 +152,8 @@ async function quickLog(feeling) {
             buttons: [{ type: 'ok' }]
         });
 
-        // Обновляем данные
         document.getElementById('quick-log-section').style.display = 'none';
-        await showTodayEntry();
+        await loadTodayEntry();
         await loadAllData();
 
     } catch (error) {
@@ -160,105 +162,60 @@ async function quickLog(feeling) {
     }
 }
 
+function getMoodByFeeling(feeling) {
+    const moodMap = {
+        1: 'грусть',
+        2: 'стресс',
+        3: 'релакс',
+        4: 'радость',
+        5: 'радостное_волнение'
+    };
+    return moodMap[feeling] || 'релакс';
+}
+
+function getFeelingByMood(mood) {
+    const feelingMap = {
+        'грусть': 1,
+        'стресс': 2,
+        'тревожность': 2,
+        'раздраженность': 2,
+        'обидчивость': 2,
+        'релакс': 3,
+        'радость': 4,
+        'радостное_волнение': 5
+    };
+    return feelingMap[mood] || 3;
+}
+
 // ==================== СЕГОДНЯШНЯЯ ЗАПИСЬ ====================
-async function showTodayEntry() {
+async function loadTodayEntry() {
     try {
-        const entry = await HealthAPI.getLatestEntry();
+        const today = HealthAPI.getTodayDate();
+        const entry = await HealthAPI.getEntry(today);
+        
         if (!entry) return;
 
-        const today = new Date().toDateString();
-        const entryDate = new Date(entry.recorded_at).toDateString();
-
-        if (today !== entryDate) return;
-
-        // Формируем HTML
-        let html = `
-            <div class="entry-detail-row">
-                <span class="entry-detail-label">Самочувствие</span>
-                <span class="entry-detail-value">${HealthAPI.getFeelingEmoji(entry.overall_feeling)} ${entry.overall_feeling}/5</span>
-            </div>
-        `;
-
-        if (entry.energy_level) {
-            html += `
-                <div class="entry-detail-row">
-                    <span class="entry-detail-label">Энергия</span>
-                    <span class="entry-detail-value">⚡ ${entry.energy_level}/5</span>
-                </div>
-            `;
-        }
-
-        if (entry.sleep_quality) {
-            html += `
-                <div class="entry-detail-row">
-                    <span class="entry-detail-label">Сон</span>
-                    <span class="entry-detail-value">😴 ${entry.sleep_quality}/5</span>
-                </div>
-            `;
-        }
-
-        if (entry.stress_level) {
-            html += `
-                <div class="entry-detail-row">
-                    <span class="entry-detail-label">Стресс</span>
-                    <span class="entry-detail-value">😰 ${entry.stress_level}/5</span>
-                </div>
-            `;
-        }
-
-        if (entry.symptoms && entry.symptoms.length > 0) {
-            html += `
-                <div class="entry-detail-row">
-                    <span class="entry-detail-label">Симптомы</span>
-                    <span class="entry-detail-value">🩺 ${entry.symptoms.join(', ')}</span>
-                </div>
-            `;
-        }
-
-        if (entry.notes) {
-            html += `
-                <div class="entry-detail-row" style="flex-direction: column; align-items: flex-start;">
-                    <span class="entry-detail-label">Заметки</span>
-                    <span class="entry-detail-value" style="margin-top: 5px; opacity: 0.8;">${escapeHtml(entry.notes)}</span>
-                </div>
-            `;
-        }
-
-        document.getElementById('today-entry-body').innerHTML = html;
-        document.getElementById('today-entry-section').style.display = 'block';
-
-        // Сохраняем ID для редактирования
-        currentEntryId = entry.id;
+        HealthApp.setState({ todayEntry: entry });
+        HealthUI.renderTodayEntry(entry);
 
     } catch (error) {
-        console.error('Ошибка загрузки сегодняшней записи:', error);
+        if (!error.message.includes('404')) {
+            console.error('Ошибка загрузки сегодняшней записи:', error);
+        }
     }
 }
 
 async function editTodayEntry() {
-    if (!currentEntryId) return;
+    const entry = HealthApp.state.todayEntry;
+    if (!entry) return;
 
-    try {
-        // Загружаем полную запись
-        const entries = await HealthAPI.getEntries(1, 1);
-        const entry = entries.find(e => e.id === currentEntryId);
-
-        if (!entry) {
-            tg.showAlert('Запись не найдена');
-            return;
-        }
-
-        openEditForm(entry);
-
-    } catch (error) {
-        console.error('Ошибка загрузки записи для редактирования:', error);
-        tg.showAlert('Ошибка загрузки записи');
-    }
+    const today = HealthAPI.getTodayDate();
+    HealthForms.openEditForm(today, entry);
 }
 
 // ==================== СМЕНА ПЕРИОДА ====================
 function changePeriod(days, element) {
-    currentPeriodDays = days;
+    HealthApp.setState({ currentPeriodDays: days });
 
     document.querySelectorAll('.period-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -270,332 +227,51 @@ function changePeriod(days, element) {
 }
 
 // ==================== СТАТИСТИКА ====================
-async function loadStatistics() {
+async function loadStatistics(startDate, endDate) {
     try {
-        const stats = await HealthAPI.getStatistics(currentPeriodDays);
-
-        // Средняя оценка
-        const avgFeeling = stats.avg_overall_feeling
-            ? stats.avg_overall_feeling.toFixed(1) + '/5'
-            : '-';
-        document.getElementById('avg-feeling').textContent = avgFeeling;
-
-        // Тренд (сравнение с предыдущим периодом)
-        // TODO: Требуется дополнительный запрос для сравнения
-        document.getElementById('feeling-trend').textContent = '';
-
-        // Энергия
-        document.getElementById('avg-energy').textContent =
-            stats.avg_energy_level ? stats.avg_energy_level.toFixed(1) + '/5' : '-';
-
-        // Сон
-        document.getElementById('avg-sleep').textContent =
-            stats.avg_sleep_quality ? stats.avg_sleep_quality.toFixed(1) + '/5' : '-';
-
-        // Стресс
-        document.getElementById('avg-stress').textContent =
-            stats.avg_stress_level ? stats.avg_stress_level.toFixed(1) + '/5' : '-';
-
-        // Количество записей
-        document.getElementById('total-entries').textContent =
-            stats.total_entries || 0;
-
-        // Streak (дни подряд)
-        const streak = await calculateStreak();
-        document.getElementById('streak').textContent = streak;
-
+        const stats = await HealthAPI.getStatisticsByDays(HealthApp.state.currentPeriodDays);
+        HealthStats.renderStatistics(stats);
+        HealthStats.renderTrendChart(stats);
+        HealthStats.renderInsights(stats);
+        HealthStats.renderTopSymptoms(stats);
     } catch (error) {
         console.error('Ошибка загрузки статистики:', error);
     }
 }
 
-async function calculateStreak() {
+// ==================== ИСТОРИЯ ====================
+async function loadHistory(startDate, endDate) {
     try {
-        const entries = await HealthAPI.getEntries(365, 365);
-
-        if (!entries || entries.length === 0) return 0;
-
-        // Сортируем по дате (новые первыми)
-        entries.sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at));
-
-        let streak = 0;
-        let currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-
-        for (const entry of entries) {
-            const entryDate = new Date(entry.recorded_at);
-            entryDate.setHours(0, 0, 0, 0);
-
-            const diffDays = Math.floor((currentDate - entryDate) / (1000 * 60 * 60 * 24));
-
-            if (diffDays === streak) {
-                streak++;
-            } else if (diffDays > streak) {
-                break;
-            }
-        }
-
-        return streak;
-
-    } catch (error) {
-        console.error('Ошибка подсчёта streak:', error);
-        return 0;
-    }
-}
-
-// ==================== ГРАФИК ТРЕНДОВ ====================
-async function loadTrendChart() {
-    try {
-        const entries = await HealthAPI.getEntries(currentPeriodDays, 100);
-        const container = document.getElementById('trend-chart');
-
-        if (!entries || entries.length === 0) {
-            container.innerHTML = '<div class="empty-state">Недостаточно данных для графика</div>';
-            return;
-        }
-
-        // Группируем по дням
-        const entriesByDay = {};
-
-        entries.forEach(entry => {
-            const date = new Date(entry.recorded_at);
-            const dateKey = date.toISOString().split('T')[0];
-
-            if (!entriesByDay[dateKey]) {
-                entriesByDay[dateKey] = [];
-            }
-            entriesByDay[dateKey].push(entry);
-        });
-
-        // Вычисляем средние значения по дням
-        const chartData = Object.keys(entriesByDay).map(dateKey => {
-            const dayEntries = entriesByDay[dateKey];
-            const avgFeeling = dayEntries.reduce((sum, e) => sum + e.overall_feeling, 0) / dayEntries.length;
-
-            return {
-                date: dateKey,
-                avgFeeling: avgFeeling,
-                count: dayEntries.length
-            };
-        });
-
-        // Сортируем по дате
-        chartData.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        // Берём последние 14 дней
-        const last14Days = chartData.slice(-14);
-
-        if (last14Days.length === 0) {
-            container.innerHTML = '<div class="empty-state">Недостаточно данных</div>';
-            return;
-        }
-
-        // Находим максимум для масштабирования
-        const maxFeeling = 5; // Всегда 5, так как это максимальная оценка
-
-        // Рендерим график
-        container.innerHTML = last14Days.map(day => {
-            const date = new Date(day.date);
-            const dayStr = date.getDate();
-            const monthStr = date.toLocaleDateString('ru-RU', { month: 'short' });
-            const dateLabel = `${dayStr} ${monthStr}`;
-
-            const percent = (day.avgFeeling / maxFeeling) * 100;
-            const feelingRounded = Math.round(day.avgFeeling * 10) / 10;
-            const feelingClass = `feeling-${Math.round(day.avgFeeling)}`;
-
-            return `
-                <div class="chart-row">
-                    <div class="chart-date">${dateLabel}</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar ${feelingClass}" style="width: ${percent}%">
-                            ${HealthAPI.getFeelingEmoji(Math.round(day.avgFeeling))}
-                        </div>
-                    </div>
-                    <div class="chart-value">${feelingRounded}/5</div>
-                </div>
-            `;
-        }).join('');
-
-    } catch (error) {
-        console.error('Ошибка загрузки графика:', error);
-    }
-}
-
-// ==================== ИНСАЙТЫ ====================
-async function loadInsights() {
-    try {
-        const entries = await HealthAPI.getEntries(currentPeriodDays, 100);
-        const container = document.getElementById('insights-list');
-        const section = document.getElementById('insights-section');
-
-        if (!entries || entries.length < 3) {
-            section.style.display = 'none';
-            return;
-        }
-
-        const insights = generateInsights(entries);
-
-        if (insights.length === 0) {
-            section.style.display = 'none';
-            return;
-        }
-
-        section.style.display = 'block';
-        container.innerHTML = insights.map(insight => `
-            <div class="insight-card ${insight.type}">
-                <div class="insight-text">${insight.text}</div>
-            </div>
-        `).join('');
-
-    } catch (error) {
-        console.error('Ошибка загрузки инсайтов:', error);
-    }
-}
-
-function generateInsights(entries) {
-    const insights = [];
-
-    // Средняя оценка
-    const avgFeeling = entries.reduce((sum, e) => sum + e.overall_feeling, 0) / entries.length;
-
-    if (avgFeeling >= 4) {
-        insights.push({
-            type: 'positive',
-            text: `✨ Отличная неделя! Ваше среднее самочувствие — ${avgFeeling.toFixed(1)}/5. Продолжайте в том же духе!`
-        });
-    } else if (avgFeeling < 3) {
-        insights.push({
-            type: 'negative',
-            text: `😔 Среднее самочувствие ниже обычного (${avgFeeling.toFixed(1)}/5). Возможно, стоит больше отдыхать и обратить внимание на здоровье.`
-        });
-    }
-
-    // Анализ сна
-    const sleepEntries = entries.filter(e => e.sleep_quality !== null);
-    if (sleepEntries.length >= 3) {
-        const avgSleep = sleepEntries.reduce((sum, e) => sum + e.sleep_quality, 0) / sleepEntries.length;
-
-        if (avgSleep < 3) {
-            insights.push({
-                type: 'warning',
-                text: `😴 Качество сна ниже среднего (${avgSleep.toFixed(1)}/5). Хороший сон — основа хорошего самочувствия. Попробуйте ложиться пораньше.`
-            });
-        }
-    }
-
-    // Анализ стресса
-    const stressEntries = entries.filter(e => e.stress_level !== null);
-    if (stressEntries.length >= 3) {
-        const avgStress = stressEntries.reduce((sum, e) => sum + e.stress_level, 0) / stressEntries.length;
-
-        if (avgStress >= 4) {
-            insights.push({
-                type: 'warning',
-                text: `😰 Высокий уровень стресса (${avgStress.toFixed(1)}/5). Не забывайте про отдых и расслабление. Попробуйте медитацию или прогулки.`
-            });
-        }
-    }
-
-    // Анализ энергии
-    const energyEntries = entries.filter(e => e.energy_level !== null);
-    if (energyEntries.length >= 3) {
-        const avgEnergy = energyEntries.reduce((sum, e) => sum + e.energy_level, 0) / energyEntries.length;
-
-        if (avgEnergy < 3) {
-            insights.push({
-                type: 'warning',
-                text: `⚡ Низкий уровень энергии (${avgEnergy.toFixed(1)}/5). Возможно, стоит добавить больше физической активности и правильного питания.`
-            });
-        }
-    }
-
-    // Паттерн: улучшение
-    if (entries.length >= 5) {
-        const recentAvg = entries.slice(0, Math.floor(entries.length / 2))
-            .reduce((sum, e) => sum + e.overall_feeling, 0) / Math.floor(entries.length / 2);
-        const olderAvg = entries.slice(Math.floor(entries.length / 2))
-            .reduce((sum, e) => sum + e.overall_feeling, 0) / Math.ceil(entries.length / 2);
-
-        if (recentAvg - olderAvg >= 0.5) {
-            insights.push({
-                type: 'positive',
-                text: `📈 Заметна положительная динамика! Ваше самочувствие улучшилось за последнее время.`
-            });
-        } else if (olderAvg - recentAvg >= 0.5) {
-            insights.push({
-                type: 'negative',
-                text: `📉 Самочувствие ухудшилось за последнее время. Возможно, стоит обратить внимание на режим дня.`
-            });
-        }
-    }
-
-    // Регулярность
-    const daysWithEntries = new Set(
-        entries.map(e => new Date(e.recorded_at).toDateString())
-    ).size;
-
-    if (daysWithEntries >= currentPeriodDays * 0.8) {
-        insights.push({
-            type: 'positive',
-            text: `🔥 Отличная регулярность! Вы ведёте дневник ${daysWithEntries} из ${currentPeriodDays} дней.`
-        });
-    }
-
-    return insights;
-}
-
-// ==================== ЧАСТЫЕ СИМПТОМЫ ====================
-async function loadTopSymptoms() {
-    try {
-        const stats = await HealthAPI.getStatistics(currentPeriodDays);
-        const container = document.getElementById('symptoms-cloud');
-        const section = document.getElementById('symptoms-section');
-
-        if (!stats.most_common_symptoms || stats.most_common_symptoms.length === 0) {
-            section.style.display = 'none';
-            return;
-        }
-
-        section.style.display = 'block';
-
-        container.innerHTML = stats.most_common_symptoms.map(symptom => `
-            <div class="symptom-badge">
-                <span>${escapeHtml(symptom.symptom)}</span>
-                <span class="symptom-count">${symptom.count}</span>
-            </div>
-        `).join('');
-
-    } catch (error) {
-        console.error('Ошибка загрузки симптомов:', error);
-    }
-}
-
-// ==================== ИСТОРИЯ ЗАПИСЕЙ ====================
-async function loadHistory() {
-    try {
-        allEntries = await HealthAPI.getEntries(currentPeriodDays, 100);
+        const entries = await HealthAPI.getEntriesByDays(HealthApp.state.currentPeriodDays);
+        HealthApp.setState({ allEntries: entries || [] });
         renderHistory();
-
     } catch (error) {
         console.error('Ошибка загрузки истории:', error);
     }
 }
 
 function renderHistory() {
+    const { allEntries, currentFilter, loadedEntriesCount } = HealthApp.state;
     const container = document.getElementById('entries-list');
 
-    // Применяем фильтр
+    // Фильтрация
     let filteredEntries = allEntries;
-
-    if (currentFilter !== 'all') {
-        if (currentFilter === '1-2') {
-            filteredEntries = allEntries.filter(e => e.overall_feeling <= 2);
-        } else if (currentFilter === '3') {
-            filteredEntries = allEntries.filter(e => e.overall_feeling === 3);
-        } else if (currentFilter === '4-5') {
-            filteredEntries = allEntries.filter(e => e.overall_feeling >= 4);
-        }
+    
+    if (currentFilter === 'positive') {
+        filteredEntries = allEntries.filter(e => {
+            const feeling = e.mood ? getFeelingByMood(e.mood) : 3;
+            return feeling >= 4;
+        });
+    } else if (currentFilter === 'neutral') {
+        filteredEntries = allEntries.filter(e => {
+            const feeling = e.mood ? getFeelingByMood(e.mood) : 3;
+            return feeling === 3;
+        });
+    } else if (currentFilter === 'negative') {
+        filteredEntries = allEntries.filter(e => {
+            const feeling = e.mood ? getFeelingByMood(e.mood) : 3;
+            return feeling <= 2;
+        });
     }
 
     if (filteredEntries.length === 0) {
@@ -609,32 +285,30 @@ function renderHistory() {
         return;
     }
 
-    // Показываем первые N записей
     const entriesToShow = filteredEntries.slice(0, loadedEntriesCount);
-
+    
     container.innerHTML = entriesToShow.map(entry => {
-        const emoji = HealthAPI.getFeelingEmoji(entry.overall_feeling);
-        const dateStr = HealthAPI.formatEntryDate(entry.recorded_at, true);
+        const emoji = entry.mood ? HealthAPI.getMoodEmoji(entry.mood) : '😐';
+        const dateStr = HealthAPI.formatEntryDate(entry.entry_date);
 
         let metricsHtml = '';
-        if (entry.energy_level) metricsHtml += `⚡ ${entry.energy_level}/5 `;
-        if (entry.sleep_quality) metricsHtml += `😴 ${entry.sleep_quality}/5 `;
-        if (entry.stress_level) metricsHtml += `😰 ${entry.stress_level}/5`;
+        if (entry.sleep_hours) metricsHtml += `😴 ${entry.sleep_hours}ч `;
+        if (entry.weight) metricsHtml += `⚖️ ${entry.weight}кг`;
 
         return `
-            <div class="entry-card" onclick="viewEntry(${entry.id})">
+            <div class="entry-card" onclick="viewEntry('${entry.entry_date}')">
                 <div class="entry-emoji">${emoji}</div>
                 <div class="entry-info">
                     <div class="entry-date">${dateStr}</div>
                     ${metricsHtml ? `<div class="entry-metrics">${metricsHtml}</div>` : ''}
                     ${entry.notes ? `<div class="entry-notes">${escapeHtml(entry.notes.substring(0, 80))}${entry.notes.length > 80 ? '...' : ''}</div>` : ''}
                 </div>
-                <div class="entry-rating">${entry.overall_feeling}/5</div>
+                <div class="entry-rating">${entry.mood ? HealthAPI.getMoodDescription(entry.mood) : '-'}</div>
             </div>
         `;
     }).join('');
 
-    // Показываем/скрываем кнопку "Загрузить ещё"
+    // Кнопка "Загрузить ещё"
     if (filteredEntries.length > loadedEntriesCount) {
         document.getElementById('load-more-btn').style.display = 'block';
     } else {
@@ -643,7 +317,9 @@ function renderHistory() {
 }
 
 function loadMoreEntries() {
-    loadedEntriesCount += 20;
+    HealthApp.setState({ 
+        loadedEntriesCount: HealthApp.state.loadedEntriesCount + 20 
+    });
     renderHistory();
     tg.HapticFeedback.impactOccurred('light');
 }
@@ -652,13 +328,12 @@ function loadMoreEntries() {
 function toggleHistoryFilters() {
     const filters = document.getElementById('history-filters');
     const isVisible = filters.style.display !== 'none';
-
     filters.style.display = isVisible ? 'none' : 'block';
     tg.HapticFeedback.impactOccurred('light');
 }
 
 function filterByFeeling(filter, element) {
-    currentFilter = filter;
+    HealthApp.setState({ currentFilter: filter });
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
         chip.classList.remove('active');
@@ -669,289 +344,16 @@ function filterByFeeling(filter, element) {
     tg.HapticFeedback.impactOccurred('light');
 }
 
-// ==================== ПОДРОБНАЯ ФОРМА (СОЗДАНИЕ) ====================
-function openDetailedForm() {
-    isEditMode = false;
-    editingEntryId = null;
-
-    document.getElementById('modal-title').textContent = 'Новая запись';
-
-    // Сбрасываем состояние
-    currentRatings = {
-        overall_feeling: null,
-        energy_level: null,
-        sleep_quality: null,
-        stress_level: null
-    };
-    selectedSymptoms = [];
-
-    // Инициализируем рейтинговые шкалы
-    initRatingScale('overall-feeling', 'overall_feeling');
-    initRatingScale('energy-level', 'energy_level');
-    initRatingScale('sleep-quality', 'sleep_quality');
-    initRatingScale('stress-level', 'stress_level');
-
-    // Инициализируем симптомы
-    initSymptomsChips();
-
-    // Устанавливаем текущую дату/время
-    const now = new Date();
-    const dateTimeString = now.toISOString().slice(0, 16);
-    document.getElementById('recorded-at').value = dateTimeString;
-
-    // Очищаем заметки
-    document.getElementById('notes').value = '';
-    document.getElementById('notes-counter').textContent = '0';
-
-    // Счётчик символов
-    document.getElementById('notes').addEventListener('input', updateNotesCounter);
-
-    document.getElementById('detailed-modal').classList.add('active');
-    tg.HapticFeedback.impactOccurred('light');
-}
-
-function updateNotesCounter() {
-    const length = document.getElementById('notes').value.length;
-    document.getElementById('notes-counter').textContent = length;
-
-    if (length > 1000) {
-        document.getElementById('notes-counter').style.color = '#ef4444';
-    } else {
-        document.getElementById('notes-counter').style.color = '';
-    }
-}
-
-function closeDetailedForm() {
-    document.getElementById('detailed-modal').classList.remove('active');
-
-    // Сбрасываем состояние
-    currentRatings = {
-        overall_feeling: null,
-        energy_level: null,
-        sleep_quality: null,
-        stress_level: null
-    };
-    selectedSymptoms = [];
-    isEditMode = false;
-    editingEntryId = null;
-}
-
-function initRatingScale(containerId, ratingKey) {
-    const container = document.getElementById(containerId);
-    const emojis = ['😢', '😕', '😐', '🙂', '😊'];
-
-    container.innerHTML = emojis.map((emoji, index) => {
-        const value = index + 1;
-        return `
-            <button class="rating-btn" data-value="${value}"
-                    onclick="selectRating('${ratingKey}', ${value}, '${containerId}')">
-                ${emoji}
-            </button>
-        `;
-    }).join('');
-}
-
-function selectRating(key, value, containerId) {
-    currentRatings[key] = value;
-
-    // Визуально выделяем
-    const container = document.getElementById(containerId);
-    container.querySelectorAll('.rating-btn').forEach(btn => {
-        btn.classList.toggle('selected', parseInt(btn.dataset.value) === value);
-    });
-
-    // Показываем описание
-    const descriptions = {
-        1: 'Очень плохо',
-        2: 'Плохо',
-        3: 'Нормально',
-        4: 'Хорошо',
-        5: 'Отлично'
-    };
-
-    const desc = descriptions[value] || '';
-    const descElement = document.getElementById(`${key}-desc`);
-    if (descElement) {
-        descElement.textContent = desc;
-    }
-
-    tg.HapticFeedback.impactOccurred('light');
-}
-
-function initSymptomsChips() {
-    const container = document.getElementById('symptoms-chips');
-    const symptoms = HealthAPI.getAvailableSymptoms();
-
-    container.innerHTML = symptoms.map(symptom => {
-        const isSelected = selectedSymptoms.includes(symptom);
-        return `
-            <button class="symptom-chip ${isSelected ? 'selected' : ''}"
-                    onclick="toggleSymptom('${escapeHtml(symptom).replace(/'/g, "\\'")}')">
-                ${escapeHtml(symptom)}
-            </button>
-        `;
-    }).join('');
-}
-
-function toggleSymptom(symptom) {
-    const index = selectedSymptoms.indexOf(symptom);
-
-    if (index > -1) {
-        selectedSymptoms.splice(index, 1);
-    } else {
-        selectedSymptoms.push(symptom);
-    }
-
-    // Обновляем визуально
-    document.querySelectorAll('.symptom-chip').forEach(chip => {
-        if (chip.textContent.trim() === symptom) {
-            chip.classList.toggle('selected');
-        }
-    });
-
-    tg.HapticFeedback.impactOccurred('light');
-}
-
-async function saveDetailedEntry() {
-    const entryData = {
-        overall_feeling: currentRatings.overall_feeling,
-        energy_level: currentRatings.energy_level,
-        sleep_quality: currentRatings.sleep_quality,
-        stress_level: currentRatings.stress_level,
-        symptoms: selectedSymptoms.length > 0 ? selectedSymptoms : null,
-        notes: document.getElementById('notes').value.trim() || null,
-        recorded_at: document.getElementById('recorded-at').value
-            ? new Date(document.getElementById('recorded-at').value).toISOString()
-            : new Date().toISOString()
-    };
-
-    const validation = HealthAPI.validateEntry(entryData);
-
-    if (!validation.valid) {
-        tg.showAlert(validation.errors.join('\n'));
-        return;
-    }
-
+// ==================== ПРОСМОТР ЗАПИСИ ====================
+async function viewEntry(entryDate) {
     try {
-        tg.MainButton.showProgress();
-
-        if (isEditMode && editingEntryId) {
-            // Режим редактирования
-            await HealthAPI.updateEntry(editingEntryId, entryData);
-
-            tg.showPopup({
-                title: '✅ Обновлено',
-                message: 'Запись успешно обновлена',
-                buttons: [{ type: 'ok' }]
-            });
-        } else {
-            // Режим создания
-            await HealthAPI.createEntry(entryData);
-
-            tg.showPopup({
-                title: '✅ Готово',
-                message: 'Запись сохранена',
-                buttons: [{ type: 'ok' }]
-            });
-        }
-
-        tg.MainButton.hideProgress();
-        closeDetailedForm();
-
-        // Обновляем данные
-        await init();
-
-    } catch (error) {
-        tg.MainButton.hideProgress();
-        console.error('Ошибка сохранения:', error);
-        tg.showAlert('Ошибка: ' + error.message);
-    }
-}
-
-// ==================== ПРОСМОТР И РЕДАКТИРОВАНИЕ ЗАПИСИ ====================
-// ==================== ПРОСМОТР И РЕДАКТИРОВАНИЕ ЗАПИСИ ====================
-async function viewEntry(entryId) {
-    try {
-        // ✅ ИСПРАВЛЕНО: Используем новый endpoint GET /health/entries/{id}
-        currentViewingEntry = await HealthAPI.getEntry(entryId);
-
-        if (!currentViewingEntry) {
+        const entry = await HealthAPI.getEntry(entryDate);
+        if (!entry) {
             tg.showAlert('Запись не найдена');
             return;
         }
 
-        // Формируем HTML для просмотра
-        let html = `
-            <div class="view-entry-grid">
-                <div class="view-metric">
-                    <div class="view-metric-label">Самочувствие</div>
-                    <div class="view-metric-value">${HealthAPI.getFeelingEmoji(currentViewingEntry.overall_feeling)} ${currentViewingEntry.overall_feeling}/5</div>
-                </div>
-        `;
-
-        if (currentViewingEntry.energy_level) {
-            html += `
-                <div class="view-metric">
-                    <div class="view-metric-label">Энергия</div>
-                    <div class="view-metric-value">⚡ ${currentViewingEntry.energy_level}/5</div>
-                </div>
-            `;
-        }
-
-        if (currentViewingEntry.sleep_quality) {
-            html += `
-                <div class="view-metric">
-                    <div class="view-metric-label">Сон</div>
-                    <div class="view-metric-value">😴 ${currentViewingEntry.sleep_quality}/5</div>
-                </div>
-            `;
-        }
-
-        if (currentViewingEntry.stress_level) {
-            html += `
-                <div class="view-metric">
-                    <div class="view-metric-label">Стресс</div>
-                    <div class="view-metric-value">😰 ${currentViewingEntry.stress_level}/5</div>
-                </div>
-            `;
-        }
-
-        html += `</div>`;
-
-        // Дата
-        html += `
-            <div class="view-date">
-                📅 ${HealthAPI.formatEntryDate(currentViewingEntry.recorded_at, true)}
-            </div>
-        `;
-
-        // Симптомы
-        if (currentViewingEntry.symptoms && currentViewingEntry.symptoms.length > 0) {
-            html += `
-                <div class="view-symptoms">
-                    <h4>🩺 Симптомы</h4>
-                    <div class="symptoms-chips">
-                        ${currentViewingEntry.symptoms.map(s =>
-                            `<div class="symptom-chip selected">${escapeHtml(s)}</div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Заметки
-        if (currentViewingEntry.notes) {
-            html += `
-                <div class="view-notes">
-                    <h4>📝 Заметки</h4>
-                    <div class="view-notes-text">${escapeHtml(currentViewingEntry.notes)}</div>
-                </div>
-            `;
-        }
-
-        document.getElementById('view-entry-body').innerHTML = html;
-        document.getElementById('view-entry-modal').classList.add('active');
-
+        HealthUI.showViewModal(entry);
         tg.HapticFeedback.impactOccurred('light');
 
     } catch (error) {
@@ -962,70 +364,29 @@ async function viewEntry(entryId) {
 
 function closeViewModal() {
     document.getElementById('view-entry-modal').classList.remove('active');
-    currentViewingEntry = null;
 }
 
-function editCurrentEntry() {
-    if (!currentViewingEntry) return;
+async function editCurrentEntry() {
+    const modal = document.getElementById('view-entry-modal');
+    const entryDate = modal.dataset.entryDate;
+    
+    if (!entryDate) return;
 
-    closeViewModal();
-    openEditForm(currentViewingEntry);
-}
-
-function openEditForm(entry) {
-    isEditMode = true;
-    editingEntryId = entry.id;
-
-    document.getElementById('modal-title').textContent = 'Редактирование записи';
-
-    // Заполняем текущие значения
-    currentRatings = {
-        overall_feeling: entry.overall_feeling,
-        energy_level: entry.energy_level,
-        sleep_quality: entry.sleep_quality,
-        stress_level: entry.stress_level
-    };
-
-    selectedSymptoms = entry.symptoms ? [...entry.symptoms] : [];
-
-    // Инициализируем формы с текущими значениями
-    initRatingScale('overall-feeling', 'overall_feeling');
-    initRatingScale('energy-level', 'energy_level');
-    initRatingScale('sleep-quality', 'sleep_quality');
-    initRatingScale('stress-level', 'stress_level');
-
-    // Выделяем выбранные оценки
-    if (entry.overall_feeling) {
-        selectRating('overall_feeling', entry.overall_feeling, 'overall-feeling');
+    try {
+        const entry = await HealthAPI.getEntry(entryDate);
+        closeViewModal();
+        HealthForms.openEditForm(entryDate, entry);
+    } catch (error) {
+        console.error('Ошибка загрузки записи:', error);
+        tg.showAlert('Ошибка загрузки');
     }
-    if (entry.energy_level) {
-        selectRating('energy_level', entry.energy_level, 'energy-level');
-    }
-    if (entry.sleep_quality) {
-        selectRating('sleep_quality', entry.sleep_quality, 'sleep-quality');
-    }
-    if (entry.stress_level) {
-        selectRating('stress_level', entry.stress_level, 'stress-level');
-    }
-
-    // Инициализируем симптомы
-    initSymptomsChips();
-
-    // Дата
-    const recordedDate = new Date(entry.recorded_at);
-    const dateTimeString = recordedDate.toISOString().slice(0, 16);
-    document.getElementById('recorded-at').value = dateTimeString;
-
-    // Заметки
-    document.getElementById('notes').value = entry.notes || '';
-    updateNotesCounter();
-
-    document.getElementById('detailed-modal').classList.add('active');
-    tg.HapticFeedback.impactOccurred('light');
 }
 
 async function confirmDeleteEntry() {
-    if (!currentViewingEntry) return;
+    const modal = document.getElementById('view-entry-modal');
+    const entryDate = modal.dataset.entryDate;
+    
+    if (!entryDate) return;
 
     tg.showPopup({
         title: '🗑️ Удалить запись?',
@@ -1036,18 +397,17 @@ async function confirmDeleteEntry() {
         ]
     }, async (buttonId) => {
         if (buttonId === 'delete') {
-            await deleteEntry(currentViewingEntry.id);
+            await deleteEntry(entryDate);
         }
     });
 }
 
-async function deleteEntry(entryId) {
+async function deleteEntry(entryDate) {
     try {
         tg.MainButton.showProgress();
-
-        await HealthAPI.deleteEntry(entryId);
-
+        await HealthAPI.deleteEntry(entryDate);
         tg.MainButton.hideProgress();
+        
         closeViewModal();
 
         tg.showPopup({
@@ -1056,7 +416,6 @@ async function deleteEntry(entryId) {
             buttons: [{ type: 'ok' }]
         });
 
-        // Обновляем данные
         await init();
 
     } catch (error) {
@@ -1074,96 +433,16 @@ function openSettings() {
 
     tg.showPopup({
         title: '⚙️ Профиль здоровья',
-        message: `${genderIcon} Пол: ${genderName}\n\n🚧 Полный профиль (возраст, вес, рост) будет доступен после добавления API endpoint.\n\nВы можете изменить пол в любое время.`,
+        message: `${genderIcon} Пол: ${genderName}\n\nВы можете изменить пол в любое время.`,
         buttons: [
             { id: 'change', type: 'default', text: 'Изменить пол' },
             { id: 'close', type: 'close' }
         ]
     }, (buttonId) => {
         if (buttonId === 'change') {
-            showGenderChange();
+            HealthUI.showGenderChange();
         }
     });
-}
-
-function showGenderChange() {
-    // Создаём временное модальное окно для смены пола
-    const currentGender = HealthAPI.getGender();
-
-    const modalHtml = `
-        <div class="modal active" id="change-gender-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Изменить пол</h2>
-                    <button class="modal-close" onclick="closeChangeGenderModal()">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="gender-buttons">
-                        <button class="gender-btn ${currentGender === 'male' ? 'selected' : ''}"
-                                data-gender="male" onclick="selectNewGender('male', this)">
-                            <div class="gender-icon">♂️</div>
-                            <div class="gender-label">Мужской</div>
-                        </button>
-                        <button class="gender-btn ${currentGender === 'female' ? 'selected' : ''}"
-                                data-gender="female" onclick="selectNewGender('female', this)">
-                            <div class="gender-icon">♀️</div>
-                            <div class="gender-label">Женский</div>
-                        </button>
-                        <button class="gender-btn ${currentGender === 'other' ? 'selected' : ''}"
-                                data-gender="other" onclick="selectNewGender('other', this)">
-                            <div class="gender-icon">⚧️</div>
-                            <div class="gender-label">Другой</div>
-                        </button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-cancel" onclick="closeChangeGenderModal()">Отмена</button>
-                    <button class="btn-save" onclick="saveNewGender()">Сохранить</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    window.newSelectedGender = currentGender;
-}
-
-function selectNewGender(gender, element) {
-    window.newSelectedGender = gender;
-
-    document.querySelectorAll('#change-gender-modal .gender-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    element.classList.add('selected');
-
-    tg.HapticFeedback.impactOccurred('light');
-}
-
-function saveNewGender() {
-    if (window.newSelectedGender) {
-        HealthAPI.setGender(window.newSelectedGender);
-
-        tg.showPopup({
-            title: '✅ Сохранено',
-            message: 'Пол успешно изменён',
-            buttons: [{ type: 'ok' }]
-        });
-
-        closeChangeGenderModal();
-
-        // Обновляем симптомы если форма открыта
-        if (document.getElementById('detailed-modal').classList.contains('active')) {
-            initSymptomsChips();
-        }
-    }
-}
-
-function closeChangeGenderModal() {
-    const modal = document.getElementById('change-gender-modal');
-    if (modal) {
-        modal.remove();
-    }
-    delete window.newSelectedGender;
 }
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ====================
@@ -1174,7 +453,15 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ==================== ПОДПИСКА НА ОБНОВЛЕНИЯ ====================
+HealthApp.subscribe((state) => {
+    // Автоматическое обновление UI при изменении состояния
+    if (state.allEntries) {
+        renderHistory();
+    }
+});
+
 // ==================== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ====================
 document.addEventListener('DOMContentLoaded', init);
 
-console.log('✅ Health.js загружен - полная версия v2.0.0');
+console.log('✅ Health.js загружен v3.0.0 (модульная архитектура)');

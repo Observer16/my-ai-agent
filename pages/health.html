@@ -85,8 +85,8 @@
             <div class="feeling-label">Отлично</div>
         </button>
     </div>
-    <button class="btn-detailed-link" onclick="openDetailedForm()">
-        ➕ Подробная запись с заметками
+    <button class="btn-detailed-link" onclick="HealthForms.openDetailedForm()">
+    ➕ Подробная запись с заметками
     </button>
 </div>
 
@@ -153,6 +153,24 @@
     </div>
 </div>
 
+
+<!-- Контейнеры для графиков -->
+<div class="chart-section" id="chart-section">
+    <h3>📊 Тренд настроения</h3>
+    <div class="chart-container" id="trend-chart"></div>
+</div>
+
+<div class="insights-section" id="insights-section">
+    <h3>💡 Инсайты</h3>
+    <div id="insights-list"></div>
+</div>
+
+<div class="symptoms-section" id="symptoms-section">
+    <h3>🩺 Частые симптомы</h3>
+    <div id="symptoms-cloud"></div>
+</div>
+
+
 <!-- ИСТОРИЯ ЗАПИСЕЙ -->
 <div class="history-section">
     <div class="history-header">
@@ -168,8 +186,21 @@
     </button>
 </div>
 
+<!-- Фильтр истории -->
+<div class="history-filters" id="history-filters" style="display: none;">
+    <div class="filter-group">
+        <label>Фильтр по настроению</label>
+        <div class="filter-chips">
+            <button class="filter-chip active" onclick="filterByFeeling('all', this)">Все</button>
+            <button class="filter-chip" onclick="filterByFeeling('positive', this)">Позитивные</button>
+            <button class="filter-chip" onclick="filterByFeeling('neutral', this)">Нейтральные</button>
+            <button class="filter-chip" onclick="filterByFeeling('negative', this)">Негативные</button>
+        </div>
+    </div>
+</div>
+
 <!-- ПЛАВАЮЩАЯ КНОПКА -->
-<button class="fab" onclick="openDetailedForm()" id="fab-btn">
+<button class="fab" onclick="HealthForms.openDetailedForm()" id="fab-btn">
     ➕
 </button>
 
@@ -180,48 +211,44 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="modal-title">Новая запись</h2>
-            <button class="modal-close" onclick="closeDetailedForm()">✕</button>
+            <button class="modal-close" onclick="HealthForms.closeDetailedForm()">✕</button>
         </div>
 
         <div class="modal-body">
             <!-- Дата записи -->
             <div class="form-group">
                 <label>📅 Дата записи</label>
-                <input type="datetime-local" id="recorded-at" class="form-input">
+                <div id="entry-date-display" style="padding: 12px; background: var(--tg-theme-secondary-bg-color, #f8f9fa); border-radius: 12px; font-weight: 600;"></div>
             </div>
 
-            <!-- Общее самочувствие -->
+            <!-- Настроение -->
             <div class="form-group">
-                <label>😊 Общее самочувствие <span class="required">*</span></label>
-                <div class="rating-scale" id="overall-feeling"></div>
-                <div class="rating-description" id="overall-feeling-desc"></div>
+                <label>😊 Настроение</label>
+                <div id="mood-buttons" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             </div>
 
-            <!-- Уровень энергии -->
+            <!-- Сон -->
             <div class="form-group">
-                <label>⚡ Уровень энергии</label>
-                <div class="rating-scale" id="energy-level"></div>
-                <div class="rating-description" id="energy-level-desc"></div>
+                <label>😴 Часов сна</label>
+                <input type="number" id="sleep-input" class="form-input" placeholder="Например: 7.5" step="0.5" min="0" max="24">
             </div>
 
-            <!-- Качество сна -->
+            <!-- Вес -->
             <div class="form-group">
-                <label>😴 Качество сна</label>
-                <div class="rating-scale" id="sleep-quality"></div>
-                <div class="rating-description" id="sleep-quality-desc"></div>
+                <label>⚖️ Вес (кг)</label>
+                <input type="number" id="weight-input" class="form-input" placeholder="Например: 70" step="0.1" min="0" max="300">
             </div>
 
-            <!-- Уровень стресса -->
+            <!-- Сексуальная активность -->
             <div class="form-group">
-                <label>😰 Уровень стресса</label>
-                <div class="rating-scale" id="stress-level"></div>
-                <div class="rating-description" id="stress-level-desc"></div>
+                <label>💑 Сексуальная активность</label>
+                <div id="activity-buttons" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             </div>
 
             <!-- Симптомы -->
             <div class="form-group">
                 <label>🩺 Симптомы (необязательно)</label>
-                <div class="symptoms-chips" id="symptoms-chips"></div>
+                <div id="symptoms-selector"></div>
             </div>
 
             <!-- Заметки -->
@@ -235,8 +262,8 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeDetailedForm()">Отмена</button>
-            <button class="btn-save" onclick="saveDetailedEntry()">Сохранить</button>
+            <button class="btn-cancel" onclick="HealthForms.closeDetailedForm()">Отмена</button>
+            <button class="btn-save" onclick="HealthForms.saveDetailedEntry()">Сохранить</button>
         </div>
     </div>
 </div>
@@ -264,6 +291,9 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/health-api.js"></script>
+<script src="../js/health-ui.js"></script>
+<script src="../js/health-stats.js"></script>
+<script src="../js/health-forms.js"></script>
 <script src="../js/health.js"></script>
 
 </body>
