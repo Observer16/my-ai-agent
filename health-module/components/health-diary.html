@@ -1,0 +1,36 @@
+<!-- components/health-diary.html -->
+<div class="health-diary">
+    <!-- Заголовок -->
+    <div class="diary-header">
+        <h2>📖 Дневник здоровья</h2>
+        <button id="today-btn" class="health-btn btn-primary">
+            Сегодня
+        </button>
+    </div>
+
+    <!-- Календарь -->
+    <div class="calendar-container">
+        <div id="health-calendar">
+            <!-- Заполняется динамически -->
+        </div>
+    </div>
+
+    <!-- Форма записи -->
+    <div id="entry-form">
+        <div style="text-align: center; padding: 40px 20px;">
+            <div class="empty-icon">📅</div>
+            <p style="color: var(--health-text-light);">Выберите дату для просмотра или создания записи</p>
+        </div>
+    </div>
+
+    <!-- Подсказка -->
+    <div class="health-card" style="margin-top: 24px;">
+        <h3>📝 Советы по ведению дневника</h3>
+        <ul style="color: var(--health-text-light); padding-left: 20px; margin: 0;">
+            <li>Регулярно отмечайте свое настроение и сон</li>
+            <li>Добавляйте симптомы при их появлении</li>
+            <li>Отмечайте вес раз в неделю</li>
+            <li>Используйте заметки для важных наблюдений</li>
+        </ul>
+    </div>
+</div>

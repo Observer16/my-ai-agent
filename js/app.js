@@ -341,7 +341,7 @@ function openModule(moduleName) {
         'budget': 'pages/budget.html',
         'products': 'pages/products.html',
         'add-expense': 'pages/add-expense.html',
-        'health': 'pages/health.html',
+        'health': 'health-module/index.html',
         'activity': 'pages/activity.html',
         'doctor': 'pages/doctor.html'
     };

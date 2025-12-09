@@ -1,0 +1,35 @@
+<!-- components/health-medications.html -->
+<div class="health-medications">
+    <!-- Заголовок и действия -->
+    <div class="medications-header">
+        <h2>💊 Аптечка</h2>
+        <div class="medications-actions">
+            <button id="toggle-archive" class="health-btn btn-secondary">
+                Архив
+            </button>
+            <button id="add-medication-btn" class="health-btn btn-primary">
+                + Добавить
+            </button>
+        </div>
+    </div>
+
+    <!-- Список лекарств -->
+    <div id="medications-list">
+        <div class="loading-spinner"></div>
+        <p>Загрузка лекарств...</p>
+    </div>
+
+    <!-- Пояснение -->
+    <div class="health-card" style="margin-top: 24px;">
+        <h3>💡 Как это работает?</h3>
+        <p style="margin-bottom: 12px; color: var(--health-text-light);">
+            Добавляйте лекарства, которые принимаете регулярно. Вы можете указать:
+        </p>
+        <ul style="color: var(--health-text-light); padding-left: 20px; margin: 0;">
+            <li>Название и дозировку</li>
+            <li>Форму выпуска (таблетки, капсулы и т.д.)</li>
+            <li>Расписание приема</li>
+            <li>Инструкции по применению</li>
+        </ul>
+    </div>
+</div>

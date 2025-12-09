@@ -1,0 +1,356 @@
+// js/health-api.js
+
+/**
+ * API модуль для взаимодействия с бэкендом здоровья
+ */
+const HealthAPI = (function() {
+    const BASE_URL = CONFIG.API_URL;
+
+    /**
+     * Получить заголовки с Telegram ID
+     */
+    function getHeaders() {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // Добавляем Telegram ID из WebApp если доступен
+        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+            headers['X-Telegram-User-Id'] = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+        }
+
+        return headers;
+    }
+
+    /**
+     * Обработка ответа API
+     */
+    async function handleResponse(response) {
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+            return {
+                success: true,
+                data: data,
+                status: response.status
+            };
+        } else {
+            return {
+                success: false,
+                error: data.detail || `HTTP ${response.status}`,
+                status: response.status
+            };
+        }
+    }
+
+    /**
+     * Получить информацию о пользователе
+     */
+    async function getUserInfo() {
+        try {
+            const response = await fetch(`${BASE_URL}/auth/me`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить опции пользователя
+     */
+    async function getUserOptions() {
+        try {
+            const response = await fetch(`${BASE_URL}/health/profile/options`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Обновить пол пользователя
+     */
+    async function updateUserGender(gender) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/profile/gender`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({ gender })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить лекарства на сегодня
+     */
+    async function getTodayMedications() {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/logs/today`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить все лекарства
+     */
+    async function getMedications(activeOnly = true) {
+        try {
+            const url = new URL(`${BASE_URL}/health/medications`);
+            if (activeOnly) {
+                url.searchParams.append('active_only', 'true');
+            }
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Отметить прием лекарства
+     */
+    async function logMedicationIntake(medicationId, status = 'taken', notes = '') {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/logs`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    medication_id: medicationId,
+                    status: status,
+                    notes: notes
+                })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить запись по дате
+     */
+    async function getEntryByDate(date) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Добавить настроение
+     */
+    async function addMood(date, mood) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}/mood`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ mood })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Добавить сон
+     */
+    async function addSleep(date, sleepHours) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}/sleep`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ sleep_hours: sleepHours })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Добавить вес
+     */
+    async function addWeight(date, weight) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}/weight`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ weight })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Добавить симптомы
+     */
+    async function addSymptoms(date, symptoms) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}/symptoms`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ symptoms })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Добавить заметки
+     */
+    async function addNotes(date, notes) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}/notes`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ notes })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить сводку здоровья
+     */
+    async function getHealthSummary(days = 30) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/statistics/summary?days=${days}`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить статистику здоровья
+     */
+    async function getHealthStatistics(days = 30) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/statistics/by-days?days=${days}`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Создать лекарство
+     */
+    async function createMedication(medicationData) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(medicationData)
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    // Публичные методы
+    return {
+        getUserInfo,
+        getUserOptions,
+        updateUserGender,
+        getTodayMedications,
+        getMedications,
+        logMedicationIntake,
+        getEntryByDate,
+        addMood,
+        addSleep,
+        addWeight,
+        addSymptoms,
+        addNotes,
+        getHealthSummary,
+        getHealthStatistics,
+        createMedication
+    };
+})();
+
+// Делаем доступным глобально
+if (typeof window !== 'undefined') {
+    window.HealthAPI = HealthAPI;
+}

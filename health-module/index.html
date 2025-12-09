@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль Здоровья - Мой AI Агент</title>
+
+    <!-- Подключаем существующие зависимости -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Подключаем конфигурацию проекта -->
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+
+    <!-- Подключаем стили модуля -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/health-styles.css">
+    <link rel="stylesheet" href="css/health-components.css">
+</head>
+<body>
+    <!-- Навигация модуля -->
+    <div class="health-navigation">
+        <div class="health-tabs" id="health-tabs">
+            <div class="health-tab active" data-tab="dashboard">
+                <span class="tab-icon">🏠</span>
+                <span class="tab-text">Сегодня</span>
+            </div>
+            <div class="health-tab" data-tab="medications">
+                <span class="tab-icon">💊</span>
+                <span class="tab-text">Аптечка</span>
+            </div>
+            <div class="health-tab" data-tab="diary">
+                <span class="tab-icon">📖</span>
+                <span class="tab-text">Дневник</span>
+            </div>
+            <div class="health-tab" data-tab="stats">
+                <span class="tab-icon">📊</span>
+                <span class="tab-text">Статистика</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для контента -->
+    <div class="health-container" id="health-container">
+        <!-- Контент загружается динамически -->
+        <div class="health-loading" id="health-loading">
+            <div class="loading-spinner"></div>
+            <p>Загрузка модуля здоровья...</p>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="health-modals"></div>
+
+    <!-- Подключаем JS модуля -->
+    <script src="js/health-storage.js"></script>
+    <script src="js/health-api.js"></script>
+    <script src="js/health-ui.js"></script>
+    <script src="js/health-module.js"></script>
+
+    <!-- Инициализация -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            HealthModule.init();
+        });
+    </script>
+</body>
+</html>

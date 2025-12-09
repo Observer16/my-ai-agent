@@ -1,0 +1,61 @@
+<!-- components/health-dashboard.html -->
+<div class="health-dashboard">
+    <!-- Приветствие -->
+    <div class="health-card greeting-card">
+        <div class="greeting-content">
+            <h2>👋 Добро пожаловать!</h2>
+            <p id="greeting-date">Загрузка даты...</p>
+        </div>
+    </div>
+
+    <!-- Трекер лекарств -->
+    <div class="health-card">
+        <div class="health-card-header">
+            <div class="health-card-icon">💊</div>
+            <h3 class="health-card-title">План на сегодня</h3>
+        </div>
+        <div id="medication-tracker">
+            <div class="loading-spinner"></div>
+            <p>Загрузка лекарств...</p>
+        </div>
+    </div>
+
+    <!-- Грид самочувствия -->
+    <div class="health-card">
+        <div class="health-card-header">
+            <div class="health-card-icon">⚡️</div>
+            <h3 class="health-card-title">Как самочувствие?</h3>
+        </div>
+        <div id="wellness-grid">
+            <!-- Заполняется динамически -->
+        </div>
+    </div>
+
+    <!-- Симптомы -->
+    <div class="health-card">
+        <div class="health-card-header">
+            <div class="health-card-icon">🤕</div>
+            <h3 class="health-card-title">Симптомы сегодня</h3>
+        </div>
+        <div id="symptoms-container">
+            <p class="no-symptoms">Симптомы не добавлены</p>
+        </div>
+        <button id="add-symptoms-btn" class="health-btn btn-secondary" style="margin-top: 16px; width: 100%;">
+            + Добавить запись
+        </button>
+    </div>
+
+    <!-- Сводка -->
+    <div id="health-summary">
+        <!-- Заполняется динамически -->
+    </div>
+</div>
+
+<script>
+    // Обновляем дату приветствия
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('greeting-date').textContent = now.toLocaleDateString('ru-RU', options);
+    });
+</script>

@@ -1,0 +1,29 @@
+<!-- components/health-stats.html -->
+<div class="health-stats">
+    <!-- Заголовок -->
+    <h2>📊 Статистика здоровья</h2>
+
+    <!-- Период -->
+    <div class="stats-period">
+        <button class="period-btn active" data-days="7">7 дней</button>
+        <button class="period-btn" data-days="30">30 дней</button>
+        <button class="period-btn" data-days="90">90 дней</button>
+    </div>
+
+    <!-- Содержимое статистики -->
+    <div id="stats-content">
+        <div class="loading-spinner" style="margin: 40px auto;"></div>
+        <p style="text-align: center; color: var(--health-text-light);">Загрузка статистики...</p>
+    </div>
+
+    <!-- Пояснение -->
+    <div class="health-card" style="margin-top: 24px;">
+        <h3>📈 Как читать статистику?</h3>
+        <div style="color: var(--health-text-light); line-height: 1.6;">
+            <p><strong>Приверженность лечению:</strong> процент принятых вовремя лекарств.</p>
+            <p><strong>Распределение настроений:</strong> какие эмоции преобладали в выбранный период.</p>
+            <p><strong>Частые симптомы:</strong> какие симптомы появлялись чаще всего.</p>
+            <p><strong>Статистика сна:</strong> средняя продолжительность и колебания сна.</p>
+        </div>
+    </div>
+</div>
