@@ -175,32 +175,80 @@ const HealthModule = (function() {
      * Загрузка главной панели
      */
     async function loadDashboard() {
-        // Загружаем лекарства на сегодня
+    console.log('📊 Загрузка главной панели...');
+
+    // ИНИЦИАЛИЗИРУЕМ массив, если его нет
+    if (!Array.isArray(state.todayMedications)) {
+        state.todayMedications = [];
+    }
+
+    // Загружаем лекарства на сегодня
+    try {
         const medsResponse = await HealthAPI.getTodayMedications();
+        console.log('💊 Ответ API лекарств:', medsResponse);
+
         if (medsResponse.success) {
-            state.todayMedications = medsResponse.data || [];
+            // ГАРАНТИРУЕМ, что это массив
+            state.todayMedications = Array.isArray(medsResponse.data)
+                ? medsResponse.data
+                : [];
+        } else {
+            console.warn('⚠️ Не удалось загрузить лекарства:', medsResponse.error);
+            state.todayMedications = [];
         }
+    } catch (error) {
+        console.error('❌ Ошибка загрузки лекарств:', error);
+        state.todayMedications = [];
+    }
 
-        // Загружаем запись за сегодня
+    // Загружаем запись за сегодня
+    try {
         const today = new Date().toISOString().split('T')[0];
+        console.log('📅 Загрузка записи за:', today);
+
         const entryResponse = await HealthAPI.getEntryByDate(today);
+        console.log('📝 Ответ API записи:', entryResponse);
+
         if (entryResponse.success) {
-            state.todayEntry = entryResponse.data;
+            state.todayEntry = entryResponse.data || null;
+        } else {
+            console.log('📝 Запись за сегодня не найдена');
+            state.todayEntry = null;
         }
+    } catch (error) {
+        console.error('❌ Ошибка загрузки записи:', error);
+        state.todayEntry = null;
+    }
 
-        // Загружаем сводку
+    // Загружаем сводку
+    try {
+        console.log('📈 Загрузка сводки...');
         const summaryResponse = await HealthAPI.getHealthSummary(7);
-        if (summaryResponse.success) {
-            state.stats = summaryResponse.data;
-        }
+        console.log('📊 Ответ API сводки:', summaryResponse);
 
-        // Рендерим контент
+        if (summaryResponse.success) {
+            state.stats = summaryResponse.data || null;
+        } else {
+            console.warn('⚠️ Не удалось загрузить сводку:', summaryResponse.error);
+            state.stats = null;
+        }
+    } catch (error) {
+        console.error('❌ Ошибка загрузки сводки:', error);
+        state.stats = null;
+    }
+
+    // Рендерим контент
+    try {
         const html = await fetchComponent('health-dashboard.html');
         elements.container.innerHTML = html;
 
         // Инициализируем компоненты панели
         HealthUI.initDashboardComponents();
+    } catch (error) {
+        console.error('❌ Ошибка рендеринга панели:', error);
+        showError('Не удалось загрузить главную панель');
     }
+}
 
     /**
      * Загрузка аптечки

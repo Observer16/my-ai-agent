@@ -26,22 +26,32 @@ const HealthAPI = (function() {
      * Обработка ответа API
      */
     async function handleResponse(response) {
-        const data = await response.json().catch(() => ({}));
+    const text = await response.text();
+    let data;
 
-        if (response.ok) {
-            return {
-                success: true,
-                data: data,
-                status: response.status
-            };
-        } else {
-            return {
-                success: false,
-                error: data.detail || `HTTP ${response.status}`,
-                status: response.status
-            };
-        }
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch (error) {
+        console.error('❌ Ошибка парсинга JSON:', error, 'Текст ответа:', text);
+        data = {};
     }
+
+    console.log(`📡 API Response [${response.status} ${response.url}]:`, data);
+
+    if (response.ok) {
+        return {
+            success: true,
+            data: data,
+            status: response.status
+        };
+    } else {
+        return {
+            success: false,
+            error: data.detail || data.message || `HTTP ${response.status}`,
+            status: response.status
+        };
+    }
+}
 
     /**
      * Получить информацию о пользователе
@@ -102,19 +112,40 @@ const HealthAPI = (function() {
      * Получить лекарства на сегодня
      */
     async function getTodayMedications() {
-        try {
-            const response = await fetch(`${BASE_URL}/health/medications/logs/today`, {
-                method: 'GET',
-                headers: getHeaders()
-            });
-            return await handleResponse(response);
-        } catch (error) {
-            return {
-                success: false,
-                error: error.message
-            };
+    try {
+        const response = await fetch(`${BASE_URL}/health/medications/logs/today`, {
+            method: 'GET',
+            headers: getHeaders()
+        });
+        const result = await handleResponse(response);
+
+        // Гарантируем, что data всегда массив
+        if (result.success && result.data) {
+            // Если data - объект, проверяем, есть ли массив внутри
+            if (Array.isArray(result.data)) {
+                result.data = result.data;
+            } else if (result.data.data && Array.isArray(result.data.data)) {
+                result.data = result.data.data;
+            } else if (result.data.medications && Array.isArray(result.data.medications)) {
+                result.data = result.data.medications;
+            } else {
+                console.warn('⚠️ Ответ не содержит массива лекарств:', result.data);
+                result.data = [];
+            }
+        } else if (result.success) {
+            result.data = [];
         }
+
+        return result;
+    } catch (error) {
+        console.error('❌ Ошибка получения лекарств на сегодня:', error);
+        return {
+            success: false,
+            error: error.message,
+            data: []
+        };
     }
+}
 
     /**
      * Получить все лекарства

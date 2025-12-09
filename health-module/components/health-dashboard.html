@@ -8,6 +8,15 @@
         </div>
     </div>
 
+    <!-- Отладочная информация (только в режиме разработки) -->
+    <div id="debug-info" style="display: none;" class="health-card">
+        <h3>🛠 Отладка</h3>
+        <button onclick="testHealthAPI()" class="health-btn btn-secondary">
+            Тестировать API
+        </button>
+        <div id="debug-output" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
     <!-- Трекер лекарств -->
     <div class="health-card">
         <div class="health-card-header">
@@ -52,10 +61,48 @@
 </div>
 
 <script>
+// Отладочная функция
+async function testHealthAPI() {
+    const output = document.getElementById('debug-output');
+    if (!output) return;
+
+    output.innerHTML = '<p>🧪 Тестирование API...</p>';
+
+    try {
+        // Тест 1: Получение опций пользователя
+        output.innerHTML += '<p>1. Получение опций пользователя...</p>';
+        const options = await HealthAPI.getUserOptions();
+        output.innerHTML += `<p>✅ Опции: ${JSON.stringify(options)}</p>`;
+
+        // Тест 2: Получение лекарств на сегодня
+        output.innerHTML += '<p>2. Получение лекарств на сегодня...</p>';
+        const meds = await HealthAPI.getTodayMedications();
+        output.innerHTML += `<p>✅ Лекарств: ${JSON.stringify(meds)}</p>`;
+
+        // Тест 3: Получение записи за сегодня
+        output.innerHTML += '<p>3. Получение записи за сегодня...</p>';
+        const today = new Date().toISOString().split('T')[0];
+        const entry = await HealthAPI.getEntryByDate(today);
+        output.innerHTML += `<p>✅ Запись: ${JSON.stringify(entry)}</p>';
+
+    } catch (error) {
+        output.innerHTML += `<p style="color: red;">❌ Ошибка: ${error.message}</p>`;
+    }
+}
+
+// Показываем отладочную информацию в режиме разработки
+document.addEventListener('DOMContentLoaded', function() {
+    const debugInfo = document.getElementById('debug-info');
+    if (window.CONFIG && window.CONFIG.DEBUG) {
+        debugInfo.style.display = 'block';
+    }
+
     // Обновляем дату приветствия
-    document.addEventListener('DOMContentLoaded', function() {
-        const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('greeting-date').textContent = now.toLocaleDateString('ru-RU', options);
-    });
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateElement = document.getElementById('greeting-date');
+    if (dateElement) {
+        dateElement.textContent = now.toLocaleDateString('ru-RU', options);
+    }
+});
 </script>

@@ -57,11 +57,37 @@
     <script src="js/health-api.js"></script>
     <script src="js/health-ui.js"></script>
     <script src="js/health-module.js"></script>
+    <script src="js/health-debug.js"></script>
 
     <!-- Инициализация -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            HealthModule.init();
+            console.log('🚀 Запуск модуля здоровья...');
+
+            // Включаем режим отладки если в URL есть параметр
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('debug') || window.CONFIG?.DEBUG) {
+                window.CONFIG = window.CONFIG || {};
+                window.CONFIG.DEBUG = true;
+                console.log('🔧 Режим отладки включен');
+            }
+
+            // Инициализируем модуль
+            HealthModule.init().catch(error => {
+                console.error('💥 Критическая ошибка инициализации:', error);
+                document.getElementById('health-container').innerHTML = `
+                    <div class="health-error-message">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-text">
+                            <h3>Ошибка загрузки модуля</h3>
+                            <p>${error.message}</p>
+                            <button onclick="location.reload()" class="health-btn btn-primary" style="margin-top: 10px;">
+                                Перезагрузить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
         });
     </script>
 </body>
