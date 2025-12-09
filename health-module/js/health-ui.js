@@ -782,13 +782,229 @@ const HealthUI = (function() {
         },
 
         /**
-         * Показать модальное окно
-         */
-        showModal: function(modalType, data = {}) {
-            // Реализация модальных окон
-            console.log('Показ модального окна:', modalType, data);
-        }
+ * Показать модальное окно
+ */
+showModal: function(modalType, data = {}) {
+    const modalsContainer = document.getElementById('health-modals');
+    if (!modalsContainer) return;
+
+    let modalHtml = '';
+
+    switch(modalType) {
+        case 'mood-picker':
+            modalHtml = `
+                <div class="modal-overlay" onclick="HealthUI.closeModal()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h3>😊 Как настроение?</h3>
+                            <button class="modal-close" onclick="HealthUI.closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mood-options">
+                                ${Object.entries(MOOD_EMOJIS).map(([mood, emoji]) => `
+                                    <button class="mood-btn" onclick="HealthUI.selectMood('${mood}')">
+                                        <span class="mood-emoji">${emoji}</span>
+                                        <span class="mood-text">${mood}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'sleep-input':
+            modalHtml = `
+                <div class="modal-overlay" onclick="HealthUI.closeModal()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h3>🌙 Сколько спали?</h3>
+                            <button class="modal-close" onclick="HealthUI.closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="number" id="modal-sleep-input" min="0" max="24" step="0.5"
+                                   placeholder="Часов сна" class="modal-input">
+                            <button class="health-btn btn-primary" onclick="HealthUI.saveSleep()" style="width:100%; margin-top:16px;">
+                                Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'weight-input':
+            modalHtml = `
+                <div class="modal-overlay" onclick="HealthUI.closeModal()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h3>⚖️ Ваш вес</h3>
+                            <button class="modal-close" onclick="HealthUI.closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="number" id="modal-weight-input" min="30" max="300" step="0.1"
+                                   placeholder="Вес в кг" class="modal-input">
+                            <button class="health-btn btn-primary" onclick="HealthUI.saveWeight()" style="width:100%; margin-top:16px;">
+                                Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            break;
+
+        case 'symptom-picker':
+            const state = HealthModule.getState();
+            const categories = state.userOptions?.symptom_categories || [];
+            const symptomsByCategory = state.userOptions?.symptoms_by_category || {};
+
+            modalHtml = `
+                <div class="modal-overlay" onclick="HealthUI.closeModal()">
+                    <div class="modal-content modal-large" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h3>🤕 Добавить симптом</h3>
+                            <button class="modal-close" onclick="HealthUI.closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <select id="symptom-category" class="modal-input" onchange="HealthUI.updateSymptomsList()">
+                                <option value="">Выберите категорию</option>
+                                ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                            </select>
+                            <select id="symptom-name" class="modal-input" style="margin-top:12px;" disabled>
+                                <option value="">Сначала выберите категорию</option>
+                            </select>
+                            <div style="margin-top:12px;">
+                                <label>Интенсивность: <span id="intensity-value">3</span>/5</label>
+                                <input type="range" id="symptom-intensity" min="1" max="5" value="3"
+                                       oninput="document.getElementById('intensity-value').textContent=this.value">
+                            </div>
+                            <button class="health-btn btn-primary" onclick="HealthUI.saveSymptom()" style="width:100%; margin-top:16px;">
+                                Добавить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            break;
+
+        default:
+            console.warn('Неизвестный тип модального окна:', modalType);
+            return;
+    }
+
+    modalsContainer.innerHTML = modalHtml;
+},
+
+closeModal: function() {
+    const modalsContainer = document.getElementById('health-modals');
+    if (modalsContainer) {
+        modalsContainer.innerHTML = '';
+    }
+},
+
+selectMood: async function(mood) {
+    const today = new Date().toISOString().split('T')[0];
+    const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
+    if (success) {
+        this.showToast('✅ Настроение сохранено', 'success');
+        this.closeModal();
+        HealthModule.refreshData();
+    }
+},
+
+saveSleep: async function() {
+    const input = document.getElementById('modal-sleep-input');
+    if (!input || !input.value) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const success = await HealthModule.updateHealthEntry(today, 'sleep', parseFloat(input.value));
+    if (success) {
+        this.showToast('✅ Сон сохранён', 'success');
+        this.closeModal();
+        HealthModule.refreshData();
+    }
+},
+
+saveWeight: async function() {
+    const input = document.getElementById('modal-weight-input');
+    if (!input || !input.value) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const success = await HealthModule.updateHealthEntry(today, 'weight', parseFloat(input.value));
+    if (success) {
+        this.showToast('✅ Вес сохранён', 'success');
+        this.closeModal();
+        HealthModule.refreshData();
+    }
+},
+
+updateSymptomsList: function() {
+    const categorySelect = document.getElementById('symptom-category');
+    const nameSelect = document.getElementById('symptom-name');
+    const state = HealthModule.getState();
+    const symptomsByCategory = state.userOptions?.symptoms_by_category || {};
+
+    const category = categorySelect.value;
+    if (!category) {
+        nameSelect.disabled = true;
+        nameSelect.innerHTML = '<option value="">Сначала выберите категорию</option>';
+        return;
+    }
+
+    const symptoms = symptomsByCategory[category] || [];
+    nameSelect.disabled = false;
+    nameSelect.innerHTML = `
+        <option value="">Выберите симптом</option>
+        ${symptoms.map(s => `<option value="${s}">${s}</option>`).join('')}
+    `;
+},
+
+saveSymptom: async function() {
+    const category = document.getElementById('symptom-category')?.value;
+    const name = document.getElementById('symptom-name')?.value;
+    const intensity = parseInt(document.getElementById('symptom-intensity')?.value || '3');
+
+    if (!category || !name) {
+        this.showToast('⚠️ Выберите категорию и симптом', 'warning');
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const success = await HealthModule.updateHealthEntry(today, 'symptoms', [
+        { category, name, intensity }
+    ]);
+
+    if (success) {
+        this.showToast('✅ Симптом добавлен', 'success');
+        this.closeModal();
+        HealthModule.refreshData();
+    }
+}
     };
+
+    window.selectMood = function(mood) {
+    const today = new Date().toISOString().split('T')[0];
+    HealthModule.updateHealthEntry(today, 'mood', mood);
+};
+
+    window.saveEntry = async function(date) {
+        const sleep = document.getElementById('sleep-input')?.value;
+        const weight = document.getElementById('weight-input')?.value;
+        const notes = document.getElementById('notes-input')?.value;
+
+        if (sleep) await HealthModule.updateHealthEntry(date, 'sleep', parseFloat(sleep));
+        if (weight) await HealthModule.updateHealthEntry(date, 'weight', parseFloat(weight));
+        if (notes) await HealthModule.updateHealthEntry(date, 'notes', notes);
+
+        HealthUI.showToast('✅ Сохранено', 'success');
+    };
+
+    window.toggleArchiveView = function() {};
+    window.editMedication = function(id) {};
+    window.deleteMedication = function(id) {};
+    window.removeSymptom = function(id) {};
+
 })();
 
 // Делаем доступным глобально
