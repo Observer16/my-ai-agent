@@ -1,10 +1,15 @@
-// js/health-api.js
+// health-module/js/health-api.js
 
 /**
  * API модуль для взаимодействия с бэкендом здоровья
  */
 const HealthAPI = (function() {
-    const BASE_URL = CONFIG.API_URL;
+    const BASE_URL = HealthConfig.API_URL;
+
+    console.log('🩺 HealthAPI инициализация:', {
+        baseUrl: BASE_URL,
+        telegramUserId: HealthConfig.TELEGRAM_USER?.id
+    });
 
     /**
      * Получить заголовки с Telegram ID
@@ -12,11 +17,18 @@ const HealthAPI = (function() {
     function getHeaders() {
         const headers = {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true' // ← ВАЖНО! ДОБАВЛЯЕМ ЗДЕСЬ
         };
 
-        // Добавляем Telegram ID из WebApp если доступен
-        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-            headers['X-Telegram-User-Id'] = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+        // Добавляем Telegram User ID
+        if (HealthConfig.TELEGRAM_USER?.id) {
+            headers['X-Telegram-User-Id'] = HealthConfig.TELEGRAM_USER.id.toString();
+        }
+
+        // Добавляем initData если есть
+        if (HealthConfig.TELEGRAM_DATA) {
+            headers['X-Telegram-Init-Data'] = HealthConfig.TELEGRAM_DATA;
         }
 
         return headers;

@@ -355,6 +355,52 @@ function openModule(moduleName) {
 }
 
 /**
+ * Получить данные здоровья за сегодня
+ */
+async function fetchHealthData(date) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/health/entries/${date}`, {
+            method: 'GET',
+            headers: {
+                'X-Telegram-User-Id': tg.initDataUnsafe?.user?.id?.toString() || '',
+                'ngrok-skip-browser-warning': 'true' // ← ДОБАВЛЯЕМ ЗДЕСЬ
+            }
+        });
+
+        if (response.ok) {
+            return await response.json();
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ Ошибка получения данных здоровья:', error);
+        return null;
+    }
+}
+
+/**
+ * Получить статистику здоровья за неделю
+ */
+async function fetchHealthWeekStats() {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/health/statistics/summary?days=7`, {
+            method: 'GET',
+            headers: {
+                'X-Telegram-User-Id': tg.initDataUnsafe?.user?.id?.toString() || '',
+                'ngrok-skip-browser-warning': 'true' // ← ДОБАВЛЯЕМ ЗДЕСЬ
+            }
+        });
+
+        if (response.ok) {
+            return await response.json();
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ Ошибка получения статистики здоровья:', error);
+        return null;
+    }
+}
+
+/**
  * Вспомогательная функция для форматирования чисел с пробелами тысяч
  */
 function formatNumberWithSpaces(number) {
@@ -436,6 +482,86 @@ function formatCurrency(amount) {
 function openFamily() {
     tg.HapticFeedback.impactOccurred('light');
     window.location.href = 'pages/family.html';
+}
+
+function openHealthModule() {
+    console.log('🏥 Открытие модуля здоровья...');
+    tg.HapticFeedback.impactOccurred('light');
+
+    // Получаем данные из Telegram
+    const telegramUser = tg.initDataUnsafe?.user;
+    const telegramData = tg.initData;
+    const apiUrl = CONFIG.API_URL;
+
+    console.log('📱 Данные для передачи в модуль:', {
+        userId: telegramUser?.id,
+        apiUrl: apiUrl,
+        hasTelegramData: !!telegramData
+    });
+
+    // Сохраняем данные в localStorage для модуля здоровья
+    if (telegramUser) {
+        try {
+            localStorage.setItem('health_telegram_user', JSON.stringify(telegramUser));
+            localStorage.setItem('health_telegram_data', telegramData);
+            localStorage.setItem('health_api_url', apiUrl);
+            localStorage.setItem('health_config', JSON.stringify({
+                API_URL: apiUrl,
+                DEBUG: CONFIG.DEBUG,
+                VERSION: CONFIG.VERSION,
+                // Добавляем настройки для работы с ngrok
+                NGROK_HEADERS: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            }));
+
+            console.log('✅ Данные сохранены в localStorage для модуля здоровья');
+        } catch (error) {
+            console.error('❌ Ошибка сохранения данных:', error);
+        }
+    }
+
+    // Создаем URL для модуля здоровья
+    const healthModuleUrl = 'health-module/index.html';
+
+    // Добавляем параметры для отладки если нужно
+    const url = new URL(healthModuleUrl, window.location.origin);
+    if (CONFIG.DEBUG) {
+        url.searchParams.append('debug', 'true');
+    }
+
+    console.log('🔗 URL модуля здоровья:', url.toString());
+
+    // Открываем модуль в новом окне
+    try {
+        const healthModuleWindow = window.open(url.toString(), '_blank',
+            'width=400,height=700,location=no,menubar=no,toolbar=no,status=no'
+        );
+
+        if (!healthModuleWindow) {
+            // Если не удалось открыть новое окно, показываем инструкцию
+            tg.showPopup({
+                title: 'Внимание',
+                message: 'Пожалуйста, разрешите всплывающие окна для открытия модуля здоровья. Или попробуйте открыть в новой вкладке.',
+                buttons: [
+                    {type: 'default', text: 'Открыть в новой вкладке'},
+                    {type: 'cancel', text: 'Отмена'}
+                ]
+            }, (buttonId) => {
+                if (buttonId === 'default') {
+                    window.open(url.toString(), '_blank');
+                }
+            });
+            return;
+        }
+
+        // Фокусируем новое окно
+        healthModuleWindow.focus();
+
+    } catch (error) {
+        console.error('❌ Ошибка открытия модуля:', error);
+        tg.showAlert(`Ошибка открытия модуля: ${error.message}`);
+    }
 }
 
 /**
