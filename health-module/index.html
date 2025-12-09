@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Модуль Здоровья - Мой AI Агент </title>
+    <title>Модуль Здоровья - Мой AI Агент</title>
 
-    <!-- Подключаем существующие зависимости -->
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Подключаем конфигурацию проекта -->
+    <!-- ✅ ИСПРАВЛЕНО: Сначала загружаем ГЛАВНУЮ конфигурацию проекта -->
     <script src="../js/config.js"></script>
-    <script src="../js/api.js"></script>
 
     <!-- Подключаем стили модуля -->
     <link rel="stylesheet" href="../css/style.css">
@@ -52,11 +51,18 @@
     <!-- Модальные окна -->
     <div id="health-modals"></div>
 
-    <!-- Подключаем JS модуля -->
+    <!-- ✅ ИСПРАВЛЕНО: Правильный порядок загрузки JS модуля -->
+    <!-- 1. Сначала конфиг модуля (использует глобальный CONFIG) -->
+    <script src="js/config.js"></script>
+    <!-- 2. Затем storage -->
     <script src="js/health-storage.js"></script>
+    <!-- 3. Затем API (использует HealthConfig) -->
     <script src="js/health-api.js"></script>
+    <!-- 4. Затем UI -->
     <script src="js/health-ui.js"></script>
+    <!-- 5. Затем основной модуль -->
     <script src="js/health-module.js"></script>
+    <!-- 6. Опционально debug -->
     <script src="js/health-debug.js"></script>
 
     <!-- Инициализация -->
@@ -64,30 +70,49 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Запуск модуля здоровья...');
 
+            // ✅ Проверяем загрузку конфигурации
+            console.log('📋 Проверка конфигурации:');
+            console.log('  - CONFIG:', typeof CONFIG !== 'undefined' ? CONFIG.API_URL : 'НЕ ЗАГРУЖЕН');
+            console.log('  - HealthConfig:', typeof HealthConfig !== 'undefined' ? HealthConfig.API_URL : 'НЕ ЗАГРУЖЕН');
+
             // Включаем режим отладки если в URL есть параметр
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('debug') || window.CONFIG?.DEBUG) {
-                window.CONFIG = window.CONFIG || {};
-                window.CONFIG.DEBUG = true;
+            if (urlParams.has('debug') || (typeof CONFIG !== 'undefined' && CONFIG.DEBUG)) {
+                if (typeof HealthConfig !== 'undefined') {
+                    HealthConfig.DEBUG = true;
+                }
                 console.log('🔧 Режим отладки включен');
             }
 
+            // ✅ Проверяем что HealthAPI загружен и работает
+            if (typeof HealthAPI !== 'undefined') {
+                console.log('✅ HealthAPI загружен');
+                console.log('  - Base URL:', HealthAPI.getBaseUrl());
+                console.log('  - Headers:', HealthAPI.getHeaders());
+            } else {
+                console.error('❌ HealthAPI НЕ загружен!');
+            }
+
             // Инициализируем модуль
-            HealthModule.init().catch(error => {
-                console.error('💥 Критическая ошибка инициализации:', error);
-                document.getElementById('health-container').innerHTML = `
-                    <div class="health-error-message">
-                        <div class="error-icon">⚠️</div>
-                        <div class="error-text">
-                            <h3>Ошибка загрузки модуля</h3>
-                            <p>${error.message}</p>
-                            <button onclick="location.reload()" class="health-btn btn-primary" style="margin-top: 10px;">
-                                Перезагрузить
-                            </button>
+            if (typeof HealthModule !== 'undefined') {
+                HealthModule.init().catch(error => {
+                    console.error('💥 Критическая ошибка инициализации:', error);
+                    document.getElementById('health-container').innerHTML = `
+                        <div class="health-error-message">
+                            <div class="error-icon">⚠️</div>
+                            <div class="error-text">
+                                <h3>Ошибка загрузки модуля</h3>
+                                <p>${error.message}</p>
+                                <button onclick="location.reload()" class="health-btn btn-primary" style="margin-top: 10px;">
+                                    Перезагрузить
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } else {
+                console.error('❌ HealthModule НЕ загружен!');
+            }
         });
     </script>
 </body>

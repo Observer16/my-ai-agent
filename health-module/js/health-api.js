@@ -15,11 +15,11 @@ const HealthAPI = (function() {
      * Получить заголовки с Telegram ID
      */
     function getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'ngrok-skip-browser-warning': 'true' // ← ВАЖНО! ДОБАВЛЯЕМ ЗДЕСЬ
-        };
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+    };
 
         // Добавляем Telegram User ID
         if (HealthConfig.TELEGRAM_USER?.id) {

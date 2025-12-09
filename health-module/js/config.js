@@ -108,7 +108,9 @@ const HealthConfig = (function() {
         // Получить все заголовки для запросов
         getAllHeaders: function() {
             const headers = {
-                ...this.NGROK_HEADERS
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
             };
 
             if (this.TELEGRAM_USER?.id) {
