@@ -22,6 +22,39 @@ const HealthModule = (function() {
     let elements = {};
 
     /**
+     * Инициализация DOM элементов
+     */
+    function initElements() {
+        try {
+            elements = {
+                container: document.getElementById('health-container'),
+                loading: document.getElementById('health-loading'),
+                tabs: document.getElementById('health-tabs'),
+                tabButtons: document.querySelectorAll('.health-tab'),
+                modals: document.getElementById('health-modals')
+            };
+
+            console.log('✅ DOM элементы инициализированы:', {
+                container: !!elements.container,
+                loading: !!elements.loading,
+                tabs: !!elements.tabs,
+                tabButtons: elements.tabButtons.length,
+                modals: !!elements.modals
+            });
+        } catch (error) {
+            console.error('❌ Ошибка инициализации DOM элементов:', error);
+            // Создаем минимальный набор элементов
+            elements = {
+                container: document.getElementById('health-container') || document.body,
+                loading: document.getElementById('health-loading'),
+                tabs: document.getElementById('health-tabs'),
+                tabButtons: [],
+                modals: document.getElementById('health-modals')
+            };
+        }
+    }
+
+    /**
      * Инициализация модуля
      */
     async function init() {

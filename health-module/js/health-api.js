@@ -147,6 +147,25 @@ const HealthAPI = (function() {
     }
 
     /**
+     * Получить опции пользователя
+     */
+    async function getUserOptions() {
+        try {
+            const response = await fetch(`${BASE_URL}/health/profile/options`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            console.error('❌ Ошибка получения опций:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Обновить пол пользователя
      */
     async function updateUserGender(gender) {
@@ -437,6 +456,7 @@ const HealthAPI = (function() {
     // Публичные методы
     return {
         getUserInfo,
+        getUserGender,
         getUserOptions,
         updateUserGender,
         getTodayMedications,

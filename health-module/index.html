@@ -70,59 +70,103 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Запуск модуля здоровья...');
 
-        // Функция для быстрой проверки состояния
-        window.checkOnboardingStatus = async function() {
-            console.log('=== ПРОВЕРКА СТАТУСА ОНБОРДИНГА ===');
-
-            // 1. Проверить API гендера
-            if (typeof HealthAPI !== 'undefined' && HealthAPI.getUserGender) {
-                const genderResult = await HealthAPI.getUserGender();
-                console.log('1. API Гендер:', {
-                    success: genderResult.success,
-                    gender: genderResult.data?.gender,
-                    raw: genderResult
-                });
-            }
-
-            // 2. Проверить состояние модуля
-            if (typeof HealthModule !== 'undefined') {
-                const state = HealthModule.getState();
-                console.log('2. Состояние модуля:', {
-                    userGender: state.userGender,
-                    isOnboarding: state.isOnboarding,
-                    isLoading: state.isLoading
-                });
-            }
-
-            // 3. Проверить localStorage
-            console.log('3. localStorage:', {
-                gender: localStorage.getItem('health_user_gender'),
-                allKeys: Object.keys(localStorage).filter(k => k.includes('health'))
-            });
-
-            // 4. Проверить Telegram
-            console.log('4. Telegram:', {
-                user: Telegram?.WebApp?.initDataUnsafe?.user,
-                userId: Telegram?.WebApp?.initDataUnsafe?.user?.id
-            });
+        // Проверяем загрузку всех зависимостей
+        const dependencies = {
+            CONFIG: typeof CONFIG !== 'undefined',
+            HealthConfig: typeof HealthConfig !== 'undefined',
+            HealthAPI: typeof HealthAPI !== 'undefined',
+            HealthUI: typeof HealthUI !== 'undefined',
+            HealthModule: typeof HealthModule !== 'undefined',
+            Telegram: typeof Telegram !== 'undefined'
         };
 
-        // Автоматически проверить через 2 секунды
+        console.log('📋 Проверка зависимостей:', dependencies);
+
+        // Если HealthAPI не загружен - пытаемся загрузить вручную
+        if (!dependencies.HealthAPI) {
+            console.error('❌ HealthAPI не загружен!');
+            showError('Ошибка загрузки модуля здоровья');
+            return;
+        }
+
+        // Если HealthModule не загружен
+        if (!dependencies.HealthModule) {
+            console.error('❌ HealthModule не загружен!');
+            showError('Ошибка загрузки модуля здоровья');
+            return;
+        }
+
+        // Функция для быстрой проверки состояния (только если все зависимости загружены)
+        if (dependencies.HealthAPI && dependencies.HealthModule) {
+            window.checkOnboardingStatus = async function() {
+                console.log('=== ПРОВЕРКА СТАТУСА ОНБОРДИНГА ===');
+
+                try {
+                    // 1. Проверить API гендера
+                    const genderResult = await HealthAPI.getUserGender();
+                    console.log('1. API Гендер:', {
+                        success: genderResult.success,
+                        gender: genderResult.data?.gender,
+                        raw: genderResult
+                    });
+
+                    // 2. Проверить состояние модуля
+                    const state = HealthModule.getState();
+                    console.log('2. Состояние модуля:', {
+                        userGender: state.userGender,
+                        isOnboarding: state.isOnboarding,
+                        isLoading: state.isLoading
+                    });
+
+                    // 3. Проверить localStorage
+                    console.log('3. localStorage:', {
+                        gender: localStorage.getItem('health_user_gender'),
+                        allKeys: Object.keys(localStorage).filter(k => k.includes('health'))
+                    });
+
+                } catch (error) {
+                    console.error('❌ Ошибка проверки статуса:', error);
+                }
+            };
+        }
+
+        // Функция показа ошибки
+        function showError(message) {
+            const container = document.getElementById('health-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="health-error-message">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-text">
+                            <h3>Ошибка загрузки модуля</h3>
+                            <p>${message}</p>
+                            <button onclick="location.reload()" class="health-btn btn-primary">
+                                Перезагрузить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        try {
+            // Инициализация модуля
+            HealthModule.init().catch(error => {
+                console.error('💥 Ошибка инициализации модуля:', error);
+                showError(error.message || 'Неизвестная ошибка');
+            });
+
+        } catch (error) {
+            console.error('💥 Критическая ошибка запуска:', error);
+            showError('Критическая ошибка загрузки модуля');
+        }
+
+        // Автоматически проверить статус через 3 секунды
         setTimeout(() => {
-            if (window.checkOnboardingStatus) {
+            if (window.checkOnboardingStatus && typeof HealthAPI !== 'undefined') {
                 window.checkOnboardingStatus();
             }
-        }, 2000);
-
-        // Инициализация модуля
-        if (typeof HealthModule !== 'undefined') {
-            HealthModule.init().catch(error => {
-                console.error('💥 Критическая ошибка инициализации:', error);
-                // Показать ошибку пользователю
-            });
-        } else {
-            console.error('❌ HealthModule не загружен!');
-        }
+        }, 3000);
     });
 </script>
 </body>
