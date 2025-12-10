@@ -30,13 +30,10 @@ const HealthConfig = (function() {
     }
 
     const config = {
-        // API URL в порядке приоритета:
-        // 1. Из localStorage (основное приложение)
-        // 2. Из родительского окна
-        // 3. Значение по умолчанию
-        API_URL: savedConfig.API_URL ||
-                parentConfig.API_URL ||
-                'https://279c938840ad.ngrok-free.app',
+        API_URL: window.CONFIG?.API_URL ||
+         savedConfig.API_URL ||
+         parentConfig.API_URL ||
+         null,
 
         // Режим отладки
         DEBUG: savedConfig.DEBUG ||
@@ -45,7 +42,7 @@ const HealthConfig = (function() {
                false,
 
         // Версия
-        VERSION: savedConfig.VERSION || parentConfig.VERSION || '1.0.0',
+        VERSION: savedConfig.VERSION || parentConfig.VERSION || '2.0.0',
 
         // Заголовки для ngrok
         NGROK_HEADERS: savedConfig.NGROK_HEADERS || {
@@ -62,6 +59,10 @@ const HealthConfig = (function() {
 
             // Пробуем получить данные Telegram
             this.loadTelegramData();
+
+            if (!this.API_URL) {
+                console.error('❌ API_URL не найден! Убедитесь что js/config.js загружен перед health-module/js/config.js');
+            }
 
             // Логируем конфигурацию
             console.log('📋 Конфигурация модуля здоровья:', {
