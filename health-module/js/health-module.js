@@ -164,25 +164,32 @@ const HealthModule = (function() {
      * Проверка онбординга
      */
     function checkOnboarding() {
-        console.log('🎯 Проверка необходимости онбординга...');
+        console.log('🎯 Проверка необходимости онбординга...', {
+            stateGender: state.userGender,
+            cachedGender: localStorage.getItem('health_user_gender')
+        });
 
-        // 1. Проверяем гендер в state (только что загруженный из API)
-        if (state.userGender) {
-            console.log('✅ Гендер уже указан в БД:', state.userGender);
-            state.isOnboarding = false;
+        // 1. Если уже в процессе онбординга - не показываем снова
+        if (state.isOnboarding) {
+            console.log('⏳ Онбординг уже в процессе');
             return false;
         }
 
-        // 2. Проверяем кэш в localStorage
+        // 2. Проверяем гендер в state (только что загруженный из API)
+        if (state.userGender && state.userGender !== 'null' && state.userGender !== '') {
+            console.log('✅ Гендер уже указан в state:', state.userGender);
+            return false;
+        }
+
+        // 3. Проверяем кэш в localStorage
         const cachedGender = localStorage.getItem('health_user_gender');
-        if (cachedGender) {
+        if (cachedGender && cachedGender !== 'null' && cachedGender !== '') {
             console.log('✅ Гендер найден в кэше:', cachedGender);
             state.userGender = cachedGender;
-            state.isOnboarding = false;
             return false;
         }
 
-        // 3. Если гендера нет нигде - требуется онбординг
+        // 4. Если гендера нет нигде - требуется онбординг
         console.log('❌ Гендер не найден, требуется онбординг');
         state.isOnboarding = true;
         return true;
@@ -661,10 +668,18 @@ const HealthModule = (function() {
         // Метод для завершения онбординга (вызывается из UI)
         completeOnboarding: async function() {
             console.log('🎉 Завершаем онбординг...');
+
+            // Сбрасываем флаг ПЕРЕД инициализацией
             state.isOnboarding = false;
 
-            // Полностью перезапускаем модуль
-            await this.init();
+            // Убеждаемся что гендер сохранён
+            console.log('📋 Гендер перед перезапуском:', {
+                state: state.userGender,
+                localStorage: localStorage.getItem('health_user_gender')
+            });
+
+            // Перезапускаем модуль
+            await init();
         },
 
         logMedication: async function(medicationId, status, notes) {
