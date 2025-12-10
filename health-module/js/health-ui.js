@@ -696,9 +696,11 @@ const HealthUI = (function() {
     /**
      * Получить эмодзи для настроения
      */
-    function getMoodEmoji(mood) {
-        return MOOD_EMOJIS[mood] || '😐';
-    }
+    window.selectMood = function(mood) {
+        const today = new Date().toISOString().split('T')[0];
+        HealthModule.updateHealthEntry(today, 'mood', mood);
+    };
+
 
     /**
      * Получить следующий график приема
@@ -1096,11 +1098,6 @@ saveSymptom: async function() {
     }
 }
     };
-
-    window.selectMood = function(mood) {
-    const today = new Date().toISOString().split('T')[0];
-    HealthModule.updateHealthEntry(today, 'mood', mood);
-};
 
     window.saveEntry = async function(date) {
         const sleep = document.getElementById('sleep-input')?.value;
