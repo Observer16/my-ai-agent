@@ -28,23 +28,27 @@ const HealthModule = (function() {
         try {
             // Получаем или создаем основные элементы
             elements.container = document.getElementById('health-container');
-            elements.loading = document.getElementById('health-loading');
             elements.tabs = document.getElementById('health-tabs');
             elements.tabButtons = document.querySelectorAll('.health-tab');
             elements.modals = document.getElementById('health-modals');
-
+            
+            // ГАРАНТИРУЕМ, что loading всегда существует
+            elements.loading = document.getElementById('health-loading');
+            
             // Если loading не найден - создаем его
-            if (!elements.loading && elements.container) {
+            if (!elements.loading) {
                 console.log('⚠️ Элемент health-loading не найден, создаем...');
                 const loadingDiv = document.createElement('div');
                 loadingDiv.id = 'health-loading';
                 loadingDiv.className = 'health-loading';
+                loadingDiv.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
                 loadingDiv.innerHTML = `
                     <div class="loading-spinner"></div>
                     <p>Загрузка модуля здоровья...</p>
                 `;
-                loadingDiv.style.display = 'none';
-                elements.container.appendChild(loadingDiv);
+                
+                // Добавляем в body, а не в container
+                document.body.appendChild(loadingDiv);
                 elements.loading = loadingDiv;
             }
 
@@ -60,11 +64,18 @@ const HealthModule = (function() {
             // Создаем минимальный набор элементов
             elements = {
                 container: document.getElementById('health-container') || document.body,
-                loading: document.getElementById('health-loading'),
                 tabs: document.getElementById('health-tabs'),
                 tabButtons: [],
                 modals: document.getElementById('health-modals')
             };
+            
+            // Создаем loading как последний резерв
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'health-loading';
+            loadingDiv.style.cssText = 'display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
+            loadingDiv.innerHTML = '<div style="width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;animation:spin 1s linear infinite"></div><p>Загрузка...</p>';
+            document.body.appendChild(loadingDiv);
+            elements.loading = loadingDiv;
         }
     }
 
@@ -82,7 +93,7 @@ const HealthModule = (function() {
         initElements();
 
         // Показываем индикатор загрузки
-        if (elements.loading) {
+        if (elements.loading && elements.loading.style) {
             elements.loading.style.display = 'flex';
         }
 
@@ -123,7 +134,7 @@ const HealthModule = (function() {
             console.error('💥 Ошибка инициализации модуля:', error);
             showError(`Ошибка загрузки: ${error.message}`);
         } finally {
-            if (elements.loading) {
+            if (elements.loading && elements.loading.style) {
                 elements.loading.style.display = 'none';
             }
         }
@@ -210,51 +221,44 @@ const HealthModule = (function() {
     }
 
     /**
-     * Завершить онбординг и перезагрузить модуль
+     * Показать экран онбординга
      */
-    async function completeOnboarding() {
-        console.log('🎉 Завершение онбординга...');
+    async function showOnboarding() {
+        console.log('👋 Показываем онбординг...');
 
-        // 1. Сбрасываем флаги
-        state.isOnboarding = false;
-        state.isLoading = true;
-
-        // 2. Показываем индикатор загрузки
-        if (elements.loading) {
-            elements.loading.style.display = 'flex';
+        // Скрываем табы на время онбординга
+        if (elements.tabs && elements.tabs.style) {
+            elements.tabs.style.display = 'none';
         }
 
-        // 3. Очищаем контейнер, но НЕ удаляем health-loading
-        if (elements.container) {
-            // Находим health-loading и сохраняем ссылку
-            const loadingEl = elements.container.querySelector('#health-loading');
-
-            // Очищаем остальной контент
-            const children = Array.from(elements.container.children);
-            children.forEach(child => {
-                if (child.id !== 'health-loading' && child.id !== 'health-tabs') {
-                    elements.container.removeChild(child);
-                }
-            });
-
-            // Добавляем сообщение о загрузке
-            const loadingMessage = document.createElement('div');
-            loadingMessage.className = 'onboarding-complete-message';
-            loadingMessage.style.textAlign = 'center';
-            loadingMessage.style.padding = '80px 20px';
-            loadingMessage.innerHTML = `
-                <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
-                <p style="color: #666; font-size: 16px;">Настраиваем модуль здоровья...</p>
-            `;
-
-            elements.container.appendChild(loadingMessage);
+        // Скрываем индикатор загрузки
+        if (elements.loading && elements.loading.style) {
+            elements.loading.style.display = 'none';
         }
 
-        // 4. Ждем немного и перезапускаем модуль
-        setTimeout(async () => {
-            // Перезапускаем модуль
-            await init();
-        }, 1000);
+        // Загружаем HTML онбординга
+        const html = await fetchComponent('health-onboarding.html');
+
+        // Очищаем контейнер и добавляем плавное появление
+        elements.container.innerHTML = '';
+        elements.container.innerHTML = html;
+
+        // Анимация появления
+        setTimeout(() => {
+            const onboardingContainer = elements.container.querySelector('.onboarding-container');
+            if (onboardingContainer && onboardingContainer.style) {
+                onboardingContainer.style.opacity = '0';
+                onboardingContainer.style.transition = 'opacity 0.5s ease';
+
+                // Принудительный reflow для анимации
+                void onboardingContainer.offsetWidth;
+
+                onboardingContainer.style.opacity = '1';
+            }
+        }, 50);
+
+        // Инициализируем компонент онбординга
+        HealthUI.initOnboardingComponents();
     }
 
     /**
@@ -298,12 +302,22 @@ const HealthModule = (function() {
      * Инициализация вкладок
      */
     function initTabs() {
+        if (!elements.tabButtons || elements.tabButtons.length === 0) {
+            // Переинициализируем табы
+            elements.tabButtons = document.querySelectorAll('.health-tab');
+        }
+        
         elements.tabButtons.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                switchTab(tabName);
-            });
+            // Удаляем старые обработчики
+            tab.removeEventListener('click', handleTabClick);
+            // Добавляем новые
+            tab.addEventListener('click', handleTabClick);
         });
+        
+        function handleTabClick() {
+            const tabName = this.getAttribute('data-tab');
+            switchTab(tabName);
+        }
     }
 
     /**
@@ -330,15 +344,21 @@ const HealthModule = (function() {
      */
     async function loadCurrentTab() {
         // Очищаем контейнер, но не health-loading
-        const children = Array.from(elements.container.children);
-        children.forEach(child => {
-            if (child.id !== 'health-loading' && child.id !== 'health-tabs') {
-                elements.container.removeChild(child);
-            }
-        });
+        if (elements.container) {
+            // Сохраняем health-loading и health-tabs
+            const loadingEl = elements.container.querySelector('#health-loading');
+            const tabsEl = elements.container.querySelector('#health-tabs');
+            
+            // Очищаем остальное
+            elements.container.innerHTML = '';
+            
+            // Восстанавливаем сохраненные элементы
+            if (loadingEl) elements.container.appendChild(loadingEl);
+            if (tabsEl) elements.container.appendChild(tabsEl);
+        }
 
-        // Защита от null
-        if (elements.loading) {
+        // Защита от null - используем безопасный доступ к style
+        if (elements.loading && elements.loading.style) {
             elements.loading.style.display = 'flex';
         }
 
@@ -361,8 +381,8 @@ const HealthModule = (function() {
             console.error(`❌ Ошибка загрузки вкладки ${state.currentTab}:`, error);
             showError(`Не удалось загрузить данные: ${error.message}`);
         } finally {
-            // Защита от null
-            if (elements.loading) {
+            // Защита от null - используем безопасный доступ к style
+            if (elements.loading && elements.loading.style) {
                 elements.loading.style.display = 'none';
             }
         }
@@ -437,10 +457,11 @@ const HealthModule = (function() {
         // Рендерим контент
         try {
             const html = await fetchComponent('health-dashboard.html');
-            elements.container.innerHTML = html;
-
-            // Инициализируем компоненты панели
-            HealthUI.initDashboardComponents();
+            if (elements.container) {
+                elements.container.innerHTML = html;
+                // Инициализируем компоненты панели
+                HealthUI.initDashboardComponents();
+            }
         } catch (error) {
             console.error('❌ Ошибка рендеринга панели:', error);
             showError('Не удалось загрузить главную панель');
@@ -451,40 +472,58 @@ const HealthModule = (function() {
      * Загрузка аптечки
      */
     async function loadMedications() {
-        const response = await HealthAPI.getMedications(true);
-        if (response.success) {
-            state.medications = response.data || [];
+        try {
+            const response = await HealthAPI.getMedications(true);
+            if (response.success) {
+                state.medications = response.data || [];
+            }
+
+            const html = await fetchComponent('health-medications.html');
+            if (elements.container) {
+                elements.container.innerHTML = html;
+                HealthUI.initMedicationsComponents();
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки аптечки:', error);
+            showError('Не удалось загрузить аптечку');
         }
-
-        const html = await fetchComponent('health-medications.html');
-        elements.container.innerHTML = html;
-
-        HealthUI.initMedicationsComponents();
     }
 
     /**
      * Загрузка дневника
      */
     async function loadDiary() {
-        const html = await fetchComponent('health-diary.html');
-        elements.container.innerHTML = html;
-
-        HealthUI.initDiaryComponents();
+        try {
+            const html = await fetchComponent('health-diary.html');
+            if (elements.container) {
+                elements.container.innerHTML = html;
+                HealthUI.initDiaryComponents();
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки дневника:', error);
+            showError('Не удалось загрузить дневник');
+        }
     }
 
     /**
      * Загрузка статистики
      */
     async function loadStats() {
-        const response = await HealthAPI.getHealthStatistics(30);
-        if (response.success) {
-            state.stats = response.data;
+        try {
+            const response = await HealthAPI.getHealthStatistics(30);
+            if (response.success) {
+                state.stats = response.data;
+            }
+
+            const html = await fetchComponent('health-stats.html');
+            if (elements.container) {
+                elements.container.innerHTML = html;
+                HealthUI.initStatsComponents();
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки статистики:', error);
+            showError('Не удалось загрузить статистику');
         }
-
-        const html = await fetchComponent('health-stats.html');
-        elements.container.innerHTML = html;
-
-        HealthUI.initStatsComponents();
     }
 
     /**
@@ -504,72 +543,6 @@ const HealthModule = (function() {
     }
 
     /**
-     * Скрыть экран онбординга
-     */
-    function hideOnboarding() {
-        const onboardingContainer = elements.container.querySelector('.onboarding-container');
-        if (onboardingContainer) {
-            onboardingContainer.classList.add('onboarding-fade-out');
-
-            // Удаляем через 300мс после анимации
-            setTimeout(() => {
-                elements.container.innerHTML = '';
-
-                // Показываем табы
-                if (elements.tabs) {
-                    elements.tabs.style.display = 'flex';
-                }
-
-                // Показываем индикатор загрузки
-                if (elements.loading) {
-                    elements.loading.style.display = 'flex';
-                }
-            }, 300);
-        }
-    }
-
-    /**
-     * Показать экран онбординга
-     */
-    async function showOnboarding() {
-        console.log('👋 Показываем онбординг...');
-
-        // Скрываем табы на время онбординга
-        if (elements.tabs) {
-            elements.tabs.style.display = 'none';
-        }
-
-        // Скрываем индикатор загрузки
-        if (elements.loading) {
-            elements.loading.style.display = 'none';
-        }
-
-        // Загружаем HTML онбординга
-        const html = await fetchComponent('health-onboarding.html');
-
-        // Очищаем контейнер и добавляем плавное появление
-        elements.container.innerHTML = '';
-        elements.container.innerHTML = html;
-
-        // Анимация появления
-        setTimeout(() => {
-            const onboardingContainer = elements.container.querySelector('.onboarding-container');
-            if (onboardingContainer) {
-                onboardingContainer.style.opacity = '0';
-                onboardingContainer.style.transition = 'opacity 0.5s ease';
-
-                // Принудительный reflow для анимации
-                void onboardingContainer.offsetWidth;
-
-                onboardingContainer.style.opacity = '1';
-            }
-        }, 50);
-
-        // Инициализируем компонент онбординга
-        HealthUI.initOnboardingComponents();
-    }
-
-    /**
      * Обновление UI
      */
     function updateUI() {
@@ -577,7 +550,7 @@ const HealthModule = (function() {
         document.title = `Здоровье - ${getTabTitle(state.currentTab)}`;
 
         // Показываем табы если они были скрыты
-        if (elements.tabs) {
+        if (elements.tabs && elements.tabs.style) {
             elements.tabs.style.display = 'flex';
         }
     }
@@ -599,6 +572,8 @@ const HealthModule = (function() {
      * Показать ошибку
      */
     function showError(message) {
+        if (!elements.container) return;
+        
         const errorDiv = document.createElement('div');
         errorDiv.className = 'health-error-message';
         errorDiv.innerHTML = `
@@ -611,7 +586,6 @@ const HealthModule = (function() {
     // Публичные методы
     return {
         init,
-        completeOnboarding,
         getState: () => ({ ...state }),
 
         setUserGender: async function(gender) {
@@ -648,6 +622,7 @@ const HealthModule = (function() {
 
             // Сбрасываем флаг ПЕРЕД инициализацией
             state.isOnboarding = false;
+            state.isLoading = true;
 
             // Убеждаемся что гендер сохранён
             console.log('📋 Гендер перед перезапуском:', {
@@ -655,8 +630,20 @@ const HealthModule = (function() {
                 localStorage: localStorage.getItem('health_user_gender')
             });
 
-            // Перезапускаем модуль - вызываем внутреннюю функцию init
-            await init();
+            // Сначала скрываем текущий контент
+            if (elements.container) {
+                elements.container.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                        <p style="color: #666; font-size: 16px;">Настраиваем модуль здоровья...</p>
+                    </div>
+                `;
+            }
+
+            // Даем время на анимацию, затем перезапускаем
+            setTimeout(async () => {
+                await init();
+            }, 500);
         },
 
         logMedication: async function(medicationId, status, notes) {
@@ -704,6 +691,13 @@ const HealthModule = (function() {
                 console.error(`❌ Ошибка обновления ${field}:`, error);
                 return false;
             }
+        },
+
+        switchTab: switchTab,
+
+        // Метод для обновления данных
+        refreshData: async function() {
+            await loadCurrentTab();
         }
     };
 })();
