@@ -13,7 +13,8 @@ const HealthModule = (function() {
         todayMedications: [],
         todayEntry: null,
         stats: null,
-        isLoading: true
+        isLoading: true,
+        isOnboarding: false // Флаг онбординга
     };
 
     // DOM элементы
@@ -32,8 +33,24 @@ const HealthModule = (function() {
         await loadUserData();
 
         // Проверяем, прошел ли пользователь онбординг
-        await checkOnboarding();
+        const needsOnboarding = await checkOnboarding();
 
+        if (needsOnboarding) {
+            // Показываем онбординг и ждем его завершения
+            console.log('👋 Требуется онбординг');
+            await showOnboarding();
+            // После онбординга не продолжаем - перезапустится в initOnboardingComponents
+            return;
+        }
+
+        // Только если онбординг не требуется или завершен
+        await continueInitialization();
+    }
+
+    /**
+     * Продолжение инициализации после онбординга
+     */
+    async function continueInitialization() {
         // Загружаем опции пользователя
         await loadUserOptions();
 
@@ -82,10 +99,25 @@ const HealthModule = (function() {
      * Проверка онбординга
      */
     async function checkOnboarding() {
-        if (!state.userData || !state.userData.gender) {
-            // Показываем экран онбординга
-            await showOnboarding();
+        // Возвращает true если нужен онбординг
+        if (!state.userData) {
+            console.warn('⚠️ Данные пользователя не загружены');
+            return false;
         }
+
+        // Проверяем наличие гендера (допускаем 'prefer_not_to_say' как валидный выбор)
+        const hasGender = state.userData.gender &&
+                         state.userData.gender !== 'prefer_not_to_say';
+
+        if (!hasGender) {
+            console.log('👤 Гендер не указан или выбран "Не указывать"');
+            state.isOnboarding = true;
+            return true;
+        }
+
+        console.log('✅ Онбординг не требуется');
+        state.isOnboarding = false;
+        return false;
     }
 
     /**
@@ -175,80 +207,80 @@ const HealthModule = (function() {
      * Загрузка главной панели
      */
     async function loadDashboard() {
-    console.log('📊 Загрузка главной панели...');
+        console.log('📊 Загрузка главной панели...');
 
-    // ИНИЦИАЛИЗИРУЕМ массив, если его нет
-    if (!Array.isArray(state.todayMedications)) {
-        state.todayMedications = [];
-    }
-
-    // Загружаем лекарства на сегодня
-    try {
-        const medsResponse = await HealthAPI.getTodayMedications();
-        console.log('💊 Ответ API лекарств:', medsResponse);
-
-        if (medsResponse.success) {
-            // ГАРАНТИРУЕМ, что это массив
-            state.todayMedications = Array.isArray(medsResponse.data)
-                ? medsResponse.data
-                : [];
-        } else {
-            console.warn('⚠️ Не удалось загрузить лекарства:', medsResponse.error);
+        // ИНИЦИАЛИЗИРУЕМ массив, если его нет
+        if (!Array.isArray(state.todayMedications)) {
             state.todayMedications = [];
         }
-    } catch (error) {
-        console.error('❌ Ошибка загрузки лекарств:', error);
-        state.todayMedications = [];
-    }
 
-    // Загружаем запись за сегодня
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        console.log('📅 Загрузка записи за:', today);
+        // Загружаем лекарства на сегодня
+        try {
+            const medsResponse = await HealthAPI.getTodayMedications();
+            console.log('💊 Ответ API лекарств:', medsResponse);
 
-        const entryResponse = await HealthAPI.getEntryByDate(today);
-        console.log('📝 Ответ API записи:', entryResponse);
+            if (medsResponse.success) {
+                // ГАРАНТИРУЕМ, что это массив
+                state.todayMedications = Array.isArray(medsResponse.data)
+                    ? medsResponse.data
+                    : [];
+            } else {
+                console.warn('⚠️ Не удалось загрузить лекарства:', medsResponse.error);
+                state.todayMedications = [];
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки лекарств:', error);
+            state.todayMedications = [];
+        }
 
-        if (entryResponse.success) {
-            state.todayEntry = entryResponse.data || null;
-        } else {
-            console.log('📝 Запись за сегодня не найдена');
+        // Загружаем запись за сегодня
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            console.log('📅 Загрузка записи за:', today);
+
+            const entryResponse = await HealthAPI.getEntryByDate(today);
+            console.log('📝 Ответ API записи:', entryResponse);
+
+            if (entryResponse.success) {
+                state.todayEntry = entryResponse.data || null;
+            } else {
+                console.log('📝 Запись за сегодня не найдена');
+                state.todayEntry = null;
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки записи:', error);
             state.todayEntry = null;
         }
-    } catch (error) {
-        console.error('❌ Ошибка загрузки записи:', error);
-        state.todayEntry = null;
-    }
 
-    // Загружаем сводку
-    try {
-        console.log('📈 Загрузка сводки...');
-        const summaryResponse = await HealthAPI.getHealthSummary(7);
-        console.log('📊 Ответ API сводки:', summaryResponse);
+        // Загружаем сводку
+        try {
+            console.log('📈 Загрузка сводки...');
+            const summaryResponse = await HealthAPI.getHealthSummary(7);
+            console.log('📊 Ответ API сводки:', summaryResponse);
 
-        if (summaryResponse.success) {
-            state.stats = summaryResponse.data || null;
-        } else {
-            console.warn('⚠️ Не удалось загрузить сводку:', summaryResponse.error);
+            if (summaryResponse.success) {
+                state.stats = summaryResponse.data || null;
+            } else {
+                console.warn('⚠️ Не удалось загрузить сводку:', summaryResponse.error);
+                state.stats = null;
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки сводки:', error);
             state.stats = null;
         }
-    } catch (error) {
-        console.error('❌ Ошибка загрузки сводки:', error);
-        state.stats = null;
-    }
 
-    // Рендерим контент
-    try {
-        const html = await fetchComponent('health-dashboard.html');
-        elements.container.innerHTML = html;
+        // Рендерим контент
+        try {
+            const html = await fetchComponent('health-dashboard.html');
+            elements.container.innerHTML = html;
 
-        // Инициализируем компоненты панели
-        HealthUI.initDashboardComponents();
-    } catch (error) {
-        console.error('❌ Ошибка рендеринга панели:', error);
-        showError('Не удалось загрузить главную панель');
+            // Инициализируем компоненты панели
+            HealthUI.initDashboardComponents();
+        } catch (error) {
+            console.error('❌ Ошибка рендеринга панели:', error);
+            showError('Не удалось загрузить главную панель');
+        }
     }
-}
 
     /**
      * Загрузка аптечки
@@ -310,11 +342,18 @@ const HealthModule = (function() {
      * Показать экран онбординга
      */
     async function showOnboarding() {
+        console.log('👋 Показываем онбординг...');
+
         const html = await fetchComponent('health-onboarding.html');
         elements.container.innerHTML = html;
 
         // Инициализируем компонент онбординга
         HealthUI.initOnboardingComponents();
+
+        // Скрываем табы на время онбординга
+        if (elements.tabs) {
+            elements.tabs.style.display = 'none';
+        }
     }
 
     /**
@@ -323,6 +362,11 @@ const HealthModule = (function() {
     function updateUI() {
         // Обновляем заголовок
         document.title = `Здоровье - ${getTabTitle(state.currentTab)}`;
+
+        // Показываем табы если они были скрыты
+        if (elements.tabs) {
+            elements.tabs.style.display = 'flex';
+        }
     }
 
     /**
@@ -364,18 +408,34 @@ const HealthModule = (function() {
         // Методы для работы с данными
         setUserGender: async function(gender) {
             try {
+                console.log('👤 Сохраняем гендер:', gender);
                 const response = await HealthAPI.updateUserGender(gender);
                 if (response.success) {
                     state.userData.gender = gender;
+                    state.isOnboarding = false;
+
                     // Перезагружаем опции
                     await loadUserOptions();
+
+                    console.log('✅ Гендер сохранен');
                     return true;
+                } else {
+                    console.error('❌ Ошибка сохранения гендера:', response.error);
+                    return false;
                 }
-                return false;
             } catch (error) {
                 console.error('❌ Ошибка обновления пола:', error);
                 return false;
             }
+        },
+
+        // Метод для завершения онбординга (вызывается из UI)
+        completeOnboarding: async function() {
+            console.log('🎉 Завершаем онбординг...');
+            state.isOnboarding = false;
+
+            // Полностью перезапускаем модуль
+            await this.init();
         },
 
         logMedication: async function(medicationId, status, notes) {

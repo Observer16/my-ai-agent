@@ -17,101 +17,121 @@
     <link rel="stylesheet" href="css/health-components.css">
 </head>
 <body>
-    <!-- Навигация модуля -->
-    <div class="health-navigation">
-        <div class="health-tabs" id="health-tabs">
-            <div class="health-tab active" data-tab="dashboard">
-                <span class="tab-icon">🏠</span>
-                <span class="tab-text">Сегодня</span>
-            </div>
-            <div class="health-tab" data-tab="medications">
-                <span class="tab-icon">💊</span>
-                <span class="tab-text">Аптечка</span>
-            </div>
-            <div class="health-tab" data-tab="diary">
-                <span class="tab-icon">📖</span>
-                <span class="tab-text">Дневник</span>
-            </div>
-            <div class="health-tab" data-tab="stats">
-                <span class="tab-icon">📊</span>
-                <span class="tab-text">Статистика</span>
-            </div>
+<!-- Навигация модуля -->
+<div class="health-navigation">
+    <div class="health-tabs" id="health-tabs">
+        <div class="health-tab active" data-tab="dashboard">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-text">Сегодня</span>
+        </div>
+        <div class="health-tab" data-tab="medications">
+            <span class="tab-icon">💊</span>
+            <span class="tab-text">Аптечка</span>
+        </div>
+        <div class="health-tab" data-tab="diary">
+            <span class="tab-icon">📖</span>
+            <span class="tab-text">Дневник</span>
+        </div>
+        <div class="health-tab" data-tab="stats">
+            <span class="tab-icon">📊</span>
+            <span class="tab-text">Статистика</span>
         </div>
     </div>
+</div>
 
-    <!-- Контейнер для контента -->
-    <div class="health-container" id="health-container">
-        <!-- Контент загружается динамически -->
-        <div class="health-loading" id="health-loading">
-            <div class="loading-spinner"></div>
-            <p>Загрузка модуля здоровья...</p>
-        </div>
+<!-- Контейнер для контента -->
+<div class="health-container" id="health-container">
+    <!-- Контент загружается динамически -->
+    <div class="health-loading" id="health-loading">
+        <div class="loading-spinner"></div>
+        <p>Загрузка модуля здоровья...</p>
     </div>
+</div>
 
-    <!-- Модальные окна -->
-    <div id="health-modals"></div>
+<!-- Модальные окна -->
+<div id="health-modals"></div>
 
-    <!-- ✅ ИСПРАВЛЕНО: Правильный порядок загрузки JS модуля -->
-    <!-- 1. Сначала конфиг модуля (использует глобальный CONFIG) -->
-    <script src="js/config.js"></script>
-    <!-- 2. Затем storage -->
-    <script src="js/health-storage.js"></script>
-    <!-- 3. Затем API (использует HealthConfig) -->
-    <script src="js/health-api.js"></script>
-    <!-- 4. Затем UI -->
-    <script src="js/health-ui.js"></script>
-    <!-- 5. Затем основной модуль -->
-    <script src="js/health-module.js"></script>
-    <!-- 6. Опционально debug -->
-    <script src="js/health-debug.js"></script>
+<!-- ✅ ИСПРАВЛЕНО: Правильный порядок загрузки JS модуля -->
+<!-- 1. Сначала конфиг модуля (использует глобальный CONFIG) -->
+<script src="js/config.js"></script>
+<!-- 2. Затем storage -->
+<script src="js/health-storage.js"></script>
+<!-- 3. Затем API (использует HealthConfig) -->
+<script src="js/health-api.js"></script>
+<!-- 4. Затем UI -->
+<script src="js/health-ui.js"></script>
+<!-- 5. Затем основной модуль -->
+<script src="js/health-module.js"></script>
+<!-- 6. Опционально debug -->
+<script src="js/health-debug.js"></script>
 
-    <!-- Инициализация -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Запуск модуля здоровья...');
+<!-- Инициализация -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Запуск модуля здоровья...');
 
-            // ✅ Проверяем загрузку конфигурации
-            console.log('📋 Проверка конфигурации:');
-            console.log('  - CONFIG:', typeof CONFIG !== 'undefined' ? CONFIG.API_URL : 'НЕ ЗАГРУЖЕН');
-            console.log('  - HealthConfig:', typeof HealthConfig !== 'undefined' ? HealthConfig.API_URL : 'НЕ ЗАГРУЖЕН');
+        // ✅ Проверяем загрузку конфигурации
+        console.log('📋 Проверка конфигурации:');
+        console.log('  - CONFIG:', typeof CONFIG !== 'undefined' ? 'Загружен' : 'НЕ ЗАГРУЖЕН');
+        console.log('  - HealthConfig:', typeof HealthConfig !== 'undefined' ? 'Загружен' : 'НЕ ЗАГРУЖЕН');
+        console.log('  - Telegram WebApp:', typeof Telegram !== 'undefined' ? 'Доступен' : 'НЕ доступен');
 
-            // Включаем режим отладки если в URL есть параметр
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('debug') || (typeof CONFIG !== 'undefined' && CONFIG.DEBUG)) {
-                if (typeof HealthConfig !== 'undefined') {
-                    HealthConfig.DEBUG = true;
-                }
-                console.log('🔧 Режим отладки включен');
+        // Включаем режим отладки если в URL есть параметр
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('debug') || (typeof CONFIG !== 'undefined' && CONFIG.DEBUG)) {
+            if (typeof HealthConfig !== 'undefined') {
+                HealthConfig.DEBUG = true;
             }
+            console.log('🔧 Режим отладки включен');
+        }
 
-            // ✅ Проверяем что HealthAPI загружен и работает
-            if (typeof HealthAPI !== 'undefined') {
-                console.log('✅ HealthAPI загружен')
-            } else {
-                console.error('❌ HealthAPI НЕ загружен!');
-            }
+        // ✅ Проверяем что HealthAPI загружен и работает
+        if (typeof HealthAPI !== 'undefined') {
+            console.log('✅ HealthAPI загружен');
+        } else {
+            console.error('❌ HealthAPI НЕ загружен!');
+            showCriticalError('Ошибка загрузки модуля здоровья');
+            return;
+        }
 
-            // Инициализируем модуль
-            if (typeof HealthModule !== 'undefined') {
-                HealthModule.init().catch(error => {
-                    console.error('💥 Критическая ошибка инициализации:', error);
-                    document.getElementById('health-container').innerHTML = `
-                        <div class="health-error-message">
-                            <div class="error-icon">⚠️</div>
-                            <div class="error-text">
-                                <h3>Ошибка загрузки модуля</h3>
-                                <p>${error.message}</p>
-                                <button onclick="location.reload()" class="health-btn btn-primary" style="margin-top: 10px;">
-                                    Перезагрузить
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                console.error('❌ HealthModule НЕ загружен!');
-            }
+        // ✅ Проверяем что HealthModule загружен
+        if (typeof HealthModule !== 'undefined') {
+            console.log('✅ HealthModule загружен');
+        } else {
+            console.error('❌ HealthModule НЕ загружен!');
+            showCriticalError('Ошибка загрузки модуля здоровья');
+            return;
+        }
+
+        // ✅ Проверяем авторизацию Telegram
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp && Telegram.WebApp.initDataUnsafe.user) {
+            console.log('✅ Telegram авторизация:', Telegram.WebApp.initDataUnsafe.user.id);
+        } else {
+            console.warn('⚠️ Telegram авторизация не обнаружена');
+        }
+
+        // Инициализируем модуль
+        HealthModule.init().catch(error => {
+            console.error('💥 Критическая ошибка инициализации:', error);
+            showCriticalError(error.message || 'Неизвестная ошибка');
         });
-    </script>
+
+        // Функция показа критической ошибки
+        function showCriticalError(message) {
+            document.getElementById('health-container').innerHTML = `
+                <div class="health-error-message">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-text">
+                        <h3>Ошибка загрузки модуля здоровья</h3>
+                        <p>${message}</p>
+                        <button onclick="location.reload()" class="health-btn btn-primary" style="margin-top: 10px;">
+                            Перезагрузить
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    });
+</script>
 </body>
 </html>

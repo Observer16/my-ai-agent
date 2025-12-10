@@ -559,19 +559,29 @@ const HealthUI = (function() {
         genderBtns.forEach(btn => {
             btn.addEventListener('click', async function() {
                 const gender = this.getAttribute('data-gender');
+                console.log('👤 Выбран гендер:', gender);
 
                 // Показываем загрузку
                 this.classList.add('loading');
+                this.innerHTML = '<div class="loading-spinner-small"></div>';
 
                 // Сохраняем пол
                 const success = await HealthModule.setUserGender(gender);
 
                 if (success) {
-                    // Переключаемся на главную панель
-                    HealthModule.switchTab('dashboard');
+                    // ПОЛНОСТЬЮ ПЕРЕЗАПУСКАЕМ МОДУЛЬ
+                    console.log('🔄 Перезапускаем модуль после онбординга...');
+                    await HealthModule.completeOnboarding();
                 } else {
-                    alert('Ошибка сохранения данных. Попробуйте еще раз.');
                     this.classList.remove('loading');
+                    this.innerHTML = `
+                        <div class="gender-icon">${btn.querySelector('.gender-icon')?.textContent || '🙅'}</div>
+                        <div class="gender-label">${btn.querySelector('.gender-label')?.textContent || 'Ошибка'}</div>
+                        <div class="gender-description">Попробуйте еще раз</div>
+                    `;
+
+                    // Показываем ошибку
+                    this.showToast('⚠️ Ошибка сохранения. Проверьте соединение.', 'error');
                 }
             });
         });
