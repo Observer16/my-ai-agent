@@ -19,40 +19,7 @@ const HealthModule = (function() {
     };
 
     // DOM элементы
-    let elements = {};
-
-    /**
-     * Инициализация DOM элементов
-     */
-    function initElements() {
-        try {
-            elements = {
-                container: document.getElementById('health-container'),
-                loading: document.getElementById('health-loading'),
-                tabs: document.getElementById('health-tabs'),
-                tabButtons: document.querySelectorAll('.health-tab'),
-                modals: document.getElementById('health-modals')
-            };
-
-            console.log('✅ DOM элементы инициализированы:', {
-                container: !!elements.container,
-                loading: !!elements.loading,
-                tabs: !!elements.tabs,
-                tabButtons: elements.tabButtons.length,
-                modals: !!elements.modals
-            });
-        } catch (error) {
-            console.error('❌ Ошибка инициализации DOM элементов:', error);
-            // Создаем минимальный набор элементов
-            elements = {
-                container: document.getElementById('health-container') || document.body,
-                loading: document.getElementById('health-loading'),
-                tabs: document.getElementById('health-tabs'),
-                tabButtons: [],
-                modals: document.getElementById('health-modals')
-            };
-        }
-    }
+    let elements = null;
 
     /**
      * Инициализация модуля
@@ -60,24 +27,31 @@ const HealthModule = (function() {
     async function init() {
         console.log('🩺 Инициализация модуля здоровья...');
 
-        // Сбрасываем состояние онбординга
+        // ВАЖНО: Всегда сбрасываем состояние при инициализации
         state.isOnboarding = false;
         state.isLoading = true;
 
-        // Инициализируем DOM элементы
+        // 1. Инициализируем DOM элементы (ВСЕГДА сначала это!)
         initElements();
 
-        // Показываем индикатор загрузки
-        if (elements.loading) {
+        // 2. Проверяем, что элементы существуют
+        if (!elements || !elements.container) {
+            console.error('❌ Критическая ошибка: DOM элементы не найдены');
+            showCriticalError('Не удалось инициализировать интерфейс');
+            return;
+        }
+
+        // 3. Показываем индикатор загрузки (с проверкой)
+        if (elements.loading && elements.loading.style) {
             elements.loading.style.display = 'flex';
         }
 
         try {
-            // 1. Загружаем гендер пользователя (ГЛАВНЫЙ проверочный метод)
+            // 4. Загружаем гендер пользователя
             await loadUserGender();
 
-            // 2. Проверяем, нужен ли онбординг
-            const needsOnboarding = await checkOnboarding();
+            // 5. Проверяем, нужен ли онбординг
+            const needsOnboarding = checkOnboarding();
 
             console.log('🔍 Результат проверки онбординга:', {
                 needsOnboarding,
@@ -86,17 +60,17 @@ const HealthModule = (function() {
             });
 
             if (needsOnboarding) {
-                // Показываем онбординг и ВЫХОДИМ из init
+                // Показываем онбординг
                 console.log('👋 Требуется онбординг');
                 await showOnboarding();
-                return; // Не продолжаем дальше!
+                return; // Не продолжаем дальше
             }
 
-            // 3. Загружаем остальные данные (только если онбординг не нужен)
+            // 6. Загружаем остальные данные
             await loadUserData();
             await loadUserOptions();
 
-            // 4. Инициализируем интерфейс
+            // 7. Инициализируем интерфейс
             initTabs();
             await loadCurrentTab();
 
@@ -109,90 +83,54 @@ const HealthModule = (function() {
             console.error('💥 Ошибка инициализации модуля:', error);
             showError(`Ошибка загрузки: ${error.message}`);
         } finally {
-            if (elements.loading) {
+            // 8. Всегда скрываем индикатор загрузки (с проверкой)
+            if (elements.loading && elements.loading.style) {
                 elements.loading.style.display = 'none';
             }
         }
     }
 
     /**
-     * Загрузить гендер пользователя
+     * Инициализация DOM элементов (БЕЗОПАСНАЯ версия)
      */
-    async function loadUserGender() {
+    function initElements() {
+        console.log('🔧 Инициализация DOM элементов...');
+
         try {
-            console.log('🔍 Проверяем гендер пользователя...');
+            elements = {
+                container: document.getElementById('health-container'),
+                loading: document.getElementById('health-loading'),
+                tabs: document.getElementById('health-tabs'),
+                tabButtons: document.querySelectorAll('.health-tab'),
+                modals: document.getElementById('health-modals')
+            };
 
-            const response = await HealthAPI.getUserGender();
+            // Проверяем каждый элемент
+            const elementChecks = {
+                container: !!elements.container,
+                loading: !!elements.loading,
+                tabs: !!elements.tabs,
+                tabButtons: elements.tabButtons ? elements.tabButtons.length : 0,
+                modals: !!elements.modals
+            };
 
-            if (response.success && response.data) {
-                // Гендер может быть строкой или null
-                const gender = response.data.gender;
+            console.log('✅ DOM элементы:', elementChecks);
 
-                console.log('⚧️ Получен гендер из API:', {
-                    gender,
-                    isString: typeof gender === 'string',
-                    isNull: gender === null,
-                    isUndefined: gender === undefined,
-                    length: gender ? gender.length : 0
-                });
-
-                // Сохраняем в state
-                state.userGender = gender;
-
-                // Сохраняем в localStorage для быстрого доступа
-                if (gender) {
-                    localStorage.setItem('health_user_gender', gender);
-                } else {
-                    localStorage.removeItem('health_user_gender');
-                }
-
-                return true;
-            } else {
-                console.warn('⚠️ Не удалось загрузить гендер:', response.error);
-                state.userGender = null;
-                return false;
+            // Если контейнер не найден - критическая ошибка
+            if (!elements.container) {
+                throw new Error('Контейнер health-container не найден в DOM');
             }
 
         } catch (error) {
-            console.error('❌ Ошибка загрузки гендера:', error);
-            state.userGender = null;
-            return false;
+            console.error('❌ Ошибка инициализации DOM элементов:', error);
+            elements = {
+                container: document.body, // Фолбэк на body
+                loading: null,
+                tabs: null,
+                tabButtons: [],
+                modals: null
+            };
         }
-    }
-
-    /**
-     * Проверка онбординга
-     */
-    function checkOnboarding() {
-        console.log('🎯 Проверка необходимости онбординга...', {
-            stateGender: state.userGender,
-            cachedGender: localStorage.getItem('health_user_gender')
-        });
-
-        // 1. Если уже в процессе онбординга - не показываем снова
-        if (state.isOnboarding) {
-            console.log('⏳ Онбординг уже в процессе');
-            return false;
-        }
-
-        // 2. Проверяем гендер в state (только что загруженный из API)
-        if (state.userGender && state.userGender !== 'null' && state.userGender !== '') {
-            console.log('✅ Гендер уже указан в state:', state.userGender);
-            return false;
-        }
-
-        // 3. Проверяем кэш в localStorage
-        const cachedGender = localStorage.getItem('health_user_gender');
-        if (cachedGender && cachedGender !== 'null' && cachedGender !== '') {
-            console.log('✅ Гендер найден в кэше:', cachedGender);
-            state.userGender = cachedGender;
-            return false;
-        }
-
-        // 4. Если гендера нет нигде - требуется онбординг
-        console.log('❌ Гендер не найден, требуется онбординг');
-        state.isOnboarding = true;
-        return true;
     }
 
     /**
@@ -201,35 +139,41 @@ const HealthModule = (function() {
     async function showOnboarding() {
         console.log('👋 Показываем экран онбординга...');
 
-        // Скрываем табы на время онбординга
-        if (elements.tabs) {
+        // 1. Скрываем табы (с проверкой)
+        if (elements.tabs && elements.tabs.style) {
             elements.tabs.style.display = 'none';
         }
 
-        // Скрываем индикатор загрузки
-        if (elements.loading) {
+        // 2. Скрываем индикатор загрузки (с проверкой)
+        if (elements.loading && elements.loading.style) {
             elements.loading.style.display = 'none';
         }
 
-        // Очищаем контейнер
-        elements.container.innerHTML = '';
+        // 3. Очищаем контейнер
+        if (elements.container) {
+            elements.container.innerHTML = '';
 
-        // Загружаем HTML онбординга
-        try {
-            const html = await fetchComponent('health-onboarding.html');
-            elements.container.innerHTML = html;
+            // Загружаем HTML онбординга
+            try {
+                const html = await fetchComponent('health-onboarding.html');
+                elements.container.innerHTML = html;
 
-            // Инициализируем компонент онбординга
-            HealthUI.initOnboardingComponents();
+                // Инициализируем компонент онбординга
+                if (typeof HealthUI !== 'undefined' && HealthUI.initOnboardingComponents) {
+                    HealthUI.initOnboardingComponents();
+                } else {
+                    throw new Error('HealthUI не загружен');
+                }
 
-        } catch (error) {
-            console.error('❌ Ошибка загрузки онбординга:', error);
-            showError('Не удалось загрузить форму онбординга');
+            } catch (error) {
+                console.error('❌ Ошибка загрузки онбординга:', error);
+                showError('Не удалось загрузить форму онбординга');
+            }
         }
     }
 
     /**
-     * Завершить онбординг и перезагрузить модуль
+     * Завершить онбординг и перезагрузить модуль (БЕЗОПАСНАЯ версия)
      */
     async function completeOnboarding() {
         console.log('🎉 Завершение онбординга...');
@@ -238,344 +182,88 @@ const HealthModule = (function() {
         state.isOnboarding = false;
         state.isLoading = true;
 
-        // 2. Показываем индикатор загрузки
-        if (elements.loading) {
+        // 2. Переинициализируем DOM элементы (ВАЖНО!)
+        initElements();
+
+        // 3. Показываем индикатор загрузки (с проверкой)
+        if (elements.loading && elements.loading.style) {
             elements.loading.style.display = 'flex';
         }
 
-        // 3. Очищаем контейнер с плавным переходом
-        if (elements.container) {
+        // 4. Очищаем контейнер с плавным переходом
+        if (elements.container && elements.container.style) {
             elements.container.style.opacity = '0.5';
             elements.container.style.transition = 'opacity 0.3s ease';
 
             setTimeout(() => {
-                elements.container.innerHTML = `
-                    <div style="text-align: center; padding: 80px 20px;">
-                        <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
-                        <p style="color: #666; font-size: 16px;">Настраиваем модуль здоровья...</p>
-                    </div>
-                `;
-                elements.container.style.opacity = '1';
+                if (elements.container) {
+                    elements.container.innerHTML = `
+                        <div style="text-align: center; padding: 80px 20px;">
+                            <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                            <p style="color: #666; font-size: 16px;">Настраиваем модуль здоровья...</p>
+                        </div>
+                    `;
+                    elements.container.style.opacity = '1';
+                }
             }, 300);
         }
 
-        // 4. Загружаем гендер ЕЩЕ РАЗ (чтобы убедиться что он сохранился)
+        // 5. Загружаем гендер ЕЩЕ РАЗ
         await loadUserGender();
 
-        // 5. Ждем немного и перезапускаем модуль
+        // 6. Ждем немного и перезапускаем модуль
         setTimeout(async () => {
-            await this.init();
+            try {
+                await init(); // Вызываем init() а не this.init()
+            } catch (error) {
+                console.error('❌ Ошибка перезагрузки модуля:', error);
+                showError('Ошибка перезагрузки модуля');
+            }
         }, 1000);
     }
 
     /**
-     * Загрузить данные пользователя (профиль)
+     * Показать критическую ошибку
      */
-    async function loadUserData() {
-        try {
-            const userResponse = await HealthAPI.getUserInfo();
-            if (userResponse.success) {
-                state.userData = userResponse.data;
-                console.log('👤 Данные пользователя загружены');
-            }
-        } catch (error) {
-            console.error('❌ Ошибка загрузки данных пользователя:', error);
+    function showCriticalError(message) {
+        // Используем document.body как фолбэк
+        const container = elements?.container || document.body;
+        container.innerHTML = `
+            <div style="padding: 40px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                <h3 style="margin-bottom: 10px;">Критическая ошибка</h3>
+                <p style="color: #666; margin-bottom: 20px;">${message}</p>
+                <button onclick="location.reload()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Перезагрузить
+                </button>
+            </div>
+        `;
+    }
+
+    /**
+     * Показать ошибку
+     */
+    function showError(message) {
+        if (elements.container) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'health-error-message';
+            errorDiv.innerHTML = `
+                <div class="error-icon">⚠️</div>
+                <div class="error-text">${message}</div>
+            `;
+            elements.container.appendChild(errorDiv);
         }
     }
 
     /**
-     * Загрузка опций пользователя
-     */
-    async function loadUserOptions() {
-        try {
-            const options = await HealthStorage.getUserOptions();
-            if (options) {
-                state.userOptions = options;
-            } else {
-                // Загружаем с сервера
-                const response = await HealthAPI.getUserOptions();
-                if (response.success) {
-                    state.userOptions = response.data;
-                    await HealthStorage.saveUserOptions(response.data);
-                }
-            }
-            console.log('⚙️ Опции пользователя загружены');
-        } catch (error) {
-            console.error('❌ Ошибка загрузки опций:', error);
-        }
-    }
-
-    /**
-     * Инициализация вкладок
-     */
-    function initTabs() {
-        elements.tabButtons.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                switchTab(tabName);
-            });
-        });
-    }
-
-    /**
-     * Переключение вкладки
-     */
-    async function switchTab(tabName) {
-        if (state.currentTab === tabName) return;
-
-        // Обновляем активную вкладку
-        elements.tabButtons.forEach(tab => {
-            tab.classList.remove('active');
-            if (tab.getAttribute('data-tab') === tabName) {
-                tab.classList.add('active');
-            }
-        });
-
-        state.currentTab = tabName;
-        await loadCurrentTab();
-        updateUI();
-    }
-
-    /**
-     * Загрузка данных для текущей вкладки
-     */
-    async function loadCurrentTab() {
-        elements.container.innerHTML = '';
-        elements.loading.style.display = 'flex';
-
-        try {
-            switch (state.currentTab) {
-                case 'dashboard':
-                    await loadDashboard();
-                    break;
-                case 'medications':
-                    await loadMedications();
-                    break;
-                case 'diary':
-                    await loadDiary();
-                    break;
-                case 'stats':
-                    await loadStats();
-                    break;
-            }
-        } catch (error) {
-            console.error(`❌ Ошибка загрузки вкладки ${state.currentTab}:`, error);
-            showError(`Не удалось загрузить данные: ${error.message}`);
-        } finally {
-            elements.loading.style.display = 'none';
-        }
-    }
-
-    /**
-     * Загрузка главной панели
-     */
-    async function loadDashboard() {
-        console.log('📊 Загрузка главной панели...');
-
-        // ИНИЦИАЛИЗИРУЕМ массив, если его нет
-        if (!Array.isArray(state.todayMedications)) {
-            state.todayMedications = [];
-        }
-
-        // Загружаем лекарства на сегодня
-        try {
-            const medsResponse = await HealthAPI.getTodayMedications();
-            console.log('💊 Ответ API лекарств:', medsResponse);
-
-            if (medsResponse.success) {
-                // ГАРАНТИРУЕМ, что это массив
-                state.todayMedications = Array.isArray(medsResponse.data)
-                    ? medsResponse.data
-                    : [];
-            } else {
-                console.warn('⚠️ Не удалось загрузить лекарства:', medsResponse.error);
-                state.todayMedications = [];
-            }
-        } catch (error) {
-            console.error('❌ Ошибка загрузки лекарств:', error);
-            state.todayMedications = [];
-        }
-
-        // Загружаем запись за сегодня
-        try {
-            const today = new Date().toISOString().split('T')[0];
-            console.log('📅 Загрузка записи за:', today);
-
-            const entryResponse = await HealthAPI.getEntryByDate(today);
-            console.log('📝 Ответ API записи:', entryResponse);
-
-            if (entryResponse.success) {
-                state.todayEntry = entryResponse.data || null;
-            } else {
-                console.log('📝 Запись за сегодня не найдена');
-                state.todayEntry = null;
-            }
-        } catch (error) {
-            console.error('❌ Ошибка загрузки записи:', error);
-            state.todayEntry = null;
-        }
-
-        // Загружаем сводку
-        try {
-            console.log('📈 Загрузка сводки...');
-            const summaryResponse = await HealthAPI.getHealthSummary(7);
-            console.log('📊 Ответ API сводки:', summaryResponse);
-
-            if (summaryResponse.success) {
-                state.stats = summaryResponse.data || null;
-            } else {
-                console.warn('⚠️ Не удалось загрузить сводку:', summaryResponse.error);
-                state.stats = null;
-            }
-        } catch (error) {
-            console.error('❌ Ошибка загрузки сводки:', error);
-            state.stats = null;
-        }
-
-        // Рендерим контент
-        try {
-            const html = await fetchComponent('health-dashboard.html');
-            elements.container.innerHTML = html;
-
-            // Инициализируем компоненты панели
-            HealthUI.initDashboardComponents();
-        } catch (error) {
-            console.error('❌ Ошибка рендеринга панели:', error);
-            showError('Не удалось загрузить главную панель');
-        }
-    }
-
-    /**
-     * Загрузка аптечки
-     */
-    async function loadMedications() {
-        const response = await HealthAPI.getMedications(true);
-        if (response.success) {
-            state.medications = response.data || [];
-        }
-
-        const html = await fetchComponent('health-medications.html');
-        elements.container.innerHTML = html;
-
-        HealthUI.initMedicationsComponents();
-    }
-
-    /**
-     * Загрузка дневника
-     */
-    async function loadDiary() {
-        const html = await fetchComponent('health-diary.html');
-        elements.container.innerHTML = html;
-
-        HealthUI.initDiaryComponents();
-    }
-
-    /**
-     * Загрузка статистики
-     */
-    async function loadStats() {
-        const response = await HealthAPI.getHealthStatistics(30);
-        if (response.success) {
-            state.stats = response.data;
-        }
-
-        const html = await fetchComponent('health-stats.html');
-        elements.container.innerHTML = html;
-
-        HealthUI.initStatsComponents();
-    }
-
-    /**
-     * Загрузка HTML компонента
-     */
-    async function fetchComponent(componentName) {
-        try {
-            const response = await fetch(`components/${componentName}`);
-            if (!response.ok) {
-                throw new Error(`Failed to load component: ${componentName}`);
-            }
-            return await response.text();
-        } catch (error) {
-            console.error('❌ Ошибка загрузки компонента:', error);
-            return '<div class="health-error">Не удалось загрузить компонент</div>';
-        }
-    }
-
-    /**
-     * Скрыть экран онбординга
-     */
-    function hideOnboarding() {
-        const onboardingContainer = elements.container.querySelector('.onboarding-container');
-        if (onboardingContainer) {
-            onboardingContainer.classList.add('onboarding-fade-out');
-
-            // Удаляем через 300мс после анимации
-            setTimeout(() => {
-                elements.container.innerHTML = '';
-
-                // Показываем табы
-                if (elements.tabs) {
-                    elements.tabs.style.display = 'flex';
-                }
-
-                // Показываем индикатор загрузки
-                if (elements.loading) {
-                    elements.loading.style.display = 'flex';
-                }
-            }, 300);
-        }
-    }
-
-    /**
-     * Показать экран онбординга
-     */
-    async function showOnboarding() {
-        console.log('👋 Показываем онбординг...');
-
-        // Скрываем табы на время онбординга
-        if (elements.tabs) {
-            elements.tabs.style.display = 'none';
-        }
-
-        // Скрываем индикатор загрузки
-        if (elements.loading) {
-            elements.loading.style.display = 'none';
-        }
-
-        // Загружаем HTML онбординга
-        const html = await fetchComponent('health-onboarding.html');
-
-        // Очищаем контейнер и добавляем плавное появление
-        elements.container.innerHTML = '';
-        elements.container.innerHTML = html;
-
-        // Анимация появления
-        setTimeout(() => {
-            const onboardingContainer = elements.container.querySelector('.onboarding-container');
-            if (onboardingContainer) {
-                onboardingContainer.style.opacity = '0';
-                onboardingContainer.style.transition = 'opacity 0.5s ease';
-
-                // Принудительный reflow для анимации
-                void onboardingContainer.offsetWidth;
-
-                onboardingContainer.style.opacity = '1';
-            }
-        }, 50);
-
-        // Инициализируем компонент онбординга
-        HealthUI.initOnboardingComponents();
-    }
-
-    /**
-     * Обновление UI
+     * Обновление UI (с проверкой элементов)
      */
     function updateUI() {
         // Обновляем заголовок
         document.title = `Здоровье - ${getTabTitle(state.currentTab)}`;
 
-        // Показываем табы если они были скрыты
-        if (elements.tabs) {
+        // Показываем табы если они были скрыты (с проверкой)
+        if (elements.tabs && elements.tabs.style) {
             elements.tabs.style.display = 'flex';
         }
     }
@@ -612,6 +300,12 @@ const HealthModule = (function() {
         completeOnboarding,
         getState: () => ({ ...state }),
 
+        // Явно экспортируем initElements для отладки
+        _debug: {
+            initElements,
+            elements: () => elements
+        },
+
         setUserGender: async function(gender) {
             try {
                 console.log('💾 Сохраняем гендер:', gender);
@@ -623,12 +317,7 @@ const HealthModule = (function() {
                     state.userGender = gender;
                     localStorage.setItem('health_user_gender', gender);
 
-                    console.log('✅ Гендер сохранен:', {
-                        в_state: state.userGender,
-                        в_localStorage: localStorage.getItem('health_user_gender'),
-                        ответ_API: response.data
-                    });
-
+                    console.log('✅ Гендер сохранен');
                     return true;
                 } else {
                     console.error('❌ Ошибка сохранения гендера:', response.error);

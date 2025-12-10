@@ -53,10 +53,10 @@ const CONFIG = {
         FAMILY_MEMBERS: '/family/members',
         FAMILY_INVITE: '/family/invite',
         FAMILY_INVITES_PENDING: '/family/invites/pending',
-        FAMILY_INVITE_ACCEPT: '/family/invites',  // + /{token}/accept
-        FAMILY_INVITE_DECLINE: '/family/invites', // + /{token}/decline
+        FAMILY_INVITE_ACCEPT: '/family/invites',
+        FAMILY_INVITE_DECLINE: '/family/invites',
         FAMILY_LEAVE: '/family/leave',
-        FAMILY_REMOVE_MEMBER: '/family/members',  // + /{telegram_id}
+        FAMILY_REMOVE_MEMBER: '/family/members',
         
         // N8n интеграция
         N8N_TEST: '/n8n/test',
