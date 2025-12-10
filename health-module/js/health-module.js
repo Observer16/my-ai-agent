@@ -77,7 +77,7 @@ const HealthModule = (function() {
             await loadUserGender();
 
             // 2. Проверяем, нужен ли онбординг
-            const needsOnboarding = checkOnboarding();
+            const needsOnboarding = await checkOnboarding();
 
             console.log('🔍 Результат проверки онбординга:', {
                 needsOnboarding,
@@ -283,30 +283,6 @@ const HealthModule = (function() {
         }
     }
 
-    /**
-     * Проверка онбординга
-     */
-    async function checkOnboarding() {
-        // Возвращает true если нужен онбординг
-        if (!state.userData) {
-            console.warn('⚠️ Данные пользователя не загружены');
-            return false;
-        }
-
-        // Проверяем наличие гендера (допускаем 'prefer_not_to_say' как валидный выбор)
-        const hasGender = state.userData.gender &&
-                         state.userData.gender !== 'prefer_not_to_say';
-
-        if (!hasGender) {
-            console.log('👤 Гендер не указан или выбран "Не указывать"');
-            state.isOnboarding = true;
-            return true;
-        }
-
-        console.log('✅ Онбординг не требуется');
-        state.isOnboarding = false;
-        return false;
-    }
 
     /**
      * Загрузка опций пользователя
