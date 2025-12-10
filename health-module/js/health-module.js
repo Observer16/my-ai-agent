@@ -339,21 +339,69 @@ const HealthModule = (function() {
     }
 
     /**
+     * Скрыть экран онбординга
+     */
+    function hideOnboarding() {
+        const onboardingContainer = elements.container.querySelector('.onboarding-container');
+        if (onboardingContainer) {
+            onboardingContainer.classList.add('onboarding-fade-out');
+
+            // Удаляем через 300мс после анимации
+            setTimeout(() => {
+                elements.container.innerHTML = '';
+
+                // Показываем табы
+                if (elements.tabs) {
+                    elements.tabs.style.display = 'flex';
+                }
+
+                // Показываем индикатор загрузки
+                if (elements.loading) {
+                    elements.loading.style.display = 'flex';
+                }
+            }, 300);
+        }
+    }
+
+    /**
      * Показать экран онбординга
      */
     async function showOnboarding() {
         console.log('👋 Показываем онбординг...');
 
-        const html = await fetchComponent('health-onboarding.html');
-        elements.container.innerHTML = html;
-
-        // Инициализируем компонент онбординга
-        HealthUI.initOnboardingComponents();
-
         // Скрываем табы на время онбординга
         if (elements.tabs) {
             elements.tabs.style.display = 'none';
         }
+
+        // Скрываем индикатор загрузки
+        if (elements.loading) {
+            elements.loading.style.display = 'none';
+        }
+
+        // Загружаем HTML онбординга
+        const html = await fetchComponent('health-onboarding.html');
+
+        // Очищаем контейнер и добавляем плавное появление
+        elements.container.innerHTML = '';
+        elements.container.innerHTML = html;
+
+        // Анимация появления
+        setTimeout(() => {
+            const onboardingContainer = elements.container.querySelector('.onboarding-container');
+            if (onboardingContainer) {
+                onboardingContainer.style.opacity = '0';
+                onboardingContainer.style.transition = 'opacity 0.5s ease';
+
+                // Принудительный reflow для анимации
+                void onboardingContainer.offsetWidth;
+
+                onboardingContainer.style.opacity = '1';
+            }
+        }, 50);
+
+        // Инициализируем компонент онбординга
+        HealthUI.initOnboardingComponents();
     }
 
     /**
@@ -398,6 +446,7 @@ const HealthModule = (function() {
     // Публичные методы
     return {
         init,
+        hideOnboarding,
         getState: () => ({ ...state }),
         switchTab,
         refreshData: async () => {

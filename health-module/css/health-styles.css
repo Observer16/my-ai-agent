@@ -530,3 +530,44 @@
     border-color: #4CAF50;
     background: #f0f7ff;
 }
+
+/* Улучшенные стили для онбординга */
+
+.disabled {
+    pointer-events: none;
+}
+
+/* Анимация выбора */
+.gender-option.selected {
+    border-color: #4CAF50;
+    background: #f0f7ff;
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+/* Анимация появления */
+.onboarding-container {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Плавное исчезновение */
+.onboarding-fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Индикатор успеха */
+.success-check {
+    color: #4CAF50;
+    font-size: 24px;
+    margin-bottom: 10px;
+}

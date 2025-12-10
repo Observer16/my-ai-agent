@@ -551,41 +551,132 @@ const HealthUI = (function() {
     }
 
     /**
-     * Инициализация компонентов онбординга
-     */
-    function initOnboardingComponents() {
-        const genderBtns = document.querySelectorAll('.gender-option');
+ * Инициализация компонентов онбординга
+ */
+function initOnboardingComponents() {
+    const genderBtns = document.querySelectorAll('.gender-option');
 
-        genderBtns.forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const gender = this.getAttribute('data-gender');
-                console.log('👤 Выбран гендер:', gender);
+    genderBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const gender = this.getAttribute('data-gender');
+            console.log('👤 Выбран гендер:', gender);
 
-                // Показываем загрузку
-                this.classList.add('loading');
-                this.innerHTML = '<div class="loading-spinner-small"></div>';
-
-                // Сохраняем пол
-                const success = await HealthModule.setUserGender(gender);
-
-                if (success) {
-                    // ПОЛНОСТЬЮ ПЕРЕЗАПУСКАЕМ МОДУЛЬ
-                    console.log('🔄 Перезапускаем модуль после онбординга...');
-                    await HealthModule.completeOnboarding();
-                } else {
-                    this.classList.remove('loading');
-                    this.innerHTML = `
-                        <div class="gender-icon">${btn.querySelector('.gender-icon')?.textContent || '🙅'}</div>
-                        <div class="gender-label">${btn.querySelector('.gender-label')?.textContent || 'Ошибка'}</div>
-                        <div class="gender-description">Попробуйте еще раз</div>
-                    `;
-
-                    // Показываем ошибку
-                    this.showToast('⚠️ Ошибка сохранения. Проверьте соединение.', 'error');
-                }
+            // Показываем загрузку на ВСЕХ кнопках
+            genderBtns.forEach(b => {
+                b.classList.add('disabled');
+                b.style.opacity = '0.5';
+                b.style.cursor = 'wait';
             });
+
+            this.classList.add('loading');
+            this.innerHTML = '<div class="loading-spinner-small"></div>';
+
+            // Сохраняем пол
+            const success = await HealthModule.setUserGender(gender);
+
+            if (success) {
+                // ПОКАЗЫВАЕМ АНИМАЦИЮ УСПЕХА
+                this.classList.remove('loading');
+                this.classList.add('selected');
+                this.innerHTML = `
+                    <div class="gender-icon">✅</div>
+                    <div class="gender-label">Сохранено!</div>
+                    <div class="gender-description">Загружаем модуль...</div>
+                `;
+
+                // Добавляем небольшую задержку для UX
+                setTimeout(async () => {
+                    // СКРЫВАЕМ ОНБОРДИНГ ПЕРЕД ПЕРЕЗАГРУЗКОЙ
+                    const onboardingContainer = document.querySelector('.onboarding-container');
+                    if (onboardingContainer) {
+                        onboardingContainer.style.opacity = '0';
+                        onboardingContainer.style.transition = 'opacity 0.3s ease';
+
+                        // Показываем индикатор загрузки
+                        const loadingEl = document.getElementById('health-loading');
+                        if (loadingEl) {
+                            loadingEl.style.display = 'flex';
+                        }
+                    }
+
+                    // Ждем анимацию и перезапускаем модуль
+                    setTimeout(async () => {
+                        console.log('🔄 Перезапускаем модуль после онбординга...');
+                        await HealthModule.completeOnboarding();
+                    }, 300);
+
+                }, 800);
+
+            } else {
+                // Восстанавливаем кнопки при ошибке
+                genderBtns.forEach(b => {
+                    b.classList.remove('disabled');
+                    b.style.opacity = '1';
+                    b.style.cursor = 'pointer';
+                });
+
+                this.classList.remove('loading');
+                this.innerHTML = `
+                    <div class="gender-icon">❌</div>
+                    <div class="gender-label">Ошибка</div>
+                    <div class="gender-description">Попробуйте еще раз</div>
+                `;
+
+                // Возвращаем остальные кнопки в исходное состояние через 2 секунды
+                setTimeout(() => {
+                    genderBtns.forEach(b => {
+                        if (b !== this) {
+                            const gender = b.getAttribute('data-gender');
+                            const icon = getGenderIcon(gender);
+                            const label = getGenderLabel(gender);
+                            const desc = getGenderDescription(gender);
+
+                            b.innerHTML = `
+                                <div class="gender-icon">${icon}</div>
+                                <div class="gender-label">${label}</div>
+                                <div class="gender-description">${desc}</div>
+                            `;
+                        }
+                    });
+                }, 2000);
+
+                // Показываем ошибку
+                this.showToast('⚠️ Ошибка сохранения. Проверьте соединение.', 'error');
+            }
         });
+    });
+
+    // Вспомогательные функции для получения текста кнопок
+    function getGenderIcon(gender) {
+        const icons = {
+            male: '👨',
+            female: '👩',
+            other: '🧑',
+            prefer_not_to_say: '🙅'
+        };
+        return icons[gender] || '🙅';
     }
+
+    function getGenderLabel(gender) {
+        const labels = {
+            male: 'Мужской',
+            female: 'Женский',
+            other: 'Другой',
+            prefer_not_to_say: 'Не указывать'
+        };
+        return labels[gender] || 'Не указывать';
+    }
+
+    function getGenderDescription(gender) {
+        const descriptions = {
+            male: 'Стандартные рекомендации для мужчин',
+            female: 'Включая женское здоровье',
+            other: 'Общие рекомендации',
+            prefer_not_to_say: 'Общие настройки'
+        };
+        return descriptions[gender] || 'Общие настройки';
+    }
+}
 
     // Вспомогательные функции
 
