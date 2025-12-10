@@ -70,66 +70,58 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Запуск модуля здоровья...');
 
-        // ✅ Проверяем загрузку конфигурации
-        console.log('📋 Проверка конфигурации:');
-        console.log('  - CONFIG:', typeof CONFIG !== 'undefined' ? 'Загружен' : 'НЕ ЗАГРУЖЕН');
-        console.log('  - HealthConfig:', typeof HealthConfig !== 'undefined' ? 'Загружен' : 'НЕ ЗАГРУЖЕН');
-        console.log('  - Telegram WebApp:', typeof Telegram !== 'undefined' ? 'Доступен' : 'НЕ доступен');
+        // Функция для быстрой проверки состояния
+        window.checkOnboardingStatus = async function() {
+            console.log('=== ПРОВЕРКА СТАТУСА ОНБОРДИНГА ===');
 
-        // Включаем режим отладки если в URL есть параметр
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('debug') || (typeof CONFIG !== 'undefined' && CONFIG.DEBUG)) {
-            if (typeof HealthConfig !== 'undefined') {
-                HealthConfig.DEBUG = true;
+            // 1. Проверить API гендера
+            if (typeof HealthAPI !== 'undefined' && HealthAPI.getUserGender) {
+                const genderResult = await HealthAPI.getUserGender();
+                console.log('1. API Гендер:', {
+                    success: genderResult.success,
+                    gender: genderResult.data?.gender,
+                    raw: genderResult
+                });
             }
-            console.log('🔧 Режим отладки включен');
-        }
 
-        // ✅ Проверяем что HealthAPI загружен и работает
-        if (typeof HealthAPI !== 'undefined') {
-            console.log('✅ HealthAPI загружен');
-        } else {
-            console.error('❌ HealthAPI НЕ загружен!');
-            showCriticalError('Ошибка загрузки модуля здоровья');
-            return;
-        }
+            // 2. Проверить состояние модуля
+            if (typeof HealthModule !== 'undefined') {
+                const state = HealthModule.getState();
+                console.log('2. Состояние модуля:', {
+                    userGender: state.userGender,
+                    isOnboarding: state.isOnboarding,
+                    isLoading: state.isLoading
+                });
+            }
 
-        // ✅ Проверяем что HealthModule загружен
+            // 3. Проверить localStorage
+            console.log('3. localStorage:', {
+                gender: localStorage.getItem('health_user_gender'),
+                allKeys: Object.keys(localStorage).filter(k => k.includes('health'))
+            });
+
+            // 4. Проверить Telegram
+            console.log('4. Telegram:', {
+                user: Telegram?.WebApp?.initDataUnsafe?.user,
+                userId: Telegram?.WebApp?.initDataUnsafe?.user?.id
+            });
+        };
+
+        // Автоматически проверить через 2 секунды
+        setTimeout(() => {
+            if (window.checkOnboardingStatus) {
+                window.checkOnboardingStatus();
+            }
+        }, 2000);
+
+        // Инициализация модуля
         if (typeof HealthModule !== 'undefined') {
-            console.log('✅ HealthModule загружен');
+            HealthModule.init().catch(error => {
+                console.error('💥 Критическая ошибка инициализации:', error);
+                // Показать ошибку пользователю
+            });
         } else {
-            console.error('❌ HealthModule НЕ загружен!');
-            showCriticalError('Ошибка загрузки модуля здоровья');
-            return;
-        }
-
-        // ✅ Проверяем авторизацию Telegram
-        if (typeof Telegram !== 'undefined' && Telegram.WebApp && Telegram.WebApp.initDataUnsafe.user) {
-            console.log('✅ Telegram авторизация:', Telegram.WebApp.initDataUnsafe.user.id);
-        } else {
-            console.warn('⚠️ Telegram авторизация не обнаружена');
-        }
-
-        // Инициализируем модуль
-        HealthModule.init().catch(error => {
-            console.error('💥 Критическая ошибка инициализации:', error);
-            showCriticalError(error.message || 'Неизвестная ошибка');
-        });
-
-        // Функция показа критической ошибки
-        function showCriticalError(message) {
-            document.getElementById('health-container').innerHTML = `
-                <div class="health-error-message">
-                    <div class="error-icon">⚠️</div>
-                    <div class="error-text">
-                        <h3>Ошибка загрузки модуля здоровья</h3>
-                        <p>${message}</p>
-                        <button onclick="location.reload()" class="health-btn btn-primary" style="margin-top: 10px;">
-                            Перезагрузить
-                        </button>
-                    </div>
-                </div>
-            `;
+            console.error('❌ HealthModule не загружен!');
         }
     });
 </script>

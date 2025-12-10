@@ -551,100 +551,113 @@ const HealthUI = (function() {
     }
 
     /**
- * Инициализация компонентов онбординга
- */
-function initOnboardingComponents() {
-    const genderBtns = document.querySelectorAll('.gender-option');
+     * Инициализация компонентов онбординга
+     */
+    function initOnboardingComponents() {
+        console.log('🎯 Инициализация компонентов онбординга');
 
-    genderBtns.forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const gender = this.getAttribute('data-gender');
-            console.log('👤 Выбран гендер:', gender);
+        const genderBtns = document.querySelectorAll('.gender-option');
+        const container = document.getElementById('health-container');
 
-            // Показываем загрузку на ВСЕХ кнопках
-            genderBtns.forEach(b => {
-                b.classList.add('disabled');
-                b.style.opacity = '0.5';
-                b.style.cursor = 'wait';
-            });
+        genderBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const gender = this.getAttribute('data-gender');
+                console.log('👤 Пользователь выбрал гендер:', gender);
 
-            this.classList.add('loading');
-            this.innerHTML = '<div class="loading-spinner-small"></div>';
-
-            // Сохраняем пол
-            const success = await HealthModule.setUserGender(gender);
-
-            if (success) {
-                // ПОКАЗЫВАЕМ АНИМАЦИЮ УСПЕХА
-                this.classList.remove('loading');
-                this.classList.add('selected');
-                this.innerHTML = `
-                    <div class="gender-icon">✅</div>
-                    <div class="gender-label">Сохранено!</div>
-                    <div class="gender-description">Загружаем модуль...</div>
-                `;
-
-                // Добавляем небольшую задержку для UX
-                setTimeout(async () => {
-                    // СКРЫВАЕМ ОНБОРДИНГ ПЕРЕД ПЕРЕЗАГРУЗКОЙ
-                    const onboardingContainer = document.querySelector('.onboarding-container');
-                    if (onboardingContainer) {
-                        onboardingContainer.style.opacity = '0';
-                        onboardingContainer.style.transition = 'opacity 0.3s ease';
-
-                        // Показываем индикатор загрузки
-                        const loadingEl = document.getElementById('health-loading');
-                        if (loadingEl) {
-                            loadingEl.style.display = 'flex';
-                        }
-                    }
-
-                    // Ждем анимацию и перезапускаем модуль
-                    setTimeout(async () => {
-                        console.log('🔄 Перезапускаем модуль после онбординга...');
-                        await HealthModule.completeOnboarding();
-                    }, 300);
-
-                }, 800);
-
-            } else {
-                // Восстанавливаем кнопки при ошибке
+                // 1. Блокируем ВСЕ кнопки
                 genderBtns.forEach(b => {
-                    b.classList.remove('disabled');
-                    b.style.opacity = '1';
-                    b.style.cursor = 'pointer';
+                    b.style.pointerEvents = 'none';
+                    b.style.opacity = '0.5';
+                    b.style.cursor = 'not-allowed';
                 });
 
-                this.classList.remove('loading');
+                // 2. Показываем загрузку на выбранной кнопке
+                this.classList.add('loading');
+                const originalHTML = this.innerHTML;
                 this.innerHTML = `
-                    <div class="gender-icon">❌</div>
-                    <div class="gender-label">Ошибка</div>
-                    <div class="gender-description">Попробуйте еще раз</div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div class="loading-spinner-small" style="margin: 0 auto 10px;"></div>
+                        <div style="font-size: 12px; color: #666;">Сохранение...</div>
+                    </div>
                 `;
 
-                // Возвращаем остальные кнопки в исходное состояние через 2 секунды
-                setTimeout(() => {
-                    genderBtns.forEach(b => {
-                        if (b !== this) {
-                            const gender = b.getAttribute('data-gender');
-                            const icon = getGenderIcon(gender);
-                            const label = getGenderLabel(gender);
-                            const desc = getGenderDescription(gender);
+                try {
+                    // 3. Сохраняем гендер через API
+                    console.log('📤 Отправляем запрос на сохранение гендера...');
+                    const success = await HealthModule.setUserGender(gender);
 
-                            b.innerHTML = `
-                                <div class="gender-icon">${icon}</div>
-                                <div class="gender-label">${label}</div>
-                                <div class="gender-description">${desc}</div>
-                            `;
+                    if (!success) {
+                        throw new Error('API вернул ошибку');
+                    }
+
+                    console.log('✅ Гендер успешно сохранен');
+
+                    // 4. Показываем успех на выбранной кнопке
+                    this.classList.remove('loading');
+                    this.classList.add('selected');
+                    this.innerHTML = `
+                        <div style="padding: 20px; text-align: center;">
+                            <div style="font-size: 32px; color: #4CAF50; margin-bottom: 10px;">✓</div>
+                            <div style="font-size: 14px; color: #4CAF50;">Сохранено!</div>
+                        </div>
+                    `;
+
+                    // 5. Краткая пауза для UX, затем переход
+                    setTimeout(() => {
+                        // Плавно скрываем онбординг
+                        if (container) {
+                            container.style.opacity = '0';
+                            container.style.transition = 'opacity 0.5s ease';
                         }
-                    });
-                }, 2000);
 
-                // Показываем ошибку
-                this.showToast('⚠️ Ошибка сохранения. Проверьте соединение.', 'error');
-            }
+                        // 6. Показываем сообщение о переходе
+                        setTimeout(() => {
+                            if (container) {
+                                container.style.opacity = '1';
+                                container.innerHTML = `
+                                    <div style="text-align: center; padding: 100px 20px;">
+                                        <div style="font-size: 64px; margin-bottom: 20px;">✨</div>
+                                        <h3 style="margin-bottom: 10px; color: #333;">Отлично!</h3>
+                                        <p style="color: #666; margin-bottom: 40px; font-size: 16px;">
+                                            Настраиваем модуль здоровья для вас...
+                                        </p>
+                                        <div class="loading-spinner" style="width: 40px; height: 40px; margin: 0 auto;"></div>
+                                    </div>
+                                `;
+                            }
+
+                            // 7. Завершаем онбординг (это вызовет полную перезагрузку модуля)
+                            setTimeout(async () => {
+                                console.log('🔄 Запускаем завершение онбординга...');
+                                await HealthModule.completeOnboarding();
+                            }, 800);
+
+                        }, 500);
+
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('❌ Ошибка в процессе онбординга:', error);
+
+                    // Восстанавливаем ВСЕ кнопки
+                    genderBtns.forEach(b => {
+                        b.style.pointerEvents = 'auto';
+                        b.style.opacity = '1';
+                        b.style.cursor = 'pointer';
+                        b.classList.remove('loading', 'selected');
+                    });
+
+                    // Восстанавливаем оригинальное содержимое выбранной кнопки
+                    this.innerHTML = originalHTML;
+
+                    // Показываем ошибку
+                    HealthUI.showToast('❌ Ошибка сохранения. Попробуйте еще раз.', 'error');
+                }
+            });
         });
-    });
+
+        console.log(`✅ Инициализировано ${genderBtns.length} кнопок онбординга`);
+    }
 
     // Вспомогательные функции для получения текста кнопок
     function getGenderIcon(gender) {

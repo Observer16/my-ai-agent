@@ -84,16 +84,61 @@ const HealthAPI = (function() {
     }
 
     /**
-     * Получить опции пользователя
+     * Получить гендер пользователя
      */
-    async function getUserOptions() {
+    async function getUserGender() {
         try {
-            const response = await fetch(`${BASE_URL}/health/profile/options`, {
+            const response = await fetch(`${BASE_URL}/health/profile/gender`, {
                 method: 'GET',
                 headers: getHeaders()
             });
-            return await handleResponse(response);
+
+            const result = await handleResponse(response);
+
+            if (HealthConfig.DEBUG) {
+                console.log('⚧️ Ответ getUserGender:', {
+                    success: result.success,
+                    gender: result.data?.gender,
+                    hasGender: !!result.data?.gender,
+                    options: result.data?.options,
+                    fullResponse: result
+                });
+            }
+
+            return result;
         } catch (error) {
+            console.error('❌ Ошибка получения гендера:', error);
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
+    }
+
+    /**
+     * Получить информацию о пользователе
+     */
+    async function getUserInfo() {
+        try {
+            const response = await fetch(`${BASE_URL}/auth/me`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+
+            const result = await handleResponse(response);
+
+            if (HealthConfig.DEBUG) {
+                console.log('👤 Ответ getUserInfo:', {
+                    success: result.success,
+                    hasData: !!result.data,
+                    fullResponse: result
+                });
+            }
+
+            return result;
+        } catch (error) {
+            console.error('❌ Ошибка получения данных пользователя:', error);
             return {
                 success: false,
                 error: error.message
@@ -106,13 +151,29 @@ const HealthAPI = (function() {
      */
     async function updateUserGender(gender) {
         try {
+            if (HealthConfig.DEBUG) {
+                console.log('📤 Отправляем гендер на сервер:', gender);
+            }
+
             const response = await fetch(`${BASE_URL}/health/profile/gender`, {
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify({ gender })
             });
-            return await handleResponse(response);
+
+            const result = await handleResponse(response);
+
+            if (HealthConfig.DEBUG) {
+                console.log('📥 Ответ updateUserGender:', {
+                    success: result.success,
+                    gender: result.data?.gender,
+                    fullResponse: result
+                });
+            }
+
+            return result;
         } catch (error) {
+            console.error('❌ Ошибка обновления гендера:', error);
             return {
                 success: false,
                 error: error.message
