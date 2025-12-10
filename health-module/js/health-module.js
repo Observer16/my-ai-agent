@@ -283,7 +283,6 @@ const HealthModule = (function() {
         }
     }
 
-
     /**
      * Загрузка опций пользователя
      */
