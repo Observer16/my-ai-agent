@@ -1097,9 +1097,9 @@ saveSymptom: async function() {
 }
     };
 
-    window.selectMood = function(mod) {
+    window.selectMood = function(mood) {
     const today = new Date().toISOString().split('T')[0];
-    HealthModule.updateHealthEntry(today, 'mod', mod);
+    HealthModule.updateHealthEntry(today, 'mood', mood);
 };
 
     window.saveEntry = async function(date) {
