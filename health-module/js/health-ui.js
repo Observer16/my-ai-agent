@@ -1,4 +1,4 @@
-// js/health-ui.js
+// health-module/js/health-ui.js
 
 /**
  * UI компоненты модуля здоровья
