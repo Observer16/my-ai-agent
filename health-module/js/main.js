@@ -201,3 +201,8 @@ if (typeof window !== 'undefined') {
 }
 
 console.log('✅ Health UI модуль инициализирован');
+
+if (typeof window !== 'undefined') {
+    window.HealthUIMain = HealthUI; // Реальная реализация
+    window.HealthUI = HealthUI;     // Псевдоним
+}
