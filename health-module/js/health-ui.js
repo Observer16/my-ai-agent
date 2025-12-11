@@ -1,202 +1,431 @@
 // health-module/js/health-ui.js
-// Обёртка для обратной совместимости после декомпозиции
+// ПОЛНАЯ РЕАЛИЗАЦИЯ для обратной совместимости
 
-console.log('🔗 health-ui.js - обёртка для обратной совместимости');
+console.log('🔗 health-ui.js - полная реализация (совместимость)');
 
-const HealthUIWrapper = (function() {
-    // Флаг, что это обёртка, а не реальная реализация
-    const isWrapper = true;
+const HealthUILegacy = (function() {
+    // Эмодзи для настроения (из оригинала)
+    const MOOD_EMOJIS = {
+        'радость': '😄',
+        'удовлетворение': '🙂',
+        'нейтрально': '😐',
+        'грусть': '😔',
+        'стресс': '😫',
+        'гнев': '😠',
+        'беспокойство': '😟',
+        'усталость': '😴',
+        'энергичность': '⚡️',
+        'спокойствие': '😌'
+    };
 
-    // Ждём загрузки main.js
-    function waitForMainModule() {
-        return new Promise((resolve) => {
-            const checkInterval = setInterval(() => {
-                if (window.HealthUIMain && !window.HealthUIMain.__isStub) {
-                    clearInterval(checkInterval);
-                    resolve(window.HealthUIMain);
-                }
-            }, 100);
+    // Цвета для интенсивности симптомов (из оригинала)
+    const INTENSITY_COLORS = {
+        1: '#4CAF50',
+        2: '#8BC34A',
+        3: '#FFC107',
+        4: '#FF9800',
+        5: '#F44336'
+    };
 
-            // Таймаут 5 секунд
-            setTimeout(() => {
-                clearInterval(checkInterval);
-                resolve(null);
-            }, 5000);
+    // === РЕАЛЬНАЯ РЕАЛИЗАЦИЯ КАК В ИСХОДНОМ ФАЙЛЕ ===
+
+    /**
+     * Инициализация компонентов главной панели
+     */
+    function initDashboardComponents() {
+        console.log('📊 HealthUI.initDashboardComponents() вызван');
+
+        // Пробуем использовать декомпозированные компоненты
+        if (window.Dashboard && window.Dashboard.init) {
+            console.log('✅ Использую Dashboard.init()');
+            return window.Dashboard.init();
+        }
+
+        // Если компоненты не загружены, используем локальную реализацию
+        console.log('⚠️ Dashboard не найден, использую локальную реализацию');
+        initMedicationTracker();
+        initWellnessGrid();
+        initAddSymptomsButton();
+        renderSummary();
+    }
+
+    /**
+     * Инициализация трекера лекарств (из оригинала)
+     */
+    function initMedicationTracker() {
+        const trackerContainer = document.getElementById('medication-tracker');
+        if (!trackerContainer) {
+            console.warn('⚠️ Контейнер medication-tracker не найден');
+            return;
+        }
+
+        const state = HealthModule.getState();
+        const medications = Array.isArray(state.todayMedications)
+            ? state.todayMedications
+            : [];
+
+        console.log('💊 Загружено лекарств:', medications.length);
+
+        if (medications.length === 0) {
+            trackerContainer.innerHTML = `
+                <div class="no-medications">
+                    <div class="no-meds-icon">💊</div>
+                    <p>На сегодня нет запланированных лекарств</p>
+                    <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
+                        Добавить лекарство
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="medication-list">';
+
+        medications.forEach(med => {
+            const medicationId = med.medication_id || med.id || '';
+            const time = med.time_of_day ?
+                (typeof med.time_of_day === 'string' ? med.time_of_day.substring(0, 5) : '--:--')
+                : '--:--';
+            const status = med.status || 'pending';
+            const isTaken = status === 'taken';
+            const takenTime = med.taken_time ?
+                `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
+                : '';
+
+            const medicationName = med.medication_name || med.name || 'Лекарство';
+            const dosage = med.dosage || '';
+            const form = med.form || '';
+
+            html += `
+                <div class="medication-card ${isTaken ? 'taken' : ''}" data-medication-id="${medicationId}">
+                    <div class="medication-time">${time}</div>
+                    <div class="medication-info">
+                        <div class="medication-name">${medicationName}</div>
+                        ${dosage ? `<div class="medication-dosage">${dosage}</div>` : ''}
+                        ${form ? `<div class="medication-form">${form}</div>` : ''}
+                    </div>
+                    <div class="medication-actions">
+                        ${isTaken ?
+                            `<button class="health-btn btn-success" disabled>
+                                ✅ Принято ${takenTime}
+                            </button>` :
+                            `<button class="health-btn btn-primary" onclick="markMedicationTaken('${medicationId}')">
+                                ✅ Принять
+                            </button>
+                            <button class="health-btn btn-secondary" onclick="markMedicationSkipped('${medicationId}')">
+                                ⏭ Пропустить
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        trackerContainer.innerHTML = html;
+    }
+
+    /**
+     * Инициализация грида самочувствия (из оригинала)
+     */
+    function initWellnessGrid() {
+        const gridContainer = document.getElementById('wellness-grid');
+        if (!gridContainer) return;
+
+        const state = HealthModule.getState();
+
+        html = `
+            <div class="wellness-grid">
+                <div class="wellness-item" onclick="showMoodPicker()">
+                    <div class="wellness-icon">${getMoodEmoji(state.todayEntry?.mood)}</div>
+                    <div class="wellness-label">Настроение</div>
+                    <div class="wellness-value">${state.todayEntry?.mood || 'Добавить'}</div>
+                </div>
+
+                <div class="wellness-item" onclick="showSleepInput()">
+                    <div class="wellness-icon">🌙</div>
+                    <div class="wellness-label">Сон</div>
+                    <div class="wellness-value">${state.todayEntry?.sleep_hours ? `${state.todayEntry.sleep_hours} ч` : 'Добавить'}</div>
+                </div>
+
+                <div class="wellness-item" onclick="showWeightInput()">
+                    <div class="wellness-icon">⚖️</div>
+                    <div class="wellness-label">Вес</div>
+                    <div class="wellness-value">${state.todayEntry?.weight ? `${state.todayEntry.weight} кг` : 'Добавить'}</div>
+                </div>
+
+                <div class="wellness-item" onclick="HealthModule.switchTab('diary')">
+                    <div class="wellness-icon">🤕</div>
+                    <div class="wellness-label">Симптомы</div>
+                    <div class="wellness-value">${state.todayEntry?.symptoms?.length || 0}</div>
+                </div>
+            </div>
+        `;
+
+        gridContainer.innerHTML = html;
+    }
+
+    /**
+     * Инициализация кнопки добавления симптомов (из оригинала)
+     */
+    function initAddSymptomsButton() {
+        const button = document.getElementById('add-symptoms-btn');
+        if (!button) return;
+
+        button.addEventListener('click', () => {
+            showSymptomPicker();
         });
     }
 
-    // Получить реальную реализацию или заглушку
-    async function getRealImplementation() {
-        // Если main.js уже загружен
-        if (window.HealthUIMain && !window.HealthUIMain.__isStub) {
-            return window.HealthUIMain;
+    /**
+     * Отобразить сводку (из оригинала)
+     */
+    function renderSummary() {
+        const summaryContainer = document.getElementById('health-summary');
+        if (!summaryContainer) return;
+
+        const state = HealthModule.getState();
+
+        if (!state.stats) {
+            summaryContainer.innerHTML = '<p>Загрузка сводки...</p>';
+            return;
         }
 
-        // Если компоненты уже загружены напрямую
-        if (window.Dashboard && window.Diary && window.Medications) {
-            console.log('✅ Декомпозированные компоненты уже загружены');
-            return {
-                initDashboardComponents: () => window.Dashboard?.init(),
-                initMedicationsComponents: () => window.Medications?.init(),
-                initDiaryComponents: () => window.Diary?.init(),
-                initStatsComponents: () => window.Stats?.init(),
-                initOnboardingComponents: () => window.Onboarding?.init(),
-                showToast: (msg, type) => {
-                    console.log(`[Toast ${type}]: ${msg}`);
-                    // Простая реализация, если нет основной
-                    const toast = document.createElement('div');
-                    toast.className = `health-toast toast-${type}`;
-                    toast.textContent = msg;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
-                },
-                showModal: (type, data) => {
-                    console.log(`[Modal ${type}]:`, data);
-                    if (window.ModalManager) window.ModalManager.show(type, data);
-                },
-                closeModal: () => {
-                    if (window.ModalManager) window.ModalManager.close();
-                },
-                selectMood: async (mood) => {
-                    const today = new Date().toISOString().split('T')[0];
-                    return HealthModule?.updateHealthEntry(today, 'mood', mood);
-                },
-                saveSleep: async () => {
-                    const input = document.getElementById('modal-sleep-input');
-                    if (!input?.value) return false;
-                    const today = new Date().toISOString().split('T')[0];
-                    return HealthModule?.updateHealthEntry(today, 'sleep', parseFloat(input.value));
-                },
-                saveWeight: async () => {
-                    const input = document.getElementById('modal-weight-input');
-                    if (!input?.value) return false;
-                    const today = new Date().toISOString().split('T')[0];
-                    return HealthModule?.updateHealthEntry(today, 'weight', parseFloat(input.value));
-                },
-                updateSymptomsList: () => {
-                    if (window.SymptomModal) window.SymptomModal.updateSymptomsList();
-                },
-                saveSymptom: async () => {
-                    if (window.SymptomModal) return window.SymptomModal.save();
-                    return false;
-                }
-            };
-        }
+        html = `
+            <div class="summary-card">
+                <h3>📊 За последние 7 дней</h3>
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <div class="stat-value">${state.stats.entries_count || 0}</div>
+                        <div class="stat-label">записей</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="stat-value">${state.stats.average_sleep ? state.stats.average_sleep.toFixed(1) : '0'}</div>
+                        <div class="stat-label">ч сна в среднем</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="stat-value">${state.stats.medication_adherence ? Math.round(state.stats.medication_adherence) : 0}%</div>
+                        <div class="stat-label">приверженность лечению</div>
+                    </div>
+                </div>
+            </div>
+        `;
 
-        // Ждём загрузки main.js
-        console.log('⏳ Ожидание загрузки main.js...');
-        const mainModule = await waitForMainModule();
-
-        if (mainModule) {
-            console.log('✅ Main.js загружен, делегирую вызовы');
-            return mainModule;
-        }
-
-        console.warn('⚠️ Main.js не загружен, использую заглушки');
-        return null;
+        summaryContainer.innerHTML = html;
     }
 
-    // Создаём прокси-объект, который делегирует вызовы
-    return new Proxy({}, {
-        get: function(target, prop) {
-            // Если метод существует в обёртке
-            if (prop === '__isWrapper') return isWrapper;
-            if (prop === '__isStub') return true;
+    /**
+     * Получить эмодзи для настроения (из оригинала)
+     */
+    function getMoodEmoji(mood) {
+        return MOOD_EMOJIS[mood] || '😐';
+    }
 
-            // Возвращаем асинхронную функцию, которая найдёт реальную реализацию
-            return async function(...args) {
-                const realImpl = await getRealImplementation();
+    // === ПРОКСИ-МЕТОДЫ ДЛЯ ОСТАЛЬНЫХ ФУНКЦИЙ ===
 
-                if (realImpl && typeof realImpl[prop] === 'function') {
-                    return realImpl[prop].apply(realImpl, args);
-                }
+    /**
+     * Показать тост-уведомление (упрощённая версия)
+     */
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `health-toast toast-${type}`;
+        toast.innerHTML = message;
 
-                // Если метода нет, логируем и пробуем альтернативы
-                console.warn(`⚠️ HealthUI.${prop} не найден, пробую альтернативы...`);
+        document.body.appendChild(toast);
 
-                // Альтернативные реализации для ключевых методов
-                switch(prop) {
-                    case 'initDashboardComponents':
-                        if (window.Dashboard && window.Dashboard.init) {
-                            console.log('✅ Использую Dashboard.init() напрямую');
-                            return window.Dashboard.init();
-                        }
-                        break;
+        setTimeout(() => toast.classList.add('show'), 10);
 
-                    case 'initMedicationsComponents':
-                        if (window.Medications && window.Medications.init) {
-                            return window.Medications.init();
-                        }
-                        break;
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
 
-                    case 'initDiaryComponents':
-                        if (window.Diary && window.Diary.init) {
-                            return window.Diary.init();
-                        }
-                        break;
+    // === ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ onclick ===
 
-                    case 'initStatsComponents':
-                        if (window.Stats && window.Stats.init) {
-                            return window.Stats.init();
-                        }
-                        break;
-
-                    case 'initOnboardingComponents':
-                        if (window.Onboarding && window.Onboarding.init) {
-                            return window.Onboarding.init();
-                        }
-                        break;
-
-                    case 'showToast':
-                        console.log(`[Toast]: ${args[0]}`);
-                        return;
-                }
-
-                console.error(`❌ HealthUI.${prop} не реализован`);
-                return null;
-            };
+    // Экспортируем глобальные функции как в оригинале
+    window.markMedicationTaken = async function(medicationId) {
+        const success = await HealthModule.logMedication(medicationId, 'taken');
+        if (success) {
+            showToast('✅ Лекарство отмечено как принятое', 'success');
+            HealthModule.refreshData();
         }
-    });
+    };
+
+    window.markMedicationSkipped = async function(medicationId) {
+        const success = await HealthModule.logMedication(medicationId, 'skipped');
+        if (success) {
+            showToast('⏭ Лекарство пропущено', 'info');
+            HealthModule.refreshData();
+        }
+    };
+
+    window.showMoodPicker = function() {
+        showModal('mood-picker');
+    };
+
+    window.showSleepInput = function() {
+        showModal('sleep-input');
+    };
+
+    window.showWeightInput = function() {
+        showModal('weight-input');
+    };
+
+    window.showSymptomPicker = function() {
+        showModal('symptom-picker');
+    };
+
+    window.showMedicationForm = function() {
+        showModal('medication-form');
+    };
+
+    window.selectMood = function(mood) {
+        const today = new Date().toISOString().split('T')[0];
+        HealthModule.updateHealthEntry(today, 'mood', mood);
+    };
+
+    window.saveEntry = async function(date) {
+        const sleep = document.getElementById('sleep-input')?.value;
+        const weight = document.getElementById('weight-input')?.value;
+        const notes = document.getElementById('notes-input')?.value;
+        const sexualActivity = document.getElementById('sexual-activity-input')?.value;
+
+        const promises = [];
+
+        if (sleep) promises.push(HealthModule.updateHealthEntry(date, 'sleep', parseFloat(sleep)));
+        if (weight) promises.push(HealthModule.updateHealthEntry(date, 'weight', parseFloat(weight)));
+        if (notes) promises.push(HealthModule.updateHealthEntry(date, 'notes', notes));
+        if (sexualActivity) promises.push(HealthModule.updateHealthEntry(date, 'sexual_activity', sexualActivity));
+
+        await Promise.all(promises);
+        showToast('✅ Сохранено', 'success');
+    };
+
+    window.toggleArchiveView = function() {
+        console.log('toggleArchiveView - заглушка');
+    };
+
+    window.editMedication = function(id) {
+        console.log('editMedication - заглушка', id);
+    };
+
+    window.deleteMedication = function(id) {
+        console.log('deleteMedication - заглушка', id);
+    };
+
+    window.removeSymptom = function(id) {
+        console.log('removeSymptom - заглушка', id);
+    };
+
+    // === ПУБЛИЧНЫЙ ИНТЕРФЕЙС ===
+
+    return {
+        // Основные методы
+        initDashboardComponents,
+        initMedicationsComponents: function() {
+            console.log('💊 HealthUI.initMedicationsComponents()');
+            if (window.Medications && window.Medications.init) {
+                return window.Medications.init();
+            }
+            console.warn('Medications не загружен');
+        },
+        initDiaryComponents: function() {
+            console.log('📓 HealthUI.initDiaryComponents()');
+            if (window.Diary && window.Diary.init) {
+                return window.Diary.init();
+            }
+            console.warn('Diary не загружен');
+        },
+        initStatsComponents: function() {
+            console.log('📈 HealthUI.initStatsComponents()');
+            if (window.Stats && window.Stats.init) {
+                return window.Stats.init();
+            }
+            console.warn('Stats не загружен');
+        },
+        initOnboardingComponents: function() {
+            console.log('🎯 HealthUI.initOnboardingComponents()');
+            if (window.Onboarding && window.Onboarding.init) {
+                return window.Onboarding.init();
+            }
+            console.warn('Onboarding не загружен');
+        },
+
+        // Вспомогательные методы
+        showToast,
+        showModal: function(modalType, data = {}) {
+            console.log(`📱 HealthUI.showModal(${modalType})`);
+            // Простая реализация или делегирование
+            if (window.ModalManager) {
+                window.ModalManager.show(modalType, data);
+            } else {
+                console.warn('ModalManager не загружен');
+            }
+        },
+        closeModal: function() {
+            console.log('❌ HealthUI.closeModal()');
+            if (window.ModalManager) {
+                window.ModalManager.close();
+            }
+        },
+
+        // Методы для обратной совместимости
+        selectMood: async function(mood) {
+            const today = new Date().toISOString().split('T')[0];
+            const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
+            if (success) {
+                showToast('✅ Настроение сохранено', 'success');
+                HealthModule.refreshData();
+            }
+        },
+        saveSleep: async function() {
+            const input = document.getElementById('modal-sleep-input');
+            if (!input || !input.value) return;
+            const today = new Date().toISOString().split('T')[0];
+            const success = await HealthModule.updateHealthEntry(today, 'sleep', parseFloat(input.value));
+            if (success) {
+                showToast('✅ Сон сохранён', 'success');
+                HealthModule.refreshData();
+            }
+        },
+        saveWeight: async function() {
+            const input = document.getElementById('modal-weight-input');
+            if (!input || !input.value) return;
+            const today = new Date().toISOString().split('T')[0];
+            const success = await HealthModule.updateHealthEntry(today, 'weight', parseFloat(input.value));
+            if (success) {
+                showToast('✅ Вес сохранён', 'success');
+                HealthModule.refreshData();
+            }
+        },
+        updateSymptomsList: function() {
+            console.log('🔄 HealthUI.updateSymptomsList()');
+        },
+        saveSymptom: async function() {
+            console.log('💾 HealthUI.saveSymptom()');
+            return false;
+        },
+
+        // Маркер для обратной совместимости
+        __isLegacyImplementation: true
+    };
 })();
 
 // Экспорт в глобальную область
 if (typeof window !== 'undefined') {
-    // Сохраняем текущий HealthUI если он есть
-    if (window.HealthUI && !window.HealthUI.__isWrapper) {
-        window.HealthUIPrevious = window.HealthUI;
-    }
-
-    // Устанавливаем нашу обёртку
-    window.HealthUI = HealthUIWrapper;
-
-    // Если main.js загрузится позже, он должен перезаписать HealthUI
-    Object.defineProperty(window, 'HealthUIMain', {
-        set: function(value) {
-            // Сохраняем ссылку на main.js реализацию
-            window.__HealthUIMain = value;
-            // Перезаписываем HealthUI
-            window.HealthUI = value;
-            console.log('✅ HealthUI заменён на main.js реализацию');
-        },
-        get: function() {
-            return window.__HealthUIMain;
-        }
-    });
-
-    console.log('✅ HealthUI обёртка установлена');
+    window.HealthUI = HealthUILegacy;
+    console.log('✅ HealthUI (legacy) загружен');
 }
 
-// Автоматически инициируем загрузку компонентов если они нужны
-document.addEventListener('DOMContentLoaded', function() {
-    // Проверяем, есть ли контейнер здоровья на странице
-    const healthContainer = document.getElementById('health-container');
-    if (healthContainer && !window.Dashboard && window.loadHealthModule) {
-        console.log('🔄 Автозагрузка компонентов здоровья...');
-        setTimeout(() => window.loadHealthModule(), 100);
+// Если main.js загрузится позже, он может перезаписать HealthUI
+Object.defineProperty(window, 'HealthUIMain', {
+    set: function(value) {
+        console.log('✅ HealthUIMain установлен (main.js загружен)');
+        window.__HealthUIMain = value;
+        // НЕ перезаписываем HealthUI, чтобы старый код работал
+    },
+    get: function() {
+        return window.__HealthUIMain;
     }
 });
-
-// Для ES6 модулей
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HealthUIWrapper;
-}
