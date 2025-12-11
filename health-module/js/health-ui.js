@@ -48,80 +48,80 @@ const HealthUI = (function() {
      * Инициализация трекера лекарств
      */
     function initMedicationTracker() {
-    const trackerContainer = document.getElementById('medication-tracker');
-    if (!trackerContainer) {
-        console.warn('⚠️ Контейнер medication-tracker не найден');
-        return;
-    }
+        const trackerContainer = document.getElementById('medication-tracker');
+        if (!trackerContainer) {
+            console.warn('⚠️ Контейнер medication-tracker не найден');
+            return;
+        }
 
-    const state = HealthModule.getState();
+        const state = HealthModule.getState();
 
-    // ГАРАНТИРУЕМ, что todayMedications - массив
-    const medications = Array.isArray(state.todayMedications)
-        ? state.todayMedications
-        : [];
+        // ГАРАНТИРУЕМ, что todayMedications - массив
+        const medications = Array.isArray(state.todayMedications)
+            ? state.todayMedications
+            : [];
 
-    console.log('💊 Загружено лекарств:', medications.length, medications);
+        console.log('💊 Загружено лекарств:', medications.length, medications);
 
-    if (medications.length === 0) {
-        trackerContainer.innerHTML = `
-            <div class="no-medications">
-                <div class="no-meds-icon">💊</div>
-                <p>На сегодня нет запланированных лекарств</p>
-                <button class="btn-secondary" onclick="HealthModule.switchTab('medications')">
-                    Добавить лекарство
-                </button>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '<div class="medication-list">';
-
-    medications.forEach(med => {
-        // БЕЗОПАСНОЕ извлечение данных
-        const medicationId = med.medication_id || med.id || '';
-        const time = med.time_of_day ?
-            (typeof med.time_of_day === 'string' ? med.time_of_day.substring(0, 5) : '--:--')
-            : '--:--';
-        const status = med.status || 'pending';
-        const isTaken = status === 'taken';
-        const takenTime = med.taken_time ?
-            `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
-            : '';
-
-        const medicationName = med.medication_name || med.name || 'Лекарство';
-        const dosage = med.dosage || '';
-        const form = med.form || '';
-
-        html += `
-            <div class="medication-card ${isTaken ? 'taken' : ''}" data-medication-id="${medicationId}">
-                <div class="medication-time">${time}</div>
-                <div class="medication-info">
-                    <div class="medication-name">${medicationName}</div>
-                    ${dosage ? `<div class="medication-dosage">${dosage}</div>` : ''}
-                    ${form ? `<div class="medication-form">${form}</div>` : ''}
+        if (medications.length === 0) {
+            trackerContainer.innerHTML = `
+                <div class="no-medications">
+                    <div class="no-meds-icon">💊</div>
+                    <p>На сегодня нет запланированных лекарств</p>
+                    <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
+                        Добавить лекарство
+                    </button>
                 </div>
-                <div class="medication-actions">
-                    ${isTaken ?
-                        `<button class="btn-success" disabled>
-                            ✅ Принято ${takenTime}
-                        </button>` :
-                        `<button class="btn-primary" onclick="markMedicationTaken('${medicationId}')">
-                            ✅ Принять
-                        </button>
-                        <button class="btn-secondary" onclick="markMedicationSkipped('${medicationId}')">
-                            ⏭ Пропустить
-                        </button>`
-                    }
-                </div>
-            </div>
-        `;
-    });
+            `;
+            return;
+        }
 
-    html += '</div>';
-    trackerContainer.innerHTML = html;
-}
+        let html = '<div class="medication-list">';
+
+        medications.forEach(med => {
+            // БЕЗОПАСНОЕ извлечение данных
+            const medicationId = med.medication_id || med.id || '';
+            const time = med.time_of_day ?
+                (typeof med.time_of_day === 'string' ? med.time_of_day.substring(0, 5) : '--:--')
+                : '--:--';
+            const status = med.status || 'pending';
+            const isTaken = status === 'taken';
+            const takenTime = med.taken_time ?
+                `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
+                : '';
+
+            const medicationName = med.medication_name || med.name || 'Лекарство';
+            const dosage = med.dosage || '';
+            const form = med.form || '';
+
+            html += `
+                <div class="medication-card ${isTaken ? 'taken' : ''}" data-medication-id="${medicationId}">
+                    <div class="medication-time">${time}</div>
+                    <div class="medication-info">
+                        <div class="medication-name">${medicationName}</div>
+                        ${dosage ? `<div class="medication-dosage">${dosage}</div>` : ''}
+                        ${form ? `<div class="medication-form">${form}</div>` : ''}
+                    </div>
+                    <div class="medication-actions">
+                        ${isTaken ?
+                            `<button class="health-btn btn-success" disabled>
+                                ✅ Принято ${takenTime}
+                            </button>` :
+                            `<button class="health-btn btn-primary" onclick="markMedicationTaken('${medicationId}')">
+                                ✅ Принять
+                            </button>
+                            <button class="health-btn btn-secondary" onclick="markMedicationSkipped('${medicationId}')">
+                                ⏭ Пропустить
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        trackerContainer.innerHTML = html;
+    }
 
     /**
      * Инициализация грида самочувствия
@@ -396,7 +396,7 @@ const HealthUI = (function() {
             day: 'numeric'
         });
 
-        html = `
+        const html = `
             <div class="entry-form">
                 <h3>📅 ${formattedDate}</h3>
 
@@ -637,6 +637,7 @@ const HealthUI = (function() {
                     ErrorHandler.show('Ошибка сохранения. Попробуйте еще раз.', { type: 'error' });
                 }
             });
+        });
 
         console.log(`✅ Инициализировано ${genderBtns.length} кнопок онбординга`);
     }
