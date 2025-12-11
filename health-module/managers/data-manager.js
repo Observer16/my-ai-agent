@@ -235,6 +235,9 @@ const DataManager = (function() {
                 case 'notes':
                     response = await HealthAPI.addNotes(date, value);
                     break;
+                case 'sexual_activity':
+                    response = await HealthAPI.addSexualActivity(date, value);
+                    break;
                 default:
                     throw new Error(`Неизвестное поле: ${field}`);
             }

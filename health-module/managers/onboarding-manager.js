@@ -41,7 +41,7 @@ const OnboardingManager = (function() {
         const state = StateManager.getState();
         if (state.isOnboarding) return;
 
-        // Обновляем состояние - ГЛАВНОЕ: isLoading = false
+        // Обновляем состояние
         StateManager.updateState({
             isOnboarding: true,
             isLoading: false
@@ -49,7 +49,7 @@ const OnboardingManager = (function() {
 
         // Скрываем табы
         DomManager.hideTabs();
-        DomManager.hideLoading(); // ← важно!
+        DomManager.hideLoading();
 
         // Загружаем HTML онбординга
         const html = await ComponentLoader.load('health-onboarding.html');
@@ -118,14 +118,14 @@ const OnboardingManager = (function() {
         }
     }
 
-    // Завершить онбординг
+    // Завершить онбординг (БЕЗ RESTART!)
     async function complete() {
-        console.log('🎉 Завершаем онбординг...');
+        console.log('🎉 Завершаем онбординг (переход на dashboard)...');
 
-        // Сначала завершаем процесс онбординга
+        // Завершаем онбординг
         StateManager.updateState({
             isOnboarding: false,
-            isLoading: true // будем загружать основной интерфейс
+            isLoading: true // будем загружать dashboard
         });
 
         console.log('📋 Гендер после онбординга:', {
@@ -133,20 +133,18 @@ const OnboardingManager = (function() {
             localStorage: localStorage.getItem('health_user_gender')
         });
 
-        // Скрываем контейнер онбординга плавно
+        // Плавное скрытие онбординга
         const onboardingContainer = document.querySelector('.onboarding-container');
         if (onboardingContainer) {
             onboardingContainer.style.opacity = '0';
             onboardingContainer.style.transition = 'opacity 0.3s ease';
-
-            // Ждем завершения анимации
             await new Promise(resolve => setTimeout(resolve, 300));
         }
 
         // ТРИГГЕРИМ СОБЫТИЕ завершения
         EventManager.emit('onboarding:completed');
 
-        console.log('✅ Онбординг завершен, можно загружать основной интерфейс');
+        console.log('✅ Онбординг завершен');
         return true;
     }
 

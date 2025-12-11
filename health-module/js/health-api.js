@@ -15,11 +15,11 @@ const HealthAPI = (function() {
      * Получить заголовки с Telegram ID
      */
     function getHeaders() {
-    const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
-    };
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...HealthConfig.NGROK_HEADERS // ← используем из конфига
+        };
 
         // Добавляем Telegram User ID
         if (HealthConfig.TELEGRAM_USER?.id) {
@@ -38,32 +38,34 @@ const HealthAPI = (function() {
      * Обработка ответа API
      */
     async function handleResponse(response) {
-    const text = await response.text();
-    let data;
+        const text = await response.text();
+        let data;
 
-    try {
-        data = text ? JSON.parse(text) : {};
-    } catch (error) {
-        console.error('❌ Ошибка парсинга JSON:', error, 'Текст ответа:', text);
-        data = {};
+        try {
+            data = text ? JSON.parse(text) : {};
+        } catch (error) {
+            console.error('❌ Ошибка парсинга JSON:', error, 'Текст ответа:', text);
+            data = {};
+        }
+
+        if (HealthConfig.DEBUG) {
+            console.log(`📡 API Response [${response.status} ${response.url}]:`, data);
+        }
+
+        if (response.ok) {
+            return {
+                success: true,
+                data: data,
+                status: response.status
+            };
+        } else {
+            return {
+                success: false,
+                error: data.detail || data.message || `HTTP ${response.status}`,
+                status: response.status
+            };
+        }
     }
-
-    console.log(`📡 API Response [${response.status} ${response.url}]:`, data);
-
-    if (response.ok) {
-        return {
-            success: true,
-            data: data,
-            status: response.status
-        };
-    } else {
-        return {
-            success: false,
-            error: data.detail || data.message || `HTTP ${response.status}`,
-            status: response.status
-        };
-    }
-}
 
     /**
      * Получить информацию о пользователе
@@ -201,43 +203,86 @@ const HealthAPI = (function() {
     }
 
     /**
+     * Добавить сексуальную активность
+     */
+    async function addSexualActivity(date, activity) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/entries/${date}/sexual-activity`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ sexual_activity: activity })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Получить лекарства на сегодня
+     * Бэк возвращает: [{ medication: {...}, schedule: {...}, status: "..." }]
      */
     async function getTodayMedications() {
-    try {
-        const response = await fetch(`${BASE_URL}/health/medications/logs/today`, {
-            method: 'GET',
-            headers: getHeaders()
-        });
-        const result = await handleResponse(response);
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/logs/today`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            const result = await handleResponse(response);
 
-        // Гарантируем, что data всегда массив
-        if (result.success && result.data) {
-            // Если data - объект, проверяем, есть ли массив внутри
-            if (Array.isArray(result.data)) {
-                result.data = result.data;
-            } else if (result.data.data && Array.isArray(result.data.data)) {
-                result.data = result.data.data;
-            } else if (result.data.medications && Array.isArray(result.data.medications)) {
-                result.data = result.data.medications;
-            } else {
-                console.warn('⚠️ Ответ не содержит массива лекарств:', result.data);
-                result.data = [];
+            // Нормализуем ответ от бэка
+            if (result.success && result.data) {
+                const rawData = Array.isArray(result.data) ? result.data : [];
+
+                // Преобразуем вложенную структуру в плоскую для UI
+                const normalized = rawData.map(item => ({
+                    // ID лекарства
+                    medication_id: item.medication?.id || item.id,
+
+                    // Основная информация
+                    medication_name: item.medication?.name || item.name || 'Лекарство',
+                    dosage: item.medication?.dosage || item.dosage || '',
+                    form: item.medication?.form || item.form || '',
+                    instructions: item.medication?.instructions || item.instructions || '',
+
+                    // Расписание
+                    time_of_day: item.schedule?.time_of_day || item.time_of_day || '00:00:00',
+                    reminder_minutes: item.schedule?.reminder_minutes || item.reminder_minutes || 10,
+                    days_of_week: item.schedule?.days_of_week || item.days_of_week || [0,1,2,3,4,5,6],
+
+                    // Статус приема
+                    status: item.status || 'pending',
+                    taken_time: item.taken_time || null,
+
+                    // Служебные ID
+                    schedule_id: item.schedule?.id || item.schedule_id || null,
+                    log_id: item.log_id || null
+                }));
+
+                if (HealthConfig.DEBUG) {
+                    console.log('💊 Нормализованные лекарства:', {
+                        raw: rawData.length,
+                        normalized: normalized.length,
+                        sample: normalized[0]
+                    });
+                }
+
+                return { ...result, data: normalized };
             }
-        } else if (result.success) {
-            result.data = [];
-        }
 
-        return result;
-    } catch (error) {
-        console.error('❌ Ошибка получения лекарств на сегодня:', error);
-        return {
-            success: false,
-            error: error.message,
-            data: []
-        };
+            return { ...result, data: [] };
+        } catch (error) {
+            console.error('❌ Ошибка получения лекарств на сегодня:', error);
+            return {
+                success: false,
+                error: error.message,
+                data: []
+            };
+        }
     }
-}
 
     /**
      * Получить все лекарства
@@ -468,6 +513,7 @@ const HealthAPI = (function() {
         addWeight,
         addSymptoms,
         addNotes,
+        addSexualActivity,
         getHealthSummary,
         getHealthStatistics,
         createMedication

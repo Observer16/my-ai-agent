@@ -433,6 +433,20 @@ const HealthUI = (function() {
                 </div>
 
                 <div class="form-section">
+                    <label>
+                        🔒 Сексуальная активность (приватно)
+                        <span style="font-size: 12px; color: var(--health-text-light); margin-left: 8px;">
+                            Только для вас
+                        </span>
+                    </label>
+                    <select id="sexual-activity-input" class="modal-input">
+                        <option value="">Не указано</option>
+                        <option value="yes" ${entry?.sexual_activity === 'yes' ? 'selected' : ''}>Да</option>
+                        <option value="no" ${entry?.sexual_activity === 'no' ? 'selected' : ''}>Нет</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
                     <label>Симптомы</label>
                     <div id="symptoms-list">
                         ${renderSymptomsList(entry?.symptoms || [])}
@@ -571,7 +585,7 @@ const HealthUI = (function() {
                     b.style.cursor = 'not-allowed';
                 });
 
-                // 2. Показываем загрузку на выбранной кнопке
+                // 2. Показываем загрузку
                 this.classList.add('loading');
                 const originalHTML = this.innerHTML;
                 this.innerHTML = `
@@ -582,7 +596,7 @@ const HealthUI = (function() {
                 `;
 
                 try {
-                    // 3. Сохраняем гендер через API
+                    // 3. Сохраняем гендер
                     console.log('📤 Отправляем запрос на сохранение гендера...');
                     const success = await HealthModule.setUserGender(gender);
 
@@ -592,7 +606,7 @@ const HealthUI = (function() {
 
                     console.log('✅ Гендер успешно сохранен');
 
-                    // 4. Показываем успех на выбранной кнопке
+                    // 4. Показываем успех
                     this.classList.remove('loading');
                     this.classList.add('selected');
                     this.innerHTML = `
@@ -602,44 +616,16 @@ const HealthUI = (function() {
                         </div>
                     `;
 
-                    // 5. Краткая пауза для UX, затем переход
-                    setTimeout(() => {
-                        // Плавно скрываем онбординг
-                        if (container) {
-                            container.style.opacity = '0';
-                            container.style.transition = 'opacity 0.5s ease';
-                        }
-
-                        // 6. Показываем сообщение о переходе
-                        setTimeout(() => {
-                            if (container) {
-                                container.style.opacity = '1';
-                                container.innerHTML = `
-                                    <div style="text-align: center; padding: 100px 20px;">
-                                        <div style="font-size: 64px; margin-bottom: 20px;">✨</div>
-                                        <h3 style="margin-bottom: 10px; color: #333;">Отлично!</h3>
-                                        <p style="color: #666; margin-bottom: 40px; font-size: 16px;">
-                                            Настраиваем модуль здоровья для вас...
-                                        </p>
-                                        <div class="loading-spinner" style="width: 40px; height: 40px; margin: 0 auto;"></div>
-                                    </div>
-                                `;
-                            }
-
-                            // 7. Завершаем онбординг (это вызовет полную перезагрузку модуля)
-                            setTimeout(async () => {
-                                console.log('🔄 Запускаем завершение онбординга...');
-                                await HealthModule.completeOnboarding();
-                            }, 800);
-
-                        }, 500);
-
+                    // 5. Завершаем онбординг (БЕЗ RESTART - просто переходим на dashboard)
+                    setTimeout(async () => {
+                        console.log('🔄 Завершаем онбординг...');
+                        await OnboardingManager.complete();
                     }, 1000);
 
                 } catch (error) {
                     console.error('❌ Ошибка в процессе онбординга:', error);
 
-                    // Восстанавливаем ВСЕ кнопки
+                    // Восстанавливаем кнопки
                     genderBtns.forEach(b => {
                         b.style.pointerEvents = 'auto';
                         b.style.opacity = '1';
@@ -647,14 +633,10 @@ const HealthUI = (function() {
                         b.classList.remove('loading', 'selected');
                     });
 
-                    // Восстанавливаем оригинальное содержимое выбранной кнопки
                     this.innerHTML = originalHTML;
-
-                    // Показываем ошибку
-                    HealthUI.showToast('❌ Ошибка сохранения. Попробуйте еще раз.', 'error');
+                    ErrorHandler.show('Ошибка сохранения. Попробуйте еще раз.', { type: 'error' });
                 }
             });
-        });
 
         console.log(`✅ Инициализировано ${genderBtns.length} кнопок онбординга`);
     }
@@ -1107,10 +1089,16 @@ window.saveEntry = async function(date) {
     const sleep = document.getElementById('sleep-input')?.value;
     const weight = document.getElementById('weight-input')?.value;
     const notes = document.getElementById('notes-input')?.value;
+    const sexualActivity = document.getElementById('sexual-activity-input')?.value;
 
-    if (sleep) await HealthModule.updateHealthEntry(date, 'sleep', parseFloat(sleep));
-    if (weight) await HealthModule.updateHealthEntry(date, 'weight', parseFloat(weight));
-    if (notes) await HealthModule.updateHealthEntry(date, 'notes', notes);
+    const promises = [];
+
+    if (sleep) promises.push(HealthModule.updateHealthEntry(date, 'sleep', parseFloat(sleep)));
+    if (weight) promises.push(HealthModule.updateHealthEntry(date, 'weight', parseFloat(weight)));
+    if (notes) promises.push(HealthModule.updateHealthEntry(date, 'notes', notes));
+    if (sexualActivity) promises.push(HealthModule.updateHealthEntry(date, 'sexual_activity', sexualActivity));
+
+    await Promise.all(promises);
 
     if (typeof HealthUI !== 'undefined') {
         HealthUI.showToast('✅ Сохранено', 'success');
