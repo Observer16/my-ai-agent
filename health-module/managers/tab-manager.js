@@ -24,6 +24,12 @@ const TabManager = (function() {
 
     // Метод для начальной загрузки
     async function loadInitialTab(tabName = 'dashboard') {
+        // ПРОВЕРКА: если идет онбординг - не загружаем вкладки
+        if (StateManager.getState().isOnboarding) {
+            console.log('⏸️ Пропускаем загрузку вкладки, идет онбординг');
+            return;
+        }
+
         console.log(`🚀 Начальная загрузка вкладки: ${tabName}`);
 
         currentTab = tabName;

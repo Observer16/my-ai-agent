@@ -41,7 +41,7 @@ const OnboardingManager = (function() {
         const state = StateManager.getState();
         if (state.isOnboarding) return;
 
-        // Обновляем состояние
+        // Обновляем состояние - ГЛАВНОЕ: isLoading = false
         StateManager.updateState({
             isOnboarding: true,
             isLoading: false
@@ -49,7 +49,7 @@ const OnboardingManager = (function() {
 
         // Скрываем табы
         DomManager.hideTabs();
-        DomManager.hideLoading();
+        DomManager.hideLoading(); // ← важно!
 
         // Загружаем HTML онбординга
         const html = await ComponentLoader.load('health-onboarding.html');
@@ -64,7 +64,7 @@ const OnboardingManager = (function() {
             if (onboardingContainer) {
                 onboardingContainer.style.opacity = '0';
                 onboardingContainer.style.transition = 'opacity 0.5s ease';
-                void onboardingContainer.offsetWidth; // reflow
+                void onboardingContainer.offsetWidth;
                 onboardingContainer.style.opacity = '1';
             }
         }, 50);
@@ -74,7 +74,13 @@ const OnboardingManager = (function() {
             HealthUI.initOnboardingComponents();
         }
 
-        EventManager.emit('onboarding:shown');
+        // ВОЗВРАЩАЕМ ПРОМИС, который разрешится когда онбординг завершится
+        return new Promise((resolve) => {
+            EventManager.on('onboarding:completed', () => {
+                console.log('🎉 Онбординг завершен в менеджере');
+                resolve(true);
+            });
+        });
     }
 
     // Сохранить гендер пользователя
@@ -116,34 +122,31 @@ const OnboardingManager = (function() {
     async function complete() {
         console.log('🎉 Завершаем онбординг...');
 
-        EventManager.emit('onboarding:completing');
-
-        // Обновляем состояние
+        // Сначала завершаем процесс онбординга
         StateManager.updateState({
             isOnboarding: false,
-            isLoading: true
+            isLoading: true // будем загружать основной интерфейс
         });
 
-        console.log('📋 Гендер перед перезапуском:', {
+        console.log('📋 Гендер после онбординга:', {
             state: StateManager.getState().userGender,
             localStorage: localStorage.getItem('health_user_gender')
         });
 
-        // Показываем загрузку
-        if (DomManager.getElement('container')) {
-            DomManager.setContainerHTML(`
-                <div style="text-align: center; padding: 100px 20px;">
-                    <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
-                    <p style="color: #666; font-size: 16px;">Настраиваем модуль здоровья...</p>
-                </div>
-            `);
+        // Скрываем контейнер онбординга плавно
+        const onboardingContainer = document.querySelector('.onboarding-container');
+        if (onboardingContainer) {
+            onboardingContainer.style.opacity = '0';
+            onboardingContainer.style.transition = 'opacity 0.3s ease';
+
+            // Ждем завершения анимации
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
 
-        // Даем время на анимацию
-        await new Promise(resolve => setTimeout(resolve, 500));
-
+        // ТРИГГЕРИМ СОБЫТИЕ завершения
         EventManager.emit('onboarding:completed');
 
+        console.log('✅ Онбординг завершен, можно загружать основной интерфейс');
         return true;
     }
 
