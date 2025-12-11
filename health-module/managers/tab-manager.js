@@ -22,6 +22,34 @@ const TabManager = (function() {
         console.log('✅ TabManager инициализирован');
     }
 
+    // Метод для начальной загрузки
+    async function loadInitialTab(tabName = 'dashboard') {
+        console.log(`🚀 Начальная загрузка вкладки: ${tabName}`);
+
+        currentTab = tabName;
+        StateManager.updateState({ currentTab: tabName });
+        updateDocumentTitle(tabName);
+        updateActiveTabButton(tabName);
+
+        // Загружаем содержимое вкладки
+        await loadCurrentTab();
+
+        // Показываем табы
+        DomManager.showTabs();
+
+        EventManager.emit('tab:initialLoaded', tabName);
+    }
+
+    return {
+        init,
+        switchToTab,
+        loadInitialTab, // <-- Добавить этот метод
+        getCurrentTab,
+        getTabTitle,
+        registerTabHandler,
+        loadCurrentTab
+    };
+
     // Инициализация кнопок вкладок
     function initTabButtons() {
         const tabButtons = document.querySelectorAll('.health-tab');

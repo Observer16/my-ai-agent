@@ -102,54 +102,57 @@ const HealthModule = (function() {
      * Запуск модуля
      */
     async function startModule() {
-        // Сбрасываем состояние
+    // Сбрасываем состояние
+    StateManager.updateState({
+        isLoading: true,
+        isOnboarding: false
+    });
+
+    // Показываем загрузку
+    DomManager.showLoading();
+
+    try {
+        // 1. Загружаем гендер пользователя
+        await DataManager.loadUserGender();
+
+        // 2. Проверяем нужен ли онбординг
+        const needsOnboarding = await OnboardingManager.checkIfNeeded(
+            StateManager.getState().userGender
+        );
+
+        console.log('🔍 Результат проверки онбординга:', { needsOnboarding });
+
+        if (needsOnboarding) {
+            // Показываем онбординг
+            await OnboardingManager.show();
+            return;
+        }
+
+        // 3. Загружаем остальные данные пользователя
+        await DataManager.loadAllUserData();
+
+        // 4. ПОКАЗЫВАЕМ ТАБЫ перед загрузкой данных вкладки
+        DomManager.showTabs();
+
+        // 5. Загружаем начальную вкладку dashboard с данными
+        await TabManager.loadInitialTab('dashboard');
+
+        // 6. Обновляем состояние
         StateManager.updateState({
-            isLoading: true,
+            isLoading: false,
             isOnboarding: false
         });
 
-        // Показываем загрузку
-        DomManager.showLoading();
+        console.log('✅ Модуль запущен, dashboard загружен');
 
-        try {
-            // 1. Загружаем гендер пользователя
-            await DataManager.loadUserGender();
-
-            // 2. Проверяем нужен ли онбординг
-            const needsOnboarding = await OnboardingManager.checkIfNeeded(
-                StateManager.getState().userGender
-            );
-
-            console.log('🔍 Результат проверки онбординга:', { needsOnboarding });
-
-            if (needsOnboarding) {
-                // Показываем онбординг
-                await OnboardingManager.show();
-                return;
-            }
-
-            // 3. Загружаем остальные данные
-            await DataManager.loadAllUserData();
-
-            // 4. Инициализируем интерфейс
-            TabManager.switchToTab('dashboard');
-
-            // 5. Обновляем состояние
-            StateManager.updateState({
-                isLoading: false,
-                isOnboarding: false
-            });
-
-            console.log('✅ Модуль запущен');
-
-        } catch (error) {
-            console.error('❌ Ошибка запуска модуля:', error);
-            ErrorHandler.show(`Ошибка запуска: ${error.message}`);
-            throw error;
-        } finally {
-            DomManager.hideLoading();
-        }
+    } catch (error) {
+        console.error('❌ Ошибка запуска модуля:', error);
+        ErrorHandler.show(`Ошибка запуска: ${error.message}`);
+        throw error;
+    } finally {
+        DomManager.hideLoading();
     }
+}
 
     /**
      * Перезапуск модуля
