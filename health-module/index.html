@@ -60,8 +60,34 @@
 <script src="js/health-api.js"></script>
 <!-- 4. Затем UI -->
 <script src="js/health-ui.js"></script>
-<!-- 5. Затем основной модуль -->
-<script src="js/health-module.js"></script>
+
+<!-- Подключаем модули в правильном порядке -->
+<script src="constants/config.js"></script>
+
+<!-- Core -->
+<script src="core/state-manager.js"></script>
+<script src="core/dom-manager.js"></script>
+<script src="core/event-manager.js"></script>
+
+<!-- Utils -->
+<script src="utils/component-loader.js"></script>
+<script src="utils/error-handler.js"></script>
+<script src="utils/storage-helper.js"></script>
+<script src="utils/ui-helpers.js"></script>
+
+<!-- Managers -->
+<script src="managers/onboarding-manager.js"></script>
+<script src="managers/tab-manager.js"></script>
+<script src="managers/data-manager.js"></script>
+
+<!-- Tabs -->
+<script src="tabs/dashboard-manager.js"></script>
+<script src="tabs/medications-manager.js"></script>
+<script src="tabs/diary-manager.js"></script>
+<script src="tabs/stats-manager.js"></script>
+
+<!-- Главный модуль -->
+<script src="health-module.js"></script>
 <!-- 6. Опционально debug -->
 <script src="js/health-debug.js"></script>
 
