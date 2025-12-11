@@ -1,30 +1,58 @@
 // health-module/js/health-ui.js
-// ПОЛНЫЙ ФАЙЛ С ВСЕМИ КОМПОНЕНТАМИ INLINE
+// ПОЛНАЯ РЕАЛИЗАЦИЯ для обратной совместимости
 
-console.log('🔗 health-ui.js - полная реализация с inline компонентами');
+console.log('🔗 health-ui.js - полная реализация (совместимость)');
 
-// ========== ВСТРАИВАЕМ ВСЕ КОМПОНЕНТЫ ==========
+const HealthUILegacy = (function() {
+    // Эмодзи для настроения (из оригинала)
+    const MOOD_EMOJIS = {
+        'радость': '😄',
+        'удовлетворение': '🙂',
+        'нейтрально': '😐',
+        'грусть': '😔',
+        'стресс': '😫',
+        'гнев': '😠',
+        'беспокойство': '😟',
+        'усталость': '😴',
+        'энергичность': '⚡️',
+        'спокойствие': '😌'
+    };
 
-// 1. Dashboard компонент
-const Dashboard = {
-    isInitialized: false,
+    // Цвета для интенсивности симптомов (из оригинала)
+    const INTENSITY_COLORS = {
+        1: '#4CAF50',
+        2: '#8BC34A',
+        3: '#FFC107',
+        4: '#FF9800',
+        5: '#F44336'
+    };
 
-    init() {
-        if (this.isInitialized) {
-            console.log('⚠️ Dashboard уже инициализирован');
-            return;
+    // === РЕАЛЬНАЯ РЕАЛИЗАЦИЯ КАК В ИСХОДНОМ ФАЙЛЕ ===
+
+    /**
+     * Инициализация компонентов главной панели
+     */
+    function initDashboardComponents() {
+        console.log('📊 HealthUI.initDashboardComponents() вызван');
+
+        // Пробуем использовать декомпозированные компоненты
+        if (window.Dashboard && window.Dashboard.init) {
+            console.log('✅ Использую Dashboard.init()');
+            return window.Dashboard.init();
         }
 
-        this.isInitialized = true;
-        console.log('📊 Dashboard.init()');
+        // Если компоненты не загружены, используем локальную реализацию
+        console.log('⚠️ Dashboard не найден, использую локальную реализацию');
+        initMedicationTracker();
+        initWellnessGrid();
+        initAddSymptomsButton();
+        renderSummary();
+    }
 
-        this.initMedicationTracker();
-        this.initWellnessGrid();
-        this.initAddSymptomsButton();
-        this.renderSummary();
-    },
-
-    initMedicationTracker() {
+    /**
+     * Инициализация трекера лекарств (из оригинала)
+     */
+    function initMedicationTracker() {
         const trackerContainer = document.getElementById('medication-tracker');
         if (!trackerContainer) {
             console.warn('⚠️ Контейнер medication-tracker не найден');
@@ -95,20 +123,16 @@ const Dashboard = {
 
         html += '</div>';
         trackerContainer.innerHTML = html;
-    },
+    }
 
-    initWellnessGrid() {
+    /**
+     * Инициализация грида самочувствия (из оригинала)
+     */
+    function initWellnessGrid() {
         const gridContainer = document.getElementById('wellness-grid');
         if (!gridContainer) return;
 
         const state = HealthModule.getState();
-        const MOOD_EMOJIS = {
-            'радость': '😄', 'удовлетворение': '🙂', 'нейтрально': '😐', 'грусть': '😔',
-            'стресс': '😫', 'гнев': '😠', 'беспокойство': '😟', 'усталость': '😴',
-            'энергичность': '⚡️', 'спокойствие': '😌'
-        };
-
-        const getMoodEmoji = (mood) => MOOD_EMOJIS[mood] || '😐';
 
         html = `
             <div class="wellness-grid">
@@ -139,18 +163,24 @@ const Dashboard = {
         `;
 
         gridContainer.innerHTML = html;
-    },
+    }
 
-    initAddSymptomsButton() {
+    /**
+     * Инициализация кнопки добавления симптомов (из оригинала)
+     */
+    function initAddSymptomsButton() {
         const button = document.getElementById('add-symptoms-btn');
         if (!button) return;
 
         button.addEventListener('click', () => {
-            window.showSymptomPicker();
+            showSymptomPicker();
         });
-    },
+    }
 
-    renderSummary() {
+    /**
+     * Отобразить сводку (из оригинала)
+     */
+    function renderSummary() {
         const summaryContainer = document.getElementById('health-summary');
         if (!summaryContainer) return;
 
@@ -183,413 +213,18 @@ const Dashboard = {
 
         summaryContainer.innerHTML = html;
     }
-};
-
-// 2. Diary компонент
-const Diary = {
-    currentDate: null,
-
-    init() {
-        console.log('📓 Diary.init()');
-        this.initCalendar();
-        this.initTodayButton();
-        this.loadToday();
-    },
-
-    initCalendar() {
-        const calendarContainer = document.getElementById('health-calendar');
-        if (!calendarContainer) return;
-
-        const today = new Date();
-        const currentMonth = today.getMonth();
-        const currentYear = today.getFullYear();
-        const firstDay = new Date(currentYear, currentMonth, 1);
-        const lastDay = new Date(currentYear, currentMonth + 1, 0);
-
-        const months = [
-            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ];
-
-        let html = '<div class="calendar-header">';
-        html += `<h3>${months[currentMonth]} ${currentYear}</h3>`;
-        html += '</div>';
-
-        html += '<div class="calendar-grid">';
-        const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-        weekDays.forEach(day => {
-            html += `<div class="calendar-weekday">${day}</div>`;
-        });
-
-        for (let i = 0; i < firstDay.getDay(); i++) {
-            html += '<div class="calendar-day empty"></div>';
-        }
-
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const isToday = day === today.getDate() && currentMonth === today.getMonth();
-
-            html += `
-                <div class="calendar-day ${isToday ? 'today' : ''}"
-                     onclick="Diary.loadDate('${dateStr}')">
-                    ${day}
-                </div>
-            `;
-        }
-
-        html += '</div>';
-        calendarContainer.innerHTML = html;
-    },
-
-    initTodayButton() {
-        const todayBtn = document.getElementById('today-btn');
-        if (todayBtn) {
-            todayBtn.addEventListener('click', () => {
-                this.loadToday();
-            });
-        }
-    },
-
-    loadToday() {
-        const today = new Date().toISOString().split('T')[0];
-        this.loadDate(today);
-    },
-
-    async loadDate(date) {
-        this.currentDate = date;
-
-        try {
-            const response = await HealthAPI.getEntryByDate(date);
-
-            if (response.success) {
-                this.renderEntryForm(date, response.data);
-            } else {
-                this.renderEntryForm(date, null);
-            }
-        } catch (error) {
-            console.error('❌ Ошибка загрузки записи:', error);
-            this.renderEntryForm(date, null);
-        }
-    },
-
-    renderEntryForm(date, entry) {
-        const container = document.getElementById('entry-form');
-        if (!container) return;
-
-        const formattedDate = new Date(date).toLocaleDateString('ru-RU', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-
-        const state = HealthModule.getState();
-        const sexualActivityOptions = state.userOptions?.sexual_activity_options || [];
-
-        const sexualActivityOptionsHtml = sexualActivityOptions.map(option => {
-            const selected = entry?.sexual_activity === option ? 'selected' : '';
-            const label = option.replace(/_/g, ' ');
-            return `<option value="${option}" ${selected}>${label}</option>`;
-        }).join('');
-
-        const INTENSITY_COLORS = {
-            1: '#4CAF50', 2: '#8BC34A', 3: '#FFC107', 4: '#FF9800', 5: '#F44336'
-        };
-
-        const renderSymptomsList = (symptoms) => {
-            if (symptoms.length === 0) {
-                return '<p class="no-symptoms">Симптомы не добавлены</p>';
-            }
-
-            let html = '<div class="symptoms-tags">';
-            symptoms.forEach(symptom => {
-                const color = INTENSITY_COLORS[symptom.intensity] || '#4CAF50';
-                html += `
-                    <div class="symptom-tag" style="border-color: ${color}">
-                        <span class="symptom-name">${symptom.name}</span>
-                        <span class="symptom-intensity">${'●'.repeat(symptom.intensity)}</span>
-                        <button class="symptom-remove" onclick="removeSymptom('${symptom.id}')">×</button>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            return html;
-        };
-
-        const html = `
-            <div class="entry-form">
-                <h3>📅 ${formattedDate}</h3>
-
-                <div class="form-section">
-                    <label>Настроение</label>
-                    <div class="mood-selector">
-                        <button class="mood-option" onclick="selectMood('радость')">
-                            😄 Радость
-                        </button>
-                        <button class="mood-option" onclick="selectMood('удовлетворение')">
-                            🙂 Удовлетворение
-                        </button>
-                        <button class="mood-option" onclick="selectMood('нейтрально')">
-                            😐 Нейтрально
-                        </button>
-                        <button class="mood-option" onclick="selectMood('грусть')">
-                            😔 Грусть
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <label>Сон (часы)</label>
-                    <input type="number" id="sleep-input" min="0" max="24" step="0.5"
-                           value="${entry?.sleep_hours || ''}"
-                           placeholder="Например: 7.5">
-                </div>
-
-                <div class="form-section">
-                    <label>Вес (кг)</label>
-                    <input type="number" id="weight-input" min="0" max="500" step="0.1"
-                           value="${entry?.weight || ''}"
-                           placeholder="Например: 70.5">
-                </div>
-
-                <div class="form-section">
-                    <label>
-                        🔒 Сексуальная активность (приватно)
-                        <span style="font-size: 12px; color: var(--health-text-light); margin-left: 8px;">
-                            Только для вас
-                        </span>
-                    </label>
-                    <select id="sexual-activity-input" class="modal-input">
-                        <option value="">Не указано</option>
-                        ${sexualActivityOptionsHtml}
-                    </select>
-                </div>
-
-                <div class="form-section">
-                    <label>Симптомы</label>
-                    <div id="symptoms-list">
-                        ${renderSymptomsList(entry?.symptoms || [])}
-                    </div>
-                    <button class="btn-secondary" onclick="showSymptomPicker()">
-                        + Добавить симптом
-                    </button>
-                </div>
-
-                <div class="form-section">
-                    <label>Заметки</label>
-                    <textarea id="notes-input" rows="4"
-                              placeholder="Как вы себя чувствовали сегодня?">${entry?.notes || ''}</textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button class="btn-primary" onclick="saveEntry('${date}')">
-                        💾 Сохранить запись
-                    </button>
-                </div>
-            </div>
-        `;
-
-        container.innerHTML = html;
-    }
-};
-
-// 3. Medications компонент (упрощенный)
-const Medications = {
-    showArchived: false,
-
-    init() {
-        console.log('💊 Medications.init()');
-        this.renderMedicationsList();
-    },
-
-    renderMedicationsList() {
-        const container = document.getElementById('medications-list');
-        if (!container) return;
-
-        const state = HealthModule.getState();
-        const medications = state.medications || [];
-
-        if (medications.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">💊</div>
-                    <h3>Аптечка пуста</h3>
-                    <p>Добавьте лекарства, которые вы принимаете регулярно</p>
-                    <button class="btn-primary" onclick="showMedicationForm()">
-                        Добавить первое лекарство
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        let html = '<div class="medications-grid">';
-
-        medications.forEach(med => {
-            const nextSchedule = this.getNextSchedule(med);
-
-            html += `
-                <div class="medication-item" data-medication-id="${med.id}">
-                    <div class="medication-header">
-                        <div class="medication-icon">💊</div>
-                        <div class="medication-title">
-                            <h4>${med.name}</h4>
-                            ${med.dosage ? `<span class="medication-subtitle">${med.dosage}</span>` : ''}
-                        </div>
-                    </div>
-
-                    ${med.form ? `<div class="medication-detail"><strong>Форма:</strong> ${med.form}</div>` : ''}
-
-                    ${nextSchedule ? `
-                        <div class="medication-detail">
-                            <strong>Следующий прием:</strong> ${nextSchedule}
-                        </div>
-                    ` : ''}
-
-                    ${med.instructions ? `
-                        <div class="medication-detail">
-                            <strong>Инструкция:</strong> ${med.instructions.substring(0, 50)}${med.instructions.length > 50 ? '...' : ''}
-                        </div>
-                    ` : ''}
-
-                    <div class="medication-actions">
-                        <button class="btn-icon" onclick="editMedication('${med.id}')" title="Редактировать">
-                            ✏️
-                        </button>
-                        <button class="btn-icon btn-danger" onclick="deleteMedication('${med.id}')" title="Удалить">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += '</div>';
-        container.innerHTML = html;
-    },
-
-    getNextSchedule(medication) {
-        if (!medication.schedules || medication.schedules.length === 0) {
-            return null;
-        }
-
-        const now = new Date();
-        const today = now.getDay();
-
-        for (const schedule of medication.schedules) {
-            const days = schedule.days_of_week || [];
-            const time = schedule.time_of_day;
-
-            if (days.includes(today)) {
-                return time.substring(0, 5);
-            }
-        }
-
-        return 'Завтра';
-    }
-};
-
-// 4. Stats компонент (упрощенный)
-const Stats = {
-    init() {
-        console.log('📈 Stats.init()');
-        this.renderStats();
-    },
-
-    renderStats() {
-        const container = document.getElementById('stats-content');
-        if (!container) return;
-
-        const state = HealthModule.getState();
-
-        if (!state.stats) {
-            container.innerHTML = '<p>Загрузка статистики...</p>';
-            return;
-        }
-
-        const adherence = state.stats.medication_adherence || 0;
-        const remaining = 100 - adherence;
-
-        html = `
-            <div class="stats-section">
-                <h3>💊 Приверженность лечению</h3>
-                <div class="adherence-chart">
-                    <div class="chart-container">
-                        <div class="pie-chart" style="--percentage: ${adherence}%"></div>
-                        <div class="chart-center">${Math.round(adherence)}%</div>
-                    </div>
-                    <div class="chart-legend">
-                        <div class="legend-item">
-                            <span class="legend-color" style="background-color: #4CAF50"></span>
-                            <span>Принято вовремя: ${adherence.toFixed(1)}%</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background-color: #e0e0e0"></span>
-                            <span>Пропущено: ${remaining.toFixed(1)}%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        container.innerHTML = html;
-    }
-};
-
-// 5. Onboarding компонент (упрощенный)
-const Onboarding = {
-    init() {
-        console.log('🎯 Onboarding.init()');
-        this.initGenderButtons();
-    },
-
-    initGenderButtons() {
-        const genderContainer = document.getElementById('gender-options');
-        if (!genderContainer) return;
-
-        const GENDER_OPTIONS = [
-            { value: 'male', label: 'Мужской', icon: '👨', description: 'Стандартные рекомендации для мужчин' },
-            { value: 'female', label: 'Женский', icon: '👩', description: 'Включая женское здоровье' },
-            { value: 'other', label: 'Другой', icon: '🧑', description: 'Общие рекомендации' },
-            { value: 'prefer_not_to_say', label: 'Не указывать', icon: '🙅', description: 'Общие настройки' }
-        ];
-
-        GENDER_OPTIONS.forEach(option => {
-            const button = document.createElement('button');
-            button.className = 'gender-option';
-            button.setAttribute('data-gender', option.value);
-
-            button.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 16px;">${option.icon}</div>
-                <div style="font-size: 18px; font-weight: 500; margin-bottom: 8px;">${option.label}</div>
-                <div style="font-size: 14px; color: #666;">${option.description}</div>
-            `;
-
-            button.addEventListener('click', () => {
-                console.log('Выбран гендер:', option.value);
-                // Простая реализация
-                HealthModule.setUserGender(option.value);
-            });
-
-            genderContainer.appendChild(button);
-        });
-    }
-};
-
-// ========== ОСНОВНОЙ HealthUI ИНТЕРФЕЙС ==========
-
-const HealthUILegacy = (function() {
 
     /**
-     * Инициализация компонентов главной панели
+     * Получить эмодзи для настроения (из оригинала)
      */
-    function initDashboardComponents() {
-        console.log('📊 HealthUI.initDashboardComponents()');
-        return Dashboard.init();
+    function getMoodEmoji(mood) {
+        return MOOD_EMOJIS[mood] || '😐';
     }
 
+    // === ПРОКСИ-МЕТОДЫ ДЛЯ ОСТАЛЬНЫХ ФУНКЦИЙ ===
+
     /**
-     * Показать тост-уведомление
+     * Показать тост-уведомление (упрощённая версия)
      */
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');
@@ -606,8 +241,9 @@ const HealthUILegacy = (function() {
         }, 3000);
     }
 
-    // === ГЛОБАЛЬНЫЕ ФУНКЦИИ ===
+    // === ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ onclick ===
 
+    // Экспортируем глобальные функции как в оригинале
     window.markMedicationTaken = async function(medicationId) {
         const success = await HealthModule.logMedication(medicationId, 'taken');
         if (success) {
@@ -666,10 +302,21 @@ const HealthUILegacy = (function() {
         showToast('✅ Сохранено', 'success');
     };
 
-    window.toggleArchiveView = function() {};
-    window.editMedication = function(id) {};
-    window.deleteMedication = function(id) {};
-    window.removeSymptom = function(id) {};
+    window.toggleArchiveView = function() {
+        console.log('toggleArchiveView - заглушка');
+    };
+
+    window.editMedication = function(id) {
+        console.log('editMedication - заглушка', id);
+    };
+
+    window.deleteMedication = function(id) {
+        console.log('deleteMedication - заглушка', id);
+    };
+
+    window.removeSymptom = function(id) {
+        console.log('removeSymptom - заглушка', id);
+    };
 
     // === ПУБЛИЧНЫЙ ИНТЕРФЕЙС ===
 
@@ -678,30 +325,49 @@ const HealthUILegacy = (function() {
         initDashboardComponents,
         initMedicationsComponents: function() {
             console.log('💊 HealthUI.initMedicationsComponents()');
-            return Medications.init();
+            if (window.Medications && window.Medications.init) {
+                return window.Medications.init();
+            }
+            console.warn('Medications не загружен');
         },
         initDiaryComponents: function() {
             console.log('📓 HealthUI.initDiaryComponents()');
-            return Diary.init();
+            if (window.Diary && window.Diary.init) {
+                return window.Diary.init();
+            }
+            console.warn('Diary не загружен');
         },
         initStatsComponents: function() {
             console.log('📈 HealthUI.initStatsComponents()');
-            return Stats.init();
+            if (window.Stats && window.Stats.init) {
+                return window.Stats.init();
+            }
+            console.warn('Stats не загружен');
         },
         initOnboardingComponents: function() {
             console.log('🎯 HealthUI.initOnboardingComponents()');
-            return Onboarding.init();
+            if (window.Onboarding && window.Onboarding.init) {
+                return window.Onboarding.init();
+            }
+            console.warn('Onboarding не загружен');
         },
 
         // Вспомогательные методы
         showToast,
         showModal: function(modalType, data = {}) {
             console.log(`📱 HealthUI.showModal(${modalType})`);
-            // Простая реализация
-            showToast(`Модальное окно: ${modalType}`, 'info');
+            // Простая реализация или делегирование
+            if (window.ModalManager) {
+                window.ModalManager.show(modalType, data);
+            } else {
+                console.warn('ModalManager не загружен');
+            }
         },
         closeModal: function() {
             console.log('❌ HealthUI.closeModal()');
+            if (window.ModalManager) {
+                window.ModalManager.close();
+            }
         },
 
         // Методы для обратной совместимости
@@ -741,32 +407,23 @@ const HealthUILegacy = (function() {
             return false;
         },
 
-        // Маркер
+        // Маркер для обратной совместимости
         __isLegacyImplementation: true
     };
 })();
 
-// ========== ЭКСПОРТ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ==========
-
+// Экспорт в глобальную область
 if (typeof window !== 'undefined') {
-    // Экспортируем компоненты
-    window.Dashboard = Dashboard;
-    window.Diary = Diary;
-    window.Medications = Medications;
-    window.Stats = Stats;
-    window.Onboarding = Onboarding;
-
-    // Экспортируем основной интерфейс
     window.HealthUI = HealthUILegacy;
-
-    console.log('✅ HealthUI с inline компонентами загружен');
+    console.log('✅ HealthUI (legacy) загружен');
 }
 
-// Если нужно, main.js может перезаписать эти компоненты
+// Если main.js загрузится позже, он может перезаписать HealthUI
 Object.defineProperty(window, 'HealthUIMain', {
     set: function(value) {
-        console.log('✅ HealthUIMain установлен');
+        console.log('✅ HealthUIMain установлен (main.js загружен)');
         window.__HealthUIMain = value;
+        // НЕ перезаписываем HealthUI, чтобы старый код работал
     },
     get: function() {
         return window.__HealthUIMain;
