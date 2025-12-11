@@ -81,7 +81,10 @@ const TabManager = (function() {
 
     // Переключение вкладки
     async function switchToTab(tabName) {
-        if (currentTab === tabName) return;
+        if (currentTab === tabName) {
+            console.log(`⏭️ Вкладка ${tabName} уже активна`);
+            return; // ДОБАВЛЕНО: не перезагружаем активную вкладку
+        }
 
         console.log(`🔄 Переключение на вкладку: ${tabName}`);
 

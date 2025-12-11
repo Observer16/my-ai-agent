@@ -134,6 +134,7 @@ const DataManager = (function() {
     }
 
     // Загрузить запись за сегодня
+
     async function loadTodayEntry() {
         try {
             const today = new Date().toISOString().split('T')[0];
@@ -149,12 +150,18 @@ const DataManager = (function() {
                 EventManager.emit('data:todayEntryLoaded', response.data);
                 return response.data;
             } else {
-                console.log('📝 Запись за сегодня не найдена');
+                // ИСПРАВЛЕНО: Не логируем как ошибку, это нормально
+                console.log('📝 Запись за сегодня не найдена (создается при первом добавлении данных)');
                 StateManager.updateState({ todayEntry: null });
                 return null;
             }
         } catch (error) {
-            console.error('❌ Ошибка загрузки записи:', error);
+            // ИСПРАВЛЕНО: 404 это не критичная ошибка
+            if (error.message && error.message.includes('404')) {
+                console.log('📝 Запись за сегодня отсутствует');
+            } else {
+                console.error('❌ Ошибка загрузки записи:', error);
+            }
             StateManager.updateState({ todayEntry: null });
             return null;
         }

@@ -224,21 +224,16 @@ const HealthUILegacy = (function() {
     // === ПРОКСИ-МЕТОДЫ ДЛЯ ОСТАЛЬНЫХ ФУНКЦИЙ ===
 
     /**
-     * Показать тост-уведомление (упрощённая версия)
+     * Показать тост-уведомление
      */
     function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `health-toast toast-${type}`;
-        toast.innerHTML = message;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => toast.classList.add('show'), 10);
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        if (window.HealthUI && window.HealthUI.showToast) {
+            HealthUI.showToast(message, type);
+        } else {
+            // Fallback
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            alert(message);
+        }
     }
 
     // Глобальные функции для onclick из HTML
@@ -276,23 +271,58 @@ const HealthUILegacy = (function() {
     };
 
     window.showMoodPicker = function() {
-        showModal('mood-picker');
+        if (window.HealthUI && window.HealthUI.showModal) {
+            HealthUI.showModal('mood-picker');
+        } else if (window.ModalManager) {
+            ModalManager.show('mood-picker');
+        } else {
+            console.error('❌ Modal system not loaded');
+            showToast('⚠️ Функция временно недоступна', 'warning');
+        }
     };
 
     window.showSleepInput = function() {
-        showModal('sleep-input');
+        if (window.HealthUI && window.HealthUI.showModal) {
+            HealthUI.showModal('sleep-input');
+        } else if (window.ModalManager) {
+            ModalManager.show('sleep-input');
+        } else {
+            console.error('❌ Modal system not loaded');
+            showToast('⚠️ Функция временно недоступна', 'warning');
+        }
     };
 
     window.showWeightInput = function() {
-        showModal('weight-input');
+        if (window.HealthUI && window.HealthUI.showModal) {
+            HealthUI.showModal('weight-input');
+        } else if (window.ModalManager) {
+            ModalManager.show('weight-input');
+        } else {
+            console.error('❌ Modal system not loaded');
+            showToast('⚠️ Функция временно недоступна', 'warning');
+        }
     };
 
     window.showSymptomPicker = function() {
-        showModal('symptom-picker');
+        if (window.HealthUI && window.HealthUI.showModal) {
+            HealthUI.showModal('symptom-picker');
+        } else if (window.ModalManager) {
+            ModalManager.show('symptom-picker');
+        } else {
+            console.error('❌ Modal system not loaded');
+            showToast('⚠️ Функция временно недоступна', 'warning');
+        }
     };
 
     window.showMedicationForm = function() {
-        showModal('medication-form');
+        if (window.HealthUI && window.HealthUI.showModal) {
+            HealthUI.showModal('medication-form');
+        } else if (window.ModalManager) {
+            ModalManager.show('medication-form');
+        } else {
+            console.error('❌ Modal system not loaded');
+            showToast('⚠️ Функция временно недоступна', 'warning');
+        }
     };
 
     window.selectMood = function(mood) {
