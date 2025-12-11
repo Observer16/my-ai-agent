@@ -241,22 +241,37 @@ const HealthUILegacy = (function() {
         }, 3000);
     }
 
-    // === ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ onclick ===
+    // Глобальные функции для onclick из HTML
 
-    // Экспортируем глобальные функции как в оригинале
     window.markMedicationTaken = async function(medicationId) {
-        const success = await HealthModule.logMedication(medicationId, 'taken');
-        if (success) {
-            showToast('✅ Лекарство отмечено как принятое', 'success');
-            HealthModule.refreshData();
+        try {
+            const success = await HealthModule.logMedication(medicationId, 'taken');
+
+            if (success) {
+                HealthUI.showToast('✅ Лекарство отмечено как принятое', 'success');
+                await HealthModule.refreshData();
+            } else {
+                HealthUI.showToast('❌ Не удалось отметить прием', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error marking medication as taken:', error);
+            HealthUI.showToast('❌ Ошибка отметки приема', 'error');
         }
     };
 
     window.markMedicationSkipped = async function(medicationId) {
-        const success = await HealthModule.logMedication(medicationId, 'skipped');
-        if (success) {
-            showToast('⏭ Лекарство пропущено', 'info');
-            HealthModule.refreshData();
+        try {
+            const success = await HealthModule.logMedication(medicationId, 'skipped');
+
+            if (success) {
+                HealthUI.showToast('⏭ Лекарство пропущено', 'info');
+                await HealthModule.refreshData();
+            } else {
+                HealthUI.showToast('❌ Не удалось отметить пропуск', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error marking medication as skipped:', error);
+            HealthUI.showToast('❌ Ошибка отметки пропуска', 'error');
         }
     };
 

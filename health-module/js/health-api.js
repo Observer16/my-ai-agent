@@ -312,17 +312,50 @@ const HealthAPI = (function() {
      */
     async function logMedicationIntake(medicationId, status = 'taken', notes = '') {
         try {
+            // ИСПРАВЛЕНО: Ищем schedule_id из сегодняшних лекарств
+            const state = HealthModule.getState();
+            const todayMeds = state.todayMedications || [];
+
+            // Находим лекарство с нужным medication_id
+            const medication = todayMeds.find(
+                med => med.medication_id === medicationId
+            );
+
+            const scheduleId = medication?.schedule_id || null;
+
+            if (!scheduleId) {
+                console.warn(
+                    `⚠️ schedule_id not found for medication ${medicationId}, ` +
+                    `sending without it`
+                );
+            }
+
             const response = await fetch(`${BASE_URL}/health/medications/logs`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify({
                     medication_id: medicationId,
+                    schedule_id: scheduleId,  // ДОБАВЛЕНО
                     status: status,
                     notes: notes
                 })
             });
-            return await handleResponse(response);
+
+            const result = await handleResponse(response);
+
+            if (HealthConfig.DEBUG) {
+                console.log('✅ Medication logged:', {
+                    medication_id: medicationId,
+                    schedule_id: scheduleId,
+                    status: status,
+                    response: result
+                });
+            }
+
+            return result;
+
         } catch (error) {
+            console.error('❌ Ошибка логирования лекарства:', error);
             return {
                 success: false,
                 error: error.message
