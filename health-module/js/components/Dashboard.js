@@ -180,15 +180,15 @@ const Dashboard = (function() {
         showWeightInput,
         logMedication
     };
-})();
+})(); // ← IIFE ЗАВЕРШЕН, Dashboard создан!
 
-// Глобальные функции для onclick
+// Экспорт в window (СНАЧАЛА экспортируем сам модуль)
+if (typeof window !== 'undefined') {
+    window.Dashboard = Dashboard;
+}
+
+// Глобальные функции для onclick (ТОЛЬКО после экспорта модуля)
 window.showMoodPicker = () => Dashboard.showMoodPicker();
 window.showSleepInput = () => Dashboard.showSleepInput();
 window.showWeightInput = () => Dashboard.showWeightInput();
 window.logMedication = (id, scheduleId) => Dashboard.logMedication(id, scheduleId);
-
-// Экспорт
-if (typeof window !== 'undefined') {
-    window.Dashboard = Dashboard;
-}

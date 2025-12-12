@@ -183,7 +183,7 @@ const Stats = (function() {
     };
 })();
 
-// Экспорт
+// Экспорт в window
 if (typeof window !== 'undefined') {
     window.Stats = Stats;
 }

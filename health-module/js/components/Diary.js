@@ -279,12 +279,12 @@ const Diary = (function() {
         saveEntry,
         showSymptomPicker
     };
-})();
+})(); // ← IIFE ЗАВЕРШЕН, Diary создан!
 
-// Глобальная функция для onclick
-window.showSymptomPicker = () => Diary.showSymptomPicker();
-
-// Экспорт
+// Экспорт в window (СНАЧАЛА экспортируем сам модуль)
 if (typeof window !== 'undefined') {
     window.Diary = Diary;
 }
+
+// Глобальная функция для onclick (ТОЛЬКО после экспорта модуля)
+window.showSymptomPicker = () => Diary.showSymptomPicker();

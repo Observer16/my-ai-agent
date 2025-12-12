@@ -1,4 +1,5 @@
 // js/components/Medications.js
+
 const Medications = (function() {
     let showArchived = false;
 
@@ -166,27 +167,29 @@ const Medications = (function() {
         }
     }
 
+    function showMedicationForm(medicationId = null) {
+        console.log('💊 Открытие формы лекарства:', medicationId);
+        if (window.SimpleModalManager) {
+            SimpleModalManager.show('medication-form', { medicationId });
+        } else {
+            showToast('⚠️ Функция в разработке', 'info');
+        }
+    }
+
     // Публичный API
     return {
         init,
         editMedication,
         deleteMedication,
         toggleArchiveView,
-        showMedicationForm  // ✅ Добавь в экспорт
+        showMedicationForm
     };
 })();
 
-// Глобальная функция для onclick
-window.showMedicationForm = (medicationId = null) => {
-    console.log('💊 Открытие формы лекарства:', medicationId);
-    if (window.SimpleModalManager) {
-        SimpleModalManager.show('medication-form', { medicationId });
-    } else {
-        showToast('⚠️ Функция в разработке', 'info');
-    }
-};
-
-// Экспорт
+// Экспорт в window
 if (typeof window !== 'undefined') {
     window.Medications = Medications;
 }
+
+// Глобальная функция для onclick (просто делегирует в модуль)
+window.showMedicationForm = (medicationId = null) => Medications.showMedicationForm(medicationId);

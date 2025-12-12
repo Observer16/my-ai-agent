@@ -102,7 +102,7 @@ const Onboarding = (function() {
     };
 })();
 
-// Экспорт в глобальную область
+// Экспорт в window
 if (typeof window !== 'undefined') {
     window.Onboarding = Onboarding;
 }
