@@ -186,16 +186,16 @@ const SymptomModal = (function() {
         }
 
         try {
-            // Формируем данные симптома
+            // Формируем данные нового симптома
             const symptomData = {
                 category: selectedCategory,
                 name: selectedSymptom,
                 intensity: intensity
             };
 
-            console.log('📤 Отправка данных симптома:', symptomData);
+            console.log('📤 Отправка симптома:', symptomData);
 
-            // Используем правильный API endpoint
+            // ✅ ИСПРАВЛЕНО: Бэкенд теперь добавляет, а не заменяет
             const result = await HealthAPI.addSymptoms(currentDate, {
                 symptoms: [symptomData]
             });
@@ -213,13 +213,17 @@ const SymptomModal = (function() {
                 if (window.Diary && window.Diary.loadDate) {
                     Diary.loadDate(currentDate);
                 }
+
+                // Обновляем Dashboard если он открыт
+                if (window.Dashboard && window.Dashboard.init) {
+                    Dashboard.init();
+                }
             } else {
                 throw new Error(result?.message || 'Ошибка добавления симптома');
             }
         } catch (error) {
             console.error('❌ Ошибка добавления симптома:', error);
 
-            // Более детальная обработка ошибок
             let errorMessage = 'Ошибка добавления симптома';
 
             if (error.response?.data?.detail) {
