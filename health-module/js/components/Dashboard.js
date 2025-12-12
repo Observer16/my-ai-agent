@@ -33,6 +33,7 @@ const Dashboard = (function() {
 
         medications.forEach(med => {
             const medicationId = med.medication_id || med.id || '';
+            const scheduleId = med.schedule_id || '';
             const time = HealthFormatters.formatTime(med.time_of_day);
             const status = med.status || 'pending';
             const isTaken = status === 'taken';
@@ -56,10 +57,10 @@ const Dashboard = (function() {
                             `<button class="health-btn btn-success" disabled>
                                 ✅ Принято ${takenTime}
                             </button>` :
-                            `<button class="health-btn btn-primary" onclick="markMedicationTaken('${medicationId}')">
+                            `<button class="health-btn btn-primary" onclick="logMedication('${medicationId}', '${scheduleId}')">
                                 ✅ Принять
                             </button>
-                            <button class="health-btn btn-secondary" onclick="markMedicationSkipped('${medicationId}')">
+                            <button class="health-btn btn-secondary" onclick="skipMedication('${medicationId}', '${scheduleId}')">
                                 ⏭ Пропустить
                             </button>`
                         }
@@ -127,7 +128,9 @@ const Dashboard = (function() {
         if (!button) return;
 
         button.addEventListener('click', () => {
-            showSymptomPicker();
+            if (window.showSymptomPicker) {
+                showSymptomPicker();
+            }
         });
     }
 
@@ -167,6 +170,97 @@ const Dashboard = (function() {
         `;
     }
 
+    function showMoodPicker() {
+        console.log('😊 Открытие выбора настроения...');
+        if (window.MoodModal) {
+            MoodModal.show();
+        } else if (window.SimpleModalManager) {
+            SimpleModalManager.show('mood-picker');
+        } else {
+            showToast('⚠️ Функция в разработке', 'info');
+        }
+    }
+
+    function showSleepInput() {
+        console.log('🌙 Открытие ввода сна...');
+        const today = new Date().toISOString().split('T')[0];
+        const currentSleep = HealthModule.getState().todayEntry?.sleep_hours || '';
+
+        const hours = prompt('Сколько часов вы спали?', currentSleep);
+        if (hours !== null && hours !== '') {
+            HealthModule.updateHealthEntry(today, 'sleep', parseFloat(hours))
+                .then(success => {
+                    if (success) {
+                        showToast('✅ Сон сохранен', 'success');
+                        init();
+                    }
+                });
+        }
+    }
+
+    function showWeightInput() {
+        console.log('⚖️ Открытие ввода веса...');
+        const today = new Date().toISOString().split('T')[0];
+        const currentWeight = HealthModule.getState().todayEntry?.weight || '';
+
+        const weight = prompt('Введите ваш вес (кг):', currentWeight);
+        if (weight !== null && weight !== '') {
+            HealthModule.updateHealthEntry(today, 'weight', parseFloat(weight))
+                .then(success => {
+                    if (success) {
+                        showToast('✅ Вес сохранен', 'success');
+                        init();
+                    }
+                });
+        }
+    }
+
+    async function logMedication(medicationId, scheduleId) {
+        console.log('💊 Отметка приема лекарства:', { medicationId, scheduleId });
+
+        try {
+            const result = await HealthAPI.logMedicationIntake({
+                medication_id: medicationId,
+                schedule_id: scheduleId,
+                status: 'taken'
+            });
+
+            if (result.success) {
+                showToast('✅ Лекарство отмечено', 'success');
+                await HealthModule.refreshData();
+                init();
+            } else {
+                showToast('❌ Ошибка отметки', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Ошибка логирования:', error);
+            showToast('❌ Ошибка отметки', 'error');
+        }
+    }
+
+    async function skipMedication(medicationId, scheduleId) {
+        console.log('⏭ Пропуск лекарства:', { medicationId, scheduleId });
+
+        try {
+            const result = await HealthAPI.logMedicationIntake({
+                medication_id: medicationId,
+                schedule_id: scheduleId,
+                status: 'skipped'
+            });
+
+            if (result.success) {
+                showToast('⏭ Лекарство пропущено', 'info');
+                await HealthModule.refreshData();
+                init();
+            } else {
+                showToast('❌ Ошибка отметки', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Ошибка логирования:', error);
+            showToast('❌ Ошибка отметки', 'error');
+        }
+    }
+
     function refresh() {
         init();
     }
@@ -178,7 +272,8 @@ const Dashboard = (function() {
         showMoodPicker,
         showSleepInput,
         showWeightInput,
-        logMedication
+        logMedication,
+        skipMedication
     };
 })(); // ← IIFE ЗАВЕРШЕН, Dashboard создан!
 
@@ -192,3 +287,4 @@ window.showMoodPicker = () => Dashboard.showMoodPicker();
 window.showSleepInput = () => Dashboard.showSleepInput();
 window.showWeightInput = () => Dashboard.showWeightInput();
 window.logMedication = (id, scheduleId) => Dashboard.logMedication(id, scheduleId);
+window.skipMedication = (id, scheduleId) => Dashboard.skipMedication(id, scheduleId);
