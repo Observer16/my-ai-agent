@@ -19,7 +19,7 @@
 .modal-content {
     position: relative;
     width: 90%;
-    max-width: 500px;
+    max-width: 50px;
     max-height: 80vh;
     background: var(--health-card-bg, #ffffff);
     border-radius: 16px;
