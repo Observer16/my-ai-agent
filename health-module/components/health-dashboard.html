@@ -23,16 +23,9 @@
         <div id="debug-output" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
     </div>
 
-    <!-- Трекер лекарств -->
-    <div class="health-card">
-        <div class="health-card-header">
-            <div class="health-card-icon">💊</div>
-            <h3 class="health-card-title">План на сегодня</h3>
-        </div>
-        <div id="medication-tracker">
-            <div class="loading-spinner"></div>
-            <p>Загрузка лекарств...</p>
-        </div>
+        <!-- Сводка -->
+    <div id="health-summary">
+        <!-- Заполняется динамически -->
     </div>
 
     <!-- Грид самочувствия -->
@@ -60,10 +53,18 @@
         </button>
     </div>
 
-    <!-- Сводка -->
-    <div id="health-summary">
-        <!-- Заполняется динамически -->
+        <!-- Трекер лекарств -->
+    <div class="health-card">
+        <div class="health-card-header">
+            <div class="health-card-icon">💊</div>
+            <h3 class="health-card-title">План на сегодня</h3>
+        </div>
+        <div id="medication-tracker">
+            <div class="loading-spinner"></div>
+            <p>Загрузка лекарств...</p>
+        </div>
     </div>
+
 </div>
 
 <script>
