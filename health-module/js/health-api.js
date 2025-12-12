@@ -439,29 +439,35 @@ const HealthAPI = (function() {
     }
 
     /**
-     * Добавить симптомы
+     * Добавление симптомов к записи за дату
+     * @param {string} entryDate - Дата в формате YYYY-MM-DD
+     * @param {Object} data - Данные симптомов { symptoms: [{category, name, intensity}] }
+     * @returns {Promise<Object>}
      */
-    async addSymptoms(entryDate, data) {
+    async function addSymptoms(entryDate, data) {
         console.log('📤 HealthAPI.addSymptoms:', { entryDate, data });
 
         try {
-            const response = await this.request(
-                `/health/entries/${entryDate}/symptoms`,
-                {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                }
-            );
+            const response = await fetch(`${BASE_URL}/health/entries/${entryDate}/symptoms`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(data)
+            });
 
-            console.log('✅ Симптомы добавлены:', response);
-            return { success: true, data: response };
+            const result = await handleResponse(response);
+
+            if (result.success) {
+                console.log('✅ Симптомы добавлены:', result.data);
+            }
+
+            return result;
 
         } catch (error) {
             console.error('❌ Ошибка добавления симптомов:', error);
 
-            // Пробрасываем детали ошибки
-            throw {
-                message: error.message || 'Ошибка добавления симптомов',
+            return {
+                success: false,
+                error: error.message || 'Ошибка добавления симптомов',
                 response: error.response || null
             };
         }
