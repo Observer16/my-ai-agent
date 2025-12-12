@@ -158,12 +158,12 @@ const Dashboard = (function() {
                         <div class="stat-label">записей</div>
                     </div>
                     <div class="summary-stat">
-                        <div class="stat-value">${stats.average_sleep ? stats.average_sleep.toFixed(1) : '0'}</div>
-                        <div class="stat-label">ч сна в среднем</div>
+                        <div class="stat-value">${stats.average_sleep ? stats.average_sleep.toFixed(1) : '0'} ч.</div>
+                        <div class="stat-label">сна в среднем</div>
                     </div>
                     <div class="summary-stat">
                         <div class="stat-value">${stats.medication_adherence ? Math.round(stats.medication_adherence) : 0}%</div>
-                        <div class="stat-label">приверженность лечению</div>
+                        <div class="stat-label">Соблюдение принятия лекарств</div>
                     </div>
                 </div>
             </div>
