@@ -159,7 +159,7 @@ const Diary = (function() {
                     <div id="symptoms-list">
                         ${renderSymptomsList(entry?.symptoms || [])}
                     </div>
-                    <button class="btn-secondary" onclick="showSymptomPicker()">
+                    <button class="btn-secondary" onclick="Diary.showSymptomPicker()">
                         + Добавить симптом
                     </button>
                 </div>
@@ -261,15 +261,28 @@ const Diary = (function() {
         }
     }
 
+    function showSymptomPicker() {
+        console.log('🔍 Открытие выбора симптомов...');
+        if (window.SimpleModalManager) {
+            SimpleModalManager.show('symptom-picker');
+        } else {
+            showToast('⚠️ Функция в разработке', 'info');
+        }
+    }
+
     // Публичный API
     return {
         init,
         loadDate,
         selectMood,
         removeSymptom,
-        saveEntry
+        saveEntry,
+        showSymptomPicker
     };
 })();
+
+// Глобальная функция для onclick
+window.showSymptomPicker = () => Diary.showSymptomPicker();
 
 // Экспорт
 if (typeof window !== 'undefined') {

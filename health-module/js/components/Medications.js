@@ -171,16 +171,18 @@ const Medications = (function() {
         init,
         editMedication,
         deleteMedication,
-        toggleArchiveView
+        toggleArchiveView,
+        showMedicationForm  // ✅ Добавь в экспорт
     };
 })();
 
-// Глобальные функции для onclick
-window.showMedicationForm = function() {
+// Глобальная функция для onclick
+window.showMedicationForm = (medicationId = null) => {
+    console.log('💊 Открытие формы лекарства:', medicationId);
     if (window.SimpleModalManager) {
-        SimpleModalManager.show('medication-form');
+        SimpleModalManager.show('medication-form', { medicationId });
     } else {
-        alert('Функция добавления лекарств в разработке');
+        showToast('⚠️ Функция в разработке', 'info');
     }
 };
 

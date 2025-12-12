@@ -97,11 +97,12 @@ const Onboarding = (function() {
 
     // Публичный API
     return {
-        init
+        init,
+        handleGenderSelect
     };
 })();
 
-// Экспорт
+// Экспорт в глобальную область
 if (typeof window !== 'undefined') {
     window.Onboarding = Onboarding;
 }

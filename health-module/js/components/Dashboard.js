@@ -171,12 +171,24 @@ const Dashboard = (function() {
         init();
     }
 
+    // Публичный API
     return {
         init,
-        refresh
+        refresh,
+        showMoodPicker,
+        showSleepInput,
+        showWeightInput,
+        logMedication
     };
 })();
 
+// Глобальные функции для onclick
+window.showMoodPicker = () => Dashboard.showMoodPicker();
+window.showSleepInput = () => Dashboard.showSleepInput();
+window.showWeightInput = () => Dashboard.showWeightInput();
+window.logMedication = (id, scheduleId) => Dashboard.logMedication(id, scheduleId);
+
+// Экспорт
 if (typeof window !== 'undefined') {
     window.Dashboard = Dashboard;
 }
