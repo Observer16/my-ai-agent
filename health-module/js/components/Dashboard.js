@@ -107,12 +107,17 @@ const Dashboard = (function() {
                     <div class="wellness-value">${todayEntry?.sleep_hours ? `${todayEntry.sleep_hours} ч` : 'Добавить'}</div>
                 </div>
 
-                <div class="wellness-item" onclick="add-symptoms-btn">
-                    <div class="wellness-icon">🤕</div>
-                    <div class="wellness-label">Симптомы</div>
-                    <div class="wellness-value">${todayEntry?.symptoms?.length || 0}</div>
+                <div class="wellness-item" onclick="showWeightInput()">
+                    <div class="wellness-icon">⚖️</div>
+                    <div class="wellness-label">Вес</div>
+                    <div class="wellness-value">${todayEntry?.weight ? `${todayEntry.weight} кг` : 'Добавить'}</div>
                 </div>
 
+                <div class="wellness-item" onclick="showSexualActivityPicker()">
+                    <div class="wellness-icon">🔒</div>
+                    <div class="wellness-label">Интимность</div>
+                    <div class="wellness-value">${todayEntry?.sexual_activity ? 'Указано' : 'Добавить'}</div>
+                </div>
             </div>
         `;
     }
@@ -176,7 +181,7 @@ const Dashboard = (function() {
                     if (success) {
                         showToast('✅ Сон сохранен', 'success');
                         await HealthModule.refreshData();
-                        init(); // Перерисовываем Dashboard
+                        init();
                     }
                 });
         }
@@ -184,19 +189,32 @@ const Dashboard = (function() {
 
     function showWeightInput() {
         console.log('⚖️ Открытие ввода веса...');
-        const today = new Date().toISOString().split('T')[0];
-        const currentWeight = HealthModule.getState().todayEntry?.weight || '';
+        if (window.WeightModal) {
+            WeightModal.show();
+        } else {
+            // Fallback на prompt
+            const today = new Date().toISOString().split('T')[0];
+            const currentWeight = HealthModule.getState().todayEntry?.weight || '';
+            const weight = prompt('Введите ваш вес (кг):', currentWeight);
+            if (weight !== null && weight !== '') {
+                HealthModule.updateHealthEntry(today, 'weight', parseFloat(weight))
+                    .then(async (success) => {
+                        if (success) {
+                            showToast('✅ Вес сохранен', 'success');
+                            await HealthModule.refreshData();
+                            init();
+                        }
+                    });
+            }
+        }
+    }
 
-        const weight = prompt('Введите ваш вес (кг):', currentWeight);
-        if (weight !== null && weight !== '') {
-            HealthModule.updateHealthEntry(today, 'weight', parseFloat(weight))
-                .then(async (success) => {
-                    if (success) {
-                        showToast('✅ Вес сохранен', 'success');
-                        await HealthModule.refreshData();
-                        init(); // Перерисовываем Dashboard
-                    }
-                });
+    function showSexualActivityPicker() {
+        console.log('🔒 Открытие выбора интимности...');
+        if (window.SexualActivityModal) {
+            SexualActivityModal.show();
+        } else {
+            showToast('⚠️ Функция в разработке', 'info');
         }
     }
 
@@ -269,19 +287,21 @@ const Dashboard = (function() {
         showMoodPicker,
         showSleepInput,
         showWeightInput,
+        showSexualActivityPicker,
         logMedication,
         skipMedication
     };
-})(); // ← IIFE ЗАВЕРШЕН, Dashboard создан!
+})();
 
-// Экспорт в window (СНАЧАЛА экспортируем сам модуль)
+// Экспорт в window
 if (typeof window !== 'undefined') {
     window.Dashboard = Dashboard;
 }
 
-// Глобальные функции для onclick (ТОЛЬКО после экспорта модуля)
+// Глобальные функции для onclick
 window.showMoodPicker = () => Dashboard.showMoodPicker();
 window.showSleepInput = () => Dashboard.showSleepInput();
 window.showWeightInput = () => Dashboard.showWeightInput();
+window.showSexualActivityPicker = () => Dashboard.showSexualActivityPicker();
 window.logMedication = (id, scheduleId) => Dashboard.logMedication(id, scheduleId);
 window.skipMedication = (id, scheduleId) => Dashboard.skipMedication(id, scheduleId);

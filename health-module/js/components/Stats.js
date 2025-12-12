@@ -163,15 +163,57 @@ const Stats = (function() {
     async function loadStats(days) {
         currentPeriod = days;
 
+        // Обновляем активную кнопку
         document.querySelectorAll('.period-btn').forEach(btn => {
             btn.classList.toggle('active', parseInt(btn.getAttribute('data-days')) === days);
         });
 
+        // Показываем загрузку
+        const container = document.getElementById('stats-content');
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 16px; color: var(--health-text-light);">
+                        Загрузка статистики за ${days} дней...
+                    </p>
+                </div>
+            `;
+        }
+
         try {
-            // TODO: Запрос к API за статистикой за период
-            showToast('⚠️ Загрузка статистики за период в разработке', 'info');
+            // ИСПРАВЛЕНО: Используем реальный API endpoint
+            const response = await HealthAPI.getHealthSummary(days);
+
+            if (response.success) {
+                // Обновляем state
+                StateManager.updateState({ stats: response.data });
+
+                // Перерисовываем статистику
+                renderStats();
+
+                showToast(`✅ Статистика за ${days} дней загружена`, 'success');
+            } else {
+                throw new Error(response.error || 'Ошибка загрузки статистики');
+            }
         } catch (error) {
             console.error('❌ Ошибка загрузки статистики:', error);
+
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <h3>Не удалось загрузить статистику</h3>
+                        <p style="color: var(--health-text-light); margin: 16px 0;">
+                            ${error.message || 'Попробуйте позже'}
+                        </p>
+                        <button class="health-btn btn-primary" onclick="Stats.loadStats(${days})">
+                            Попробовать снова
+                        </button>
+                    </div>
+                `;
+            }
+
             showToast('❌ Ошибка загрузки статистики', 'error');
         }
     }
