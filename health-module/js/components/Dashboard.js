@@ -73,24 +73,23 @@ const Dashboard = (function() {
         return html;
     }
 
-    function renderNoMedications() {
-        return `
-            <div class="no-medications">
-                <div class="no-meds-icon">💊</div>
-                <p>На сегодня нет запланированных лекарств</p>
-                <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
-                    Добавить лекарство
-                </button>
-            </div>
-        `;
-    }
-
     function initWellnessGrid() {
         const gridContainer = document.getElementById('wellness-grid');
         if (!gridContainer) return;
 
         const state = HealthModule.getState();
         gridContainer.innerHTML = renderWellnessGrid(state.todayEntry);
+    }
+
+    function initAddSymptomsButton() {
+        const button = document.getElementById('add-symptoms-btn');
+        if (!button) return;
+
+        button.addEventListener('click', () => {
+            if (window.showSymptomPicker) {
+                showSymptomPicker();
+            }
+        });
     }
 
     function renderWellnessGrid(todayEntry) {
@@ -108,30 +107,27 @@ const Dashboard = (function() {
                     <div class="wellness-value">${todayEntry?.sleep_hours ? `${todayEntry.sleep_hours} ч` : 'Добавить'}</div>
                 </div>
 
-                <div class="wellness-item" onclick="showWeightInput()">
-                    <div class="wellness-icon">⚖️</div>
-                    <div class="wellness-label">Вес</div>
-                    <div class="wellness-value">${todayEntry?.weight ? `${todayEntry.weight} кг` : 'Добавить'}</div>
-                </div>
-
-                <div class="wellness-item" onclick="HealthModule.switchTab('diary')">
+                <div class="wellness-item" onclick="add-symptoms-btn">
                     <div class="wellness-icon">🤕</div>
                     <div class="wellness-label">Симптомы</div>
                     <div class="wellness-value">${todayEntry?.symptoms?.length || 0}</div>
                 </div>
+
+                <div class="form-section">
+                    <label>
+                        🔒 Сексуальная активность (приватно)
+                        <span style="font-size: 12px; color: var(--health-text-light); margin-left: 8px;">
+                            Только для вас
+                        </span>
+                    </label>
+                    <select id="sexual-activity-input" class="modal-input">
+                        <option value="">Не указано</option>
+                        ${sexualActivityOptionsHtml}
+                    </select>
+                </div>
+
             </div>
         `;
-    }
-
-    function initAddSymptomsButton() {
-        const button = document.getElementById('add-symptoms-btn');
-        if (!button) return;
-
-        button.addEventListener('click', () => {
-            if (window.showSymptomPicker) {
-                showSymptomPicker();
-            }
-        });
     }
 
     function renderSummary() {
@@ -215,6 +211,18 @@ const Dashboard = (function() {
                     }
                 });
         }
+    }
+
+    function renderNoMedications() {
+        return `
+            <div class="no-medications">
+                <div class="no-meds-icon">💊</div>
+                <p>На сегодня нет запланированных лекарств</p>
+                <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
+                    Добавить лекарство
+                </button>
+            </div>
+        `;
     }
 
     async function logMedication(medicationId, scheduleId) {
