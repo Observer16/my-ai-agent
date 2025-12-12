@@ -774,3 +774,15 @@
 .onboarding-fade-out {
     animation: fadeOut 0.3s ease forwards;
 }
+
+/* Тренд настроения */
+.mood-trend {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    overflow: hidden;
+}
+
+.mood-trend .stat-item {
+    text-align: center;
+    padding: 16px;
+}

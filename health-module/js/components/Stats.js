@@ -28,7 +28,14 @@ const Stats = (function() {
         const state = HealthModule.getState();
 
         if (!state.stats) {
-            container.innerHTML = '<p>Загрузка статистики...</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 16px; color: var(--health-text-light);">
+                        Загрузка статистики...
+                    </p>
+                </div>
+            `;
             return;
         }
 
@@ -36,6 +43,8 @@ const Stats = (function() {
     }
 
     function renderStatsContent(stats) {
+        console.log('📊 Рендеринг статистики:', stats);
+
         const adherence = stats.medication_adherence || 0;
         const remaining = 100 - adherence;
 
@@ -61,78 +70,77 @@ const Stats = (function() {
             </div>
 
             <div class="stats-section">
-                <h3>😊 Распределение настроений</h3>
-                <div class="mood-stats">
-                    ${renderMoodDistribution(stats.mood_distribution || {})}
+                <h3>😊 Настроение</h3>
+                <div class="mood-trend">
+                    ${renderMoodTrend(stats.mood_trend)}
                 </div>
             </div>
 
             <div class="stats-section">
                 <h3>⚠️ Частые симптомы</h3>
                 <div class="symptoms-stats">
-                    ${renderTopSymptoms(stats.symptom_frequency || {})}
+                    ${renderTopSymptoms(stats.top_symptoms || [])}
                 </div>
             </div>
 
             <div class="stats-section">
-                <h3>📈 Статистика сна</h3>
+                <h3>💤 Статистика сна</h3>
                 <div class="sleep-stats">
-                    ${renderSleepStats(stats.sleep_statistics || {})}
+                    ${renderSleepStats(stats)}
                 </div>
             </div>
         `;
     }
 
-    function renderMoodDistribution(distribution) {
-        if (Object.keys(distribution).length === 0) {
-            return '<p>Нет данных о настроениях</p>';
+    function renderMoodTrend(moodTrend) {
+        if (!moodTrend) {
+            return '<p style="color: var(--health-text-light);">Нет данных о настроении</p>';
         }
 
-        let html = '<div class="mood-bars">';
-        const total = Object.values(distribution).reduce((a, b) => a + b, 0);
+        const moodEmojis = {
+            'отличное': '😄',
+            'хорошее': '🙂',
+            'нормальное': '😐',
+            'плохое': '😔',
+            'ужасное': '😭'
+        };
 
-        for (const [mood, count] of Object.entries(distribution)) {
-            const percentage = total > 0 ? (count / total * 100) : 0;
+        const emoji = moodEmojis[moodTrend] || '😐';
 
-            html += `
-                <div class="mood-bar-item">
-                    <div class="mood-label">
-                        ${HealthFormatters.getMoodEmoji(mood)} ${mood}
-                        <span class="mood-count">${count}</span>
-                    </div>
-                    <div class="mood-bar">
-                        <div class="mood-bar-fill" style="width: ${percentage}%"></div>
-                    </div>
-                    <div class="mood-percentage">${percentage.toFixed(1)}%</div>
+        return `
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 64px; margin-bottom: 12px;">${emoji}</div>
+                <div style="font-size: 20px; font-weight: 600; color: var(--health-text);">
+                    ${moodTrend.charAt(0).toUpperCase() + moodTrend.slice(1)}
                 </div>
-            `;
-        }
-
-        html += '</div>';
-        return html;
+                <div style="font-size: 14px; color: var(--health-text-light); margin-top: 8px;">
+                    Преобладающее настроение в выбранный период
+                </div>
+            </div>
+        `;
     }
 
-    function renderTopSymptoms(frequency) {
-        if (Object.keys(frequency).length === 0) {
-            return '<p>Нет данных о симптомах</p>';
+    function renderTopSymptoms(symptoms) {
+        if (!symptoms || symptoms.length === 0) {
+            return '<p style="color: var(--health-text-light);">Нет данных о симптомах</p>';
         }
-
-        const sorted = Object.entries(frequency)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
 
         let html = '<div class="top-symptoms">';
 
-        sorted.forEach(([symptom, count]) => {
-            const symptomName = symptom.includes(':') ? symptom.split(':')[1] : symptom;
+        // Находим максимальное количество для масштабирования прогресс-баров
+        const maxCount = Math.max(...symptoms.map(s => s.count));
+
+        symptoms.forEach(symptom => {
+            const symptomName = symptom.name.replace(/_/g, ' ');
+            const percentage = maxCount > 0 ? (symptom.count / maxCount * 100) : 0;
 
             html += `
                 <div class="top-symptom-item">
                     <div class="symptom-name">${symptomName}</div>
                     <div class="symptom-bar">
-                        <div class="symptom-bar-fill" style="width: ${Math.min(count * 10, 100)}%"></div>
+                        <div class="symptom-bar-fill" style="width: ${percentage}%"></div>
                     </div>
-                    <div class="symptom-count">${count}</div>
+                    <div class="symptom-count">${symptom.count}</div>
                 </div>
             `;
         });
@@ -141,20 +149,23 @@ const Stats = (function() {
         return html;
     }
 
-    function renderSleepStats(sleepStats) {
+    function renderSleepStats(stats) {
+        const avgSleep = stats.average_sleep || 0;
+        const entriesCount = stats.entries_count || 0;
+
         return `
             <div class="sleep-stats">
                 <div class="stat-item">
                     <div class="stat-label">Среднее</div>
-                    <div class="stat-value">${sleepStats.average?.toFixed(1) || '0'} ч</div>
+                    <div class="stat-value">${avgSleep.toFixed(1)} ч</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Минимум</div>
-                    <div class="stat-value">${sleepStats.min?.toFixed(1) || '0'} ч</div>
+                    <div class="stat-label">Записей</div>
+                    <div class="stat-value">${entriesCount}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Максимум</div>
-                    <div class="stat-value">${sleepStats.max?.toFixed(1) || '0'} ч</div>
+                    <div class="stat-label">Период</div>
+                    <div class="stat-value">${stats.period_days || 0} дн</div>
                 </div>
             </div>
         `;
@@ -182,10 +193,11 @@ const Stats = (function() {
         }
 
         try {
-            // ИСПРАВЛЕНО: Используем реальный API endpoint
             const response = await HealthAPI.getHealthSummary(days);
 
             if (response.success) {
+                console.log('✅ Статистика загружена:', response.data);
+
                 // Обновляем state
                 StateManager.updateState({ stats: response.data });
 

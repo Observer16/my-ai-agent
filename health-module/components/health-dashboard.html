@@ -22,7 +22,7 @@
         <div id="debug-output" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
     </div>
 
-        <!-- Сводка -->
+    <!-- Сводка -->
     <div id="health-summary">
         <!-- Заполняется динамически -->
     </div>
@@ -38,21 +38,7 @@
         </div>
     </div>
 
-    <!-- Симптомы -->
-    <div class="health-card">
-        <div class="health-card-header">
-            <div class="health-card-icon">🤕</div>
-            <h3 class="health-card-title">Симптомы сегодня</h3>
-        </div>
-        <div id="symptoms-container">
-            <p class="no-symptoms">Симптомы не добавлены</p>
-        </div>
-        <button id="add-symptoms-btn" class="health-btn btn-secondary" style="margin-top: 16px; width: 100%;">
-            + Добавить запись
-        </button>
-    </div>
-
-        <!-- Трекер лекарств -->
+    <!-- Трекер лекарств -->
     <div class="health-card">
         <div class="health-card-header">
             <div class="health-card-icon">💊</div>
@@ -89,7 +75,7 @@ async function testHealthAPI() {
         output.innerHTML += '<p>3. Получение записи за сегодня...</p>';
         const today = new Date().toISOString().split('T')[0];
         const entry = await HealthAPI.getEntryByDate(today);
-        output.innerHTML += `<p>✅ Запись: ${JSON.stringify(entry)}</p>';
+        output.innerHTML += `<p>✅ Запись: ${JSON.stringify(entry)}</p>`;
 
     } catch (error) {
         output.innerHTML += `<p style="color: red;">❌ Ошибка: ${error.message}</p>`;

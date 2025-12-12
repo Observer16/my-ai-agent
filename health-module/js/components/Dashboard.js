@@ -4,7 +4,6 @@ const Dashboard = (function() {
     function init() {
         initMedicationTracker();
         initWellnessGrid();
-        initAddSymptomsButton();
         renderSummary();
     }
 
@@ -81,18 +80,10 @@ const Dashboard = (function() {
         gridContainer.innerHTML = renderWellnessGrid(state.todayEntry);
     }
 
-    function initAddSymptomsButton() {
-        const button = document.getElementById('add-symptoms-btn');
-        if (!button) return;
-
-        button.addEventListener('click', () => {
-            if (window.showSymptomPicker) {
-                showSymptomPicker();
-            }
-        });
-    }
-
     function renderWellnessGrid(todayEntry) {
+        // Подсчитываем симптомы за сегодня
+        const symptomsCount = todayEntry?.symptoms?.length || 0;
+
         return `
             <div class="wellness-grid">
                 <div class="wellness-item" onclick="showMoodPicker()">
@@ -107,10 +98,10 @@ const Dashboard = (function() {
                     <div class="wellness-value">${todayEntry?.sleep_hours ? `${todayEntry.sleep_hours} ч` : 'Добавить'}</div>
                 </div>
 
-                <div class="wellness-item" onclick="showWeightInput()">
-                    <div class="wellness-icon">⚖️</div>
-                    <div class="wellness-label">Вес</div>
-                    <div class="wellness-value">${todayEntry?.weight ? `${todayEntry.weight} кг` : 'Добавить'}</div>
+                <div class="wellness-item" onclick="showSymptomPicker()">
+                    <div class="wellness-icon">🤕</div>
+                    <div class="wellness-label">Симптомы</div>
+                    <div class="wellness-value">${symptomsCount > 0 ? `${symptomsCount} шт` : 'Добавить'}</div>
                 </div>
 
                 <div class="wellness-item" onclick="showSexualActivityPicker()">
@@ -187,25 +178,16 @@ const Dashboard = (function() {
         }
     }
 
-    function showWeightInput() {
-        console.log('⚖️ Открытие ввода веса...');
-        if (window.WeightModal) {
-            WeightModal.show();
+    function showSymptomPicker() {
+        console.log('🤕 Открытие выбора симптомов...');
+        const today = new Date().toISOString().split('T')[0];
+
+        if (window.SymptomModal) {
+            SymptomModal.show({ date: today });
+        } else if (window.SimpleModalManager) {
+            SimpleModalManager.show('symptom-picker', { date: today });
         } else {
-            // Fallback на prompt
-            const today = new Date().toISOString().split('T')[0];
-            const currentWeight = HealthModule.getState().todayEntry?.weight || '';
-            const weight = prompt('Введите ваш вес (кг):', currentWeight);
-            if (weight !== null && weight !== '') {
-                HealthModule.updateHealthEntry(today, 'weight', parseFloat(weight))
-                    .then(async (success) => {
-                        if (success) {
-                            showToast('✅ Вес сохранен', 'success');
-                            await HealthModule.refreshData();
-                            init();
-                        }
-                    });
-            }
+            showToast('⚠️ Функция в разработке', 'info');
         }
     }
 
@@ -286,7 +268,7 @@ const Dashboard = (function() {
         refresh,
         showMoodPicker,
         showSleepInput,
-        showWeightInput,
+        showSymptomPicker,
         showSexualActivityPicker,
         logMedication,
         skipMedication
@@ -301,7 +283,7 @@ if (typeof window !== 'undefined') {
 // Глобальные функции для onclick
 window.showMoodPicker = () => Dashboard.showMoodPicker();
 window.showSleepInput = () => Dashboard.showSleepInput();
-window.showWeightInput = () => Dashboard.showWeightInput();
+window.showSymptomPicker = () => Dashboard.showSymptomPicker();
 window.showSexualActivityPicker = () => Dashboard.showSexualActivityPicker();
 window.logMedication = (id, scheduleId) => Dashboard.logMedication(id, scheduleId);
 window.skipMedication = (id, scheduleId) => Dashboard.skipMedication(id, scheduleId);
