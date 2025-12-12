@@ -386,7 +386,7 @@
 .symptom-tag {
     display: inline-flex;
     align-items: center;
-    padding: 6px 12px;
+    padding: 6px 28px;
     background: var(--health-card-bg);
     border: 2px solid;
     border-radius: 20px;
