@@ -113,19 +113,6 @@ const Dashboard = (function() {
                     <div class="wellness-value">${todayEntry?.symptoms?.length || 0}</div>
                 </div>
 
-                <div class="form-section">
-                    <label>
-                        🔒 Сексуальная активность (приватно)
-                        <span style="font-size: 12px; color: var(--health-text-light); margin-left: 8px;">
-                            Только для вас
-                        </span>
-                    </label>
-                    <select id="sexual-activity-input" class="modal-input">
-                        <option value="">Не указано</option>
-                        ${sexualActivityOptionsHtml}
-                    </select>
-                </div>
-
             </div>
         `;
     }
