@@ -1,0 +1,80 @@
+/* Toast notifications */
+.health-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 12px 20px;
+    border-radius: 12px;
+
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+
+    z-index: 10000;
+
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.health-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.health-toast.toast-success {
+    background: rgba(76, 175, 80, 0.95);
+}
+
+.health-toast.toast-error {
+    background: rgba(244, 67, 54, 0.95);
+}
+
+.health-toast.toast-info {
+    background: rgba(33, 150, 243, 0.95);
+}
+
+.health-toast.toast-warning {
+    background: rgba(255, 152, 0, 0.95);
+}
+
+.toast-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.toast-message {
+    line-height: 1.4;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .health-toast {
+        bottom: 90px;
+        left: 16px;
+        right: 16px;
+        transform: translateX(0) translateY(100px);
+        max-width: calc(100% - 32px);
+    }
+
+    .health-toast.show {
+        transform: translateX(0) translateY(0);
+    }
+}
+
+/* Темная тема Telegram */
+body.theme-dark .health-toast {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
