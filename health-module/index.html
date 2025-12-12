@@ -46,21 +46,16 @@
 
 <!-- ✅ ПРАВИЛЬНЫЙ ПОРЯДОК ЗАГРУЗКИ -->
 
-<!-- 1. Telegram WebApp SDK -->
+<!-- Telegram WebApp SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<!-- 2. ГЛАВНАЯ конфигурация проекта (только ОДИН раз!) -->
+<!-- ГЛАВНАЯ конфигурация проекта (только ОДИН раз!) -->
 <script src="../js/config.js"></script>
 
-<!-- 3. Стили модуля -->
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="css/health-styles.css">
-<link rel="stylesheet" href="css/health-components.css">
-
-<!-- 4. Конфиг модуля (НЕ constants/config.js!) -->
+<!-- Конфиг модуля (НЕ constants/config.js!) -->
 <script src="js/config.js"></script>
 
-<!-- 5. Storage и API -->
+<!-- Storage и API -->
 <script src="js/health-storage.js"></script>
 <script src="js/health-api.js"></script>
 
@@ -88,32 +83,32 @@
 <!-- Main UI (после всех компонентов) -->
 <script src="js/health-ui.js"></script>
 
-<!-- 6. Core модули -->
+<!-- Core модули -->
 <script src="core/state-manager.js"></script>
 <script src="core/dom-manager.js"></script>
 <script src="core/event-manager.js"></script>
 
-<!-- 7. Utils -->
+<!-- Utils -->
 <script src="utils/component-loader.js"></script>
 <script src="utils/error-handler.js"></script>
 <script src="utils/storage-helper.js"></script>
 <script src="utils/ui-helpers.js"></script>
 
-<!-- 8. Managers -->
+<!-- Managers -->
 <script src="managers/onboarding-manager.js"></script>
 <script src="managers/tab-manager.js"></script>
 <script src="managers/data-manager.js"></script>
 
-<!-- 9. Tabs -->
+<!-- Tabs -->
 <script src="tabs/dashboard-manager.js"></script>
 <script src="tabs/medications-manager.js"></script>
 <script src="tabs/diary-manager.js"></script>
 <script src="tabs/stats-manager.js"></script>
 
-<!-- 10. Главный модуль -->
+<!-- Главный модуль -->
 <script src="js/health-module.js"></script>
 
-<!-- 11. Debug (опционально) -->
+<!-- Debug (опционально) -->
 <script src="js/health-debug.js"></script>
 
 <!-- Инициализация -->
