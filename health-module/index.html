@@ -6,10 +6,10 @@
     <title>Модуль Здоровья - Мой AI Агент</title>
 
     <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!--<script src="https://telegram.org/js/telegram-web-app.js"></script> -->
 
     <!-- ✅ ИСПРАВЛЕНО: Сначала загружаем ГЛАВНУЮ конфигурацию проекта -->
-    <script src="../js/config.js"></script>
+    <!--<script src="../js/config.js"></script> -->
 
     <!-- Подключаем стили модуля -->
     <link rel="stylesheet" href="../css/style.css">
@@ -51,61 +51,53 @@
 <!-- Модальные окна -->
 <div id="health-modals"></div>
 
-<!-- ✅ ИСПРАВЛЕНО: Правильный порядок загрузки JS модуля -->
-<!-- 1. Сначала конфиг модуля (использует глобальный CONFIG) -->
+<!-- ✅ ПРАВИЛЬНЫЙ ПОРЯДОК ЗАГРУЗКИ -->
+
+<!-- 1. Telegram WebApp SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- 2. ГЛАВНАЯ конфигурация проекта (только ОДИН раз!) -->
+<script src="../js/config.js"></script>
+
+<!-- 3. Стили модуля -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/health-styles.css">
+<link rel="stylesheet" href="css/health-components.css">
+
+<!-- 4. Конфиг модуля (НЕ constants/config.js!) -->
 <script src="js/config.js"></script>
-<!-- 2. Затем storage -->
+
+<!-- 5. Storage и API -->
 <script src="js/health-storage.js"></script>
-<!-- 3. Затем API (использует HealthConfig) -->
 <script src="js/health-api.js"></script>
-<!-- 4. Затем UI -->
 <script src="js/health-ui.js"></script>
 
-<!-- Подключаем модули в правильном порядке -->
-<script src="constants/config.js"></script>
-
-<!-- Core -->
+<!-- 6. Core модули -->
 <script src="core/state-manager.js"></script>
 <script src="core/dom-manager.js"></script>
 <script src="core/event-manager.js"></script>
 
-<!-- Utils -->
+<!-- 7. Utils -->
 <script src="utils/component-loader.js"></script>
 <script src="utils/error-handler.js"></script>
 <script src="utils/storage-helper.js"></script>
 <script src="utils/ui-helpers.js"></script>
 
-<!-- Managers -->
+<!-- 8. Managers -->
 <script src="managers/onboarding-manager.js"></script>
 <script src="managers/tab-manager.js"></script>
 <script src="managers/data-manager.js"></script>
 
-<!-- Tabs -->
+<!-- 9. Tabs -->
 <script src="tabs/dashboard-manager.js"></script>
 <script src="tabs/medications-manager.js"></script>
 <script src="tabs/diary-manager.js"></script>
 <script src="tabs/stats-manager.js"></script>
 
-<!-- Компоненты UI (если используются) -->
-<script src="js/components/Dashboard.js"></script>
-<script src="js/components/Medications.js"></script>
-<script src="js/components/Diary.js"></script>
-<script src="js/components/Stats.js"></script>
-<script src="js/components/Onboarding.js"></script>
-
-<!-- Модальные окна (если используются) -->
-<script src="js/modals/BaseModal.js"></script>
-<script src="js/modals/MoodModal.js"></script>
-<script src="js/modals/SymptomModal.js"></script>
-
-<!-- Utils -->
-<script src="js/utils/constants.js"></script>
-<script src="js/utils/formatters.js"></script>
-<script src="js/utils/validators.js"></script>
-
-<!-- Главный модуль -->
+<!-- 10. Главный модуль -->
 <script src="js/health-module.js"></script>
-<!-- 6. Опционально debug -->
+
+<!-- 11. Debug (опционально) -->
 <script src="js/health-debug.js"></script>
 
 <!-- Инициализация -->

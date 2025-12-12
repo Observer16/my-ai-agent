@@ -1,6 +1,5 @@
 // health-module/js/components/Diary.js
 
-import { getMonthName, formatDate, getMoodEmoji, getIntensityColor } from '../js/utils/formatters.js';
 
 /**
  * Компонент дневника здоровья

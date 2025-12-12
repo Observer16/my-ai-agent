@@ -1,6 +1,5 @@
 // health-module/js/components/Medications.js
 
-import { formatTime } from '../js/utils/formatters.js';
 
 /**
  * Компонент аптечки

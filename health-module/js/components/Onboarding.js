@@ -1,6 +1,5 @@
 // health-module/js/components/Onboarding.js
 
-import { GENDER_OPTIONS } from '../js/utils/formatters.js';
 
 /**
  * Компонент онбординга

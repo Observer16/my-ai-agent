@@ -151,16 +151,18 @@ const DataManager = (function() {
                 EventManager.emit('data:todayEntryLoaded', response.data);
                 return response.data;
             } else {
-                // ИСПРАВЛЕНО: Не логируем как ошибку, это нормально
-                console.log('📝 Запись за сегодня не найдена (создается при первом добавлении данных)');
+                // ИСПРАВЛЕНО: 404 это нормально
+                if (response.status === 404) {
+                    console.log('📝 Запись за сегодня отсутствует (будет создана при первом добавлении данных)');
+                } else {
+                    console.warn(`⚠️ Не удалось загрузить запись: ${response.error}`);
+                }
                 StateManager.updateState({ todayEntry: null });
                 return null;
             }
         } catch (error) {
-            // ИСПРАВЛЕНО: 404 это не критичная ошибка
-            if (error.message && error.message.includes('404')) {
-                console.log('📝 Запись за сегодня отсутствует');
-            } else {
+            // ИСПРАВЛЕНО: Не показываем 404 в консоли как ошибку
+            if (error.status !== 404) {
                 console.error('❌ Ошибка загрузки записи:', error);
             }
             StateManager.updateState({ todayEntry: null });

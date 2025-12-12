@@ -243,14 +243,3 @@ const HealthModule = (function() {
 if (typeof window !== 'undefined') {
     window.HealthModule = HealthModule;
 }
-
-// Автоматическая инициализация при загрузке
-if (typeof window !== 'undefined' && !window.HEALTH_MODULE_NO_AUTO_INIT) {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            HealthModule.init().catch(error => {
-                console.error('💥 Не удалось автоматически инициализировать модуль:', error);
-            });
-        }, 100);
-    });
-}
