@@ -747,8 +747,8 @@
     background: var(--health-card-bg);
     border-radius: var(--health-radius);
     width: 100%;
-    max-width: 400px;
-    max-height: 80vh;
+    max-width: 200px;
+    max-height: 60vh;
     overflow-y: auto;
 }
 
