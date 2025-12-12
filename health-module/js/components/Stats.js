@@ -1,6 +1,6 @@
 // health-module/js/components/Stats.js
 
-import { getMoodEmoji } from 'health-module/js/utils/formatters.js';
+import { getMoodEmoji } from '../js/utils/formatters.js';
 
 /**
  * Компонент статистики здоровья
