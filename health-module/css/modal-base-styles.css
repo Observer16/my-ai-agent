@@ -20,7 +20,7 @@
     position: relative;
     width: 90%;
     max-width: 50px;
-    max-height: 80vh;
+    max-height: 60vh;
     background: var(--health-card-bg, #ffffff);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -31,11 +31,11 @@
 }
 
 .modal-content.modal-large {
-    max-width: 600px;
+    max-width: 400px;
 }
 
 .modal-content.modal-small {
-    max-width: 400px;
+    max-width: 300px;
 }
 
 .modal-header {
