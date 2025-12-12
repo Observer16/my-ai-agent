@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Модуль Здоровья - Мой AI Агент</title>
 
-    <!-- Telegram WebApp SDK -->
-    <!--<script src="https://telegram.org/js/telegram-web-app.js"></script> -->
-
-    <!-- ✅ ИСПРАВЛЕНО: Сначала загружаем ГЛАВНУЮ конфигурацию проекта -->
-    <!--<script src="../js/config.js"></script> -->
-
     <!-- Подключаем стили модуля -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="css/health-styles.css">
@@ -70,6 +64,24 @@
 <!-- 5. Storage и API -->
 <script src="js/health-storage.js"></script>
 <script src="js/health-api.js"></script>
+
+<!-- Utils (сначала) -->
+<script src="js/utils/constants.js"></script>
+<script src="js/utils/formatters.js"></script>
+<script src="js/utils/validators.js"></script>
+
+<!-- Components -->
+<script src="js/components/Dashboard.js"></script>
+<script src="js/components/Medications.js"></script>
+<script src="js/components/Diary.js"></script>
+<script src="js/components/Stats.js"></script>
+<script src="js/components/Onboarding.js"></script>
+
+<!-- Modals -->
+<script src="js/modals/BaseModal.js"></script>
+<script src="js/modals/MoodModal.js"></script>
+
+<!-- Main UI -->
 <script src="js/health-ui.js"></script>
 
 <!-- 6. Core модули -->

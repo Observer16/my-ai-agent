@@ -1,23 +1,14 @@
-// health-module/js/components/Dashboard.js
+// js/components/Dashboard.js
+const Dashboard = (function() {
 
-/**
- * Компонент дашборда здоровья
- */
-const Dashboard = {
-    /**
-     * Инициализация компонентов главной панели
-     */
-    init() {
-        this.initMedicationTracker();
-        this.initWellnessGrid();
-        this.initAddSymptomsButton();
-        this.renderSummary();
-    },
+    function init() {
+        initMedicationTracker();
+        initWellnessGrid();
+        initAddSymptomsButton();
+        renderSummary();
+    }
 
-    /**
-     * Инициализация трекера лекарств
-     */
-    initMedicationTracker() {
+    function initMedicationTracker() {
         const trackerContainer = document.getElementById('medication-tracker');
         if (!trackerContainer) {
             console.warn('⚠️ Контейнер medication-tracker не найден');
@@ -30,22 +21,19 @@ const Dashboard = {
         console.log('💊 Загружено лекарств:', medications.length, medications);
 
         if (medications.length === 0) {
-            trackerContainer.innerHTML = this.renderNoMedications();
+            trackerContainer.innerHTML = renderNoMedications();
             return;
         }
 
-        trackerContainer.innerHTML = this.renderMedicationList(medications);
-    },
+        trackerContainer.innerHTML = renderMedicationList(medications);
+    }
 
-    /**
-     * Рендер списка лекарств
-     */
-    renderMedicationList(medications) {
+    function renderMedicationList(medications) {
         let html = '<div class="medication-list">';
 
         medications.forEach(med => {
             const medicationId = med.medication_id || med.id || '';
-            const time = formatTime(med.time_of_day);
+            const time = HealthFormatters.formatTime(med.time_of_day);
             const status = med.status || 'pending';
             const isTaken = status === 'taken';
             const takenTime = med.taken_time ?
@@ -82,12 +70,9 @@ const Dashboard = {
 
         html += '</div>';
         return html;
-    },
+    }
 
-    /**
-     * Рендер состояния без лекарств
-     */
-    renderNoMedications() {
+    function renderNoMedications() {
         return `
             <div class="no-medications">
                 <div class="no-meds-icon">💊</div>
@@ -97,28 +82,21 @@ const Dashboard = {
                 </button>
             </div>
         `;
-    },
+    }
 
-    /**
-     * Инициализация грида самочувствия
-     */
-    initWellnessGrid() {
+    function initWellnessGrid() {
         const gridContainer = document.getElementById('wellness-grid');
         if (!gridContainer) return;
 
         const state = HealthModule.getState();
+        gridContainer.innerHTML = renderWellnessGrid(state.todayEntry);
+    }
 
-        gridContainer.innerHTML = this.renderWellnessGrid(state.todayEntry);
-    },
-
-    /**
-     * Рендер грида самочувствия
-     */
-    renderWellnessGrid(todayEntry) {
+    function renderWellnessGrid(todayEntry) {
         return `
             <div class="wellness-grid">
                 <div class="wellness-item" onclick="showMoodPicker()">
-                    <div class="wellness-icon">${getMoodEmoji(todayEntry?.mood)}</div>
+                    <div class="wellness-icon">${HealthFormatters.getMoodEmoji(todayEntry?.mood)}</div>
                     <div class="wellness-label">Настроение</div>
                     <div class="wellness-value">${todayEntry?.mood || 'Добавить'}</div>
                 </div>
@@ -142,24 +120,18 @@ const Dashboard = {
                 </div>
             </div>
         `;
-    },
+    }
 
-    /**
-     * Инициализация кнопки добавления симптомов
-     */
-    initAddSymptomsButton() {
+    function initAddSymptomsButton() {
         const button = document.getElementById('add-symptoms-btn');
         if (!button) return;
 
         button.addEventListener('click', () => {
-            HealthUI.showModal('symptom-picker');
+            showSymptomPicker();
         });
-    },
+    }
 
-    /**
-     * Отобразить сводку
-     */
-    renderSummary() {
+    function renderSummary() {
         const summaryContainer = document.getElementById('health-summary');
         if (!summaryContainer) return;
 
@@ -170,13 +142,10 @@ const Dashboard = {
             return;
         }
 
-        summaryContainer.innerHTML = this.renderSummaryCard(state.stats);
-    },
+        summaryContainer.innerHTML = renderSummaryCard(state.stats);
+    }
 
-    /**
-     * Рендер карточки сводки
-     */
-    renderSummaryCard(stats) {
+    function renderSummaryCard(stats) {
         return `
             <div class="summary-card">
                 <h3>📊 За последние 7 дней</h3>
@@ -196,17 +165,18 @@ const Dashboard = {
                 </div>
             </div>
         `;
-    },
-
-    /**
-     * Обновление дашборда
-     */
-    refresh() {
-        this.init();
     }
-};
 
-// Экспорт компонента
+    function refresh() {
+        init();
+    }
+
+    return {
+        init,
+        refresh
+    };
+})();
+
 if (typeof window !== 'undefined') {
     window.Dashboard = Dashboard;
 }
