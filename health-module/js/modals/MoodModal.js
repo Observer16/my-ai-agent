@@ -28,9 +28,16 @@ const MoodModal = (function() {
         const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
 
         if (success) {
-            showToast('Настроение сохранено', 'success');
+            showToast('✅ Настроение сохранено', 'success');
             BaseModal.close();
-            HealthModule.refreshData();
+
+            // КРИТИЧНО: Обновляем данные и перерисовываем Dashboard
+            await HealthModule.refreshData();
+
+            // Перерисовываем Dashboard если он открыт
+            if (window.Dashboard && typeof Dashboard.init === 'function') {
+                Dashboard.init();
+            }
         } else {
             showToast('❌ Не удалось сохранить настроение', 'error');
         }
@@ -43,7 +50,9 @@ const MoodModal = (function() {
     };
 })();
 
-// Экспорт
+// Экспорт в window
 if (typeof window !== 'undefined') {
     window.MoodModal = MoodModal;
 }
+
+console.log('✅ MoodModal загружен');

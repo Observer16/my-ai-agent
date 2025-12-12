@@ -189,10 +189,11 @@ const Dashboard = (function() {
         const hours = prompt('Сколько часов вы спали?', currentSleep);
         if (hours !== null && hours !== '') {
             HealthModule.updateHealthEntry(today, 'sleep', parseFloat(hours))
-                .then(success => {
+                .then(async (success) => {
                     if (success) {
                         showToast('✅ Сон сохранен', 'success');
-                        init();
+                        await HealthModule.refreshData();
+                        init(); // Перерисовываем Dashboard
                     }
                 });
         }
@@ -206,10 +207,11 @@ const Dashboard = (function() {
         const weight = prompt('Введите ваш вес (кг):', currentWeight);
         if (weight !== null && weight !== '') {
             HealthModule.updateHealthEntry(today, 'weight', parseFloat(weight))
-                .then(success => {
+                .then(async (success) => {
                     if (success) {
                         showToast('✅ Вес сохранен', 'success');
-                        init();
+                        await HealthModule.refreshData();
+                        init(); // Перерисовываем Dashboard
                     }
                 });
         }
