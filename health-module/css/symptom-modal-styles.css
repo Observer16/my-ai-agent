@@ -2,7 +2,9 @@
 .symptom-modal-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
 }
 
 .symptom-modal-content .form-group {
@@ -19,7 +21,7 @@
 
 .symptom-modal-content .modal-input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: 1px solid var(--health-border-color, #e0e0e0);
     border-radius: 8px;
     background: var(--health-card-bg, #ffffff);
@@ -139,14 +141,14 @@
 }
 
 /* Темная тема */
-body.theme-dark .symptom-modal-content .modal-input option {
-    background: var(--tg-theme-bg-color, #1e1e1e);
-    color: var(--tg-theme-text-color, #ffffff);
-}
-
 body.theme-dark .symptom-modal-content .modal-input {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
+    color: var(--tg-theme-text-color, #ffffff);
+}
+
+body.theme-dark .symptom-modal-content .modal-input option {
+    background: var(--tg-theme-bg-color, #1e1e1e);
     color: var(--tg-theme-text-color, #ffffff);
 }
 
