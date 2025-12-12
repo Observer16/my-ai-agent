@@ -1,44 +1,34 @@
-// health-module/js/components/Diary.js
+// js/components/Diary.js
+const Diary = (function() {
+    let currentDate = null;
 
+    function init() {
+        console.log('📔 Инициализация компонента Diary');
+        initCalendar();
+        initTodayButton();
+        loadToday();
+    }
 
-/**
- * Компонент дневника здоровья
- */
-const Diary = {
-    currentDate: null,
-
-    /**
-     * Инициализация компонентов дневника
-     */
-    init() {
-        this.initCalendar();
-        this.initTodayButton();
-        this.loadToday();
-    },
-
-    /**
-     * Инициализация календаря
-     */
-    initCalendar() {
+    function initCalendar() {
         const calendarContainer = document.getElementById('health-calendar');
-        if (!calendarContainer) return;
+        if (!calendarContainer) {
+            console.warn('⚠️ Контейнер health-calendar не найден');
+            return;
+        }
 
         const today = new Date();
         const currentMonth = today.getMonth();
         const currentYear = today.getFullYear();
 
-        calendarContainer.innerHTML = this.renderCalendar(currentYear, currentMonth, today);
-    },
+        calendarContainer.innerHTML = renderCalendar(currentYear, currentMonth, today);
+    }
 
-    /**
-     * Рендер календаря
-     */
-    renderCalendar(year, month, today) {
+    function renderCalendar(year, month, today) {
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
         let html = '<div class="calendar-header">';
-        html += `<h3>${getMonthName(month)} ${year}</h3>`;
+        html += `<h3>${HealthFormatters.getMonthName(month)} ${year}</h3>`;
         html += '</div>';
 
         html += '<div class="calendar-grid">';
@@ -50,14 +40,15 @@ const Diary = {
         });
 
         // Пустые ячейки до первого дня
-        for (let i = 0; i < firstDay.getDay(); i++) {
+        const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        for (let i = 0; i < firstDayOfWeek; i++) {
             html += '<div class="calendar-day empty"></div>';
         }
 
         // Дни месяца
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const isToday = day === today.getDate() && month === today.getMonth();
+            const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
             html += `
                 <div class="calendar-day ${isToday ? 'today' : ''}"
@@ -69,70 +60,56 @@ const Diary = {
 
         html += '</div>';
         return html;
-    },
+    }
 
-    /**
-     * Инициализация кнопки "Сегодня"
-     */
-    initTodayButton() {
+    function initTodayButton() {
         const todayBtn = document.getElementById('today-btn');
         if (todayBtn) {
             todayBtn.addEventListener('click', () => {
-                this.loadToday();
+                loadToday();
             });
         }
-    },
+    }
 
-    /**
-     * Загрузка данных за сегодня
-     */
-    loadToday() {
+    function loadToday() {
         const today = new Date().toISOString().split('T')[0];
-        this.loadDate(today);
-    },
+        loadDate(today);
+    }
 
-    /**
-     * Загрузить данные за дату
-     */
-    async loadDate(date) {
-        this.currentDate = date;
+    async function loadDate(date) {
+        currentDate = date;
+        console.log('📅 Загрузка записи за дату:', date);
 
         try {
             const response = await HealthAPI.getEntryByDate(date);
 
             if (response.success) {
-                this.renderEntryForm(date, response.data);
+                renderEntryForm(date, response.data);
             } else {
-                this.renderEntryForm(date, null);
+                renderEntryForm(date, null);
             }
         } catch (error) {
             console.error('❌ Ошибка загрузки записи:', error);
-            HealthUI.showToast('Ошибка загрузки данных', 'error');
-            this.renderEntryForm(date, null);
+            renderEntryForm(date, null);
         }
-    },
+    }
 
-    /**
-     * Отобразить форму записи
-     */
-    renderEntryForm(date, entry) {
+    function renderEntryForm(date, entry) {
         const container = document.getElementById('entry-form');
-        if (!container) return;
+        if (!container) {
+            console.warn('⚠️ Контейнер entry-form не найден');
+            return;
+        }
 
-        const formattedDate = formatDate(date, { weekday: 'long' });
+        const formattedDate = HealthFormatters.formatDate(date, { weekday: 'long' });
 
-        container.innerHTML = this.renderEntryFormHtml(date, formattedDate, entry);
-    },
+        container.innerHTML = renderEntryFormHtml(date, formattedDate, entry);
+    }
 
-    /**
-     * Рендер HTML формы записи
-     */
-    renderEntryFormHtml(date, formattedDate, entry) {
-        // Получаем доступные опции для пользователя
+    function renderEntryFormHtml(date, formattedDate, entry) {
         const state = HealthModule.getState();
         const sexualActivityOptions = state.userOptions?.sexual_activity_options || [];
 
-        // Генерируем опции для select
         const sexualActivityOptionsHtml = sexualActivityOptions.map(option => {
             const selected = entry?.sexual_activity === option ? 'selected' : '';
             const label = option.replace(/_/g, ' ');
@@ -146,18 +123,7 @@ const Diary = {
                 <div class="form-section">
                     <label>Настроение</label>
                     <div class="mood-selector">
-                        <button class="mood-option" onclick="Diary.selectMood('${date}', 'радость')">
-                            😄 Радость
-                        </button>
-                        <button class="mood-option" onclick="Diary.selectMood('${date}', 'удовлетворение')">
-                            🙂 Удовлетворение
-                        </button>
-                        <button class="mood-option" onclick="Diary.selectMood('${date}', 'нейтрально')">
-                            😐 Нейтрально
-                        </button>
-                        <button class="mood-option" onclick="Diary.selectMood('${date}', 'грусть')">
-                            😔 Грусть
-                        </button>
+                        ${renderMoodOptions(entry?.mood)}
                     </div>
                 </div>
 
@@ -191,9 +157,9 @@ const Diary = {
                 <div class="form-section">
                     <label>Симптомы</label>
                     <div id="symptoms-list">
-                        ${this.renderSymptomsList(entry?.symptoms || [])}
+                        ${renderSymptomsList(entry?.symptoms || [])}
                     </div>
-                    <button class="btn-secondary" onclick="HealthUI.showModal('symptom-picker', { date: '${date}' })">
+                    <button class="btn-secondary" onclick="showSymptomPicker()">
                         + Добавить симптом
                     </button>
                 </div>
@@ -211,59 +177,69 @@ const Diary = {
                 </div>
             </div>
         `;
-    },
+    }
 
-    /**
-     * Отобразить список симптомов
-     */
-    renderSymptomsList(symptoms) {
-        if (symptoms.length === 0) {
+    function renderMoodOptions(currentMood) {
+        const moods = [
+            { value: 'радость', emoji: '😄' },
+            { value: 'удовлетворение', emoji: '🙂' },
+            { value: 'нейтрально', emoji: '😐' },
+            { value: 'грусть', emoji: '😔' }
+        ];
+
+        return moods.map(mood => {
+            const active = currentMood === mood.value ? 'active' : '';
+            return `
+                <button class="mood-option ${active}"
+                        onclick="Diary.selectMood('${currentDate}', '${mood.value}')">
+                    ${mood.emoji} ${mood.value}
+                </button>
+            `;
+        }).join('');
+    }
+
+    function renderSymptomsList(symptoms) {
+        if (!symptoms || symptoms.length === 0) {
             return '<p class="no-symptoms">Симптомы не добавлены</p>';
         }
 
         let html = '<div class="symptoms-tags">';
 
         symptoms.forEach(symptom => {
-            const color = getIntensityColor(symptom.intensity);
+            const color = HealthFormatters.getIntensityColor(symptom.intensity);
 
             html += `
                 <div class="symptom-tag" style="border-color: ${color}">
                     <span class="symptom-name">${symptom.name}</span>
                     <span class="symptom-intensity">${'●'.repeat(symptom.intensity)}</span>
-                    <button class="symptom-remove" onclick="Diary.removeSymptom('${symptom.id}', '${this.currentDate}')">×</button>
+                    <button class="symptom-remove" onclick="Diary.removeSymptom('${symptom.id}', '${currentDate}')">×</button>
                 </div>
             `;
         });
 
         html += '</div>';
         return html;
-    },
+    }
 
-    /**
-     * Выбор настроения
-     */
-    async selectMood(date, mood) {
+    async function selectMood(date, mood) {
+        console.log('😊 Выбор настроения:', mood, 'для даты:', date);
+
         const success = await HealthModule.updateHealthEntry(date, 'mood', mood);
         if (success) {
-            HealthUI.showToast('✅ Настроение сохранено', 'success');
-            this.loadDate(date); // Перезагружаем форму
+            showToast('✅ Настроение сохранено', 'success');
+            loadDate(date);
         }
-    },
+    }
 
-    /**
-     * Удаление симптома
-     */
-    async removeSymptom(symptomId, date) {
-        // Здесь должна быть реализация удаления симптома
-        console.log('Удаление симптома:', symptomId, 'для даты:', date);
-        // После удаления перезагружаем форму
-        this.loadDate(date);
-    },
+    async function removeSymptom(symptomId, date) {
+        console.log('🗑️ Удаление симптома:', symptomId, 'для даты:', date);
+        // TODO: Реализовать удаление симптома через API
+        showToast('⚠️ Функция в разработке', 'info');
+    }
 
-    /**
-     * Сохранение записи
-     */
-    async saveEntry(date) {
+    async function saveEntry(date) {
+        console.log('💾 Сохранение записи за дату:', date);
+
         const sleep = document.getElementById('sleep-input')?.value;
         const weight = document.getElementById('weight-input')?.value;
         const notes = document.getElementById('notes-input')?.value;
@@ -278,15 +254,24 @@ const Diary = {
 
         try {
             await Promise.all(promises);
-            HealthUI.showToast('✅ Сохранено', 'success');
+            showToast('✅ Запись сохранена', 'success');
         } catch (error) {
             console.error('❌ Ошибка сохранения:', error);
-            HealthUI.showToast('Ошибка сохранения', 'error');
+            showToast('❌ Ошибка сохранения', 'error');
         }
     }
-};
 
-// Экспорт компонента
+    // Публичный API
+    return {
+        init,
+        loadDate,
+        selectMood,
+        removeSymptom,
+        saveEntry
+    };
+})();
+
+// Экспорт
 if (typeof window !== 'undefined') {
     window.Diary = Diary;
 }

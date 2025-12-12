@@ -1,49 +1,39 @@
-// health-module/js/components/Medications.js
+// js/components/Medications.js
+const Medications = (function() {
+    let showArchived = false;
 
+    function init() {
+        console.log('💊 Инициализация компонента Medications');
+        renderMedicationsList();
+        initAddButton();
+        initArchiveToggle();
+    }
 
-/**
- * Компонент аптечки
- */
-const Medications = {
-    showArchived: false,
-
-    /**
-     * Инициализация компонентов аптечки
-     */
-    init() {
-        this.renderMedicationsList();
-        this.initAddButton();
-        this.initArchiveToggle();
-    },
-
-    /**
-     * Отобразить список лекарств
-     */
-    renderMedicationsList() {
+    function renderMedicationsList() {
         const container = document.getElementById('medications-list');
-        if (!container) return;
-
-        const state = HealthModule.getState();
-        const medications = state.medications.filter(med =>
-            this.showArchived ? !med.is_active : med.is_active
-        );
-
-        if (medications.length === 0) {
-            container.innerHTML = this.renderEmptyState();
+        if (!container) {
+            console.warn('⚠️ Контейнер medications-list не найден');
             return;
         }
 
-        container.innerHTML = this.renderMedicationsGrid(medications);
-    },
+        const state = HealthModule.getState();
+        const medications = (state.medications || []).filter(med =>
+            showArchived ? !med.is_active : med.is_active
+        );
 
-    /**
-     * Рендер сетки лекарств
-     */
-    renderMedicationsGrid(medications) {
+        if (medications.length === 0) {
+            container.innerHTML = renderEmptyState();
+            return;
+        }
+
+        container.innerHTML = renderMedicationsGrid(medications);
+    }
+
+    function renderMedicationsGrid(medications) {
         let html = '<div class="medications-grid">';
 
         medications.forEach(med => {
-            const nextSchedule = this.getNextSchedule(med);
+            const nextSchedule = getNextSchedule(med);
 
             html += `
                 <div class="medication-item" data-medication-id="${med.id}">
@@ -83,108 +73,118 @@ const Medications = {
 
         html += '</div>';
         return html;
-    },
+    }
 
-    /**
-     * Рендер пустого состояния
-     */
-    renderEmptyState() {
+    function renderEmptyState() {
         return `
             <div class="empty-state">
                 <div class="empty-icon">💊</div>
                 <h3>Аптечка пуста</h3>
                 <p>Добавьте лекарства, которые вы принимаете регулярно</p>
-                <button class="btn-primary" onclick="HealthUI.showModal('medication-form')">
+                <button class="btn-primary" onclick="showMedicationForm()">
                     Добавить первое лекарство
                 </button>
             </div>
         `;
-    },
+    }
 
-    /**
-     * Получить следующий график приема
-     */
-    getNextSchedule(medication) {
+    function getNextSchedule(medication) {
         if (!medication.schedules || medication.schedules.length === 0) {
             return null;
         }
 
         const now = new Date();
-        const today = now.getDay(); // 0 - воскресенье, 1 - понедельник и т.д.
+        const today = now.getDay();
 
         for (const schedule of medication.schedules) {
             const days = schedule.days_of_week || [];
             const time = schedule.time_of_day;
 
             if (days.includes(today)) {
-                return formatTime(time);
+                return HealthFormatters.formatTime(time);
             }
         }
 
         return 'Завтра';
-    },
+    }
 
-    /**
-     * Инициализация кнопки добавления
-     */
-    initAddButton() {
+    function initAddButton() {
         const addBtn = document.getElementById('add-medication-btn');
         if (addBtn) {
             addBtn.addEventListener('click', () => {
-                HealthUI.showModal('medication-form');
+                showMedicationForm();
             });
         }
-    },
+    }
 
-    /**
-     * Инициализация переключателя архивных
-     */
-    initArchiveToggle() {
+    function initArchiveToggle() {
         const toggleBtn = document.getElementById('toggle-archive');
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
-                this.toggleArchiveView();
+                toggleArchiveView();
             });
         }
-    },
+    }
 
-    /**
-     * Переключение вида архивных лекарств
-     */
-    toggleArchiveView() {
-        this.showArchived = !this.showArchived;
-        this.renderMedicationsList();
+    function toggleArchiveView() {
+        showArchived = !showArchived;
+        renderMedicationsList();
 
         const toggleBtn = document.getElementById('toggle-archive');
         if (toggleBtn) {
-            toggleBtn.textContent = this.showArchived ? 'Показать активные' : 'Показать архивные';
+            toggleBtn.textContent = showArchived ? 'Показать активные' : 'Показать архивные';
         }
-    },
+    }
 
-    /**
-     * Редактирование лекарства
-     */
-    editMedication(id) {
-        // Реализация редактирования
-        console.log('Редактирование лекарства:', id);
-        HealthUI.showModal('medication-form', { medicationId: id });
-    },
+    function editMedication(id) {
+        console.log('✏️ Редактирование лекарства:', id);
+        if (window.SimpleModalManager) {
+            SimpleModalManager.show('medication-form', { medicationId: id });
+        } else {
+            alert('Функция редактирования в разработке');
+        }
+    }
 
-    /**
-     * Удаление лекарства
-     */
-    async deleteMedication(id) {
-        if (confirm('Вы уверены, что хотите удалить это лекарство?')) {
-            const success = await HealthModule.deleteMedication(id);
-            if (success) {
-                HealthUI.showToast('✅ Лекарство удалено', 'success');
-                this.renderMedicationsList();
+    async function deleteMedication(id) {
+        if (!confirm('Вы уверены, что хотите удалить это лекарство?')) {
+            return;
+        }
+
+        try {
+            const response = await HealthAPI.deleteMedication(id);
+
+            if (response && response.success) {
+                showToast('✅ Лекарство удалено', 'success');
+                await HealthModule.refreshData();
+                renderMedicationsList();
+            } else {
+                showToast('❌ Не удалось удалить лекарство', 'error');
             }
+        } catch (error) {
+            console.error('❌ Ошибка удаления лекарства:', error);
+            showToast('❌ Ошибка удаления', 'error');
         }
+    }
+
+    // Публичный API
+    return {
+        init,
+        editMedication,
+        deleteMedication,
+        toggleArchiveView
+    };
+})();
+
+// Глобальные функции для onclick
+window.showMedicationForm = function() {
+    if (window.SimpleModalManager) {
+        SimpleModalManager.show('medication-form');
+    } else {
+        alert('Функция добавления лекарств в разработке');
     }
 };
 
-// Экспорт компонента
+// Экспорт
 if (typeof window !== 'undefined') {
     window.Medications = Medications;
 }

@@ -65,10 +65,14 @@
 <script src="js/health-storage.js"></script>
 <script src="js/health-api.js"></script>
 
-<!-- Utils (сначала) -->
+<!-- Utils (сначала, т.к. другие модули от них зависят) -->
 <script src="js/utils/constants.js"></script>
 <script src="js/utils/formatters.js"></script>
 <script src="js/utils/validators.js"></script>
+
+<!-- Modals (до Components, т.к. компоненты могут их вызывать) -->
+<script src="js/modals/BaseModal.js"></script>
+<script src="js/modals/MoodModal.js"></script>
 
 <!-- Components -->
 <script src="js/components/Dashboard.js"></script>
@@ -77,11 +81,7 @@
 <script src="js/components/Stats.js"></script>
 <script src="js/components/Onboarding.js"></script>
 
-<!-- Modals -->
-<script src="js/modals/BaseModal.js"></script>
-<script src="js/modals/MoodModal.js"></script>
-
-<!-- Main UI -->
+<!-- Main UI (после всех компонентов) -->
 <script src="js/health-ui.js"></script>
 
 <!-- 6. Core модули -->

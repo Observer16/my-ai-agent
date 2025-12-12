@@ -1,26 +1,29 @@
-// health-module/js/components/Stats.js
+// js/components/Stats.js
+const Stats = (function() {
+    let currentPeriod = 30;
 
+    function init() {
+        console.log('📈 Инициализация компонента Stats');
+        initPeriodButtons();
+        renderStats();
+    }
 
-/**
- * Компонент статистики здоровья
- */
-const Stats = {
-    currentPeriod: 30, // дней по умолчанию
+    function initPeriodButtons() {
+        const periodBtns = document.querySelectorAll('.period-btn');
+        periodBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const days = parseInt(this.getAttribute('data-days'));
+                loadStats(days);
+            });
+        });
+    }
 
-    /**
-     * Инициализация компонентов статистики
-     */
-    init() {
-        this.renderStats();
-        this.initPeriodButtons();
-    },
-
-    /**
-     * Отобразить статистику
-     */
-    renderStats() {
+    function renderStats() {
         const container = document.getElementById('stats-content');
-        if (!container) return;
+        if (!container) {
+            console.warn('⚠️ Контейнер stats-content не найден');
+            return;
+        }
 
         const state = HealthModule.getState();
 
@@ -29,14 +32,10 @@ const Stats = {
             return;
         }
 
-        container.innerHTML = this.renderStatsContent(state.stats);
-    },
+        container.innerHTML = renderStatsContent(state.stats);
+    }
 
-    /**
-     * Рендер контента статистики
-     */
-    renderStatsContent(stats) {
-        // Отображаем круговую диаграмму приверженности
+    function renderStatsContent(stats) {
         const adherence = stats.medication_adherence || 0;
         const remaining = 100 - adherence;
 
@@ -64,30 +63,27 @@ const Stats = {
             <div class="stats-section">
                 <h3>😊 Распределение настроений</h3>
                 <div class="mood-stats">
-                    ${this.renderMoodDistribution(stats.mood_distribution || {})}
+                    ${renderMoodDistribution(stats.mood_distribution || {})}
                 </div>
             </div>
 
             <div class="stats-section">
                 <h3>⚠️ Частые симптомы</h3>
                 <div class="symptoms-stats">
-                    ${this.renderTopSymptoms(stats.symptom_frequency || {})}
+                    ${renderTopSymptoms(stats.symptom_frequency || {})}
                 </div>
             </div>
 
             <div class="stats-section">
                 <h3>📈 Статистика сна</h3>
                 <div class="sleep-stats">
-                    ${this.renderSleepStats(stats.sleep_statistics || {})}
+                    ${renderSleepStats(stats.sleep_statistics || {})}
                 </div>
             </div>
         `;
-    },
+    }
 
-    /**
-     * Отобразить распределение настроений
-     */
-    renderMoodDistribution(distribution) {
+    function renderMoodDistribution(distribution) {
         if (Object.keys(distribution).length === 0) {
             return '<p>Нет данных о настроениях</p>';
         }
@@ -101,7 +97,7 @@ const Stats = {
             html += `
                 <div class="mood-bar-item">
                     <div class="mood-label">
-                        ${getMoodEmoji(mood)} ${mood}
+                        ${HealthFormatters.getMoodEmoji(mood)} ${mood}
                         <span class="mood-count">${count}</span>
                     </div>
                     <div class="mood-bar">
@@ -114,17 +110,13 @@ const Stats = {
 
         html += '</div>';
         return html;
-    },
+    }
 
-    /**
-     * Отобразить топ симптомов
-     */
-    renderTopSymptoms(frequency) {
+    function renderTopSymptoms(frequency) {
         if (Object.keys(frequency).length === 0) {
             return '<p>Нет данных о симптомах</p>';
         }
 
-        // Сортируем по частоте
         const sorted = Object.entries(frequency)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
@@ -132,7 +124,6 @@ const Stats = {
         let html = '<div class="top-symptoms">';
 
         sorted.forEach(([symptom, count]) => {
-            // Извлекаем название симптома из ключа (формат "категория:симптом")
             const symptomName = symptom.includes(':') ? symptom.split(':')[1] : symptom;
 
             html += `
@@ -148,12 +139,9 @@ const Stats = {
 
         html += '</div>';
         return html;
-    },
+    }
 
-    /**
-     * Рендер статистики сна
-     */
-    renderSleepStats(sleepStats) {
+    function renderSleepStats(sleepStats) {
         return `
             <div class="sleep-stats">
                 <div class="stat-item">
@@ -170,48 +158,32 @@ const Stats = {
                 </div>
             </div>
         `;
-    },
+    }
 
-    /**
-     * Инициализация кнопок периода
-     */
-    initPeriodButtons() {
-        const periodBtns = document.querySelectorAll('.period-btn');
-        periodBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const days = parseInt(this.getAttribute('data-days'));
-                Stats.loadStats(days);
-            });
-        });
-    },
+    async function loadStats(days) {
+        currentPeriod = days;
 
-    /**
-     * Загрузка статистики за период
-     */
-    async loadStats(days) {
-        this.currentPeriod = days;
-
-        // Обновляем активную кнопку
         document.querySelectorAll('.period-btn').forEach(btn => {
             btn.classList.toggle('active', parseInt(btn.getAttribute('data-days')) === days);
         });
 
         try {
-            // Здесь должен быть запрос к API за статистикой за указанный период
-            const response = await HealthAPI.getStats(days);
-            if (response.success) {
-                // Обновляем статистику в HealthModule
-                HealthModule.setState({ stats: response.data });
-                this.renderStats();
-            }
+            // TODO: Запрос к API за статистикой за период
+            showToast('⚠️ Загрузка статистики за период в разработке', 'info');
         } catch (error) {
             console.error('❌ Ошибка загрузки статистики:', error);
-            HealthUI.showToast('Ошибка загрузки статистики', 'error');
+            showToast('❌ Ошибка загрузки статистики', 'error');
         }
     }
-};
 
-// Экспорт компонента
+    // Публичный API
+    return {
+        init,
+        loadStats
+    };
+})();
+
+// Экспорт
 if (typeof window !== 'undefined') {
     window.Stats = Stats;
 }

@@ -1,41 +1,47 @@
-// health-module/js/modals/MoodModal.js
+// js/modals/MoodModal.js
+const MoodModal = (function() {
 
-import { BaseModal } from './BaseModal.js';
-import { MOOD_EMOJIS } from '../utils/constants.js';
+    function show() {
+        const moods = HealthConstants.MOOD_EMOJIS;
 
-/**
- * Модальное окно выбора настроения
- */
-class MoodModal extends BaseModal {
-    show() {
-        const content = `
-            <div class="mood-options">
-                ${Object.entries(MOOD_EMOJIS).map(([mood, emoji]) => `
-                    <button class="mood-btn" onclick="MoodModal.select('${mood}')">
-                        <span class="mood-emoji">${emoji}</span>
-                        <span class="mood-text">${mood}</span>
-                    </button>
-                `).join('')}
-            </div>
-        `;
+        let content = '<div class="mood-options">';
 
-        const modalHtml = this.createModalStructure('😊 Как настроение?', content);
-        super.show(modalHtml);
+        for (const [mood, emoji] of Object.entries(moods)) {
+            content += `
+                <button class="mood-btn" onclick="MoodModal.select('${mood}')">
+                    <span class="mood-emoji">${emoji}</span>
+                    <span class="mood-text">${mood}</span>
+                </button>
+            `;
+        }
+
+        content += '</div>';
+
+        const modalHtml = BaseModal.createModalStructure('😊 Как настроение?', content);
+        BaseModal.show(modalHtml);
     }
 
-    static async select(mood) {
+    async function select(mood) {
+        console.log('😊 Выбрано настроение:', mood);
+
         const today = new Date().toISOString().split('T')[0];
         const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
 
         if (success) {
-            HealthUI.showToast('✅ Настроение сохранено', 'success');
-            ModalManager.close();
-
-            // Обновляем дашборд
-            if (typeof Dashboard !== 'undefined') Dashboard.refresh();
+            showToast('✅ Настроение сохранено', 'success');
+            BaseModal.close();
+            HealthModule.refreshData();
+        } else {
+            showToast('❌ Не удалось сохранить настроение', 'error');
         }
     }
-}
+
+    // Публичный API
+    return {
+        show,
+        select
+    };
+})();
 
 // Экспорт
 if (typeof window !== 'undefined') {

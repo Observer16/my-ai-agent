@@ -1,51 +1,30 @@
-// health-module/js/components/Onboarding.js
+// js/components/Onboarding.js
+const Onboarding = (function() {
 
+    function init() {
+        console.log('🎯 Инициализация компонента Onboarding');
+        initGenderButtons();
+    }
 
-/**
- * Компонент онбординга
- */
-const Onboarding = {
-    /**
-     * Инициализация компонентов онбординга
-     */
-    init() {
-        console.log('🎯 Инициализация компонентов онбординга');
-        this.initGenderButtons();
-    },
+    function initGenderButtons() {
+        const genderOptions = document.querySelectorAll('.gender-option');
 
-    /**
-     * Инициализация кнопок выбора гендера
-     */
-    initGenderButtons() {
-        const genderContainer = document.getElementById('gender-options');
-        if (!genderContainer) return;
+        if (!genderOptions || genderOptions.length === 0) {
+            console.warn('⚠️ Кнопки выбора гендера не найдены');
+            return;
+        }
 
-        // Очищаем контейнер
-        genderContainer.innerHTML = '';
-
-        // Создаем кнопки для каждого варианта гендера
-        GENDER_OPTIONS.forEach(option => {
-            const button = document.createElement('button');
-            button.className = 'gender-option';
-            button.setAttribute('data-gender', option.value);
-
-            button.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 16px;">${option.icon}</div>
-                <div style="font-size: 18px; font-weight: 500; margin-bottom: 8px;">${option.label}</div>
-                <div style="font-size: 14px; color: #666;">${option.description}</div>
-            `;
-
-            button.addEventListener('click', () => this.handleGenderSelect(option.value, button));
-            genderContainer.appendChild(button);
+        genderOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const gender = this.getAttribute('data-gender');
+                handleGenderSelect(gender, this);
+            });
         });
 
-        console.log(`✅ Инициализировано ${GENDER_OPTIONS.length} кнопок онбординга`);
-    },
+        console.log(`✅ Инициализировано ${genderOptions.length} кнопок выбора гендера`);
+    }
 
-    /**
-     * Обработка выбора гендера
-     */
-    async handleGenderSelect(gender, button) {
+    async function handleGenderSelect(gender, button) {
         console.log('👤 Пользователь выбрал гендер:', gender);
 
         // 1. Блокируем ВСЕ кнопки
@@ -87,10 +66,12 @@ const Onboarding = {
                 </div>
             `;
 
-            // 5. Завершаем онбординг
+            // 5. Завершаем онбординг через 1 секунду
             setTimeout(async () => {
                 console.log('🔄 Завершаем онбординг...');
-                await OnboardingManager.complete();
+                if (window.OnboardingManager) {
+                    await OnboardingManager.complete();
+                }
             }, 1000);
 
         } catch (error) {
@@ -105,24 +86,22 @@ const Onboarding = {
             });
 
             button.innerHTML = originalHTML;
-            ErrorHandler.show('Ошибка сохранения. Попробуйте еще раз.', { type: 'error' });
+
+            if (window.ErrorHandler) {
+                ErrorHandler.show('Ошибка сохранения. Попробуйте еще раз.', { type: 'error' });
+            } else {
+                alert('Ошибка сохранения. Попробуйте еще раз.');
+            }
         }
-    },
-
-    /**
-     * Обновление доступных симптомов после выбора гендера
-     */
-    async updateSymptomsAfterGenderSelection() {
-        // После установки гендера загружаем обновленные опции
-        await HealthModule.loadUserOptions();
-
-        // Обновляем UI компоненты, которые зависят от гендера
-        if (typeof Dashboard !== 'undefined') Dashboard.refresh();
-        if (typeof Diary !== 'undefined') Diary.loadToday();
     }
-};
 
-// Экспорт компонента
+    // Публичный API
+    return {
+        init
+    };
+})();
+
+// Экспорт
 if (typeof window !== 'undefined') {
     window.Onboarding = Onboarding;
 }
