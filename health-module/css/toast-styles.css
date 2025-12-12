@@ -7,16 +7,16 @@
 
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px; /* Уменьшили отступ между иконкой и текстом */
 
-    padding: 12px 20px;
-    border-radius: 12px;
+    padding: 8px 16px; /* Уменьшили паддинг по вертикали и горизонтали */
+    border-radius: 10px; /* Слегка уменьшили радиус скругления */
 
     background: rgba(0, 0, 0, 0.85);
     color: white;
 
-    font-size: 14px;
-    font-weight: 50;
+    font-size: 13px; /* Слегка уменьшили размер шрифта */
+    font-weight: 500;
 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
@@ -50,12 +50,12 @@
 }
 
 .toast-icon {
-    font-size: 18px;
+    font-size: 16px; /* Уменьшили размер иконки */
     line-height: 1;
 }
 
 .toast-message {
-    line-height: 1.4;
+    line-height: 1.3; /* Уменьшили межстрочный интервал */
 }
 
 /* Адаптация для мобильных */
@@ -66,10 +66,15 @@
         right: 16px;
         transform: translateX(0) translateY(100px);
         max-width: calc(100% - 32px);
+        padding: 6px 14px; /* Еще меньше для мобильных */
     }
 
     .health-toast.show {
         transform: translateX(0) translateY(0);
+    }
+
+    .toast-icon {
+        font-size: 15px;
     }
 }
 

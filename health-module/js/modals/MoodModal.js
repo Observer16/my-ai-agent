@@ -28,7 +28,7 @@ const MoodModal = (function() {
         const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
 
         if (success) {
-            showToast('✅ Настроение сохранено', 'success');
+            showToast('Настроение сохранено', 'success');
             BaseModal.close();
             HealthModule.refreshData();
         } else {
