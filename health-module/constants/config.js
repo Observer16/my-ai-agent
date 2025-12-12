@@ -1,4 +1,5 @@
 // constants/config.js
+
 const HealthConfig = {
     // Основные настройки
     APP_NAME: 'Модуль здоровья',

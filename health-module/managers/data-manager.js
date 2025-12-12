@@ -1,4 +1,5 @@
 // managers/data-manager.js
+
 const DataManager = (function() {
     // Загрузить все данные пользователя
     async function loadAllUserData() {

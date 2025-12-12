@@ -1,4 +1,5 @@
 // managers/tab-manager.js
+
 const TabManager = (function() {
     let currentTab = 'dashboard';
     const tabHandlers = new Map();
