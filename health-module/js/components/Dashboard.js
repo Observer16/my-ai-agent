@@ -1,7 +1,7 @@
 // health-module/js/components/Dashboard.js
 
-import { getMoodEmoji, getIntensityColor } from '../utils/formatters.js';
-import { formatTime } from '../utils/formatters.js';
+import { getMoodEmoji, getIntensityColor } from 'health-module/js/utils/formatters.js';
+import { formatTime } from 'health-module/js/utils/formatters.js';
 
 /**
  * Компонент дашборда здоровья
