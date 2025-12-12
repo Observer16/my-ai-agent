@@ -1,0 +1,385 @@
+/* css/modals.css */
+
+/**
+ * Стили модальных окон и компонентов форм
+ * Импортировать после components.css
+ */
+
+/* === Базовые стили модальных окон === */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--health-overlay);
+    backdrop-filter: blur(4px);
+    z-index: var(--health-z-modal-backdrop);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 500px; /* Исправлена опечатка */
+    max-height: 80vh;
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    box-shadow: var(--health-shadow-elevated);
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-content.modal-large {
+    max-width: 600px;
+}
+
+.modal-content.modal-small {
+    max-width: 400px;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--health-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--health-text);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--health-text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--health-radius-sm);
+    transition: all var(--health-transition-fast);
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.modal-close:hover:not(:disabled) {
+    background: var(--health-hover-bg);
+    color: var(--health-text);
+}
+
+.modal-close:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Скроллбар модального окна */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* === Стили модального окна симптомов === */
+
+.symptom-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.symptom-modal-content .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.symptom-modal-content label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--health-text);
+    cursor: pointer;
+}
+
+.symptom-modal-content .modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--health-border);
+    border-radius: var(--health-radius-sm);
+    background: var(--health-card-bg);
+    color: var(--health-text);
+    font-size: 14px;
+    transition: all var(--health-transition-fast);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.symptom-modal-content .modal-input:focus {
+    outline: none;
+    border-color: var(--health-primary);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.symptom-modal-content .modal-input:disabled {
+    background: var(--health-disabled-bg);
+    color: var(--health-text-disabled);
+    cursor: not-allowed;
+}
+
+/* Слайдер интенсивности */
+.intensity-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #4CAF50, #FFC107, #F44336);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.intensity-slider:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 4px;
+}
+
+.intensity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--health-primary);
+    cursor: pointer;
+    box-shadow: var(--health-shadow);
+    transition: all var(--health-transition-fast);
+}
+
+.intensity-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: var(--health-shadow-hover);
+}
+
+.intensity-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--health-primary);
+    cursor: pointer;
+    box-shadow: var(--health-shadow);
+    transition: all var(--health-transition-fast);
+}
+
+.intensity-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: var(--health-shadow-hover);
+}
+
+.intensity-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--health-text-light);
+}
+
+.intensity-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--health-primary);
+    color: white;
+    transition: all var(--health-transition-fast);
+}
+
+.intensity-badge.intensity-1 {
+    background: #4CAF50;
+}
+
+.intensity-badge.intensity-2 {
+    background: #8BC34A;
+}
+
+.intensity-badge.intensity-3 {
+    background: #FFC107;
+}
+
+.intensity-badge.intensity-4 {
+    background: #FF9800;
+}
+
+.intensity-badge.intensity-5 {
+    background: #F44336;
+}
+
+/* Действия модального окна */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.modal-actions .health-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Стили для выбора настроения в модальном окне */
+.mood-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.mood-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    background: var(--health-card-bg);
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    font-family: inherit;
+}
+
+.mood-btn:hover:not(:disabled) {
+    border-color: var(--health-primary);
+    background: var(--health-hover-bg);
+}
+
+.mood-btn:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.mood-btn.active {
+    border-color: var(--health-primary);
+    background: rgba(0, 150, 136, 0.1);
+}
+
+.mood-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.mood-text {
+    font-size: 14px;
+    color: var(--health-text);
+}
+
+/* Анимации для модальных окон */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 16px;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 85vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .modal-header {
+        padding: 14px 16px;
+    }
+
+    .modal-header h3 {
+        font-size: 17px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .symptom-modal-content {
+        gap: 12px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions .health-btn {
+        width: 100%;
+    }
+}
+
+/* Специфичные стили для темной темы */
+body.theme-dark .modal-content {
+    background: var(--health-card-bg);
+}
+
+body.theme-dark .modal-header {
+    border-bottom-color: var(--health-border);
+}
+
+body.theme-dark .modal-close:hover:not(:disabled) {
+    background: var(--health-hover-bg);
+}
+
+body.theme-dark .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.theme-dark .modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}

@@ -1,0 +1,776 @@
+/* css/components.css */
+
+/**
+ * Стили компонентов модуля здоровья
+ * Импортировать после base-styles.css
+ */
+
+/* === Главная панель === */
+
+/* Трекер лекарств */
+.medication-tracker {
+    margin-bottom: 24px;
+}
+
+.medication-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.medication-card {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    padding: 16px;
+    border: 2px solid var(--health-border);
+    transition: all var(--health-transition-normal);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.medication-card:focus-within {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.medication-card.taken {
+    border-color: var(--health-success);
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.medication-card:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--health-shadow-hover);
+}
+
+.medication-time {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--health-primary);
+    min-width: 60px;
+}
+
+.medication-info {
+    flex: 1;
+}
+
+.medication-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--health-text);
+}
+
+.medication-dosage,
+.medication-form {
+    font-size: 12px;
+    color: var(--health-text-light);
+}
+
+.medication-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.no-medications {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    border: 2px dashed var(--health-border);
+}
+
+.no-meds-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+/* Грид самочувствия */
+.wellness-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+    .wellness-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.wellness-item {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--health-transition-normal);
+    border: 2px solid transparent;
+    text-decoration: none;
+    color: inherit;
+}
+
+.wellness-item:hover:not(.disabled) {
+    border-color: var(--health-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--health-shadow-hover);
+}
+
+.wellness-item:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.wellness-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.wellness-label {
+    font-size: 12px;
+    color: var(--health-text-light);
+    margin-bottom: 4px;
+}
+
+.wellness-value {
+    font-weight: 600;
+    color: var(--health-text);
+}
+
+/* Сводка */
+.summary-card {
+    background: linear-gradient(135deg, var(--health-primary), var(--health-primary-light));
+    color: white;
+    border-radius: var(--health-radius);
+    padding: 20px;
+    margin-top: 24px;
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.summary-stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* === Аптечка === */
+
+.medications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.medications-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.medications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.medication-item {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    padding: 20px;
+    border: 1px solid var(--health-border);
+    transition: all var(--health-transition-normal);
+}
+
+.medication-item:hover:not(.disabled) {
+    border-color: var(--health-primary);
+    box-shadow: var(--health-shadow-hover);
+}
+
+.medication-item:focus-within {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.medication-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.medication-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 150, 136, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 18px;
+    color: var(--health-primary);
+}
+
+.medication-title h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+}
+
+.medication-subtitle {
+    font-size: 12px;
+    color: var(--health-text-light);
+}
+
+.medication-detail {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.medication-detail strong {
+    color: var(--health-text);
+    margin-right: 4px;
+}
+
+.medication-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--health-border);
+}
+
+/* === Дневник === */
+
+.diary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.calendar-container {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-weekday {
+    text-align: center;
+    padding: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--health-text-light);
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 10px;
+    border-radius: var(--health-radius-sm);
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+}
+
+.calendar-day:hover:not(:disabled) {
+    background: var(--health-hover-bg);
+}
+
+.calendar-day:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.calendar-day.today {
+    background: var(--health-primary);
+    color: white;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.entry-form {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    padding: 20px;
+}
+
+.mood-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mood-option {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    background: var(--health-card-bg);
+    border: 1px solid var(--health-border);
+    border-radius: var(--health-radius-sm);
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    text-align: center;
+    font-family: inherit;
+}
+
+.mood-option:hover:not(:disabled) {
+    border-color: var(--health-primary);
+    background: var(--health-hover-bg);
+}
+
+.mood-option:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.mood-option.active {
+    background: var(--health-primary);
+    color: white;
+    border-color: var(--health-primary);
+}
+
+.symptoms-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    min-height: 40px;
+}
+
+.symptom-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: var(--health-card-bg);
+    border: 2px solid;
+    border-radius: 20px;
+    font-size: 14px;
+    gap: 8px;
+}
+
+.symptom-name {
+    font-weight: 500;
+}
+
+.symptom-intensity {
+    color: var(--health-text-light);
+    letter-spacing: 2px;
+}
+
+.symptom-remove {
+    background: none;
+    border: none;
+    color: var(--health-text-light);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+    font-family: inherit;
+}
+
+.symptom-remove:hover:not(:disabled) {
+    color: var(--health-danger);
+}
+
+.symptom-remove:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.no-symptoms {
+    color: var(--health-text-light);
+    font-style: italic;
+    padding: 20px 0;
+    text-align: center;
+}
+
+/* === Статистика === */
+
+.stats-period {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+}
+
+.stats-period::-webkit-scrollbar {
+    height: 4px;
+}
+
+.stats-period::-webkit-scrollbar-thumb {
+    background: var(--health-border);
+    border-radius: 2px;
+}
+
+.period-btn {
+    padding: 8px 16px;
+    background: var(--health-card-bg);
+    border: 1px solid var(--health-border);
+    border-radius: var(--health-radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--health-transition-fast);
+    font-family: inherit;
+}
+
+.period-btn:hover:not(:disabled) {
+    border-color: var(--health-primary);
+}
+
+.period-btn:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.period-btn.active {
+    background: var(--health-primary);
+    color: white;
+    border-color: var(--health-primary);
+}
+
+.stats-section {
+    background: var(--health-card-bg);
+    border-radius: var(--health-radius);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.stats-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--health-text);
+}
+
+/* Диаграмма приверженности */
+.adherence-chart {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.chart-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.pie-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--health-success) 0% var(--percentage),
+        var(--health-border) var(--percentage) 100%
+    );
+}
+
+.chart-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: var(--health-card-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--health-text);
+    box-shadow: var(--health-shadow);
+}
+
+.chart-legend {
+    flex: 1;
+    min-width: 200px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 12px;
+}
+
+/* Статистика настроений */
+.mood-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mood-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mood-label {
+    flex: 0 0 120px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mood-count {
+    color: var(--health-text-light);
+    font-size: 12px;
+}
+
+.mood-bar {
+    flex: 1;
+    height: 20px;
+    background: var(--health-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.mood-bar-fill {
+    height: 100%;
+    background: var(--health-primary);
+    border-radius: 10px;
+    transition: width 1s ease;
+}
+
+.mood-percentage {
+    flex: 0 0 60px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--health-text);
+}
+
+/* Топ симптомов */
+.top-symptoms {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.top-symptom-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.symptom-name {
+    flex: 0 0 120px;
+    font-weight: 500;
+}
+
+.symptom-bar {
+    flex: 1;
+    height: 16px;
+    background: var(--health-bg);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.symptom-bar-fill {
+    height: 100%;
+    background: var(--health-warning);
+    border-radius: 8px;
+    transition: width 1s ease;
+}
+
+.symptom-count {
+    flex: 0 0 40px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--health-text);
+}
+
+/* Статистика сна */
+.sleep-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 16px;
+    background: rgba(0, 150, 136, 0.05);
+    border-radius: var(--health-radius);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--health-text-light);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--health-primary);
+}
+
+/* === Онбординг (перенесено из health-styles.css) === */
+
+.onboarding-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+.onboarding-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.onboarding-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: var(--health-primary);
+}
+
+.onboarding-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--health-text);
+}
+
+.onboarding-subtitle {
+    color: var(--health-text-light);
+    line-height: 1.5;
+}
+
+.gender-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 480px) {
+    .gender-selection {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gender-option {
+    background: var(--health-card-bg);
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--health-transition-normal);
+}
+
+.gender-option:hover:not(.disabled) {
+    border-color: var(--health-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--health-shadow-hover);
+}
+
+.gender-option:focus-visible {
+    outline: 2px solid var(--health-primary);
+    outline-offset: 2px;
+}
+
+.gender-option.active {
+    border-color: var(--health-primary);
+    background: var(--health-hover-bg);
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 150, 136, 0.3);
+}
+
+.gender-option.loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.gender-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.gender-label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--health-text);
+}
+
+.gender-description {
+    font-size: 12px;
+    color: var(--health-text-light);
+}
+
+.onboarding-note {
+    background: rgba(0, 150, 136, 0.05);
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    border-radius: var(--health-radius);
+    padding: 16px;
+    margin-top: 40px;
+    font-size: 14px;
+    color: var(--health-text);
+}
+
+.onboarding-note strong {
+    color: var(--health-primary);
+}
+
+/* Анимация исчезновения для онбординга */
+.onboarding-fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
