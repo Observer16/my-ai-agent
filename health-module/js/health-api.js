@@ -441,18 +441,28 @@ const HealthAPI = (function() {
     /**
      * Добавить симптомы
      */
-    async function addSymptoms(date, symptoms) {
+    async addSymptoms(entryDate, data) {
+        console.log('📤 HealthAPI.addSymptoms:', { entryDate, data });
+
         try {
-            const response = await fetch(`${BASE_URL}/health/entries/${date}/symptoms`, {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify({ symptoms })
-            });
-            return await handleResponse(response);
+            const response = await this.request(
+                `/health/entries/${entryDate}/symptoms`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                }
+            );
+
+            console.log('✅ Симптомы добавлены:', response);
+            return { success: true, data: response };
+
         } catch (error) {
-            return {
-                success: false,
-                error: error.message
+            console.error('❌ Ошибка добавления симптомов:', error);
+
+            // Пробрасываем детали ошибки
+            throw {
+                message: error.message || 'Ошибка добавления симптомов',
+                response: error.response || null
             };
         }
     }

@@ -186,12 +186,21 @@ const SymptomModal = (function() {
         }
 
         try {
-            // Вызываем API для добавления симптома
-            const result = await HealthAPI.addSymptom(currentDate, {
+            // Формируем данные симптома
+            const symptomData = {
                 category: selectedCategory,
                 name: selectedSymptom,
                 intensity: intensity
+            };
+
+            console.log('📤 Отправка данных симптома:', symptomData);
+
+            // Используем правильный API endpoint
+            const result = await HealthAPI.addSymptoms(currentDate, {
+                symptoms: [symptomData]
             });
+
+            console.log('📥 Результат API:', result);
 
             if (result && result.success) {
                 showToast('✅ Симптом добавлен', 'success');
@@ -209,7 +218,17 @@ const SymptomModal = (function() {
             }
         } catch (error) {
             console.error('❌ Ошибка добавления симптома:', error);
-            showToast('❌ ' + (error.message || 'Ошибка добавления симптома'), 'error');
+
+            // Более детальная обработка ошибок
+            let errorMessage = 'Ошибка добавления симптома';
+
+            if (error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            showToast('❌ ' + errorMessage, 'error');
         }
     }
 

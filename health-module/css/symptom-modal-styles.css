@@ -139,6 +139,11 @@
 }
 
 /* Темная тема */
+body.theme-dark .symptom-modal-content .modal-input option {
+    background: var(--tg-theme-bg-color, #1e1e1e);
+    color: var(--tg-theme-text-color, #ffffff);
+}
+
 body.theme-dark .symptom-modal-content .modal-input {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
