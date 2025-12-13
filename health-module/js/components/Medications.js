@@ -169,10 +169,10 @@ const Medications = (function() {
 
     function showMedicationForm(medicationId = null) {
         console.log('💊 Открытие формы лекарства:', medicationId);
-        if (window.SimpleModalManager) {
-            SimpleModalManager.show('medication-form', { medicationId });
+        if (window.MedicationFormModal) {
+            MedicationFormModal.show({ medicationId });
         } else {
-            showToast('⚠️ Функция в разработке', 'info');
+            showToast('⚠️ Форма не загружена', 'error');
         }
     }
 

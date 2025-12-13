@@ -134,8 +134,11 @@ const SimpleModalManager = (function() {
 
     function showMedicationForm(data = {}) {
         console.log('💊 Открытие формы лекарства:', data);
-        showToast('⚠️ Форма добавления лекарств в разработке', 'info');
-        // TODO: Реализовать полноценную форму
+        if (window.MedicationFormModal) {
+            MedicationFormModal.show(data);
+        } else {
+            showToast('⚠️ Форма не загружена', 'error');
+        }
     }
 
     // Публичный API

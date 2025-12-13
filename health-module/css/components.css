@@ -786,3 +786,169 @@
     text-align: center;
     padding: 16px;
 }
+
+/* === Форма добавления лекарства === */
+
+.medication-form-step {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Индикатор шагов */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+    gap: 12px;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--health-border);
+    color: var(--health-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all var(--health-transition-fast);
+}
+
+.step-item.active .step-number {
+    background: var(--health-primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-item.completed .step-number {
+    background: var(--health-success);
+    color: white;
+}
+
+.step-label {
+    font-size: 12px;
+    color: var(--health-text-light);
+    font-weight: 500;
+}
+
+.step-item.active .step-label {
+    color: var(--health-primary);
+    font-weight: 600;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--health-border);
+    min-width: 40px;
+}
+
+/* Контент формы */
+.form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--health-text);
+    font-size: 14px;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: var(--health-text-light);
+    margin-top: -4px;
+}
+
+/* Выбор типа приёма */
+.intake-type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.intake-type-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    background: var(--health-card-bg);
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    text-align: left;
+    font-family: inherit;
+}
+
+.intake-type-btn:hover:not(.active) {
+    border-color: var(--health-primary-light);
+    background: var(--health-hover-bg);
+}
+
+.intake-type-btn.active {
+    border-color: var(--health-primary);
+    background: rgba(0, 150, 136, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.1);
+}
+
+.intake-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.intake-details {
+    flex: 1;
+}
+
+.intake-label {
+    font-weight: 600;
+    color: var(--health-text);
+    margin-bottom: 2px;
+}
+
+.intake-description {
+    font-size: 12px;
+    color: var(--health-text-light);
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 600px) {
+    .intake-type-selector {
+        grid-template-columns: 1fr;
+    }
+
+    .step-indicator {
+        gap: 8px;
+    }
+
+    .step-line {
+        min-width: 20px;
+    }
+
+    .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+}
