@@ -641,6 +641,7 @@ const HealthAPI = (function() {
         }
     }
 
+
     // Публичные методы
     return {
         getUserInfo,

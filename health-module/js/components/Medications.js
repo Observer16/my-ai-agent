@@ -152,7 +152,7 @@ const Medications = (function() {
         }
 
         try {
-            const response = await HealthAPI.deleteMedication(id);
+            const response = await HealthAPI.deactivateMedication(id);
 
             if (response && response.success) {
                 showToast('✅ Лекарство удалено', 'success');
