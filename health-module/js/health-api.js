@@ -364,6 +364,100 @@ const HealthAPI = (function() {
     }
 
     /**
+     * Обновить остатки лекарства
+     */
+    async function updateMedicationStock(medicationId, quantity, note = null) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/${medicationId}/stock`, {
+                method: 'PATCH',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    quantity_available: quantity,
+                    note: note
+                })
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить лекарства с низким остатком
+     */
+    async function getLowStockMedications() {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/low-stock/list`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Проверить остатки и отправить уведомления
+     */
+    async function checkLowStock() {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/check-low-stock`, {
+                method: 'POST',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Деактивировать лекарство
+     */
+    async function deactivateMedication(medicationId) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/${medicationId}/deactivate`, {
+                method: 'POST',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Получить конкретное лекарство
+     */
+    async function getMedication(medicationId) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/${medicationId}`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Получить запись по дате
      */
     async function getEntryByDate(date) {
@@ -565,7 +659,12 @@ const HealthAPI = (function() {
         addSexualActivity,
         getHealthSummary,
         getHealthStatistics,
-        createMedication
+        createMedication,
+        updateMedicationStock,
+        getLowStockMedications,
+        checkLowStock,
+        deactivateMedication,
+        getMedication
     };
 })();
 

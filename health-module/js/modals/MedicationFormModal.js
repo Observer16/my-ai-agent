@@ -14,7 +14,7 @@ const MedicationFormModal = (function() {
         start_date: new Date().toISOString().split('T')[0],
         end_date: null,
 
-        // Шаг 3 (пока не используется)
+        // Шаг 3
         quantity_available: 0,
         quantity_threshold: 5,
         quantity_unit: 'таблетки',
@@ -24,10 +24,19 @@ const MedicationFormModal = (function() {
     };
 
     // Константы
-    const TOTAL_STEPS = 2; // Пока только 2 шага
+    const TOTAL_STEPS = 3; // Теперь 3 шага
     const FORM_OPTIONS = [
         'таблетки', 'капсулы', 'сироп', 'раствор',
         'мазь', 'крем', 'капли', 'спрей', 'порошок', 'другое'
+    ];
+
+    const QUANTITY_UNITS = [
+        { value: 'таблетки', label: 'Таблетки', icon: '💊' },
+        { value: 'капсулы', label: 'Капсулы', icon: '💊' },
+        { value: 'мл', label: 'Миллилитры (мл)', icon: '💧' },
+        { value: 'капли', label: 'Капли', icon: '💧' },
+        { value: 'дозы', label: 'Дозы', icon: '💉' },
+        { value: 'штуки', label: 'Штуки', icon: '📦' }
     ];
 
     function show(data = {}) {
@@ -85,6 +94,9 @@ const MedicationFormModal = (function() {
             case 2:
                 content = renderStep2();
                 break;
+            case 3:
+                content = renderStep3();
+                break;
             default:
                 content = '<p>Неизвестный шаг</p>';
         }
@@ -97,21 +109,41 @@ const MedicationFormModal = (function() {
         initStepHandlers(step);
     }
 
+    function renderStepIndicator(currentStep) {
+        return `
+            <div class="step-indicator">
+                ${renderStepItem(1, 'Основное', currentStep)}
+                <div class="step-line"></div>
+                ${renderStepItem(2, 'Тип приёма', currentStep)}
+                <div class="step-line"></div>
+                ${renderStepItem(3, 'Остатки', currentStep)}
+            </div>
+        `;
+    }
+
+    function renderStepItem(stepNum, label, currentStep) {
+        let className = 'step-item';
+        let numberContent = stepNum;
+
+        if (stepNum < currentStep) {
+            className += ' completed';
+            numberContent = '✓';
+        } else if (stepNum === currentStep) {
+            className += ' active';
+        }
+
+        return `
+            <div class="${className}">
+                <div class="step-number">${numberContent}</div>
+                <div class="step-label">${label}</div>
+            </div>
+        `;
+    }
+
     function renderStep1() {
         return `
             <div class="medication-form-step">
-                <!-- Индикатор шагов -->
-                <div class="step-indicator">
-                    <div class="step-item active">
-                        <div class="step-number">1</div>
-                        <div class="step-label">Основное</div>
-                    </div>
-                    <div class="step-line"></div>
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <div class="step-label">Тип приёма</div>
-                    </div>
-                </div>
+                ${renderStepIndicator(1)}
 
                 <!-- Форма -->
                 <div class="form-content">
@@ -183,18 +215,7 @@ const MedicationFormModal = (function() {
 
         return `
             <div class="medication-form-step">
-                <!-- Индикатор шагов -->
-                <div class="step-indicator">
-                    <div class="step-item completed">
-                        <div class="step-number">✓</div>
-                        <div class="step-label">Основное</div>
-                    </div>
-                    <div class="step-line"></div>
-                    <div class="step-item active">
-                        <div class="step-number">2</div>
-                        <div class="step-label">Тип приёма</div>
-                    </div>
-                </div>
+                ${renderStepIndicator(2)}
 
                 <!-- Форма -->
                 <div class="form-content">
@@ -257,6 +278,127 @@ const MedicationFormModal = (function() {
                     <button class="health-btn btn-secondary" onclick="MedicationFormModal.prevStep()">
                         ← Назад
                     </button>
+                    <button class="health-btn btn-primary" onclick="MedicationFormModal.nextStep()">
+                        Далее →
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderStep3() {
+        const selectedUnit = formData.quantity_unit;
+        const unitInfo = QUANTITY_UNITS.find(u => u.value === selectedUnit) || QUANTITY_UNITS[0];
+
+        return `
+            <div class="medication-form-step">
+                ${renderStepIndicator(3)}
+
+                <!-- Форма -->
+                <div class="form-content">
+                    <div class="form-group">
+                        <label for="medication-quantity-unit">
+                            Единица измерения <span style="color: var(--health-danger);">*</span>
+                        </label>
+                        <div class="quantity-unit-selector">
+                            ${QUANTITY_UNITS.map(unit => `
+                                <button
+                                    class="quantity-unit-btn ${selectedUnit === unit.value ? 'active' : ''}"
+                                    onclick="MedicationFormModal.selectQuantityUnit('${unit.value}')"
+                                    type="button"
+                                >
+                                    <span class="unit-icon">${unit.icon}</span>
+                                    <span class="unit-label">${unit.label}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medication-quantity-available">
+                            Количество в наличии
+                        </label>
+                        <div class="quantity-input-group">
+                            <button
+                                type="button"
+                                class="quantity-btn"
+                                onclick="MedicationFormModal.changeQuantity('available', -1)"
+                            >
+                                −
+                            </button>
+                            <input
+                                type="number"
+                                id="medication-quantity-available"
+                                class="modal-input quantity-input"
+                                value="${formData.quantity_available}"
+                                min="0"
+                                step="1"
+                            >
+                            <button
+                                type="button"
+                                class="quantity-btn"
+                                onclick="MedicationFormModal.changeQuantity('available', 1)"
+                            >
+                                +
+                            </button>
+                            <span class="quantity-unit-label">${unitInfo.label}</span>
+                        </div>
+                        <div class="form-hint">Сколько у вас есть сейчас</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medication-quantity-threshold">
+                            Уведомить о покупке когда остаётся
+                        </label>
+                        <div class="quantity-input-group">
+                            <button
+                                type="button"
+                                class="quantity-btn"
+                                onclick="MedicationFormModal.changeQuantity('threshold', -1)"
+                            >
+                                −
+                            </button>
+                            <input
+                                type="number"
+                                id="medication-quantity-threshold"
+                                class="modal-input quantity-input"
+                                value="${formData.quantity_threshold}"
+                                min="0"
+                                step="1"
+                            >
+                            <button
+                                type="button"
+                                class="quantity-btn"
+                                onclick="MedicationFormModal.changeQuantity('threshold', 1)"
+                            >
+                                +
+                            </button>
+                            <span class="quantity-unit-label">${unitInfo.label}</span>
+                        </div>
+                        <div class="form-hint">
+                            ${formData.intake_type === 'постоянно'
+                                ? '💡 Вы получите уведомление когда остаток будет ≤ этого значения'
+                                : '⚠️ Уведомления работают только для постоянных лекарств'}
+                        </div>
+                    </div>
+
+                    ${formData.intake_type === 'постоянно' && formData.quantity_available > 0 ? `
+                        <div class="stock-preview">
+                            <div class="stock-preview-header">
+                                <span>📊 Прогноз</span>
+                            </div>
+                            <div class="stock-preview-body">
+                                ${renderStockPreview()}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Действия -->
+                <div class="modal-actions">
+                    <button class="health-btn btn-secondary" onclick="MedicationFormModal.prevStep()">
+                        ← Назад
+                    </button>
                     <button class="health-btn btn-primary" onclick="MedicationFormModal.save()">
                         💾 Сохранить
                     </button>
@@ -265,11 +407,48 @@ const MedicationFormModal = (function() {
         `;
     }
 
+    function renderStockPreview() {
+        const { quantity_available, quantity_threshold } = formData;
+        const diff = quantity_available - quantity_threshold;
+
+        if (diff > 0) {
+            return `
+                <div class="stock-status stock-ok">
+                    <span class="stock-icon">✅</span>
+                    <div class="stock-text">
+                        <div class="stock-main">Запас в норме</div>
+                        <div class="stock-detail">Осталось ${diff} до уведомления</div>
+                    </div>
+                </div>
+            `;
+        } else if (diff === 0) {
+            return `
+                <div class="stock-status stock-warning">
+                    <span class="stock-icon">⚠️</span>
+                    <div class="stock-text">
+                        <div class="stock-main">Пора пополнить</div>
+                        <div class="stock-detail">Достигнут порог уведомления</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="stock-status stock-low">
+                    <span class="stock-icon">🔴</span>
+                    <div class="stock-text">
+                        <div class="stock-main">Низкий остаток!</div>
+                        <div class="stock-detail">Ниже порога на ${Math.abs(diff)}</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
     function initStepHandlers(step) {
         // Автофокус на первое поле
         setTimeout(() => {
             const firstInput = document.querySelector('.modal-input');
-            if (firstInput) {
+            if (firstInput && step === 1) {
                 firstInput.focus();
             }
         }, 100);
@@ -325,6 +504,23 @@ const MedicationFormModal = (function() {
                 }
                 return true;
 
+            case 3:
+                // Валидация остатков
+                const available = parseInt(document.getElementById('medication-quantity-available')?.value || 0);
+                const threshold = parseInt(document.getElementById('medication-quantity-threshold')?.value || 0);
+
+                if (available < 0) {
+                    showToast('⚠️ Количество не может быть отрицательным', 'warning');
+                    return false;
+                }
+
+                if (threshold < 0) {
+                    showToast('⚠️ Порог не может быть отрицательным', 'warning');
+                    return false;
+                }
+
+                return true;
+
             default:
                 return true;
         }
@@ -347,6 +543,11 @@ const MedicationFormModal = (function() {
                     formData.end_date = null;
                 }
                 break;
+
+            case 3:
+                formData.quantity_available = parseInt(document.getElementById('medication-quantity-available')?.value || 0);
+                formData.quantity_threshold = parseInt(document.getElementById('medication-quantity-threshold')?.value || 5);
+                break;
         }
 
         console.log('📝 Данные шага сохранены:', formData);
@@ -355,6 +556,38 @@ const MedicationFormModal = (function() {
     function selectIntakeType(type) {
         formData.intake_type = type;
         renderStep(2); // Перерисовываем шаг 2
+    }
+
+    function selectQuantityUnit(unit) {
+        formData.quantity_unit = unit;
+        renderStep(3); // Перерисовываем шаг 3
+    }
+
+    function changeQuantity(type, delta) {
+        const inputId = type === 'available'
+            ? 'medication-quantity-available'
+            : 'medication-quantity-threshold';
+
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const currentValue = parseInt(input.value || 0);
+        const newValue = Math.max(0, currentValue + delta);
+
+        input.value = newValue;
+
+        // Обновляем formData
+        if (type === 'available') {
+            formData.quantity_available = newValue;
+        } else {
+            formData.quantity_threshold = newValue;
+        }
+
+        // Перерисовываем превью если есть
+        const previewElement = document.querySelector('.stock-preview-body');
+        if (previewElement) {
+            previewElement.innerHTML = renderStockPreview();
+        }
     }
 
     async function save() {
@@ -378,12 +611,10 @@ const MedicationFormModal = (function() {
                 intake_type: formData.intake_type,
                 start_date: formData.start_date || null,
                 end_date: formData.end_date || null,
-
-                // Пока дефолтные значения (Модули 3-4)
-                quantity_available: 0,
-                quantity_threshold: 5,
+                quantity_available: formData.quantity_available,
+                quantity_threshold: formData.quantity_threshold,
                 quantity_unit: formData.quantity_unit,
-                schedules: []
+                schedules: [] // Пока пустой массив (Модуль 4)
             };
 
             console.log('📤 Отправка на сервер:', medicationData);
@@ -424,6 +655,8 @@ const MedicationFormModal = (function() {
         nextStep,
         prevStep,
         selectIntakeType,
+        selectQuantityUnit,
+        changeQuantity,
         save
     };
 })();
@@ -433,4 +666,4 @@ if (typeof window !== 'undefined') {
     window.MedicationFormModal = MedicationFormModal;
 }
 
-console.log('✅ MedicationFormModal загружен');
+console.log('✅ MedicationFormModal загружен (3 шага)');

@@ -952,3 +952,182 @@
         font-size: 14px;
     }
 }
+
+/* Выбор единицы измерения */
+.quantity-unit-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.quantity-unit-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    background: var(--health-card-bg);
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.quantity-unit-btn:hover:not(.active) {
+    border-color: var(--health-primary-light);
+    background: var(--health-hover-bg);
+    transform: translateY(-2px);
+}
+
+.quantity-unit-btn.active {
+    border-color: var(--health-primary);
+    background: rgba(0, 150, 136, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.1);
+}
+
+.unit-icon {
+    font-size: 24px;
+}
+
+.unit-label {
+    font-weight: 500;
+    color: var(--health-text);
+    text-align: center;
+}
+
+.quantity-unit-btn.active .unit-label {
+    color: var(--health-primary);
+    font-weight: 600;
+}
+
+/* Группа ввода количества */
+.quantity-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quantity-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    background: var(--health-card-bg);
+    color: var(--health-primary);
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.quantity-btn:hover {
+    background: var(--health-primary);
+    color: white;
+    border-color: var(--health-primary);
+}
+
+.quantity-btn:active {
+    transform: scale(0.95);
+}
+
+.quantity-input {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.quantity-unit-label {
+    color: var(--health-text-light);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Превью остатков */
+.stock-preview {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--health-hover-bg);
+    border-radius: var(--health-radius);
+    border: 1px solid var(--health-border);
+}
+
+.stock-preview-header {
+    font-weight: 600;
+    color: var(--health-text);
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.stock-preview-body {
+    /* Контейнер для динамического контента */
+}
+
+.stock-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: calc(var(--health-radius) - 2px);
+}
+
+.stock-status.stock-ok {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.stock-status.stock-warning {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.stock-status.stock-low {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.stock-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.stock-text {
+    flex: 1;
+}
+
+.stock-main {
+    font-weight: 600;
+    color: var(--health-text);
+    margin-bottom: 2px;
+}
+
+.stock-detail {
+    font-size: 13px;
+    color: var(--health-text-light);
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 600px) {
+    .quantity-unit-selector {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .quantity-input-group {
+        flex-wrap: wrap;
+    }
+
+    .quantity-unit-label {
+        width: 100%;
+        text-align: center;
+        order: 3;
+    }
+}
