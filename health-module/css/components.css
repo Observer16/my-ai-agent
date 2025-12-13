@@ -1131,3 +1131,253 @@
         order: 3;
     }
 }
+
+/* Список расписаний */
+.schedules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.empty-schedules {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--health-text-light);
+}
+
+.empty-icon {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.empty-hint {
+    font-size: 13px;
+}
+
+/* Элемент расписания */
+.schedule-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--health-card-bg);
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    transition: all var(--health-transition-fast);
+}
+
+.schedule-item:hover {
+    border-color: var(--health-primary-light);
+    background: var(--health-hover-bg);
+}
+
+.schedule-item-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.schedule-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--health-primary);
+}
+
+.time-icon {
+    font-size: 18px;
+}
+
+.time-value {
+    font-size: 16px;
+}
+
+.schedule-days {
+    flex: 1;
+    font-size: 14px;
+    color: var(--health-text);
+}
+
+.schedule-dosage {
+    font-size: 13px;
+    color: var(--health-text-light);
+    padding: 4px 8px;
+    background: rgba(0, 150, 136, 0.1);
+    border-radius: 4px;
+}
+
+.schedule-item-delete {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--health-danger);
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: var(--health-radius);
+    transition: all var(--health-transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.schedule-item-delete:hover {
+    background: rgba(244, 67, 54, 0.1);
+}
+
+/* Кнопка добавления расписания */
+.add-schedule-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Форма добавления расписания */
+.schedule-form {
+    margin-top: 16px;
+    padding: 20px;
+    background: var(--health-hover-bg);
+    border: 2px solid var(--health-primary-light);
+    border-radius: var(--health-radius);
+}
+
+.schedule-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: var(--health-text);
+}
+
+.close-schedule-form-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--health-text-light);
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--health-transition-fast);
+}
+
+.close-schedule-form-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--health-text);
+}
+
+/* Выбор дней недели */
+.days-selector {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.day-btn {
+    padding: 10px 4px;
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    background: var(--health-card-bg);
+    color: var(--health-text);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    font-family: inherit;
+}
+
+.day-btn:hover:not(.active) {
+    border-color: var(--health-primary-light);
+    background: var(--health-hover-bg);
+}
+
+.day-btn.active {
+    border-color: var(--health-primary);
+    background: var(--health-primary);
+    color: white;
+}
+
+/* Быстрый выбор дней */
+.quick-select-days {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.quick-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--health-border);
+    border-radius: calc(var(--health-radius) / 2);
+    background: var(--health-card-bg);
+    color: var(--health-text-light);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    font-family: inherit;
+}
+
+.quick-btn:hover {
+    border-color: var(--health-primary);
+    color: var(--health-primary);
+    background: rgba(0, 150, 136, 0.05);
+}
+
+/* Время и дозировка */
+.schedule-time-dosage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 600px) {
+    .schedule-item-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .schedule-time {
+        width: 100%;
+    }
+
+    .schedule-days {
+        width: 100%;
+    }
+
+    .schedule-dosage {
+        align-self: flex-start;
+    }
+
+    .days-selector {
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .schedule-time-dosage {
+        grid-template-columns: 1fr;
+    }
+}
