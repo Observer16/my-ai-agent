@@ -5,6 +5,7 @@ const Dashboard = (function() {
         initMedicationTracker();
         initWellnessGrid();
         renderSummary();
+        setupEventDelegation();
     }
 
     function initMedicationTracker() {
@@ -31,7 +32,8 @@ const Dashboard = (function() {
         let html = '<div class="medication-list">';
 
         medications.forEach(med => {
-            const medicationId = med.medication_id || med.id || '';
+            // ВАЖНО: Используем medication_id напрямую из API ответа
+            const medicationId = med.medication_id || '';
             const scheduleId = med.schedule_id || '';
             const time = HealthFormatters.formatTime(med.time_of_day);
             const status = med.status || 'pending';
@@ -43,8 +45,19 @@ const Dashboard = (function() {
             const dosage = med.dosage || '';
             const form = med.form || '';
 
+            // Отладочная информация
+            console.log('📝 Рендерим лекарство:', {
+                name: medicationName,
+                medicationId: medicationId,
+                scheduleId: scheduleId,
+                hasMedId: !!medicationId && medicationId.length === 36,
+                hasScheduleId: !!scheduleId
+            });
+
             html += `
-                <div class="medication-card ${isTaken ? 'taken' : ''}" data-medication-id="${medicationId}">
+                <div class="medication-card ${isTaken ? 'taken' : ''}"
+                     data-medication-id="${medicationId}"
+                     data-schedule-id="${scheduleId}">
                     <div class="medication-time">${time}</div>
                     <div class="medication-details">
                         <div class="medication-info">
@@ -57,10 +70,10 @@ const Dashboard = (function() {
                                 `<button class="health-btn btn-success" disabled>
                                     ✅ Принято ${takenTime}
                                 </button>` :
-                                `<button class="health-btn btn-primary" onclick="logMedication('${medicationId}', '${scheduleId}')">
+                                `<button class="health-btn btn-primary" data-action="take">
                                     ✅ Принять
                                 </button>
-                                <button class="health-btn btn-secondary" onclick="skipMedication('${medicationId}', '${scheduleId}')">
+                                <button class="health-btn btn-secondary" data-action="skip">
                                     ⏭ Пропустить
                                 </button>`
                             }
@@ -72,6 +85,39 @@ const Dashboard = (function() {
 
         html += '</div>';
         return html;
+    }
+
+    function setupEventDelegation() {
+        // Удаляем старые обработчики если есть
+        const container = document.getElementById('medication-tracker');
+        if (!container) return;
+
+        // Используем делегирование событий для кнопок приема лекарств
+        container.addEventListener('click', function(e) {
+            const button = e.target.closest('.health-btn[data-action]');
+            if (!button) return;
+
+            const medicationCard = button.closest('.medication-card');
+            if (!medicationCard) return;
+
+            const medicationId = medicationCard.dataset.medicationId;
+            const scheduleId = medicationCard.dataset.scheduleId;
+
+            if (!medicationId) {
+                console.error('❌ Не найден medicationId');
+                showToast('❌ Ошибка: не указано лекарство', 'error');
+                return;
+            }
+
+            const action = button.dataset.action;
+            if (action === 'take') {
+                e.preventDefault();
+                logMedication(medicationId, scheduleId);
+            } else if (action === 'skip') {
+                e.preventDefault();
+                skipMedication(medicationId, scheduleId);
+            }
+        });
     }
 
     function initWellnessGrid() {
@@ -88,25 +134,25 @@ const Dashboard = (function() {
 
         return `
             <div class="wellness-grid">
-                <div class="wellness-item" onclick="showMoodPicker()">
+                <div class="wellness-item" onclick="Dashboard.showMoodPicker()">
                     <div class="wellness-icon">${HealthFormatters.getMoodEmoji(todayEntry?.mood)}</div>
                     <div class="wellness-label">Настроение</div>
                     <div class="wellness-value">${todayEntry?.mood || 'Добавить'}</div>
                 </div>
 
-                <div class="wellness-item" onclick="showSleepInput()">
+                <div class="wellness-item" onclick="Dashboard.showSleepInput()">
                     <div class="wellness-icon">🌙</div>
                     <div class="wellness-label">Сон</div>
                     <div class="wellness-value">${todayEntry?.sleep_hours ? `${todayEntry.sleep_hours} ч` : 'Добавить'}</div>
                 </div>
 
-                <div class="wellness-item" onclick="showSymptomPicker()">
+                <div class="wellness-item" onclick="Dashboard.showSymptomPicker()">
                     <div class="wellness-icon">🤕</div>
                     <div class="wellness-label">Симптомы</div>
                     <div class="wellness-value">${symptomsCount > 0 ? `${symptomsCount} шт` : 'Добавить'}</div>
                 </div>
 
-                <div class="wellness-item" onclick="showSexualActivityPicker()">
+                <div class="wellness-item" onclick="Dashboard.showSexualActivityPicker()">
                     <div class="wellness-icon">🔒</div>
                     <div class="wellness-label">Интимность</div>
                     <div class="wellness-value">${todayEntry?.sexual_activity ? 'Указано' : 'Добавить'}</div>
@@ -215,13 +261,31 @@ const Dashboard = (function() {
     }
 
     async function logMedication(medicationId, scheduleId) {
-        console.log('💊 Отметка приема лекарства:', { medicationId, scheduleId });
+        console.log('💊 Отметка приема лекарства:', {
+            medicationId,
+            scheduleId,
+            isValidId: medicationId && medicationId.length === 36
+        });
+
+        // Валидация medicationId
+        if (!medicationId || medicationId.trim() === '') {
+            console.error('❌ Ошибка: medicationId пустой!', medicationId);
+            showToast('❌ Ошибка: не указано лекарство', 'error');
+            return;
+        }
+
+        // Проверяем формат UUID (предупреждение, но не блокируем)
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidPattern.test(medicationId)) {
+            console.warn('⚠️ medicationId не похож на UUID:', medicationId);
+        }
 
         try {
             const result = await HealthAPI.logMedicationIntake({
                 medication_id: medicationId,
-                schedule_id: scheduleId,
-                status: 'taken'
+                schedule_id: scheduleId || null,
+                status: 'taken',
+                notes: ''
             });
 
             if (result.success) {
@@ -229,22 +293,31 @@ const Dashboard = (function() {
                 await HealthModule.refreshData();
                 init();
             } else {
-                showToast('❌ Ошибка отметки', 'error');
+                console.error('❌ Ошибка API:', result);
+                showToast(`❌ Ошибка: ${result.error || 'не удалось отметить прием'}`, 'error');
             }
         } catch (error) {
             console.error('❌ Ошибка логирования:', error);
-            showToast('❌ Ошибка отметки', 'error');
+            showToast('❌ Ошибка сервера', 'error');
         }
     }
 
     async function skipMedication(medicationId, scheduleId) {
         console.log('⏭ Пропуск лекарства:', { medicationId, scheduleId });
 
+        // Валидация medicationId
+        if (!medicationId || medicationId.trim() === '') {
+            console.error('❌ Ошибка: medicationId пустой!', medicationId);
+            showToast('❌ Ошибка: не указано лекарство', 'error');
+            return;
+        }
+
         try {
             const result = await HealthAPI.logMedicationIntake({
                 medication_id: medicationId,
-                schedule_id: scheduleId,
-                status: 'skipped'
+                schedule_id: scheduleId || null,
+                status: 'skipped',
+                notes: ''
             });
 
             if (result.success) {
@@ -252,11 +325,12 @@ const Dashboard = (function() {
                 await HealthModule.refreshData();
                 init();
             } else {
-                showToast('❌ Ошибка отметки', 'error');
+                console.error('❌ Ошибка API:', result);
+                showToast(`❌ Ошибка: ${result.error || 'не удалось отметить пропуск'}`, 'error');
             }
         } catch (error) {
             console.error('❌ Ошибка логирования:', error);
-            showToast('❌ Ошибка отметки', 'error');
+            showToast('❌ Ошибка сервера', 'error');
         }
     }
 
@@ -282,10 +356,8 @@ if (typeof window !== 'undefined') {
     window.Dashboard = Dashboard;
 }
 
-// Глобальные функции для onclick
+// Глобальные функции для онкликов в wellness grid
 window.showMoodPicker = () => Dashboard.showMoodPicker();
 window.showSleepInput = () => Dashboard.showSleepInput();
 window.showSymptomPicker = () => Dashboard.showSymptomPicker();
 window.showSexualActivityPicker = () => Dashboard.showSexualActivityPicker();
-window.logMedication = (id, scheduleId) => Dashboard.logMedication(id, scheduleId);
-window.skipMedication = (id, scheduleId) => Dashboard.skipMedication(id, scheduleId);
