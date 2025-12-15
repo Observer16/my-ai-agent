@@ -35,10 +35,46 @@
             <div class="health-card-icon">💊</div>
             <h3 class="health-card-title">План на сегодня</h3>
         </div>
+
         <div id="medication-tracker">
-            <!-- Заполняется динамически -->
-            <div class="loading-spinner"></div>
-            <p>Загрузка лекарств...</p>
+            <!-- Заголовок трекера -->
+            <h3 style="margin-bottom: 16px; color: var(--health-text);">Лекарства на сегодня</h3>
+
+            <!-- Контейнер для лекарств с правильной структурой -->
+            <div id="today-medications">
+                <!-- Лекарства загружаются динамически с правильной структурой -->
+            </div>
+
+            <!-- Состояние "нет лекарств" -->
+            <div id="no-medications" class="no-medications" style="display: none;">
+                <div class="no-meds-icon">💊</div>
+                <h3>На сегодня лекарств нет</h3>
+                <p>Добавьте лекарства в разделе "Аптечка"</p>
+                <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
+                    Перейти в аптечку
+                </button>
+            </div>
+        </div>
+
+        <!-- Заметки -->
+        <div class="form-section" style="margin-top: 20px;">
+            <label for="notes-input">Заметки на сегодня</label>
+            <textarea
+                id="notes-input"
+                rows="3"
+                placeholder="Добавьте заметки о самочувствии..."
+                style="width: 100%; box-sizing: border-box;"
+            ></textarea>
+        </div>
+
+        <!-- Кнопка сохранения -->
+        <div class="form-actions" style="margin-top: 20px;">
+            <button class="health-btn btn-primary" onclick="saveEntry()">
+                💾 Сохранить все данные
+            </button>
+            <button class="health-btn btn-secondary refresh-dashboard-btn">
+                🔄 Обновить
+            </button>
         </div>
     </div>
 
