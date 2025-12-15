@@ -32,11 +32,8 @@ const Dashboard = (function() {
         let html = '<div class="medication-list">';
 
         medications.forEach((med, index) => {
-            // ДИАГНОСТИКА: посмотрим полную структуру данных
-            console.log(`💊 Лекарство ${index + 1}:`, med);
-
-            // Извлекаем данные - ВАЖНО: используем те же ключи, что в API ответе
-            const medicationId = med.medication_id || med.id || '';
+            // Используем данные В ТОМ ЖЕ ФОРМАТЕ, что приходят от API
+            const medicationId = med.medication_id || '';
             const scheduleId = med.schedule_id || '';
             const time = HealthFormatters.formatTime(med.time_of_day);
             const status = med.status || 'pending';
@@ -44,24 +41,23 @@ const Dashboard = (function() {
             const takenTime = med.taken_time ?
                 `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : '';
 
-            // Используем реальные данные из API
-            const medicationName = med.medication_name || med.name || 'Лекарство';
+            // Берем данные напрямую из API формата
+            const medicationName = med.medication_name || 'Лекарство';
             const dosage = med.dosage || 'Не указана';
             const form = med.form || 'Не указана';
 
-            console.log(`📝 Извлеченные данные ${index + 1}:`, {
+            console.log(`📝 API данные для лекарства ${index + 1}:`, {
                 medicationId,
                 medicationName,
                 dosage,
                 form,
                 time,
-                status,
-                scheduleId
+                status
             });
 
-            // Создаем безопасные строки для data-атрибутов
-            const safeMedicationId = medicationId ? String(medicationId).replace(/"/g, '&quot;') : '';
-            const safeScheduleId = scheduleId ? String(scheduleId).replace(/"/g, '&quot;') : '';
+            // Используем ID напрямую - не меняем формат
+            const safeMedicationId = medicationId || '';
+            const safeScheduleId = scheduleId || '';
 
             html += `
                 <div class="medication-card ${isTaken ? 'taken' : ''}"
@@ -94,18 +90,6 @@ const Dashboard = (function() {
         });
 
         html += '</div>';
-
-        // После рендеринга проверяем data-атрибуты
-        setTimeout(() => {
-            document.querySelectorAll('.medication-card').forEach((card, i) => {
-                console.log(`🔍 Проверка карточки ${i + 1}:`, {
-                    dataset: card.dataset,
-                    attributes: Array.from(card.attributes).filter(attr => attr.name.startsWith('data-')),
-                    innerHTML: card.innerHTML.substring(0, 200)
-                });
-            });
-        }, 100);
-
         return html;
     }
 

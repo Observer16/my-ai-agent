@@ -223,54 +223,42 @@ const HealthAPI = (function() {
 
     /**
      * Получить лекарства на сегодня
-     * Бэк возвращает: [{ medication: {...}, schedule: {...}, status: "..." }]
      */
-    async function getTodayMedications() {
+        async function getTodayMedications() {
         try {
+            console.log('📡 Запрос лекарств на сегодня...');
+
             const response = await fetch(`${BASE_URL}/health/medications/logs/today`, {
                 method: 'GET',
                 headers: getHeaders()
             });
+
             const result = await handleResponse(response);
 
-            // Нормализуем ответ от бэка
+            console.log('💊 Ответ от сервера:', {
+                success: result.success,
+                dataLength: result.data?.length || 0,
+                sampleData: result.data?.[0]
+            });
+
+            // ВАЖНО: Данные уже в правильном формате, не нормализуем!
             if (result.success && result.data) {
-                const rawData = Array.isArray(result.data) ? result.data : [];
+                // Просто возвращаем как есть
+                const medications = Array.isArray(result.data) ? result.data : [];
 
-                // Преобразуем вложенную структуру в плоскую для UI
-                const normalized = rawData.map(item => ({
-                    // ID лекарства
-                    medication_id: item.medication?.id || item.id,
-
-                    // Основная информация
-                    medication_name: item.medication?.name || item.name || 'Лекарство',
-                    dosage: item.medication?.dosage || item.dosage || '',
-                    form: item.medication?.form || item.form || '',
-                    instructions: item.medication?.instructions || item.instructions || '',
-
-                    // Расписание
-                    time_of_day: item.schedule?.time_of_day || item.time_of_day || '00:00:00',
-                    reminder_minutes: item.schedule?.reminder_minutes || item.reminder_minutes || 10,
-                    days_of_week: item.schedule?.days_of_week || item.days_of_week || [0,1,2,3,4,5,6],
-
-                    // Статус приема
-                    status: item.status || 'pending',
-                    taken_time: item.taken_time || null,
-
-                    // Служебные ID
-                    schedule_id: item.schedule?.id || item.schedule_id || null,
-                    log_id: item.log_id || null
-                }));
-
-                if (HealthConfig.DEBUG) {
-                    console.log('💊 Нормализованные лекарства:', {
-                        raw: rawData.length,
-                        normalized: normalized.length,
-                        sample: normalized[0]
+                // Проверяем структуру
+                if (medications.length > 0) {
+                    const firstMed = medications[0];
+                    console.log('🔍 Структура данных от сервера:', {
+                        keys: Object.keys(firstMed),
+                        medication_id: firstMed.medication_id,
+                        medication_name: firstMed.medication_name,
+                        hasMedicationId: !!firstMed.medication_id,
+                        isFlatStructure: !firstMed.medication // если нет вложенного medication объекта
                     });
                 }
 
-                return { ...result, data: normalized };
+                return { ...result, data: medications };
             }
 
             return { ...result, data: [] };
