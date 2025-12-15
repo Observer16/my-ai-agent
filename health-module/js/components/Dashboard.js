@@ -46,23 +46,25 @@ const Dashboard = (function() {
             html += `
                 <div class="medication-card ${isTaken ? 'taken' : ''}" data-medication-id="${medicationId}">
                     <div class="medication-time">${time}</div>
-                    <div class="medication-info">
-                        <div class="medication-name">${medicationName}</div>
-                        ${dosage ? `<div class="medication-dosage">${dosage}</div>` : ''}
-                        ${form ? `<div class="medication-form">${form}</div>` : ''}
-                    </div>
-                    <div class="medication-actions">
-                        ${isTaken ?
-                            `<button class="health-btn btn-success" disabled>
-                                ✅ Принято ${takenTime}
-                            </button>` :
-                            `<button class="health-btn btn-primary" onclick="logMedication('${medicationId}', '${scheduleId}')">
-                                ✅ Принять
-                            </button>
-                            <button class="health-btn btn-secondary" onclick="skipMedication('${medicationId}', '${scheduleId}')">
-                                ⏭ Пропустить
-                            </button>`
-                        }
+                    <div class="medication-details">
+                        <div class="medication-info">
+                            <div class="medication-name">${medicationName}</div>
+                            ${dosage ? `<div class="medication-dosage">${dosage}</div>` : ''}
+                            ${form ? `<div class="medication-form">${form}</div>` : ''}
+                        </div>
+                        <div class="medication-actions">
+                            ${isTaken ?
+                                `<button class="health-btn btn-success" disabled>
+                                    ✅ Принято ${takenTime}
+                                </button>` :
+                                `<button class="health-btn btn-primary" onclick="logMedication('${medicationId}', '${scheduleId}')">
+                                    ✅ Принять
+                                </button>
+                                <button class="health-btn btn-secondary" onclick="skipMedication('${medicationId}', '${scheduleId}')">
+                                    ⏭ Пропустить
+                                </button>`
+                            }
+                        </div>
                     </div>
                 </div>
             `;
