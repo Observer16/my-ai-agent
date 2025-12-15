@@ -18,7 +18,7 @@ const Dashboard = (function() {
         const state = HealthModule.getState();
         const medications = Array.isArray(state.todayMedications) ? state.todayMedications : [];
 
-        console.log('💊 Загружено лекарств:', medications.length, medications);
+        console.log('💊 Данные лекарств из состояния:', medications);
 
         if (medications.length === 0) {
             trackerContainer.innerHTML = renderNoMedications();
@@ -31,8 +31,11 @@ const Dashboard = (function() {
     function renderMedicationList(medications) {
         let html = '<div class="medication-list">';
 
-        medications.forEach(med => {
-            // Используем medication_id из API ответа
+        medications.forEach((med, index) => {
+            // ДИАГНОСТИКА: посмотрим полную структуру данных
+            console.log(`💊 Лекарство ${index + 1}:`, med);
+
+            // Извлекаем данные - ВАЖНО: используем те же ключи, что в API ответе
             const medicationId = med.medication_id || med.id || '';
             const scheduleId = med.schedule_id || '';
             const time = HealthFormatters.formatTime(med.time_of_day);
@@ -41,14 +44,19 @@ const Dashboard = (function() {
             const takenTime = med.taken_time ?
                 `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : '';
 
+            // Используем реальные данные из API
             const medicationName = med.medication_name || med.name || 'Лекарство';
-            const dosage = med.dosage || '';
-            const form = med.form || '';
+            const dosage = med.dosage || 'Не указана';
+            const form = med.form || 'Не указана';
 
-            console.log('📝 Данные для рендеринга:', {
-                name: medicationName,
-                medicationId: medicationId,
-                isValidId: medicationId && medicationId.length > 0
+            console.log(`📝 Извлеченные данные ${index + 1}:`, {
+                medicationId,
+                medicationName,
+                dosage,
+                form,
+                time,
+                status,
+                scheduleId
             });
 
             // Создаем безопасные строки для data-атрибутов
@@ -58,13 +66,14 @@ const Dashboard = (function() {
             html += `
                 <div class="medication-card ${isTaken ? 'taken' : ''}"
                      data-medication-id="${safeMedicationId}"
-                     data-schedule-id="${safeScheduleId}">
+                     data-schedule-id="${safeScheduleId}"
+                     id="med-card-${index}">
                     <div class="medication-time">${time}</div>
                     <div class="medication-details">
                         <div class="medication-info">
                             <div class="medication-name">${medicationName}</div>
-                            ${dosage ? `<div class="medication-dosage">${dosage}</div>` : ''}
-                            ${form ? `<div class="medication-form">${form}</div>` : ''}
+                            <div class="medication-dosage">${dosage}</div>
+                            <div class="medication-form">${form}</div>
                         </div>
                         <div class="medication-actions">
                             ${isTaken ?
@@ -85,48 +94,98 @@ const Dashboard = (function() {
         });
 
         html += '</div>';
+
+        // После рендеринга проверяем data-атрибуты
+        setTimeout(() => {
+            document.querySelectorAll('.medication-card').forEach((card, i) => {
+                console.log(`🔍 Проверка карточки ${i + 1}:`, {
+                    dataset: card.dataset,
+                    attributes: Array.from(card.attributes).filter(attr => attr.name.startsWith('data-')),
+                    innerHTML: card.innerHTML.substring(0, 200)
+                });
+            });
+        }, 100);
+
         return html;
     }
 
     function setupEventDelegation() {
-        // Используем делегирование событий для всего документа
-        document.addEventListener('click', function(e) {
-            const button = e.target.closest('.health-btn[data-action]');
-            if (!button) return;
+        // Удаляем старые обработчики если есть
+        document.removeEventListener('click', handleMedicationClick);
+        document.addEventListener('click', handleMedicationClick);
+    }
 
-            const medicationCard = button.closest('.medication-card');
-            if (!medicationCard) return;
+    function handleMedicationClick(e) {
+        const button = e.target.closest('.health-btn[data-action]');
+        if (!button) return;
 
-            // Получаем данные из data-атрибутов
-            const medicationId = medicationCard.getAttribute('data-medication-id');
-            const scheduleId = medicationCard.getAttribute('data-schedule-id') || null;
+        const medicationCard = button.closest('.medication-card');
+        if (!medicationCard) return;
 
-            console.log('🖱️ Клик по кнопке:', {
-                action: button.dataset.action,
-                medicationId: medicationId,
-                scheduleId: scheduleId,
-                element: medicationCard
+        // Получаем данные из data-атрибутов
+        const medicationId = medicationCard.getAttribute('data-medication-id');
+        const scheduleId = medicationCard.getAttribute('data-schedule-id') || null;
+
+        console.log('🖱️ Клик по кнопке:', {
+            action: button.dataset.action,
+            medicationId: medicationId,
+            scheduleId: scheduleId,
+            element: medicationCard,
+            cardHTML: medicationCard.outerHTML.substring(0, 300)
+        });
+
+        // Если medicationId пустой, проверяем все возможные варианты
+        if (!medicationId || medicationId === 'undefined' || medicationId.trim() === '') {
+            // Пробуем найти ID другими способами
+            const cardId = medicationCard.id;
+            const cardIndex = cardId.replace('med-card-', '');
+            const allCards = document.querySelectorAll('.medication-card');
+
+            console.log('🔍 Попытка восстановить medicationId:', {
+                cardId,
+                cardIndex,
+                totalCards: allCards.length,
+                datasetKeys: Object.keys(medicationCard.dataset),
+                innerText: medicationCard.textContent.substring(0, 100)
             });
 
-            if (!medicationId) {
-                console.error('❌ Не найден medicationId в data-атрибутах');
-                console.log('💾 Проверка data-атрибутов карточки:', {
-                    dataset: medicationCard.dataset,
-                    attributes: medicationCard.attributes
-                });
-                showToast('❌ Ошибка: не указано лекарство', 'error');
-                return;
+            // Проверяем состояние модуля
+            const state = HealthModule.getState();
+            const medications = state.todayMedications || [];
+            if (medications[cardIndex]) {
+                const medData = medications[cardIndex];
+                console.log('📊 Найденные данные в состоянии:', medData);
+
+                // Пробуем использовать данные из состояния
+                const fallbackId = medData.medication_id || medData.id;
+                if (fallbackId) {
+                    console.log('🔄 Используем fallback ID:', fallbackId);
+                    const action = button.dataset.action;
+                    e.preventDefault();
+
+                    if (action === 'take') {
+                        logMedication(fallbackId, scheduleId || medData.schedule_id);
+                        return;
+                    } else if (action === 'skip') {
+                        skipMedication(fallbackId, scheduleId || medData.schedule_id);
+                        return;
+                    }
+                }
             }
 
-            const action = button.dataset.action;
-            e.preventDefault();
+            console.error('❌ Не найден medicationId в data-атрибутах');
+            showToast('❌ Ошибка: не указано лекарство', 'error');
+            return;
+        }
 
-            if (action === 'take') {
-                logMedication(medicationId, scheduleId);
-            } else if (action === 'skip') {
-                skipMedication(medicationId, scheduleId);
-            }
-        });
+        const action = button.dataset.action;
+        e.preventDefault();
+
+        if (action === 'take') {
+            logMedication(medicationId, scheduleId);
+        } else if (action === 'skip') {
+            skipMedication(medicationId, scheduleId);
+        }
     }
 
     function initWellnessGrid() {
@@ -274,23 +333,38 @@ const Dashboard = (function() {
             medicationId,
             scheduleId,
             typeMedId: typeof medicationId,
-            typeScheduleId: typeof scheduleId
+            lengthMedId: medicationId?.length
         });
 
         // Валидация
-        if (!medicationId || medicationId.trim() === '' || medicationId === 'undefined') {
+        if (!medicationId || medicationId === 'undefined' || medicationId.trim() === '') {
             console.error('❌ Ошибка: medicationId невалидный:', medicationId);
-            showToast('❌ Ошибка: не указано лекарство', 'error');
-            return;
+
+            // Пробуем получить данные из состояния
+            const state = HealthModule.getState();
+            const medications = state.todayMedications || [];
+            if (medications.length > 0) {
+                console.log('🔄 Пробуем использовать первое лекарство из состояния:', medications[0]);
+                const fallbackId = medications[0].medication_id || medications[0].id;
+                if (fallbackId) {
+                    medicationId = fallbackId;
+                    console.log('✅ Используем fallback ID:', medicationId);
+                }
+            }
+
+            if (!medicationId) {
+                showToast('❌ Ошибка: не указано лекарство', 'error');
+                return;
+            }
         }
 
-        // Убираем возможные кавычки
-        const cleanMedicationId = medicationId.replace(/['"]/g, '');
-        const cleanScheduleId = scheduleId ? scheduleId.replace(/['"]/g, '') : null;
+        // Очищаем ID
+        const cleanMedicationId = String(medicationId).trim().replace(/['"]/g, '');
+        const cleanScheduleId = scheduleId ? String(scheduleId).trim().replace(/['"]/g, '') : null;
 
-        console.log('🔧 Очищенные ID:', {
-            cleanMedicationId,
-            cleanScheduleId
+        console.log('🔧 Отправляем данные на сервер:', {
+            medication_id: cleanMedicationId,
+            schedule_id: cleanScheduleId
         });
 
         try {
@@ -319,15 +393,15 @@ const Dashboard = (function() {
         console.log('⏭ skipMedication вызван:', { medicationId, scheduleId });
 
         // Валидация
-        if (!medicationId || medicationId.trim() === '' || medicationId === 'undefined') {
+        if (!medicationId || medicationId === 'undefined' || medicationId.trim() === '') {
             console.error('❌ Ошибка: medicationId невалидный:', medicationId);
             showToast('❌ Ошибка: не указано лекарство', 'error');
             return;
         }
 
-        // Убираем возможные кавычки
-        const cleanMedicationId = medicationId.replace(/['"]/g, '');
-        const cleanScheduleId = scheduleId ? scheduleId.replace(/['"]/g, '') : null;
+        // Очищаем ID
+        const cleanMedicationId = String(medicationId).trim().replace(/['"]/g, '');
+        const cleanScheduleId = scheduleId ? String(scheduleId).trim().replace(/['"]/g, '') : null;
 
         try {
             const result = await HealthAPI.logMedicationIntake({
