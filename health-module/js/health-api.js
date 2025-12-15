@@ -298,47 +298,70 @@ const HealthAPI = (function() {
     /**
      * Отметить прием лекарства
      */
-    async function logMedicationIntake(medicationId, status = 'taken', notes = '') {
+    async function logMedicationIntake(params) {
         try {
-            // ИСПРАВЛЕНО: Ищем schedule_id из сегодняшних лекарств
-            const state = HealthModule.getState();
-            const todayMeds = state.todayMedications || [];
+            console.log('💊 logMedicationIntake вызван с параметрами:', params);
 
-            // Находим лекарство с нужным medication_id
-            const medication = todayMeds.find(
-                med => med.medication_id === medicationId
-            );
+            // Извлекаем параметры - ВАЖНО: params это объект, а не отдельные аргументы
+            const medicationId = params.medication_id || params.medicationId;
+            const scheduleId = params.schedule_id || params.scheduleId;
+            const status = params.status || 'taken';
+            const notes = params.notes || '';
 
-            const scheduleId = medication?.schedule_id || null;
+            console.log('🔍 Извлеченные параметры:', {
+                medicationId,
+                scheduleId,
+                status,
+                notes,
+                typeMedicationId: typeof medicationId,
+                isString: typeof medicationId === 'string'
+            });
 
-            if (!scheduleId) {
-                console.warn(
-                    `⚠️ schedule_id not found for medication ${medicationId}, ` +
-                    `sending without it`
-                );
+            // Проверяем что medicationId это строка
+            if (!medicationId || typeof medicationId !== 'string') {
+                console.error('❌ medicationId не строка:', medicationId, typeof medicationId);
+                return {
+                    success: false,
+                    error: 'medication_id должен быть строкой'
+                };
             }
+
+            // Проверяем что это UUID
+            const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidPattern.test(medicationId)) {
+                console.warn('⚠️ medicationId не похож на UUID:', medicationId);
+            }
+
+            // Подготавливаем тело запроса
+            const requestBody = {
+                medication_id: medicationId.trim(),
+                status: status,
+                notes: notes
+            };
+
+            // Добавляем schedule_id если он есть
+            if (scheduleId && typeof scheduleId === 'string' && scheduleId.trim()) {
+                requestBody.schedule_id = scheduleId.trim();
+            }
+
+            console.log('📤 Отправляем запрос на сервер:', {
+                url: `${BASE_URL}/health/medications/logs`,
+                body: requestBody
+            });
 
             const response = await fetch(`${BASE_URL}/health/medications/logs`, {
                 method: 'POST',
                 headers: getHeaders(),
-                body: JSON.stringify({
-                    medication_id: medicationId,
-                    schedule_id: scheduleId,  // ДОБАВЛЕНО
-                    status: status,
-                    notes: notes
-                })
+                body: JSON.stringify(requestBody)
             });
 
             const result = await handleResponse(response);
 
-            if (HealthConfig.DEBUG) {
-                console.log('✅ Medication logged:', {
-                    medication_id: medicationId,
-                    schedule_id: scheduleId,
-                    status: status,
-                    response: result
-                });
-            }
+            console.log('📥 Ответ от сервера:', {
+                success: result.success,
+                status: response.status,
+                error: result.error
+            });
 
             return result;
 

@@ -267,16 +267,27 @@ const DataManager = (function() {
     }
 
     // Отметить прием лекарства
-    async function logMedicationIntake(medicationId, status, notes) {
+    async function logMedicationIntake(medicationId, status = 'taken', notes = '', scheduleId = null) {
         try {
             if (!window.HealthAPI) {
                 throw new Error('HealthAPI не доступен');
             }
 
-            const response = await HealthAPI.logMedicationIntake(medicationId, status, notes);
+            // Используем новый интерфейс HealthAPI
+            const response = await HealthAPI.logMedicationIntake({
+                medication_id: medicationId,
+                schedule_id: scheduleId,
+                status: status,
+                notes: notes
+            });
 
             if (response.success) {
-                EventManager.emit('data:medicationLogged', { medicationId, status, notes });
+                EventManager.emit('data:medicationLogged', {
+                    medicationId,
+                    status,
+                    notes,
+                    scheduleId
+                });
                 return true;
             }
 

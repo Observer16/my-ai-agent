@@ -43,13 +43,20 @@ const Dashboard = (function() {
 
             // Берем данные напрямую из API формата
             const medicationName = med.medication_name || 'Лекарство';
-            const dosage = med.dosage || 'Не указана';
+
+            // Если дозировка null или пустая, показываем "одна"
+            let dosage = 'одна';
+            if (med.dosage !== null && med.dosage !== undefined && med.dosage !== '') {
+                dosage = med.dosage;
+            }
+
             const form = med.form || 'Не указана';
 
             console.log(`📝 API данные для лекарства ${index + 1}:`, {
                 medicationId,
                 medicationName,
-                dosage,
+                originalDosage: med.dosage,
+                displayedDosage: dosage,
                 form,
                 time,
                 status
@@ -321,30 +328,15 @@ const Dashboard = (function() {
         });
 
         // Валидация
-        if (!medicationId || medicationId === 'undefined' || medicationId.trim() === '') {
-            console.error('❌ Ошибка: medicationId невалидный:', medicationId);
-
-            // Пробуем получить данные из состояния
-            const state = HealthModule.getState();
-            const medications = state.todayMedications || [];
-            if (medications.length > 0) {
-                console.log('🔄 Пробуем использовать первое лекарство из состояния:', medications[0]);
-                const fallbackId = medications[0].medication_id || medications[0].id;
-                if (fallbackId) {
-                    medicationId = fallbackId;
-                    console.log('✅ Используем fallback ID:', medicationId);
-                }
-            }
-
-            if (!medicationId) {
-                showToast('❌ Ошибка: не указано лекарство', 'error');
-                return;
-            }
+        if (!medicationId || medicationId.trim() === '') {
+            console.error('❌ Ошибка: medicationId пустой!', medicationId);
+            showToast('❌ Ошибка: не указано лекарство', 'error');
+            return;
         }
 
         // Очищаем ID
-        const cleanMedicationId = String(medicationId).trim().replace(/['"]/g, '');
-        const cleanScheduleId = scheduleId ? String(scheduleId).trim().replace(/['"]/g, '') : null;
+        const cleanMedicationId = String(medicationId).trim();
+        const cleanScheduleId = scheduleId ? String(scheduleId).trim() : null;
 
         console.log('🔧 Отправляем данные на сервер:', {
             medication_id: cleanMedicationId,
@@ -352,6 +344,7 @@ const Dashboard = (function() {
         });
 
         try {
+            // ВАЖНО: передаем объект с параметрами
             const result = await HealthAPI.logMedicationIntake({
                 medication_id: cleanMedicationId,
                 schedule_id: cleanScheduleId,
@@ -365,7 +358,18 @@ const Dashboard = (function() {
                 init();
             } else {
                 console.error('❌ Ошибка API:', result);
-                showToast(`❌ Ошибка: ${result.error || 'не удалось отметить прием'}`, 'error');
+
+                // Показываем понятное сообщение об ошибке
+                let errorMessage = 'Не удалось отметить прием';
+                if (result.error) {
+                    if (Array.isArray(result.error)) {
+                        errorMessage = result.error.map(e => e.msg || e).join(', ');
+                    } else if (typeof result.error === 'string') {
+                        errorMessage = result.error;
+                    }
+                }
+
+                showToast(`❌ Ошибка: ${errorMessage}`, 'error');
             }
         } catch (error) {
             console.error('❌ Ошибка логирования:', error);
