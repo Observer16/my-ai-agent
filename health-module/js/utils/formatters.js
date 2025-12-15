@@ -8,7 +8,11 @@ const HealthFormatters = (function() {
 
     function formatDate(dateStr, options = {}) {
         if (!dateStr) return '';
-        const date = new Date(dateStr);
+
+        // Парсим дату в формате YYYY-MM-DD, создавая объект в локальном времени
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day); // month - 1 потому что в JS месяцы начинаются с 0
+
         return date.toLocaleDateString('ru-RU', {
             weekday: options.weekday ? 'long' : undefined,
             year: 'numeric',
