@@ -13,15 +13,6 @@
         </div>
     </div>
 
-    <!-- Отладочная информация (только в режиме разработки) -->
-    <div id="debug-info" style="display: none;" class="health-card">
-        <h3>🛠 Отладка</h3>
-        <button onclick="testHealthAPI()" class="health-btn btn-secondary">
-            Тестировать API
-        </button>
-        <div id="debug-output" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
-    </div>
-
     <!-- Сводка -->
     <div id="health-summary">
         <!-- Заполняется динамически -->
@@ -45,6 +36,7 @@
             <h3 class="health-card-title">План на сегодня</h3>
         </div>
         <div id="medication-tracker">
+            <!-- Заполняется динамически -->
             <div class="loading-spinner"></div>
             <p>Загрузка лекарств...</p>
         </div>
