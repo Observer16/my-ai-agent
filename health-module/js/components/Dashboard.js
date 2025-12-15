@@ -32,8 +32,8 @@ const Dashboard = (function() {
         let html = '<div class="medication-list">';
 
         medications.forEach(med => {
-            // ВАЖНО: Используем medication_id напрямую из API ответа
-            const medicationId = med.medication_id || '';
+            // Используем medication_id из API ответа
+            const medicationId = med.medication_id || med.id || '';
             const scheduleId = med.schedule_id || '';
             const time = HealthFormatters.formatTime(med.time_of_day);
             const status = med.status || 'pending';
@@ -45,19 +45,20 @@ const Dashboard = (function() {
             const dosage = med.dosage || '';
             const form = med.form || '';
 
-            // Отладочная информация
-            console.log('📝 Рендерим лекарство:', {
+            console.log('📝 Данные для рендеринга:', {
                 name: medicationName,
                 medicationId: medicationId,
-                scheduleId: scheduleId,
-                hasMedId: !!medicationId && medicationId.length === 36,
-                hasScheduleId: !!scheduleId
+                isValidId: medicationId && medicationId.length > 0
             });
+
+            // Создаем безопасные строки для data-атрибутов
+            const safeMedicationId = medicationId ? String(medicationId).replace(/"/g, '&quot;') : '';
+            const safeScheduleId = scheduleId ? String(scheduleId).replace(/"/g, '&quot;') : '';
 
             html += `
                 <div class="medication-card ${isTaken ? 'taken' : ''}"
-                     data-medication-id="${medicationId}"
-                     data-schedule-id="${scheduleId}">
+                     data-medication-id="${safeMedicationId}"
+                     data-schedule-id="${safeScheduleId}">
                     <div class="medication-time">${time}</div>
                     <div class="medication-details">
                         <div class="medication-info">
@@ -88,33 +89,41 @@ const Dashboard = (function() {
     }
 
     function setupEventDelegation() {
-        // Удаляем старые обработчики если есть
-        const container = document.getElementById('medication-tracker');
-        if (!container) return;
-
-        // Используем делегирование событий для кнопок приема лекарств
-        container.addEventListener('click', function(e) {
+        // Используем делегирование событий для всего документа
+        document.addEventListener('click', function(e) {
             const button = e.target.closest('.health-btn[data-action]');
             if (!button) return;
 
             const medicationCard = button.closest('.medication-card');
             if (!medicationCard) return;
 
-            const medicationId = medicationCard.dataset.medicationId;
-            const scheduleId = medicationCard.dataset.scheduleId;
+            // Получаем данные из data-атрибутов
+            const medicationId = medicationCard.getAttribute('data-medication-id');
+            const scheduleId = medicationCard.getAttribute('data-schedule-id') || null;
+
+            console.log('🖱️ Клик по кнопке:', {
+                action: button.dataset.action,
+                medicationId: medicationId,
+                scheduleId: scheduleId,
+                element: medicationCard
+            });
 
             if (!medicationId) {
-                console.error('❌ Не найден medicationId');
+                console.error('❌ Не найден medicationId в data-атрибутах');
+                console.log('💾 Проверка data-атрибутов карточки:', {
+                    dataset: medicationCard.dataset,
+                    attributes: medicationCard.attributes
+                });
                 showToast('❌ Ошибка: не указано лекарство', 'error');
                 return;
             }
 
             const action = button.dataset.action;
+            e.preventDefault();
+
             if (action === 'take') {
-                e.preventDefault();
                 logMedication(medicationId, scheduleId);
             } else if (action === 'skip') {
-                e.preventDefault();
                 skipMedication(medicationId, scheduleId);
             }
         });
@@ -261,29 +270,33 @@ const Dashboard = (function() {
     }
 
     async function logMedication(medicationId, scheduleId) {
-        console.log('💊 Отметка приема лекарства:', {
+        console.log('💊 logMedication вызван:', {
             medicationId,
             scheduleId,
-            isValidId: medicationId && medicationId.length === 36
+            typeMedId: typeof medicationId,
+            typeScheduleId: typeof scheduleId
         });
 
-        // Валидация medicationId
-        if (!medicationId || medicationId.trim() === '') {
-            console.error('❌ Ошибка: medicationId пустой!', medicationId);
+        // Валидация
+        if (!medicationId || medicationId.trim() === '' || medicationId === 'undefined') {
+            console.error('❌ Ошибка: medicationId невалидный:', medicationId);
             showToast('❌ Ошибка: не указано лекарство', 'error');
             return;
         }
 
-        // Проверяем формат UUID (предупреждение, но не блокируем)
-        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (!uuidPattern.test(medicationId)) {
-            console.warn('⚠️ medicationId не похож на UUID:', medicationId);
-        }
+        // Убираем возможные кавычки
+        const cleanMedicationId = medicationId.replace(/['"]/g, '');
+        const cleanScheduleId = scheduleId ? scheduleId.replace(/['"]/g, '') : null;
+
+        console.log('🔧 Очищенные ID:', {
+            cleanMedicationId,
+            cleanScheduleId
+        });
 
         try {
             const result = await HealthAPI.logMedicationIntake({
-                medication_id: medicationId,
-                schedule_id: scheduleId || null,
+                medication_id: cleanMedicationId,
+                schedule_id: cleanScheduleId,
                 status: 'taken',
                 notes: ''
             });
@@ -303,19 +316,23 @@ const Dashboard = (function() {
     }
 
     async function skipMedication(medicationId, scheduleId) {
-        console.log('⏭ Пропуск лекарства:', { medicationId, scheduleId });
+        console.log('⏭ skipMedication вызван:', { medicationId, scheduleId });
 
-        // Валидация medicationId
-        if (!medicationId || medicationId.trim() === '') {
-            console.error('❌ Ошибка: medicationId пустой!', medicationId);
+        // Валидация
+        if (!medicationId || medicationId.trim() === '' || medicationId === 'undefined') {
+            console.error('❌ Ошибка: medicationId невалидный:', medicationId);
             showToast('❌ Ошибка: не указано лекарство', 'error');
             return;
         }
 
+        // Убираем возможные кавычки
+        const cleanMedicationId = medicationId.replace(/['"]/g, '');
+        const cleanScheduleId = scheduleId ? scheduleId.replace(/['"]/g, '') : null;
+
         try {
             const result = await HealthAPI.logMedicationIntake({
-                medication_id: medicationId,
-                schedule_id: scheduleId || null,
+                medication_id: cleanMedicationId,
+                schedule_id: cleanScheduleId,
                 status: 'skipped',
                 notes: ''
             });
