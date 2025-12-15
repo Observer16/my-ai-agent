@@ -135,12 +135,6 @@ const Diary = (function() {
                            placeholder="Например: 7.5">
                 </div>
 
-                <div class="form-section">
-                    <label>Вес (кг)</label>
-                    <input type="number" id="weight-input" min="0" max="500" step="0.1"
-                           value="${entry?.weight || ''}"
-                           placeholder="Например: 70.5">
-                </div>
 
                 <div class="form-section">
                     <label>
@@ -188,15 +182,28 @@ const Diary = (function() {
             { value: 'грусть', emoji: '😔' }
         ];
 
-        return moods.map(mood => {
-            const active = currentMood === mood.value ? 'active' : '';
-            return `
-                <button class="mood-option ${active}"
-                        onclick="Diary.selectMood('${currentDate}', '${mood.value}')">
-                    ${mood.emoji} ${mood.value}
-                </button>
-            `;
-        }).join('');
+        if (currentMood) {
+            // Показываем только активное настроение
+            const activeMood = moods.find(mood => mood.value === currentMood);
+            if (activeMood) {
+                return `
+                    <div class="current-mood-display">
+                        <span class="mood-emoji">${activeMood.emoji}</span>
+                        <span class="mood-text">${activeMood.value}</span>
+                        <button class="btn-link" onclick="Diary.showMoodPicker('${currentDate}')">
+                            Изменить
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Если настроение не выбрано, показываем кнопку для выбора
+        return `
+            <button class="btn-secondary" onclick="Diary.showMoodPicker('${currentDate}')">
+                + Выбрать настроение
+            </button>
+        `;
     }
 
     function renderSymptomsList(symptoms) {
@@ -242,14 +249,12 @@ const Diary = (function() {
         console.log('💾 Сохранение записи за дату:', date);
 
         const sleep = document.getElementById('sleep-input')?.value;
-        const weight = document.getElementById('weight-input')?.value;
         const notes = document.getElementById('notes-input')?.value;
         const sexualActivity = document.getElementById('sexual-activity-input')?.value;
 
         const promises = [];
 
         if (sleep) promises.push(HealthModule.updateHealthEntry(date, 'sleep', parseFloat(sleep)));
-        if (weight) promises.push(HealthModule.updateHealthEntry(date, 'weight', parseFloat(weight)));
         if (notes) promises.push(HealthModule.updateHealthEntry(date, 'notes', notes));
         if (sexualActivity) promises.push(HealthModule.updateHealthEntry(date, 'sexual_activity', sexualActivity));
 
@@ -259,6 +264,15 @@ const Diary = (function() {
         } catch (error) {
             console.error('❌ Ошибка сохранения:', error);
             showToast('❌ Ошибка сохранения', 'error');
+        }
+    }
+
+    function showMoodPicker(date) {
+        console.log('😊 Открытие выбора настроения для даты:', date);
+        if (window.SimpleModalManager) {
+            SimpleModalManager.show('mood-picker', { date });
+        } else {
+            showToast('⚠️ Функция в разработке', 'info');
         }
     }
 
@@ -278,6 +292,7 @@ const Diary = (function() {
         selectMood,
         removeSymptom,
         saveEntry,
+        showMoodPicker,
         showSymptomPicker
     };
 })(); // ← IIFE ЗАВЕРШЕН, Diary создан!

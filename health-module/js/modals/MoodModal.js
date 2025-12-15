@@ -1,14 +1,15 @@
 // js/modals/MoodModal.js
 const MoodModal = (function() {
 
-    function show() {
+    function show(data = {}) {
+        const date = data.date || new Date().toISOString().split('T')[0];
         const moods = HealthConstants.MOOD_EMOJIS;
 
         let content = '<div class="mood-options">';
 
         for (const [mood, emoji] of Object.entries(moods)) {
             content += `
-                <button class="mood-btn" onclick="MoodModal.select('${mood}')">
+                <button class="mood-btn" onclick="MoodModal.select('${mood}', '${date}')">
                     <span class="mood-emoji">${emoji}</span>
                     <span class="mood-text">${mood}</span>
                 </button>
@@ -21,20 +22,22 @@ const MoodModal = (function() {
         BaseModal.show(modalHtml);
     }
 
-    async function select(mood) {
-        console.log('😊 Выбрано настроение:', mood);
+    async function select(mood, date = null) {
+        console.log('😊 Выбрано настроение:', mood, 'для даты:', date);
 
-        const today = new Date().toISOString().split('T')[0];
-        const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
+        const targetDate = date || new Date().toISOString().split('T')[0];
+        const success = await HealthModule.updateHealthEntry(targetDate, 'mood', mood);
 
         if (success) {
             showToast('✅ Настроение сохранено', 'success');
             BaseModal.close();
 
-            // КРИТИЧНО: Обновляем данные и перерисовываем Dashboard
-            await HealthModule.refreshData();
+            // Обновляем Diary если он открыт
+            if (window.Diary && typeof Diary.loadDate === 'function') {
+                Diary.loadDate(targetDate);
+            }
 
-            // Перерисовываем Dashboard если он открыт
+            // Также обновляем Dashboard если он открыт (для совместимости)
             if (window.Dashboard && typeof Dashboard.init === 'function') {
                 Dashboard.init();
             }

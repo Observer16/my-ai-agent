@@ -18,7 +18,7 @@ const SimpleModalManager = (function() {
                 break;
             case 'mood-picker':
                 if (window.MoodModal) {
-                    MoodModal.show();
+                    MoodModal.show(data);
                 }
                 break;
             default:

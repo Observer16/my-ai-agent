@@ -383,6 +383,42 @@
     border-color: var(--health-primary);
 }
 
+.current-mood-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--health-card-bg);
+    border: 1px solid var(--health-border);
+    border-radius: var(--health-radius);
+    margin-top: 8px;
+}
+
+.current-mood-display .mood-emoji {
+    font-size: 24px;
+}
+
+.current-mood-display .mood-text {
+    flex: 1;
+    font-weight: 500;
+    color: var(--health-text);
+}
+
+.current-mood-display .btn-link {
+    padding: 4px 8px;
+    background: none;
+    border: none;
+    color: var(--health-primary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color var(--health-transition-fast);
+}
+
+.current-mood-display .btn-link:hover {
+    color: var(--health-primary-dark);
+}
+
 .symptoms-tags {
     display: flex;
     flex-wrap: wrap;
