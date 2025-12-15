@@ -45,7 +45,7 @@ const Dashboard = (function() {
             const medicationName = med.medication_name || 'Лекарство';
 
             // Если дозировка null или пустая, показываем "одна"
-            let dosage = 'одна';
+            let dosage = 'одна шт.';
             if (med.dosage !== null && med.dosage !== undefined && med.dosage !== '') {
                 dosage = med.dosage;
             }
