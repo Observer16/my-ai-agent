@@ -47,7 +47,8 @@ const Diary = (function() {
 
         // Дни месяца
         for (let day = 1; day <= lastDay.getDate(); day++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateObj = new Date(year, month, day);
+            const dateStr = dateObj.toISOString().split('T')[0];
             const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
             html += `
