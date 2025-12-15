@@ -5,17 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
+<!-- components/health-dashboard.html -->
 <div class="health-dashboard">
     <!-- Приветствие -->
     <div class="health-card greeting-card">
         <div class="greeting-content">
-            <h2>👋 Добро пожаловать!</h2>
+            <h2 id="greeting-title">👋 Добро пожаловать!</h2>
+            <p id="greeting-date"></p>
         </div>
     </div>
 
+    <!-- Отладочная информация (только в режиме разработки) -->
+    <div id="debug-info" style="display: none;" class="health-card">
+        <h3>🛠 Отладка</h3>
+        <button onclick="testHealthAPI()" class="health-btn btn-secondary">
+            Тестировать API
+        </button>
+        <div id="debug-output" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
     <!-- Сводка -->
-    <div id="health-summary">
-        <!-- Заполняется динамически -->
+    <div id="health-summary" class="health-card">
+        <div class="health-card-header">
+            <div class="health-card-icon">📈</div>
+            <h3 class="health-card-title">Сводка за неделю</h3>
+        </div>
+        <div id="health-summary-content">
+            <div class="loading-spinner-small" style="margin: 20px auto;"></div>
+            <p style="text-align: center; color: var(--health-text-light);">Загрузка статистики...</p>
+        </div>
     </div>
 
     <!-- Грид самочувствия -->
@@ -37,15 +56,12 @@
         </div>
 
         <div id="medication-tracker">
-            <!-- Заголовок трекера -->
             <h3 style="margin-bottom: 16px; color: var(--health-text);">Лекарства на сегодня</h3>
 
-            <!-- Контейнер для лекарств с правильной структурой -->
             <div id="today-medications">
-                <!-- Лекарства загружаются динамически с правильной структурой -->
+                <!-- Лекарства загружаются динамически -->
             </div>
 
-            <!-- Состояние "нет лекарств" -->
             <div id="no-medications" class="no-medications" style="display: none;">
                 <div class="no-meds-icon">💊</div>
                 <h3>На сегодня лекарств нет</h3>
@@ -77,7 +93,6 @@
             </button>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -110,7 +125,7 @@ async function testHealthAPI() {
     }
 }
 
-// Показываем отладочную информацию в режиме разработки
+// Обновляем дату приветствия
 document.addEventListener('DOMContentLoaded', function() {
     const debugInfo = document.getElementById('debug-info');
     if (window.CONFIG && window.CONFIG.DEBUG) {
@@ -123,6 +138,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateElement = document.getElementById('greeting-date');
     if (dateElement) {
         dateElement.textContent = now.toLocaleDateString('ru-RU', options);
+    }
+
+    // Устанавливаем заголовок с временем дня
+    const greetingTitle = document.getElementById('greeting-title');
+    if (greetingTitle) {
+        const hour = now.getHours();
+        if (hour < 12) {
+            greetingTitle.textContent = '👋 Доброе утро!';
+        } else if (hour < 18) {
+            greetingTitle.textContent = '👋 Добрый день!';
+        } else {
+            greetingTitle.textContent = '👋 Добрый вечер!';
+        }
     }
 });
 </script>
