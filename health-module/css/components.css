@@ -430,12 +430,13 @@
 .symptom-tag {
     display: inline-flex;
     align-items: center;
-    padding: 6px 28px;
+    justify-content: space-between;  /* ← Распределяет элементы по краям */
+    padding: 6px 12px;              /* ← Уменьшил padding */
     background: var(--health-card-bg);
     border: 2px solid;
     border-radius: 20px;
     font-size: 14px;
-    gap: 8px;
+    min-width: 120px;               /* ← Минимальная ширина для равномерности */
 }
 
 .symptom-name {
