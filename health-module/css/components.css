@@ -430,16 +430,12 @@
 .symptom-tag {
     display: inline-flex;
     align-items: center;
-    justify-content: space-between;  /* Распределяет элементы по краям */
-    padding: 6px 12px;              /* ← Уменьшил padding */
-    min-width: 140px;               /* Увеличил минимальную ширину */
+    padding: 6px 28px;
+    background: var(--health-card-bg);
+    border: 2px solid;
+    border-radius: 20px;
+    font-size: 14px;
     gap: 8px;
-}
-
-.symptom-right {
-    display: flex;
-    align-items: center;
-    gap: 4px;                       /* Маленький отступ между интенсивностью и кнопкой */
 }
 
 .symptom-name {
@@ -449,7 +445,6 @@
 .symptom-intensity {
     color: var(--health-text-light);
     letter-spacing: 2px;
-    margin-right: 8px;              /* Отступ от кнопки удаления */
 }
 
 .symptom-remove {
