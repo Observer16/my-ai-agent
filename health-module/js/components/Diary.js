@@ -218,10 +218,12 @@ const Diary = (function() {
             const color = HealthFormatters.getIntensityColor(symptom.intensity);
 
             html += `
-                <div class="symptom-tag" style="border-color: ${color}">
-                    <span class="symptom-name">${symptom.name}</span>
-                    <span class="symptom-intensity">${'●'.repeat(symptom.intensity)}</span>
-                    <button class="symptom-remove" onclick="Diary.removeSymptom('${symptom.id}', '${currentDate}')">×</button>
+                <div class="symptom-tag">
+                    <span class="symptom-name">Название</span>
+                    <div class="symptom-right">
+                        <span class="symptom-intensity">●●●</span>
+                        <button class="symptom-remove">×</button>
+                    </div>
                 </div>
             `;
         });
