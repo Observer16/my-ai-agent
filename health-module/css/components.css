@@ -428,11 +428,12 @@
 }
 
 .symptom-tag {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: space-between;  /* Распределяет элементы по краям */
-    padding: 6px 12px;
+    padding: 6px 12px;              /* ← Уменьшил padding */
     min-width: 140px;               /* Увеличил минимальную ширину */
+    gap: 8px;
 }
 
 .symptom-right {
