@@ -10,6 +10,7 @@ const TabManager = (function() {
         medications: 'Аптечка',
         diary: 'Дневник',
         stats: 'Статистика'
+        settings: 'Настройки'
     };
 
     // Инициализация вкладок
@@ -78,6 +79,7 @@ const TabManager = (function() {
         tabHandlers.set('medications', MedicationsManager.load);
         tabHandlers.set('diary', DiaryManager.load);
         tabHandlers.set('stats', StatsManager.load);
+        tabHandlers.set('settings', SettingsManager.load);
     }
 
     // Переключение вкладки
