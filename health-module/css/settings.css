@@ -1,0 +1,430 @@
+/* Стили для страницы настроек */
+
+.settings-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.settings-header {
+    margin-bottom: 24px;
+}
+
+.settings-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 8px 0;
+}
+
+.settings-icon {
+    font-size: 32px;
+}
+
+.settings-subtitle {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    margin: 0;
+}
+
+.settings-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    color: #c33;
+    font-size: 14px;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Секции настроек */
+.settings-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.section-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.section-info {
+    flex: 1;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 4px 0;
+}
+
+.section-description {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Карточки статуса */
+.status-card {
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.status-loading {
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #666;
+}
+
+.status-linked {
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.status-not-linked {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.status-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+}
+
+.status-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.status-text {
+    flex: 1;
+}
+
+.status-title {
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.status-info {
+    font-size: 13px;
+    margin: 4px 0 0 0;
+    color: #555;
+}
+
+.status-date {
+    font-size: 11px;
+    color: #777;
+    margin: 4px 0 0 0;
+}
+
+/* Инструкция по привязке */
+.link-code-instructions {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.instructions-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.instructions-icon {
+    font-size: 20px;
+}
+
+.instructions-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.countdown-text {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+.instructions-list {
+    margin: 12px 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #555;
+}
+
+.instructions-list li {
+    margin-bottom: 4px;
+}
+
+.instructions-list code {
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 12px;
+    color: #0066cc;
+}
+
+/* Группа ввода кода */
+.code-input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.code-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 16px;
+    background: white;
+}
+
+.code-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.btn-copy {
+    padding: 12px 16px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.btn-copy:hover {
+    background: var(--color-primary-dark);
+    transform: scale(1.05);
+}
+
+.btn-copy:active {
+    transform: scale(0.95);
+}
+
+/* Настройки уведомлений */
+.notification-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.setting-info {
+    flex: 1;
+}
+
+.setting-title {
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.setting-description {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+/* Toggle switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--color-success, #4caf50);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.toggle-switch input:disabled + .toggle-slider {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Кнопки */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger {
+    background: #f44336;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #d32f2f;
+}
+
+.btn-link {
+    background: transparent;
+    color: var(--color-primary);
+    padding: 4px 8px;
+    text-decoration: underline;
+}
+
+.btn-link:hover:not(:disabled) {
+    color: var(--color-primary-dark);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+/* Spinner для загрузки */
+.loading-spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+    .settings-container {
+        padding: 12px;
+    }
+
+    .settings-title {
+        font-size: 24px;
+    }
+
+    .settings-section {
+        padding: 16px;
+    }
+
+    .status-card {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .status-linked .btn-danger {
+        align-self: flex-start;
+    }
+}
+
+/* Стиль для вкладки настроек */
+.health-tab-settings {
+    margin-left: auto;
+}
+
+.health-tab-settings .tab-icon {
+    transition: transform 0.3s;
+}
+
+.health-tab-settings:hover .tab-icon {
+    transform: rotate(45deg);
+}
