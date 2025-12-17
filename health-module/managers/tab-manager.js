@@ -9,7 +9,7 @@ const TabManager = (function() {
         dashboard: 'Сегодня',
         medications: 'Аптечка',
         diary: 'Дневник',
-        stats: 'Статистика'
+        stats: 'Статистика',
         settings: 'Настройки'
     };
 
@@ -48,16 +48,6 @@ const TabManager = (function() {
         EventManager.emit('tab:initialLoaded', tabName);
     }
 
-    return {
-        init,
-        switchToTab,
-        loadInitialTab, // <-- Добавить этот метод
-        getCurrentTab,
-        getTabTitle,
-        registerTabHandler,
-        loadCurrentTab
-    };
-
     // Инициализация кнопок вкладок
     function initTabButtons() {
         const tabButtons = document.querySelectorAll('.health-tab');
@@ -79,14 +69,14 @@ const TabManager = (function() {
         tabHandlers.set('medications', MedicationsManager.load);
         tabHandlers.set('diary', DiaryManager.load);
         tabHandlers.set('stats', StatsManager.load);
-        tabHandlers.set('settings', SettingsManager.load);
+        tabHandlers.set('settings', SettingsManager.init);
     }
 
     // Переключение вкладки
     async function switchToTab(tabName) {
         if (currentTab === tabName) {
             console.log(`⏭️ Вкладка ${tabName} уже активна`);
-            return; // ДОБАВЛЕНО: не перезагружаем активную вкладку
+            return;
         }
 
         console.log(`🔄 Переключение на вкладку: ${tabName}`);
@@ -172,6 +162,7 @@ const TabManager = (function() {
     return {
         init,
         switchToTab,
+        loadInitialTab,
         getCurrentTab,
         getTabTitle,
         registerTabHandler,
