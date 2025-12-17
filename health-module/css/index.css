@@ -19,3 +19,6 @@
 
 /* 5. Уведомления (тосты) */
 @import url('./toasts.css');
+
+/* 6. Настройки (страница настроек и Telegram) */
+@import url('./settings.css');
