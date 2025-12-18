@@ -123,13 +123,15 @@ const DomManager = (function() {
     // Показать/скрыть табы
     function showTabs() {
         if (elements.tabs) {
-            elements.tabs.style.display = 'flex';
+            // НЕ меняем display, используем visibility или просто ничего не делаем
+            // CSS управляет layout через grid
+            elements.tabs.style.visibility = 'visible';
         }
     }
 
     function hideTabs() {
         if (elements.tabs) {
-            elements.tabs.style.display = 'none';
+            elements.tabs.style.visibility = 'hidden';
         }
     }
 
