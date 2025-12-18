@@ -939,12 +939,23 @@ const MedicationFormModal = (function() {
 
             console.log('📤 Отправка на сервер:', medicationData);
 
-            const result = await HealthAPI.createMedication(medicationData);
+            let result;
+            if (medicationId) {
+                // РЕДАКТИРОВАНИЕ существующего лекарства
+                result = await HealthAPI.updateMedication(medicationId, medicationData);
+                if (result.success) {
+                    showToast('✅ Лекарство обновлено', 'success');
+                }
+            } else {
+                // СОЗДАНИЕ нового лекарства
+                result = await HealthAPI.createMedication(medicationData);
+                if (result.success) {
+                    showToast('✅ Лекарство добавлено', 'success');
+                }
+            }
 
             if (result.success) {
-                showToast('✅ Лекарство добавлено', 'success');
                 close();
-
                 await HealthModule.refreshData();
 
                 if (window.Medications && window.Medications.init) {
