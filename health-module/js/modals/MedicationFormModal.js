@@ -22,6 +22,7 @@ const MedicationFormModal = (function() {
         // Шаг 4
         schedules: []
     };
+    let editingScheduleIndex = null;
 
     // Константы
     const TOTAL_STEPS = 4;
@@ -779,8 +780,50 @@ const MedicationFormModal = (function() {
         reminder_minutes: 10
     };
 
+    function editSchedule(index) {
+        console.log('✏️ Редактирование расписания:', index);
+
+        editingScheduleIndex = index;
+        const schedule = formData.schedules[index];
+
+        // Заполняем форму данными редактируемого расписания
+        tempSchedule = {
+            days_of_week: [...schedule.days_of_week],
+            time_of_day: schedule.time_of_day,
+            dosage_amount: schedule.dosage_amount,
+            reminder_minutes: schedule.reminder_minutes || 10
+        };
+
+        const form = document.getElementById('schedule-form');
+        if (form) {
+            form.style.display = 'block';
+
+            // Устанавливаем выбранные дни
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                const day = parseInt(btn.dataset.day);
+                if (tempSchedule.days_of_week.includes(day)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Заполняем поля
+            document.getElementById('schedule-time').value = schedule.time_of_day;
+            document.getElementById('schedule-dosage').value = schedule.dosage_amount;
+            document.getElementById('schedule-reminder').value = schedule.reminder_minutes || 10;
+
+            // Меняем текст кнопки
+            const addButton = form.querySelector('.health-btn.btn-primary');
+            if (addButton) {
+                addButton.textContent = '✓ Сохранить изменения';
+            }
+        }
+    }
+
     function showScheduleForm() {
-        // Сбрасываем временное расписание
+        // Сбрасываем индекс редактирования
+        editingScheduleIndex = null;
         tempSchedule = {
             days_of_week: [],
             time_of_day: '08:00',
@@ -806,7 +849,16 @@ const MedicationFormModal = (function() {
         const form = document.getElementById('schedule-form');
         if (form) {
             form.style.display = 'none';
+
+            // Сбрасываем текст кнопки
+            const addButton = form.querySelector('.health-btn.btn-primary');
+            if (addButton) {
+                addButton.textContent = '+ Добавить время';
+            }
         }
+
+        // Сбрасываем индекс редактирования
+        editingScheduleIndex = null;
     }
 
     function toggleDay(dayValue) {
@@ -1033,6 +1085,7 @@ const MedicationFormModal = (function() {
         clearDays,
         changeScheduleDosage,
         addSchedule,
+        editSchedule,
         removeSchedule,
         save
     };

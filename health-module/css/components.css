@@ -1295,6 +1295,30 @@
     background: rgba(244, 67, 54, 0.1);
 }
 
+.schedule-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.schedule-item-edit,
+.schedule-item-delete {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.schedule-item-edit:hover {
+    background-color: var(--health-primary-light);
+}
+
+.schedule-item-delete:hover {
+    background-color: var(--health-error-light);
+}
+
 /* Кнопка добавления расписания */
 .add-schedule-btn {
     width: 100%;
