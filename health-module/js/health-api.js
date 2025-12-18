@@ -653,6 +653,28 @@ const HealthAPI = (function() {
     }
 
     /**
+     * Обновить лекарство (без расписаний)
+     */
+    async function updateMedication(medicationId, medicationData) {
+        try {
+            // ВАЖНО: schedules не входит в MedicationUpdate, убираем их
+            const { schedules, ...dataWithoutSchedules } = medicationData;
+
+            const response = await fetch(`${BASE_URL}/health/medications/${medicationId}`, {
+                method: 'PATCH',
+                headers: getHeaders(),
+                body: JSON.stringify(dataWithoutSchedules)
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Получить статус Telegram привязки
      */
     async function getTelegramStatus() {
@@ -768,6 +790,7 @@ const HealthAPI = (function() {
         getHealthSummary,
         getHealthStatistics,
         createMedication,
+        updateMedication,
         updateMedicationStock,
         getLowStockMedications,
         checkLowStock,
