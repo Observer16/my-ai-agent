@@ -74,7 +74,7 @@
     color: var(--health-text-light);
 }
 
-.medication-actions {
+.medication-card .medication-actions {
     display: flex;
     gap: 8px;
     align-items: center;
@@ -263,8 +263,9 @@
     margin-right: 4px;
 }
 
-.medication-actions {
+.medication-item .medication-actions {
     display: flex;
+    flex-direction: row;
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
@@ -1435,6 +1436,7 @@
     }
 }
 
+/* Адаптация для мобильных - только для .medication-card */
 @media (max-width: 480px) {
     .medication-card {
         flex-direction: column;
@@ -1446,11 +1448,11 @@
         min-width: auto;
     }
 
-    .medication-actions {
+    .medication-card .medication-actions {
         flex-direction: column;
     }
 
-    .medication-actions .health-btn {
+    .medication-card .medication-actions .health-btn {
         width: 100%;
         justify-content: center;
     }
