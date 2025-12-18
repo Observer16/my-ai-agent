@@ -42,11 +42,11 @@ const Medications = (function() {
                         <div class="medication-icon">💊</div>
                         <div class="medication-title">
                             <h4>${med.name}</h4>
-                            ${med.dosage ? `<span class="medication-subtitle">${med.dosage}</span>` : ''}
+                            ${med.dosage && med.dosage !== 'string' ? `<span class="medication-subtitle">${med.dosage}</span>` : ''}
                         </div>
                     </div>
 
-                    ${med.form ? `<div class="medication-detail"><strong>Форма:</strong> ${med.form}</div>` : ''}
+                    ${med.form && med.form !== 'string' ? `<div class="medication-detail"><strong>Форма:</strong> ${med.form}</div>` : ''}
 
                     ${nextSchedule ? `
                         <div class="medication-detail">
@@ -54,17 +54,17 @@ const Medications = (function() {
                         </div>
                     ` : ''}
 
-                    ${med.instructions ? `
+                    ${med.instructions && med.instructions !== 'string' ? `
                         <div class="medication-detail">
                             <strong>Инструкция:</strong> ${med.instructions.substring(0, 50)}${med.instructions.length > 50 ? '...' : ''}
                         </div>
                     ` : ''}
 
-                    <div class="medication-actions">
-                        <button class="btn-icon" onclick="Medications.editMedication('${med.id}')" title="Редактировать">
+                    <div class="medication-actions" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+                        <button class="btn-icon" onclick="Medications.editMedication('${med.id}')" title="Редактировать" style="flex: 0 0 auto;">
                             ✏️
                         </button>
-                        <button class="btn-icon btn-danger" onclick="Medications.deleteMedication('${med.id}')" title="Удалить">
+                        <button class="btn-icon btn-danger" onclick="Medications.deleteMedication('${med.id}')" title="Удалить" style="flex: 0 0 auto;">
                             🗑️
                         </button>
                     </div>
