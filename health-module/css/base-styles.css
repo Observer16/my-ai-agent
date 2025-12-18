@@ -54,7 +54,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     border-top: 1px solid var(--health-border);
     z-index: var(--health-z-fixed);
@@ -63,30 +63,36 @@
 }
 
 body.theme-dark .health-navigation {
-    background: rgba(30, 30, 30, 0.95);
+    background: rgba(30, 30, 30, 0.98);
 }
 
 .health-tabs {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 равных колонок */
+    max-width: 600px;
+    margin: 0 auto;
+    gap: 4px;
 }
 
 .health-tab {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 12px;
+    justify-content: center;
+    padding: 8px 4px;
     border-radius: var(--health-radius-sm);
     cursor: pointer;
     transition: all var(--health-transition-fast);
-    min-width: 60px;
     text-decoration: none;
-    color: inherit;
+    color: var(--health-text-light);
+    background: transparent;
+    border: none;
+    font-family: inherit;
 }
 
 .health-tab:hover {
     background: var(--health-hover-bg);
+    color: var(--health-text);
 }
 
 .health-tab:focus-visible {
@@ -100,18 +106,38 @@ body.theme-dark .health-navigation {
 }
 
 .health-tab.active .tab-icon {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .tab-icon {
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 4px;
     transition: transform var(--health-transition-fast);
 }
 
 .tab-text {
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.health-tab.active .tab-text {
+    font-weight: 700;
+}
+
+/* Анимация иконки настроек */
+.health-tab-settings .tab-icon {
+    transition: transform 0.3s ease;
+}
+
+.health-tab-settings:hover .tab-icon {
+    transform: rotate(45deg);
+}
+
+.health-tab-settings.active .tab-icon {
+    transform: rotate(45deg) scale(1.15);
 }
 
 /* Карточки */
@@ -408,24 +434,28 @@ body.theme-dark .health-navigation {
 @media (max-width: 768px) {
     .health-container {
         padding: 12px;
-        padding-bottom: 70px;
+        padding-bottom: 75px;
     }
 
     .health-card {
         padding: 16px;
     }
 
+    .health-tabs {
+        gap: 2px;
+    }
+
     .health-tab {
-        padding: 6px 8px;
-        min-width: 50px;
+        padding: 6px 2px;
     }
 
     .tab-icon {
-        font-size: 18px;
+        font-size: 22px;
+        margin-bottom: 2px;
     }
 
     .tab-text {
-        font-size: 11px;
+        font-size: 10px;
     }
 }
 
@@ -435,13 +465,23 @@ body.theme-dark .health-navigation {
         padding-bottom: 70px;
     }
 
+    .health-tabs {
+        gap: 0;
+        padding: 0 4px;
+    }
+
     .health-tab {
-        padding: 4px 6px;
-        min-width: 45px;
+        padding: 6px 2px;
+    }
+
+    .tab-icon {
+        font-size: 20px;
+        margin-bottom: 2px;
     }
 
     .tab-text {
-        font-size: 10px;
+        font-size: 9px;
+        font-weight: 600;
     }
 
     .form-actions {
