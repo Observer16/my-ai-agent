@@ -60,11 +60,11 @@ const Medications = (function() {
                         </div>
                     ` : ''}
 
-                    <div class="medication-actions" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
-                        <button class="btn-icon" onclick="Medications.editMedication('${med.id}')" title="Редактировать" style="flex: 0 0 auto;">
+                    <div class="medication-actions">
+                        <button class="btn-icon" onclick="Medications.editMedication('${med.id}')" title="Редактировать">
                             ✏️
                         </button>
-                        <button class="btn-icon btn-danger" onclick="Medications.deleteMedication('${med.id}')" title="Удалить" style="flex: 0 0 auto;">
+                        <button class="btn-icon btn-danger" onclick="Medications.deleteMedication('${med.id}')" title="Удалить">
                             🗑️
                         </button>
                     </div>
