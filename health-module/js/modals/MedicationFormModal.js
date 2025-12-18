@@ -82,11 +82,37 @@ const MedicationFormModal = (function() {
 
     async function loadMedicationData(id) {
         try {
-            showToast('⚠️ Редактирование в разработке', 'info');
-            close();
+            const result = await HealthAPI.getMedication(id);
+
+            if (result.success && result.data) {
+                const med = result.data;
+
+                // Заполняем formData из загруженных данных
+                formData.name = med.name || '';
+                formData.dosage = med.dosage || '';
+                formData.form = med.form || 'таблетки';
+                formData.instructions = med.instructions || '';
+                formData.intake_type = med.intake_type || 'постоянно';
+                formData.start_date = med.start_date || new Date().toISOString().split('T')[0];
+                formData.end_date = med.end_date || null;
+                formData.quantity_available = med.quantity_available || 0;
+                formData.quantity_threshold = med.quantity_threshold || 5;
+                formData.quantity_unit = med.quantity_unit || 'таблетки';
+                formData.schedules = (med.schedules || []).map(s => ({
+                    days_of_week: s.days_of_week || [],
+                    time_of_day: s.time_of_day || '08:00',
+                    dosage_amount: s.dosage_amount || 1.0,
+                    reminder_minutes: s.reminder_minutes || 10,
+                    is_active: s.is_active !== false
+                }));
+
+                console.log('✅ Данные лекарства загружены:', formData);
+            } else {
+                throw new Error('Лекарство не найдено');
+            }
         } catch (error) {
             console.error('❌ Ошибка загрузки лекарства:', error);
-            showToast('❌ Не удалось загрузить данные', 'error');
+            showToast('❌ Не удалось загрузить данные: ' + error.message, 'error');
             close();
         }
     }
