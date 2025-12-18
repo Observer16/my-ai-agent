@@ -89,9 +89,9 @@ const MedicationFormModal = (function() {
 
                 // Заполняем formData из загруженных данных
                 formData.name = med.name || '';
-                formData.dosage = med.dosage || '';
-                formData.form = med.form || 'таблетки';
-                formData.instructions = med.instructions || '';
+                formData.dosage = (med.dosage && med.dosage !== 'string') ? med.dosage : '';
+                formData.form = (med.form && med.form !== 'string') ? med.form : 'таблетки';
+                formData.instructions = (med.instructions && med.instructions !== 'string') ? med.instructions : '';
                 formData.intake_type = med.intake_type || 'постоянно';
                 formData.start_date = med.start_date || new Date().toISOString().split('T')[0];
                 formData.end_date = med.end_date || null;
