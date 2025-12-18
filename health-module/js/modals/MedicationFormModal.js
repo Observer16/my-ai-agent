@@ -99,6 +99,7 @@ const MedicationFormModal = (function() {
                 formData.quantity_threshold = med.quantity_threshold || 5;
                 formData.quantity_unit = med.quantity_unit || 'таблетки';
                 formData.schedules = (med.schedules || []).map(s => ({
+                    id: s.id,
                     days_of_week: s.days_of_week || [],
                     time_of_day: s.time_of_day || '08:00',
                     dosage_amount: s.dosage_amount || 1.0,
@@ -942,12 +943,48 @@ const MedicationFormModal = (function() {
             let result;
             if (medicationId) {
                 // РЕДАКТИРОВАНИЕ существующего лекарства
+
+                // 1. Обновляем основную информацию (без расписаний)
                 result = await HealthAPI.updateMedication(medicationId, medicationData);
-                if (result.success) {
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Ошибка обновления лекарства');
+                }
+
+                // 2. Обновляем расписания
+                const scheduleErrors = [];
+                for (const schedule of formData.schedules) {
+                    if (schedule.id) {
+                        // Существующее расписание - обновляем
+                        const scheduleResult = await HealthAPI.updateMedicationSchedule(
+                            medicationId,
+                            schedule.id,
+                            {
+                                time_of_day: schedule.time_of_day,
+                                days_of_week: schedule.days_of_week,
+                                dosage_amount: schedule.dosage_amount,
+                                reminder_minutes: schedule.reminder_minutes,
+                                is_active: schedule.is_active !== false
+                            }
+                        );
+
+                        if (!scheduleResult.success) {
+                            scheduleErrors.push(`Расписание ${schedule.time_of_day}: ${scheduleResult.error}`);
+                        }
+                    }
+                    // Новые расписания (без id) игнорируем - они не будут созданы
+                    // Для создания новых расписаний нужен отдельный POST endpoint
+                }
+
+                if (scheduleErrors.length > 0) {
+                    console.warn('⚠️ Ошибки обновления расписаний:', scheduleErrors);
+                    showToast('✅ Лекарство обновлено, но есть проблемы с расписаниями', 'warning');
+                } else {
                     showToast('✅ Лекарство обновлено', 'success');
                 }
+
             } else {
-                // СОЗДАНИЕ нового лекарства
+                // СОЗДАНИЕ нового лекарства (с расписаниями)
                 result = await HealthAPI.createMedication(medicationData);
                 if (result.success) {
                     showToast('✅ Лекарство добавлено', 'success');

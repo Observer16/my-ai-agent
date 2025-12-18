@@ -675,6 +675,25 @@ const HealthAPI = (function() {
     }
 
     /**
+     * Обновить расписание приема лекарства
+     */
+    async function updateMedicationSchedule(medicationId, scheduleId, scheduleData) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/medications/${medicationId}/schedules/${scheduleId}`, {
+                method: 'PATCH',
+                headers: getHeaders(),
+                body: JSON.stringify(scheduleData)
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Получить статус Telegram привязки
      */
     async function getTelegramStatus() {
@@ -791,6 +810,7 @@ const HealthAPI = (function() {
         getHealthStatistics,
         createMedication,
         updateMedication,
+        updateMedicationSchedule,
         updateMedicationStock,
         getLowStockMedications,
         checkLowStock,
