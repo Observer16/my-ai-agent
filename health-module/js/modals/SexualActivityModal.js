@@ -92,13 +92,13 @@ const SexualActivityModal = (function() {
                 description: 'Нет активности'
             },
             {
-                value: 'защищенный_секс',
+                value: 'защищенный секс',
                 label: 'Защищенный секс',
                 icon: '🛡️',
                 description: 'С использованием контрацепции'
             },
             {
-                value: 'незащищенный_секс',
+                value: 'незащищенный секс',
                 label: 'Незащищенный секс',
                 icon: '⚠️',
                 description: 'Без контрацепции'
@@ -115,13 +115,13 @@ const SexualActivityModal = (function() {
             return [
                 ...baseOptions,
                 {
-                    value: 'период_овуляции',
+                    value: 'период овуляции',
                     label: 'В период овуляции',
                     icon: '🌸',
                     description: 'Повышенная фертильность'
                 },
                 {
-                    value: 'во_время_месячных',
+                    value: 'во время месячных',
                     label: 'Во время месячных',
                     icon: '🩸',
                     description: ''
