@@ -49,14 +49,14 @@ const MedicationFormModal = (function() {
         { value: 6, label: 'Вс', fullLabel: 'Воскресенье' }
     ];
 
-    function show(data = {}) {
+    async function show(data = {}) {
         console.log('💊 Открытие формы лекарства:', data);
 
         currentStep = 1;
         medicationId = data.medicationId || null;
 
         if (medicationId) {
-            loadMedicationData(medicationId);
+            await loadMedicationData(medicationId);
         } else {
             resetFormData();
         }
