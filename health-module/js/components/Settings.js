@@ -36,7 +36,6 @@ const SettingsComponent = {
 
                 <div class="settings-content">
                     ${this.renderTelegramSection()}
-                    ${this.renderNotificationsSection()}
                 </div>
             </div>
         `;
@@ -83,6 +82,9 @@ const SettingsComponent = {
         }
 
         if (this.state.telegramStatus.is_linked) {
+            // Проверяем статус уведомлений
+            const notifEnabled = this.state.notifications?.enabled ?? true;
+
             return `
                 <div class="status-card status-linked">
                     <div class="status-content">
@@ -100,13 +102,23 @@ const SettingsComponent = {
                             ` : ''}
                         </div>
                     </div>
-                    <button 
-                        onclick="SettingsComponent.unlinkTelegram()"
-                        class="btn btn-danger btn-sm"
-                        ${this.state.loading ? 'disabled' : ''}
-                    >
-                        Отвязать
-                    </button>
+
+                    <div class="notification-status ${notifEnabled ? 'enabled' : 'disabled'}">
+                        <span class="status-icon">${notifEnabled ? '🔔' : '🔕'}</span>
+                        <span class="status-text">
+                            Уведомления ${notifEnabled ? 'включены' : 'отключены'}
+                        </span>
+                    </div>
+
+                    <div class="button-center">
+                        <button
+                            onclick="SettingsComponent.toggleNotifications(${!notifEnabled})"
+                            class="btn ${notifEnabled ? 'btn-secondary' : 'btn-primary'}"
+                            ${this.state.loading ? 'disabled' : ''}
+                        >
+                            ${notifEnabled ? '🔕 Отключить уведомления' : '🔔 Включить уведомления'}
+                        </button>
+                    </div>
                 </div>
             `;
         } else {
@@ -136,7 +148,7 @@ const SettingsComponent = {
         // Если нет кода - показываем кнопку
         if (!this.state.linkCode) {
             return `
-                <button 
+                <button
                     onclick="SettingsComponent.generateLinkCode()"
                     class="btn btn-primary btn-block"
                     ${this.state.loading ? 'disabled' : ''}
@@ -172,14 +184,14 @@ const SettingsComponent = {
                 </ol>
 
                 <div class="code-input-group">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         readonly
                         value="/link ${this.state.linkCode.link_code}"
                         class="code-input"
                         id="link-code-input"
                     />
-                    <button 
+                    <button
                         onclick="SettingsComponent.copyCode()"
                         class="btn btn-copy"
                         title="Скопировать"
@@ -188,7 +200,7 @@ const SettingsComponent = {
                     </button>
                 </div>
 
-                <button 
+                <button
                     onclick="SettingsComponent.clearLinkCode()"
                     class="btn btn-link btn-sm"
                 >
@@ -199,52 +211,9 @@ const SettingsComponent = {
     },
 
     /**
-     * Рендер секции настроек уведомлений
-     */
-    renderNotificationsSection() {
-        // Показываем только если аккаунт привязан
-        if (!this.state.telegramStatus?.is_linked || !this.state.notifications) {
-            return '';
-        }
-
-        return `
-            <div class="settings-section notifications-section">
-                <div class="section-header">
-                    <div class="section-icon">🔔</div>
-                    <div class="section-info">
-                        <h2 class="section-title">Настройки уведомлений</h2>
-                        <p class="section-description">
-                            Управление напоминаниями о приёме
-                        </p>
-                    </div>
-                </div>
-
-                <div class="notification-setting">
-                    <div class="setting-info">
-                        <p class="setting-title">Telegram уведомления</p>
-                        <p class="setting-description">
-                            ${this.state.notifications.enabled ? 'Уведомления включены' : 'Уведомления отключены'}
-                        </p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input 
-                            type="checkbox" 
-                            ${this.state.notifications.enabled ? 'checked' : ''}
-                            onchange="SettingsComponent.toggleNotifications(this.checked)"
-                            ${this.state.loading ? 'disabled' : ''}
-                        />
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-        `;
-    },
-
-    /**
      * Инициализация компонента
      */
     async init() {
-        console.log('🎨 Инициализация компонента настроек...');
         await this.loadAllData();
     },
 
@@ -314,53 +283,39 @@ const SettingsComponent = {
     },
 
     /**
-     * Отвязка Telegram
-     */
-    async unlinkTelegram() {
-        if (!confirm('Отвязать Telegram? Уведомления перестанут приходить.')) {
-            return;
-        }
-
-        this.state.loading = true;
-        this.updateView();
-
-        try {
-            const response = await HealthAPI.unlinkTelegram();
-            if (response.success) {
-                await this.loadAllData();
-                this.clearLinkCode();
-                this.showSuccess('Telegram отвязан');
-            } else {
-                this.showError('Ошибка отвязки аккаунта');
-            }
-        } catch (error) {
-            console.error('Ошибка отвязки:', error);
-            this.showError('Не удалось отвязать аккаунт');
-        } finally {
-            this.state.loading = false;
-            this.updateView();
-        }
-    },
-
-    /**
      * Переключение уведомлений
      */
     async toggleNotifications(enabled) {
         this.state.loading = true;
+        this.updateView();
 
         try {
-            const response = await HealthAPI.updateNotificationSettings({ enabled });
-            if (response.success) {
-                await this.loadNotificationSettings();
-                this.showSuccess(enabled ? 'Уведомления включены' : 'Уведомления отключены');
+            let response;
+
+            if (enabled) {
+                // Включаем уведомления
+                response = await HealthAPI.updateNotificationSettings({ enabled: true });
             } else {
-                this.showError('Ошибка обновления настроек');
+                // Отключаем через unlinkTelegram (который теперь только отключает уведомления)
+                response = await HealthAPI.unlinkTelegram();
+            }
+
+            if (response.success) {
+                await this.loadAllData();
+                this.showSuccess(enabled ? '✅ Уведомления включены' : '✅ Уведомления отключены');
+            } else {
+                this.showError('❌ Ошибка изменения настроек');
+                // Восстанавливаем состояние
+                await this.loadNotificationSettings();
             }
         } catch (error) {
-            console.error('Ошибка обновления настроек:', error);
-            this.showError('Не удалось обновить настройки');
+            console.error('Ошибка переключения уведомлений:', error);
+            this.showError('❌ Не удалось изменить настройки');
+            // Восстанавливаем состояние
+            await this.loadNotificationSettings();
         } finally {
             this.state.loading = false;
+            this.updateView();
         }
     },
 
@@ -395,13 +350,13 @@ const SettingsComponent = {
         this.stopCountdown();
 
         const expiresAt = new Date(this.state.linkCode.expires_at).getTime();
-        
+
         this.state.countdownTimer = setInterval(() => {
             const now = Date.now();
             const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
-            
+
             this.state.countdown = remaining;
-            
+
             if (remaining === 0) {
                 this.clearLinkCode();
             } else {
@@ -458,12 +413,6 @@ const SettingsComponent = {
         const linkCodeContainer = document.getElementById('telegram-link-code-container');
         if (linkCodeContainer) {
             linkCodeContainer.innerHTML = this.renderLinkCodeSection();
-        }
-
-        // Обновляем секцию уведомлений
-        const notificationsSection = document.querySelector('.notifications-section');
-        if (notificationsSection) {
-            notificationsSection.outerHTML = this.renderNotificationsSection();
         }
     },
 
