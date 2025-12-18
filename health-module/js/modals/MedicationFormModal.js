@@ -40,13 +40,13 @@ const MedicationFormModal = (function() {
     ];
 
     const DAYS_OF_WEEK = [
-        { value: 1, label: 'Пн', fullLabel: 'Понедельник' },
-        { value: 2, label: 'Вт', fullLabel: 'Вторник' },
-        { value: 3, label: 'Ср', fullLabel: 'Среда' },
-        { value: 4, label: 'Чт', fullLabel: 'Четверг' },
-        { value: 5, label: 'Пт', fullLabel: 'Пятница' },
-        { value: 6, label: 'Сб', fullLabel: 'Суббота' },
-        { value: 0, label: 'Вс', fullLabel: 'Воскресенье' }
+        { value: 0, label: 'Пн', fullLabel: 'Понедельник' },
+        { value: 1, label: 'Вт', fullLabel: 'Вторник' },
+        { value: 2, label: 'Ср', fullLabel: 'Среда' },
+        { value: 3, label: 'Чт', fullLabel: 'Четверг' },
+        { value: 4, label: 'Пт', fullLabel: 'Пятница' },
+        { value: 5, label: 'Сб', fullLabel: 'Суббота' },
+        { value: 6, label: 'Вс', fullLabel: 'Воскресенье' }
     ];
 
     function show(data = {}) {
@@ -475,6 +475,19 @@ const MedicationFormModal = (function() {
                             </div>
 
                             <div class="form-group">
+                                <label for="schedule-reminder">Напомнить за (минут)</label>
+                                <select id="schedule-reminder" class="modal-input">
+                                    <option value="0">Не напоминать</option>
+                                    <option value="5">5 минут</option>
+                                    <option value="10" selected>10 минут</option>
+                                    <option value="15">15 минут</option>
+                                    <option value="30">30 минут</option>
+                                    <option value="60">1 час</option>
+                                    <option value="120">2 часа</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
                                 <label for="schedule-dosage">Количество</label>
                                 <div class="quantity-input-group">
                                     <button
@@ -657,7 +670,10 @@ const MedicationFormModal = (function() {
                 return true;
 
             case 4:
-                // Расписание опционально
+                if (formData.schedules.length === 0) {
+                    showToast('⚠️ Добавьте хотя бы одно время приёма', 'warning');
+                    return false;
+                }
                 return true;
 
             default:
@@ -732,7 +748,8 @@ const MedicationFormModal = (function() {
     let tempSchedule = {
         days_of_week: [],
         time_of_day: '08:00',
-        dosage_amount: 1.0
+        dosage_amount: 1.0,
+        reminder_minutes: 10
     };
 
     function showScheduleForm() {
@@ -785,18 +802,18 @@ const MedicationFormModal = (function() {
     }
 
     function selectWeekdays() {
-        tempSchedule.days_of_week = [1, 2, 3, 4, 5];
+        tempSchedule.days_of_week = [0, 1, 2, 3, 4];  // Было [1, 2, 3, 4, 5]
         document.querySelectorAll('.day-btn').forEach(btn => {
             const day = parseInt(btn.dataset.day);
-            btn.classList.toggle('active', day >= 1 && day <= 5);
+            btn.classList.toggle('active', day >= 0 && day <= 4);  // Было day >= 1 && day <= 5
         });
     }
 
     function selectWeekends() {
-        tempSchedule.days_of_week = [0, 6];
+        tempSchedule.days_of_week = [5, 6];  // Было [0, 6]
         document.querySelectorAll('.day-btn').forEach(btn => {
             const day = parseInt(btn.dataset.day);
-            btn.classList.toggle('active', day === 0 || day === 6);
+            btn.classList.toggle('active', day === 5 || day === 6);  // Было day === 0 || day === 6
         });
     }
 
@@ -838,10 +855,15 @@ const MedicationFormModal = (function() {
         }
 
         // Добавляем расписание
+        const reminderInput = document.getElementById('schedule-reminder');
+        const reminderMinutes = parseInt(reminderInput?.value || 10);
+
         formData.schedules.push({
             days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
             time_of_day: timeInput.value,
-            dosage_amount: dosage
+            dosage_amount: dosage,
+            reminder_minutes: reminderMinutes,
+            is_active: true
         });
 
         console.log('✅ Расписание добавлено:', formData.schedules);
@@ -883,7 +905,9 @@ const MedicationFormModal = (function() {
                 schedules: formData.schedules.map(s => ({
                     days_of_week: s.days_of_week,
                     time_of_day: s.time_of_day,
-                    dosage_amount: s.dosage_amount
+                    dosage_amount: s.dosage_amount,
+                    reminder_minutes: s.reminder_minutes,
+                    is_active: s.is_active !== false
                 }))
             };
 
