@@ -29,10 +29,12 @@ const Dashboard = (function() {
     }
 
     function renderMedicationList(medications) {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+
         let html = '<div class="medication-list">';
 
         medications.forEach((med, index) => {
-            // Используем данные В ТОМ ЖЕ ФОРМАТЕ, что приходят от API
             const medicationId = med.medication_id || '';
             const scheduleId = med.schedule_id || '';
             const time = HealthFormatters.formatTime(med.time_of_day);
@@ -41,10 +43,8 @@ const Dashboard = (function() {
             const takenTime = med.taken_time ?
                 `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : '';
 
-            // Берем данные напрямую из API формата
             const medicationName = med.medication_name || 'Лекарство';
 
-            // Если дозировка null или пустая, показываем "одна"
             let dosage = 'одна шт.';
             if (med.dosage !== null && med.dosage !== undefined && med.dosage !== '') {
                 dosage = med.dosage;
@@ -52,22 +52,36 @@ const Dashboard = (function() {
 
             const form = med.form || 'Не указана';
 
-            console.log(`📝 API данные для лекарства ${index + 1}:`, {
-                medicationId,
-                medicationName,
-                originalDosage: med.dosage,
-                displayedDosage: dosage,
-                form,
-                time,
-                status
-            });
+            // Проверяем время напоминания
+            const [hours, minutes] = med.time_of_day.split(':').map(Number);
+            const scheduleTime = hours * 60 + minutes;
+            const reminderMinutes = med.reminder_minutes || 0;
+            const reminderTime = scheduleTime - reminderMinutes;
 
-            // Используем ID напрямую - не меняем формат
+            const showActions = currentTime >= reminderTime;
+            const timeUntilReminder = reminderTime - currentTime;
+
             const safeMedicationId = medicationId || '';
             const safeScheduleId = scheduleId || '';
 
+            let statusClass = 'pending';
+            let statusInfo = '';
+
+            if (isTaken) {
+                statusClass = 'taken';
+            } else if (!showActions) {
+                statusClass = 'waiting';
+                const hoursUntil = Math.floor(timeUntilReminder / 60);
+                const minsUntil = timeUntilReminder % 60;
+                statusInfo = `
+                    <div class="medication-reminder-info">
+                        🔔 Напоминание появится в ${String(Math.floor(reminderTime / 60)).padStart(2, '0')}:${String(reminderTime % 60).padStart(2, '0')}
+                    </div>
+                `;
+            }
+
             html += `
-                <div class="medication-card ${isTaken ? 'taken' : ''}"
+                <div class="medication-card status-${statusClass}"
                      data-medication-id="${safeMedicationId}"
                      data-schedule-id="${safeScheduleId}"
                      id="med-card-${index}">
@@ -78,19 +92,21 @@ const Dashboard = (function() {
                             <div class="medication-dosage">${dosage}</div>
                             <div class="medication-form">${form}</div>
                         </div>
-                        <div class="medication-actions">
-                            ${isTaken ?
-                                `<button class="health-btn btn-success" disabled>
-                                    ✅ Принято ${takenTime}
-                                </button>` :
-                                `<button class="health-btn btn-primary" data-action="take">
-                                    ✅ Принять
-                                </button>
-                                <button class="health-btn btn-secondary" data-action="skip">
-                                    ⏭ Пропустить
-                                </button>`
-                            }
-                        </div>
+                        ${showActions ? `
+                            <div class="medication-actions">
+                                ${isTaken ?
+                                    `<button class="health-btn btn-success" disabled>
+                                        ✅ Принято ${takenTime}
+                                    </button>` :
+                                    `<button class="health-btn btn-primary" data-action="take">
+                                        ✅ Принять
+                                    </button>
+                                    <button class="health-btn btn-secondary" data-action="skip">
+                                        ⏭ Пропустить
+                                    </button>`
+                                }
+                            </div>
+                        ` : statusInfo}
                     </div>
                 </div>
             `;

@@ -10,6 +10,17 @@ const Medications = (function() {
         initArchiveToggle();
     }
 
+    function shouldShowActions(timeOfDay, reminderMinutes) {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes(); // текущее время в минутах
+
+        const [hours, minutes] = timeOfDay.split(':').map(Number);
+        const scheduleTime = hours * 60 + minutes; // время приема в минутах
+        const reminderTime = scheduleTime - (reminderMinutes || 0); // время напоминания
+
+        return currentTime >= reminderTime;
+    }
+
     function renderMedicationsList() {
         const container = document.getElementById('medications-list');
         if (!container) {
