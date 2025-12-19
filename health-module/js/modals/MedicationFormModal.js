@@ -573,6 +573,7 @@ const MedicationFormModal = (function() {
             .join(', ');
 
         const unitInfo = QUANTITY_UNITS.find(u => u.value === formData.quantity_unit) || QUANTITY_UNITS[0];
+        const reminderText = schedule.reminder_minutes === 0 ? 'без напоминания' : `за ${schedule.reminder_minutes} мин`;
 
         return `
             <div class="schedule-item">
@@ -585,15 +586,28 @@ const MedicationFormModal = (function() {
                     <div class="schedule-dosage">
                         ${schedule.dosage_amount} ${unitInfo.label.toLowerCase()}
                     </div>
+                    <div class="schedule-reminder" style="font-size: 12px; color: var(--health-text-light);">
+                        🔔 ${reminderText}
+                    </div>
                 </div>
-                <button
-                    type="button"
-                    class="schedule-item-delete"
-                    onclick="MedicationFormModal.removeSchedule(${index})"
-                    title="Удалить"
-                >
-                    🗑️
-                </button>
+                <div class="schedule-item-actions">
+                    <button
+                        type="button"
+                        class="schedule-item-edit"
+                        onclick="MedicationFormModal.editSchedule(${index})"
+                        title="Редактировать"
+                    >
+                        ✏️
+                    </button>
+                    <button
+                        type="button"
+                        class="schedule-item-delete"
+                        onclick="MedicationFormModal.removeSchedule(${index})"
+                        title="Удалить"
+                    >
+                        🗑️
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -933,25 +947,38 @@ const MedicationFormModal = (function() {
             return;
         }
 
-        // Добавляем расписание
         const reminderInput = document.getElementById('schedule-reminder');
         const reminderMinutes = parseInt(reminderInput?.value || 10);
 
-        formData.schedules.push({
-            days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
-            time_of_day: timeInput.value,
-            dosage_amount: dosage,
-            reminder_minutes: reminderMinutes,
-            is_active: true
-        });
-
-        console.log('✅ Расписание добавлено:', formData.schedules);
+        if (editingScheduleIndex !== null) {
+            // РЕДАКТИРОВАНИЕ существующего расписания
+            formData.schedules[editingScheduleIndex] = {
+                ...formData.schedules[editingScheduleIndex], // Сохраняем id если есть
+                days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
+                time_of_day: timeInput.value,
+                dosage_amount: dosage,
+                reminder_minutes: reminderMinutes,
+                is_active: true
+            };
+            console.log('✅ Расписание обновлено:', formData.schedules[editingScheduleIndex]);
+            showToast('✅ Расписание обновлено', 'success');
+            editingScheduleIndex = null;
+        } else {
+            // ДОБАВЛЕНИЕ нового расписания
+            formData.schedules.push({
+                days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
+                time_of_day: timeInput.value,
+                dosage_amount: dosage,
+                reminder_minutes: reminderMinutes,
+                is_active: true
+            });
+            console.log('✅ Расписание добавлено:', formData.schedules);
+            showToast('✅ Время приёма добавлено', 'success');
+        }
 
         // Закрываем форму и обновляем список
         hideScheduleForm();
         renderStep(4);
-
-        showToast('✅ Время приёма добавлено', 'success');
     }
 
     function removeSchedule(index) {
