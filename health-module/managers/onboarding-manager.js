@@ -6,6 +6,7 @@ const OnboardingManager = (function() {
     async function checkIfNeeded(userGender) {
         console.log('🎯 Проверка необходимости онбординга...', {
             stateGender: userGender,
+            typeOfGender: typeof userGender,
             cachedGender: localStorage.getItem('health_user_gender')
         });
 
@@ -15,15 +16,15 @@ const OnboardingManager = (function() {
             return false;
         }
 
-        // Проверяем гендер в state
-        if (userGender && userGender !== 'null' && userGender !== '') {
+        // Проверяем гендер в state (ИСПРАВЛЕНО: проверка на null, а не 'null')
+        if (userGender && userGender !== null && userGender !== 'null' && userGender !== '') {
             console.log('✅ Гендер уже указан в state:', userGender);
             return false;
         }
 
         // Проверяем кэш в localStorage
         const cachedGender = localStorage.getItem('health_user_gender');
-        if (cachedGender && cachedGender !== 'null' && cachedGender !== '') {
+        if (cachedGender && cachedGender !== 'null' && cachedGender !== '' && cachedGender !== 'undefined') {
             console.log('✅ Гендер найден в кэше:', cachedGender);
             StateManager.updateState({ userGender: cachedGender });
             return false;
