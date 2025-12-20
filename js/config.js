@@ -4,10 +4,10 @@
 
 const CONFIG = {
     // API настройки
-    API_URL: 'https://f9e103bcce21.ngrok-free.app',
+    API_URL: 'https://5ade98c43ee3.ngrok-free.app',
     
     // Версия приложения
-    VERSION: '4.1.6',
+    VERSION: '4.1.7',
     
     // Endpoints
     ENDPOINTS: {
