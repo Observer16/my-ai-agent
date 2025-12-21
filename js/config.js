@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // API настройки
-    API_URL: 'https://bcc159b5b3d1.ngrok-free.app',
+    API_URL: 'https://4e3c5f4c15df.ngrok-free.app',
     
     // Версия приложения
     VERSION: '4.1.7',
