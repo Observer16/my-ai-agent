@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // API настройки
-    API_URL: 'api.smartsaving.fun',
+    API_URL: 'https://api.smartsaving.fun',
     
     // Версия приложения
     VERSION: '4.1.7',
