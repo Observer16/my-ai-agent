@@ -17,15 +17,16 @@ const OnboardingManager = (function() {
             return false;
         }
 
-        // Проверяем гендер в state (ИСПРАВЛЕНО: проверка на null, а не 'null')
-        if (userGender && userGender !== null && userGender !== 'null' && userGender !== '') {
+        // Проверяем гендер - он должен быть строкой и иметь допустимое значение
+        const validGenders = ['male', 'female', 'other', 'prefer_not_to_say'];
+        if (userGender && typeof userGender === 'string' && validGenders.includes(userGender)) {
             console.log('✅ Гендер уже указан в state:', userGender);
             return false;
         }
 
         // Проверяем кэш в localStorage
         const cachedGender = localStorage.getItem('health_user_gender');
-        if (cachedGender && cachedGender !== 'null' && cachedGender !== '' && cachedGender !== 'undefined') {
+        if (cachedGender && typeof cachedGender === 'string' && validGenders.includes(cachedGender)) {
             console.log('✅ Гендер найден в кэше:', cachedGender);
             StateManager.updateState({ userGender: cachedGender });
             return false;
@@ -76,7 +77,7 @@ const OnboardingManager = (function() {
             HealthUI.initOnboardingComponents();
         }
 
-        // ВОЗВРАЩАЕМ ПРОМИС, который разрешится когда онбординг завершится
+        // Возвращаем промис, который разрешится когда онбординг завершится
         return new Promise((resolve) => {
             EventManager.on('onboarding:completed', () => {
                 console.log('🎉 Онбординг завершен в менеджере');
@@ -85,7 +86,7 @@ const OnboardingManager = (function() {
         });
     }
 
-    // Сохранить гендер пользователя (ОБНОВЛЕНО!)
+    // Сохранить гендер пользователя
     async function saveGender(gender) {
         try {
             console.log('💾 Сохраняем гендер:', gender);
@@ -101,7 +102,7 @@ const OnboardingManager = (function() {
                 StateManager.updateState({ userGender: gender });
                 localStorage.setItem('health_user_gender', gender);
 
-                // 🆕 ИНВАЛИДАЦИЯ КЭША ОПЦИЙ
+                // Инвалидация кэша опций
                 if (window.OptionsCache && typeof OptionsCache.invalidate === 'function') {
                     OptionsCache.invalidate();
                     console.log('🗑️ Кэш опций инвалидирован после смены гендера');
@@ -127,14 +128,14 @@ const OnboardingManager = (function() {
         }
     }
 
-    // Завершить онбординг (БЕЗ RESTART!)
+    // Завершить онбординг
     async function complete() {
         console.log('🎉 Завершаем онбординг (переход на dashboard)...');
 
         // Завершаем онбординг
         StateManager.updateState({
             isOnboarding: false,
-            isLoading: true // будем загружать dashboard
+            isLoading: true
         });
 
         console.log('📋 Гендер после онбординга:', {
@@ -150,7 +151,7 @@ const OnboardingManager = (function() {
             await new Promise(resolve => setTimeout(resolve, 300));
         }
 
-        // ТРИГГЕРИМ СОБЫТИЕ завершения
+        // Триггерим событие завершения
         EventManager.emit('onboarding:completed');
 
         console.log('✅ Онбординг завершен');
