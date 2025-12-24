@@ -317,30 +317,11 @@ const Dashboard = (function() {
     function showSexualActivityPicker() {
         console.log('🔒 Открытие выбора интимности...');
         const today = new Date().toISOString().split('T')[0];
-        const state = HealthModule.getState();
-        const userGender = state.userGender;
-        const userOptions = state.userOptions;
         
-        if (!userGender || !userOptions) {
-            showToast('⚠️ Загрузка опций...', 'info');
-            return;
-        }
-
-        const sexualActivityOptions = userOptions.sexual_activity_options || [];
-        
-        if (sexualActivityOptions.length === 0) {
-            showToast('⚠️ Нет доступных опций', 'info');
-            return;
-        }
-
-        if (window.SimpleModalManager) {
-            SimpleModalManager.show('sexual-activity-picker', { 
-                date: today,
-                options: sexualActivityOptions,
-                currentValue: HealthModule.getState().todayEntry?.sexual_activity
-            });
+        if (window.SexualActivityModal) {
+            SexualActivityModal.show({ date: today });
         } else {
-            showToast('⚠️ Функция в разработке', 'info');
+            showToast('⚠️ Модальное окно не загружено', 'error');
         }
     }
 
