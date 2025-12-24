@@ -41,6 +41,23 @@ const HealthModule = (function() {
     }
 
     /**
+     * Перезапуск модуля
+     */
+    async function restart() {
+        console.log('🔄 Перезапуск модуля здоровья...');
+        
+        try {
+            isInitialized = false;
+            StateManager.reset();
+            await init();
+            console.log('✅ Модуль успешно перезапущен');
+        } catch (error) {
+            console.error('❌ Ошибка перезапуска модуля:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Инициализация утилит
      */
     async function initUtils() {
@@ -99,7 +116,7 @@ const HealthModule = (function() {
     }
 
     /**
-     * Запуск модуля (ОБНОВЛЕННАЯ ВЕРСИЯ)
+     * Запуск модуля
      */
     async function startModule() {
         // Сбрасываем состояние
@@ -115,12 +132,11 @@ const HealthModule = (function() {
             // 1. Загружаем гендер пользователя
             await DataManager.loadUserGender();
 
-            // 2. 🆕 ПРЕДЗАГРУЖАЕМ ОПЦИИ ПОЛЬЗОВАТЕЛЯ В КЭШ (если гендер есть)
+            // 2. Предзагружаем опции пользователя в кэш (если гендер есть)
             const userGender = StateManager.getState().userGender;
             if (userGender && userGender !== 'null' && userGender !== '' && userGender !== 'undefined') {
                 console.log('⚡ Пользователь имеет гендер, предзагружаем опции:', userGender);
 
-                // Фоновая загрузка опций в кэш
                 if (typeof OptionsCache !== 'undefined' && OptionsCache.getUserOptions) {
                     try {
                         OptionsCache.getUserOptions().then(result => {
@@ -162,13 +178,12 @@ const HealthModule = (function() {
                 // Скрываем загрузку перед показом онбординга
                 DomManager.hideLoading();
 
-                // ПОКАЗЫВАЕМ ОНБОРДИНГ И ЖДЕМ ЕГО ЗАВЕРШЕНИЯ
+                // Показываем онбординг и ждем его завершения
                 await OnboardingManager.show();
 
                 console.log('✅ Онбординг завершен, продолжаем загрузку dashboard...');
 
-                // После онбординга гендер уже сохранен в state и localStorage
-                // 🆕 После онбординга также загружаем опции
+                // После онбординга также загружаем опции
                 const newGender = StateManager.getState().userGender;
                 if (newGender && typeof OptionsCache !== 'undefined') {
                     try {
@@ -183,7 +198,7 @@ const HealthModule = (function() {
             // 4. Загружаем остальные данные пользователя
             await DataManager.loadAllUserData();
 
-            // 5. ПОКАЗЫВАЕМ ТАБЫ
+            // 5. Показываем табы
             DomManager.showTabs();
 
             // 6. Загружаем начальную вкладку dashboard
@@ -206,14 +221,25 @@ const HealthModule = (function() {
         }
     }
 
-    // Публичное API (ОБНОВЛЕННАЯ ВЕРСИЯ)
+    /**
+     * Показ уведомления
+     */
+    function showToast(message, type = 'info') {
+        if (typeof window.showToast === 'function') {
+            window.showToast(message, type);
+        } else {
+            console.log(`[Toast ${type}]: ${message}`);
+        }
+    }
+
+    // Публичное API
     return {
         // Основные методы
         init,
-        restart, // ✅ Теперь функция доступна
+        restart,
         getState: () => StateManager.getState(),
 
-        // НОВАЯ ФУНКЦИЯ: Обновление гендера с инвалидацией кэша
+        // Обновление гендера с инвалидацией кэша
         updateGender: async function(gender) {
             try {
                 console.log('⚡ Обновление гендера через HealthModule.updateGender():', gender);
@@ -234,13 +260,13 @@ const HealthModule = (function() {
                 // 3. Обновляем состояние
                 StateManager.updateState({ userGender: gender });
 
-                // 4. Также обновляем localStorage (для обратной совместимости)
+                // 4. Обновляем localStorage
                 StorageHelper.set('user_gender', gender);
 
                 // 5. Показываем уведомление
                 showToast('✅ Пол обновлен', 'success');
 
-                // 6. Обновляем UI если нужно
+                // 6. Обновляем UI
                 if (window.Dashboard && typeof Dashboard.init === 'function') {
                     setTimeout(() => Dashboard.init(), 500);
                 }
@@ -309,15 +335,6 @@ const HealthModule = (function() {
             Config: HealthConfig
         }
     };
-
-// 🆕 Функция для показа уведомлений
-function showToast(message, type = 'info') {
-    if (typeof window.showToast === 'function') {
-        window.showToast(message, type);
-    } else {
-        console.log(`[Toast ${type}]: ${message}`);
-    }
-}
 
 })();
 
