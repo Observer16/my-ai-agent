@@ -199,13 +199,13 @@ const SexualActivityModal = (function() {
 
             console.log('✅ Контент сгенерирован, обновляем модальное окно');
 
-            // Обновляем модальное окно
-            const modal = document.querySelector('.base-modal-content');
+            // Обновляем модальное окно (правильный селектор!)
+            const modal = document.querySelector('.modal-body');
             if (modal) {
                 modal.innerHTML = content;
                 console.log('✅ Модальное окно обновлено');
             } else {
-                console.error('❌ Не найден элемент .base-modal-content');
+                console.error('❌ Не найден элемент .modal-body');
             }
 
         } catch (error) {
