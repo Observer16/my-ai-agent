@@ -210,7 +210,6 @@ const HealthModule = (function() {
     return {
         // Основные методы
         init,
-        restart,
         getState: () => StateManager.getState(),
 
         // Методы онбординга
