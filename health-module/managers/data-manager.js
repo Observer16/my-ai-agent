@@ -74,33 +74,12 @@ const DataManager = (function() {
                 throw new Error('HealthAPI не доступен');
             }
 
-            // Сначала пробуем получить из /health/profile/gender
-            let response = await HealthAPI.getUserGender();
-
-            console.log('⚧️ Получен гендер из /health/profile/gender:', {
-                success: response.success,
-                gender: response.data?.gender,
-                isNull: response.data?.gender === null
-            });
-
-            // Если гендер null, пробуем получить из /auth/me
-            if (response.success && (response.data?.gender === null || !response.data?.gender)) {
-                console.log('🔄 Гендер null, пробуем /auth/me...');
-                const userInfoResponse = await HealthAPI.getUserInfo();
-                
-                if (userInfoResponse.success && userInfoResponse.data?.gender) {
-                    console.log('✅ Гендер найден в /auth/me:', userInfoResponse.data.gender);
-                    response = {
-                        success: true,
-                        data: { gender: userInfoResponse.data.gender }
-                    };
-                }
-            }
+            const response = await HealthAPI.getUserGender();
 
             if (response.success && response.data) {
                 const gender = response.data.gender;
 
-                console.log('⚧️ Итоговый гендер:', {
+                console.log('⚧️ Получен гендер из API:', {
                     gender,
                     isString: typeof gender === 'string',
                     isNull: gender === null,
@@ -156,6 +135,7 @@ const DataManager = (function() {
     }
 
     // Загрузить запись за сегодня
+
     async function loadTodayEntry() {
         try {
             const today = new Date().toISOString().split('T')[0];
@@ -171,6 +151,7 @@ const DataManager = (function() {
                 EventManager.emit('data:todayEntryLoaded', response.data);
                 return response.data;
             } else {
+                // ИСПРАВЛЕНО: 404 это нормально
                 if (response.status === 404) {
                     console.log('📝 Запись за сегодня отсутствует (будет создана при первом добавлении данных)');
                 } else {
@@ -180,6 +161,7 @@ const DataManager = (function() {
                 return null;
             }
         } catch (error) {
+            // ИСПРАВЛЕНО: Не показываем 404 в консоли как ошибку
             if (error.status !== 404) {
                 console.error('❌ Ошибка загрузки записи:', error);
             }
@@ -291,6 +273,7 @@ const DataManager = (function() {
                 throw new Error('HealthAPI не доступен');
             }
 
+            // Используем новый интерфейс HealthAPI
             const response = await HealthAPI.logMedicationIntake({
                 medication_id: medicationId,
                 schedule_id: scheduleId,
