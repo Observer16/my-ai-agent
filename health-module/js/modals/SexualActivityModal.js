@@ -69,6 +69,8 @@ const SexualActivityModal = (function() {
         const state = HealthModule.getState();
         const currentActivity = state.todayEntry?.sexual_activity || '';
 
+        console.log('🔒 SexualActivityModal.show() вызван');
+
         // Показываем loader
         const loaderHtml = `
             <div style="padding: 40px; text-align: center;">
@@ -80,29 +82,39 @@ const SexualActivityModal = (function() {
         BaseModal.show(modalHtml);
 
         try {
-            // ПРАВИЛЬНО: Используем OptionsCache который сам проверит TTL и кэш
+            console.log('📡 Вызываем OptionsCache.getUserOptions()...');
+            
+            // Используем OptionsCache который сам проверит TTL и кэш
             const optionsResponse = await OptionsCache.getUserOptions();
 
+            console.log('📥 Ответ от OptionsCache:', {
+                success: optionsResponse.success,
+                source: optionsResponse.source,
+                hasData: !!optionsResponse.data,
+                dataKeys: optionsResponse.data ? Object.keys(optionsResponse.data) : [],
+                fullResponse: optionsResponse
+            });
+
             if (!optionsResponse.success) {
+                console.error('❌ OptionsCache вернул ошибку:', optionsResponse);
                 BaseModal.close();
                 showToast('❌ Не удалось загрузить опции', 'error');
-                console.error('Ошибка загрузки опций:', optionsResponse.error);
                 return;
             }
 
             const serverOptions = optionsResponse.data?.sexual_activity_options || [];
 
-            if (HealthConfig.DEBUG) {
-                console.log('⚡ Загруженные опции:', {
-                    source: optionsResponse.source,
-                    count: serverOptions.length,
-                    options: serverOptions,
-                    hasCurrent: currentActivity,
-                    currentInOptions: serverOptions.includes(currentActivity)
-                });
-            }
+            console.log('🔍 Опции сексуальной активности:', {
+                source: optionsResponse.source,
+                count: serverOptions.length,
+                options: serverOptions,
+                hasCurrent: !!currentActivity,
+                currentInOptions: serverOptions.includes(currentActivity),
+                rawData: optionsResponse.data
+            });
 
             if (serverOptions.length === 0) {
+                console.warn('⚠️ Массив sexual_activity_options пустой!');
                 BaseModal.close();
                 showToast('⚠️ Нет доступных опций', 'warning');
                 return;
@@ -185,10 +197,15 @@ const SexualActivityModal = (function() {
                 </div>
             `;
 
+            console.log('✅ Контент сгенерирован, обновляем модальное окно');
+
             // Обновляем модальное окно
             const modal = document.querySelector('.base-modal-content');
             if (modal) {
                 modal.innerHTML = content;
+                console.log('✅ Модальное окно обновлено');
+            } else {
+                console.error('❌ Не найден элемент .base-modal-content');
             }
 
         } catch (error) {
