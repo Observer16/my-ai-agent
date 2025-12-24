@@ -80,21 +80,27 @@ const SexualActivityModal = (function() {
         BaseModal.show(modalHtml);
 
         try {
-            // Получаем опции через кэш
-            const optionsResponse = await OptionsCache.getUserOptions();
+            // ИСПРАВЛЕНИЕ: Сначала пробуем взять из состояния
+            let serverOptions = state.userOptions?.sexual_activity_options || [];
+            
+            // Если опций нет в state, загружаем через API
+            if (serverOptions.length === 0) {
+                console.log('⚠️ Опции не найдены в state, загружаем через API...');
+                const optionsResponse = await OptionsCache.getUserOptions();
 
-            if (!optionsResponse.success) {
-                BaseModal.close();
-                showToast('❌ Не удалось загрузить опции', 'error');
-                console.error('Ошибка загрузки опций:', optionsResponse.error);
-                return;
+                if (!optionsResponse.success) {
+                    BaseModal.close();
+                    showToast('❌ Не удалось загрузить опции', 'error');
+                    console.error('Ошибка загрузки опций:', optionsResponse.error);
+                    return;
+                }
+
+                serverOptions = optionsResponse.data?.sexual_activity_options || [];
             }
-
-            const serverOptions = optionsResponse.data?.sexual_activity_options || [];
 
             if (HealthConfig.DEBUG) {
                 console.log('⚡ Загруженные опции:', {
-                    source: optionsResponse.source,
+                    source: serverOptions.length > 0 ? 'state или API' : 'нет',
                     count: serverOptions.length,
                     options: serverOptions,
                     hasCurrent: currentActivity,
