@@ -210,40 +210,61 @@ const HealthModule = (function() {
     return {
         // Основные методы
         init,
+        restart, // ✅ Теперь функция доступна
         getState: () => StateManager.getState(),
-
-        // Методы онбординга
-        setUserGender: async function(gender) {
-            return OnboardingManager.saveGender(gender);
-        },
 
         // НОВАЯ ФУНКЦИЯ: Обновление гендера с инвалидацией кэша
         updateGender: async function(gender) {
             try {
                 console.log('⚡ Обновление гендера через HealthModule.updateGender():', gender);
 
-                // Используем существующую функцию OnboardingManager
-                const success = await OnboardingManager.saveGender(gender);
+                // 1. Отправляем на сервер
+                const response = await HealthAPI.updateUserGender(gender);
 
-                if (success) {
-                    // Дополнительно можно обновить UI
-                    if (window.Dashboard && typeof Dashboard.init === 'function') {
-                        setTimeout(() => Dashboard.init(), 500);
-                    }
-
-                    return { success: true, gender };
-                } else {
-                    return { success: false, error: 'Не удалось сохранить гендер' };
+                if (!response.success) {
+                    throw new Error(response.error || 'Ошибка обновления');
                 }
 
+                // 2. Инвалидируем кэш опций
+                if (window.OptionsCache && typeof OptionsCache.invalidate === 'function') {
+                    OptionsCache.invalidate();
+                    console.log('🗑️ Кэш опций инвалидирован после смены гендера');
+                }
+
+                // 3. Обновляем состояние
+                StateManager.updateState({ userGender: gender });
+
+                // 4. Также обновляем localStorage (для обратной совместимости)
+                StorageHelper.set('user_gender', gender);
+
+                // 5. Показываем уведомление
+                showToast('✅ Пол обновлен', 'success');
+
+                // 6. Обновляем UI если нужно
+                if (window.Dashboard && typeof Dashboard.init === 'function') {
+                    setTimeout(() => Dashboard.init(), 500);
+                }
+
+                return { success: true, gender };
+
             } catch (error) {
-                console.error('❌ Ошибка в HealthModule.updateGender:', error);
+                console.error('❌ Ошибка обновления гендера:', error);
+                showToast(`❌ ${error.message}`, 'error');
                 return { success: false, error: error.message };
             }
         },
 
+        // Методы онбординга
+        setUserGender: async function(gender) {
+            return OnboardingManager.saveGender(gender);
+        },
+
         completeOnboarding: async function() {
-            return await OnboardingManager.complete();
+            const success = await OnboardingManager.complete();
+            if (success) {
+                await restart();
+            }
+            return success;
         },
 
         // Методы данных
@@ -288,6 +309,16 @@ const HealthModule = (function() {
             Config: HealthConfig
         }
     };
+
+// 🆕 Функция для показа уведомлений
+function showToast(message, type = 'info') {
+    if (typeof window.showToast === 'function') {
+        window.showToast(message, type);
+    } else {
+        console.log(`[Toast ${type}]: ${message}`);
+    }
+}
+
 })();
 
 // Глобальный экспорт
