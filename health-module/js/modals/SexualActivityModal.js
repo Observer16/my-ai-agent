@@ -80,27 +80,21 @@ const SexualActivityModal = (function() {
         BaseModal.show(modalHtml);
 
         try {
-            // ИСПРАВЛЕНИЕ: Сначала пробуем взять из состояния
-            let serverOptions = state.userOptions?.sexual_activity_options || [];
-            
-            // Если опций нет в state, загружаем через API
-            if (serverOptions.length === 0) {
-                console.log('⚠️ Опции не найдены в state, загружаем через API...');
-                const optionsResponse = await OptionsCache.getUserOptions();
+            // ПРАВИЛЬНО: Используем OptionsCache который сам проверит TTL и кэш
+            const optionsResponse = await OptionsCache.getUserOptions();
 
-                if (!optionsResponse.success) {
-                    BaseModal.close();
-                    showToast('❌ Не удалось загрузить опции', 'error');
-                    console.error('Ошибка загрузки опций:', optionsResponse.error);
-                    return;
-                }
-
-                serverOptions = optionsResponse.data?.sexual_activity_options || [];
+            if (!optionsResponse.success) {
+                BaseModal.close();
+                showToast('❌ Не удалось загрузить опции', 'error');
+                console.error('Ошибка загрузки опций:', optionsResponse.error);
+                return;
             }
+
+            const serverOptions = optionsResponse.data?.sexual_activity_options || [];
 
             if (HealthConfig.DEBUG) {
                 console.log('⚡ Загруженные опции:', {
-                    source: serverOptions.length > 0 ? 'state или API' : 'нет',
+                    source: optionsResponse.source,
                     count: serverOptions.length,
                     options: serverOptions,
                     hasCurrent: currentActivity,
@@ -204,7 +198,6 @@ const SexualActivityModal = (function() {
         }
     }
 
-    // Остальные функции (select, clear, close) остаются без изменений
     async function select(activity) {
         console.log('🔒 Выбрана активность:', activity);
 
