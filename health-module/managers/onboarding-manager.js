@@ -1,4 +1,5 @@
-// managers/onboarding-manager.js
+// health-module/managers/onboarding-manager.js
+
 const OnboardingManager = (function() {
     let isInitialized = false;
 
@@ -84,7 +85,7 @@ const OnboardingManager = (function() {
         });
     }
 
-    // Сохранить гендер пользователя
+    // Сохранить гендер пользователя (ОБНОВЛЕНО!)
     async function saveGender(gender) {
         try {
             console.log('💾 Сохраняем гендер:', gender);
@@ -100,10 +101,17 @@ const OnboardingManager = (function() {
                 StateManager.updateState({ userGender: gender });
                 localStorage.setItem('health_user_gender', gender);
 
+                // 🆕 ИНВАЛИДАЦИЯ КЭША ОПЦИЙ
+                if (window.OptionsCache && typeof OptionsCache.invalidate === 'function') {
+                    OptionsCache.invalidate();
+                    console.log('🗑️ Кэш опций инвалидирован после смены гендера');
+                }
+
                 console.log('✅ Гендер сохранен:', {
                     в_state: gender,
                     в_localStorage: localStorage.getItem('health_user_gender'),
-                    ответ_API: response.data
+                    ответ_API: response.data,
+                    кэш_очищен: true
                 });
 
                 EventManager.emit('onboarding:genderSaved', gender);

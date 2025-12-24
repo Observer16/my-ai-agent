@@ -1,4 +1,4 @@
-// health-module.js
+// health-module/js/health-module.js
 
 const HealthModule = (function() {
     let isInitialized = false;
@@ -99,7 +99,7 @@ const HealthModule = (function() {
     }
 
     /**
-     * Запуск модуля
+     * Запуск модуля (ОБНОВЛЕННАЯ ВЕРСИЯ)
      */
     async function startModule() {
         // Сбрасываем состояние
@@ -115,12 +115,46 @@ const HealthModule = (function() {
             // 1. Загружаем гендер пользователя
             await DataManager.loadUserGender();
 
-            // 2. Проверяем нужен ли онбординг
+            // 2. 🆕 ПРЕДЗАГРУЖАЕМ ОПЦИИ ПОЛЬЗОВАТЕЛЯ В КЭШ (если гендер есть)
+            const userGender = StateManager.getState().userGender;
+            if (userGender && userGender !== 'null' && userGender !== '' && userGender !== 'undefined') {
+                console.log('⚡ Пользователь имеет гендер, предзагружаем опции:', userGender);
+
+                // Фоновая загрузка опций в кэш
+                if (typeof OptionsCache !== 'undefined' && OptionsCache.getUserOptions) {
+                    try {
+                        OptionsCache.getUserOptions().then(result => {
+                            if (HealthConfig.DEBUG) {
+                                console.log('⚡ Опции предзагружены:', {
+                                    success: result.success,
+                                    source: result.source || 'unknown',
+                                    hasSexualOptions: !!result.data?.sexual_activity_options,
+                                    hasMoodOptions: !!result.data?.mood_options,
+                                    optionsCount: result.data ? Object.keys(result.data).length : 0
+                                });
+                            }
+                        }).catch(error => {
+                            console.warn('⚠️ Не удалось предзагрузить опции:', error);
+                        });
+                    } catch (error) {
+                        console.warn('⚠️ Ошибка при предзагрузке опций:', error);
+                    }
+                } else {
+                    console.warn('⚠️ OptionsCache не доступен для предзагрузки');
+                }
+            } else {
+                console.log('⚠️ Гендер пользователя не указан, пропускаем предзагрузку опций');
+            }
+
+            // 3. Проверяем нужен ли онбординг
             const needsOnboarding = await OnboardingManager.checkIfNeeded(
                 StateManager.getState().userGender
             );
 
-            console.log('🔍 Результат проверки онбординга:', { needsOnboarding });
+            console.log('🔍 Результат проверки онбординга:', {
+                needsOnboarding,
+                userGender: StateManager.getState().userGender
+            });
 
             if (needsOnboarding) {
                 console.log('🔄 Начинаем процесс онбординга...');
@@ -133,20 +167,29 @@ const HealthModule = (function() {
 
                 console.log('✅ Онбординг завершен, продолжаем загрузку dashboard...');
 
-                // После онбординга НЕ делаем restart - просто продолжаем
-                // Гендер уже сохранен в state и localStorage
+                // После онбординга гендер уже сохранен в state и localStorage
+                // 🆕 После онбординга также загружаем опции
+                const newGender = StateManager.getState().userGender;
+                if (newGender && typeof OptionsCache !== 'undefined') {
+                    try {
+                        await OptionsCache.getUserOptions();
+                        console.log('✅ Опции загружены после онбординга');
+                    } catch (error) {
+                        console.warn('⚠️ Не удалось загрузить опции после онбординга:', error);
+                    }
+                }
             }
 
-            // 3. Загружаем остальные данные пользователя
+            // 4. Загружаем остальные данные пользователя
             await DataManager.loadAllUserData();
 
-            // 4. ПОКАЗЫВАЕМ ТАБЫ
+            // 5. ПОКАЗЫВАЕМ ТАБЫ
             DomManager.showTabs();
 
-            // 5. Загружаем начальную вкладку dashboard
+            // 6. Загружаем начальную вкладку dashboard
             await TabManager.loadInitialTab('dashboard');
 
-            // 6. Обновляем состояние
+            // 7. Обновляем состояние
             StateManager.updateState({
                 isLoading: false,
                 isOnboarding: false
@@ -163,19 +206,7 @@ const HealthModule = (function() {
         }
     }
 
-    /**
-     * Перезапуск модуля
-     */
-    async function restart() {
-        console.log('🔄 Перезапуск модуля...');
-
-        isInitialized = false;
-        StateManager.reset();
-
-        await init();
-    }
-
-    // Публичное API (сохранено полностью для обратной совместимости)
+    // Публичное API (ОБНОВЛЕННАЯ ВЕРСИЯ)
     return {
         // Основные методы
         init,
@@ -185,6 +216,31 @@ const HealthModule = (function() {
         // Методы онбординга
         setUserGender: async function(gender) {
             return OnboardingManager.saveGender(gender);
+        },
+
+        // НОВАЯ ФУНКЦИЯ: Обновление гендера с инвалидацией кэша
+        updateGender: async function(gender) {
+            try {
+                console.log('⚡ Обновление гендера через HealthModule.updateGender():', gender);
+
+                // Используем существующую функцию OnboardingManager
+                const success = await OnboardingManager.saveGender(gender);
+
+                if (success) {
+                    // Дополнительно можно обновить UI
+                    if (window.Dashboard && typeof Dashboard.init === 'function') {
+                        setTimeout(() => Dashboard.init(), 500);
+                    }
+
+                    return { success: true, gender };
+                } else {
+                    return { success: false, error: 'Не удалось сохранить гендер' };
+                }
+
+            } catch (error) {
+                console.error('❌ Ошибка в HealthModule.updateGender:', error);
+                return { success: false, error: error.message };
+            }
         },
 
         completeOnboarding: async function() {
