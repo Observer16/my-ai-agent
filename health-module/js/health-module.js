@@ -244,11 +244,7 @@ const HealthModule = (function() {
         },
 
         completeOnboarding: async function() {
-            const success = await OnboardingManager.complete();
-            if (success) {
-                await restart();
-            }
-            return success;
+            return await OnboardingManager.complete();
         },
 
         // Методы данных
