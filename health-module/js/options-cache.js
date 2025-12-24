@@ -89,6 +89,16 @@ const OptionsCache = (function() {
      * Получить опции с приоритетом кэша
      */
     async function getUserOptions() {
+        // Проверяем что HealthAPI доступен
+        if (typeof HealthAPI === 'undefined' || !HealthAPI.getUserOptions) {
+            console.error('❌ HealthAPI не доступен для загрузки опций');
+            return {
+                success: false,
+                error: 'HealthAPI не доступен',
+                source: 'error'
+            };
+        }
+
         // Пытаемся получить из кэша
         const cached = get();
         if (cached) {
@@ -104,15 +114,25 @@ const OptionsCache = (function() {
             console.log('📡 Запрашиваем опции с сервера...');
         }
 
-        const response = await HealthAPI.getUserOptions();
+        try {
+            const response = await HealthAPI.getUserOptions();
 
-        if (response.success && response.data) {
-            // Сохраняем в кэш
-            save(response.data);
-            response.source = 'api';
+            if (response.success && response.data) {
+                // Сохраняем в кэш
+                save(response.data);
+                response.source = 'api';
+                return response;
+            } else {
+                return response;
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки опций:', error);
+            return {
+                success: false,
+                error: error.message,
+                source: 'error'
+            };
         }
-
-        return response;
     }
 
     /**
