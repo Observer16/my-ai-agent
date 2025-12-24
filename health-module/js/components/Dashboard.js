@@ -316,8 +316,29 @@ const Dashboard = (function() {
 
     function showSexualActivityPicker() {
         console.log('🔒 Открытие выбора интимности...');
-        if (window.SexualActivityModal) {
-            SexualActivityModal.show();
+        const today = new Date().toISOString().split('T')[0];
+        const state = HealthModule.getState();
+        const userGender = state.userGender;
+        const userOptions = state.userOptions;
+        
+        if (!userGender || !userOptions) {
+            showToast('⚠️ Загрузка опций...', 'info');
+            return;
+        }
+
+        const sexualActivityOptions = userOptions.sexual_activity_options || [];
+        
+        if (sexualActivityOptions.length === 0) {
+            showToast('⚠️ Нет доступных опций', 'info');
+            return;
+        }
+
+        if (window.SimpleModalManager) {
+            SimpleModalManager.show('sexual-activity-picker', { 
+                date: today,
+                options: sexualActivityOptions,
+                currentValue: HealthModule.getState().todayEntry?.sexual_activity
+            });
         } else {
             showToast('⚠️ Функция в разработке', 'info');
         }
@@ -404,8 +425,8 @@ const Dashboard = (function() {
         }
 
         // Очищаем ID
-        const cleanMedicationId = String(medicationId).trim().replace(/['"]/g, '');
-        const cleanScheduleId = scheduleId ? String(scheduleId).trim().replace(/['"]/g, '') : null;
+        const cleanMedicationId = String(medicationId).trim().replace(/['\"]/g, '');
+        const cleanScheduleId = scheduleId ? String(scheduleId).trim().replace(/['\"]/g, '') : null;
 
         try {
             const result = await HealthAPI.logMedicationIntake({
