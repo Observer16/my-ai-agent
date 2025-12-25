@@ -217,7 +217,6 @@ const SexualActivityModal = (function() {
 
     async function select(activity) {
         console.log('🔒 Выбрана активность:', activity);
-        import { getTodayLocal } from './utils/date-utils.js';
         const today = getTodayLocal();
 
         try {

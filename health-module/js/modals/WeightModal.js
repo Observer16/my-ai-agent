@@ -79,7 +79,6 @@ const WeightModal = (function() {
 
         console.log('💾 Сохраняем вес:', weight);
 
-        import { getTodayLocal } from './utils/date-utils.js';
         const today = getTodayLocal();
         const success = await HealthModule.updateHealthEntry(today, 'weight', weight);
 

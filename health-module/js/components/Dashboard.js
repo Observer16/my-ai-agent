@@ -304,7 +304,6 @@ const Dashboard = (function() {
 
     function showSymptomPicker() {
         console.log('🤕 Открытие выбора симптомов...');
-        import { getTodayLocal } from './utils/date-utils.js';
         const today = getTodayLocal();
 
         if (window.SymptomModal) {
@@ -318,7 +317,6 @@ const Dashboard = (function() {
 
     function showSexualActivityPicker() {
         console.log('🔒 Открытие выбора интимности...');
-        import { getTodayLocal } from './utils/date-utils.js';
         const today = getTodayLocal();
         
         if (window.SexualActivityModal) {

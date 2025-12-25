@@ -74,7 +74,6 @@ const Diary = (function() {
     }
 
     function loadToday() {
-        import { getTodayLocal } from './utils/date-utils.js';
         const today = getTodayLocal();
         loadDate(today);
     }

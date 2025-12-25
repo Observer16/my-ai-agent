@@ -138,7 +138,6 @@ const DataManager = (function() {
 
     async function loadTodayEntry() {
         try {
-            import { getTodayLocal } from './utils/date-utils.js';
             const today = getTodayLocal();
 
             if (!window.HealthAPI) {
