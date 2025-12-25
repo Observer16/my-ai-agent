@@ -138,7 +138,8 @@ const DataManager = (function() {
 
     async function loadTodayEntry() {
         try {
-            const today = new Date().toISOString().split('T')[0];
+            import { getTodayLocal } from './utils/date-utils.js';
+            const today = getTodayLocal();
 
             if (!window.HealthAPI) {
                 throw new Error('HealthAPI не доступен');

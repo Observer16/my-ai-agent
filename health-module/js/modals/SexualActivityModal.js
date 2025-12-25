@@ -217,8 +217,8 @@ const SexualActivityModal = (function() {
 
     async function select(activity) {
         console.log('🔒 Выбрана активность:', activity);
-
-        const today = new Date().toISOString().split('T')[0];
+        import { getTodayLocal } from './utils/date-utils.js';
+        const today = getTodayLocal();
 
         try {
             const response = await HealthAPI.addSexualActivity(today, activity);

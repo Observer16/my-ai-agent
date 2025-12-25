@@ -285,7 +285,8 @@ const Dashboard = (function() {
 
     function showSleepInput() {
         console.log('🌙 Открытие ввода сна...');
-        const today = new Date().toISOString().split('T')[0];
+        import { getTodayLocal } from './utils/date-utils.js';
+        const today = getTodayLocal();
         const currentSleep = HealthModule.getState().todayEntry?.sleep_hours || '';
 
         const hours = prompt('Сколько часов вы спали?', currentSleep);
@@ -303,7 +304,8 @@ const Dashboard = (function() {
 
     function showSymptomPicker() {
         console.log('🤕 Открытие выбора симптомов...');
-        const today = new Date().toISOString().split('T')[0];
+        import { getTodayLocal } from './utils/date-utils.js';
+        const today = getTodayLocal();
 
         if (window.SymptomModal) {
             SymptomModal.show({ date: today });
@@ -316,7 +318,8 @@ const Dashboard = (function() {
 
     function showSexualActivityPicker() {
         console.log('🔒 Открытие выбора интимности...');
-        const today = new Date().toISOString().split('T')[0];
+        import { getTodayLocal } from './utils/date-utils.js';
+        const today = getTodayLocal();
         
         if (window.SexualActivityModal) {
             SexualActivityModal.show({ date: today });

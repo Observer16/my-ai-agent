@@ -56,7 +56,8 @@ window.showMedicationForm = function() {
 };
 
 window.selectMood = function(mood) {
-    const today = new Date().toISOString().split('T')[0];
+    import { getTodayLocal } from './utils/date-utils.js';
+    const today = getTodayLocal();
     HealthModule.updateHealthEntry(today, 'mood', mood);
 };
 
@@ -127,7 +128,8 @@ const HealthUI = (function() {
 
         // Методы для модальных окон (для обратной совместимости)
         selectMood: async function(mood) {
-            const today = new Date().toISOString().split('T')[0];
+            import { getTodayLocal } from './utils/date-utils.js';
+            const today = getTodayLocal();
             const success = await HealthModule.updateHealthEntry(today, 'mood', mood);
             if (success) {
                 this.showToast('✅ Настроение сохранено', 'success');
@@ -140,7 +142,8 @@ const HealthUI = (function() {
             const input = document.getElementById('modal-sleep-input');
             if (!input || !input.value) return;
 
-            const today = new Date().toISOString().split('T')[0];
+            import { getTodayLocal } from './utils/date-utils.js';
+            const today = getTodayLocal();
             const success = await HealthModule.updateHealthEntry(today, 'sleep', parseFloat(input.value));
             if (success) {
                 this.showToast('✅ Сон сохранён', 'success');
@@ -153,7 +156,8 @@ const HealthUI = (function() {
             const input = document.getElementById('modal-weight-input');
             if (!input || !input.value) return;
 
-            const today = new Date().toISOString().split('T')[0];
+            import { getTodayLocal } from './utils/date-utils.js';
+            const today = getTodayLocal();
             const success = await HealthModule.updateHealthEntry(today, 'weight', parseFloat(input.value));
             if (success) {
                 this.showToast('✅ Вес сохранён', 'success');

@@ -39,7 +39,8 @@ const HealthDebug = (function() {
 
             // 6. Получение записи за сегодня
             console.log('6. Получение записи за сегодня...');
-            const today = new Date().toISOString().split('T')[0];
+            import { getTodayLocal } from './utils/date-utils.js';
+            const today = getTodayLocal();
             const todayEntry = await HealthAPI.getEntryByDate(today);
             console.log('✅ Today entry:', todayEntry);
 
