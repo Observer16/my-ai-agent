@@ -285,7 +285,7 @@ const Dashboard = (function() {
 
     function showSleepInput() {
         console.log('🌙 Открытие ввода сна...');
-        import { getTodayLocal } from './utils/date-utils.js';
+        import { getTodayLocal } from '.health-module/js/utils/date-utils.js';
         const today = getTodayLocal();
         const currentSleep = HealthModule.getState().todayEntry?.sleep_hours || '';
 
