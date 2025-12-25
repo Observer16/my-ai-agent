@@ -6,7 +6,7 @@
  * Получить текущую дату в локальном времени в формате YYYY-MM-DD
  * @returns {string} Дата в формате YYYY-MM-DD
  */
-export function getTodayLocal() {
+function getTodayLocal() {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -19,7 +19,7 @@ export function getTodayLocal() {
  * @param {Date} date - Объект Date
  * @returns {string} Дата в формате YYYY-MM-DD
  */
-export function toLocalDateString(date) {
+function toLocalDateString(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -31,7 +31,7 @@ export function toLocalDateString(date) {
  * @param {number} daysAgo - Количество дней назад
  * @returns {string} Дата в формате YYYY-MM-DD
  */
-export function getDateDaysAgo(daysAgo) {
+function getDateDaysAgo(daysAgo) {
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
     return toLocalDateString(date);
