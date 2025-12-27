@@ -83,6 +83,7 @@
 </div>
 
 <script src="../js/config.js"></script>
+<script src="../js/cache.js"></script>
 <script src="../js/api.js"></script>
 <script>
     const tg = window.Telegram.WebApp;
@@ -372,7 +373,7 @@
         if (tab === 'trends' && !trendsData.length) {
             loadTrends(currentDays);
         } else if (tab === 'compare') {
-            loadCompare();  // Всегда загружать при открытии
+            loadCompare();
         }
 
         tg.HapticFeedback.impactOccurred('light');
@@ -469,8 +470,8 @@
     tg.MainButton.setText('🔄 Обновить');
     tg.MainButton.show();
     tg.MainButton.onClick(() => {
-        if (typeof api !== 'undefined' && api.clearCache) {
-            api.clearCache();
+        if (typeof API !== 'undefined' && API.clearCache) {
+            API.clearCache();
         }
         init();
         tg.HapticFeedback.impactOccurred('medium');
