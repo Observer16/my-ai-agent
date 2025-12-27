@@ -506,12 +506,11 @@ const MedicationFormModal = (function() {
                                 <label for="schedule-reminder">Напомнить за (минут)</label>
                                 <select id="schedule-reminder" class="modal-input">
                                     <option value="0">Не напоминать</option>
+                                    <option value="1" selected>5 минуту</option>
                                     <option value="5">5 минут</option>
-                                    <option value="10" selected>10 минут</option>
+                                    <option value="10">10 минут</option>
                                     <option value="15">15 минут</option>
                                     <option value="30">30 минут</option>
-                                    <option value="60">1 час</option>
-                                    <option value="120">2 часа</option>
                                 </select>
                             </div>
 
