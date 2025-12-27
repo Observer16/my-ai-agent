@@ -1,5 +1,6 @@
 /**
  * API клиент для системы семейного бюджета
+ * Версия: 4.2.0 - С кэшированием
  */
 
 class APIClient {
@@ -23,6 +24,12 @@ class APIClient {
 
         // Инициализация Telegram Web App
         this.initTelegram();
+        
+        // 🆕 Инициализация кэша (если доступен)
+        this.cache = window.Cache || null;
+        if (this.cache) {
+            console.log('✅ Кэширование активировано');
+        }
     }
 
     /**
@@ -65,12 +72,39 @@ class APIClient {
 
         return headers;
     }
+    
+    /**
+     * Извлечь параметры из endpoint
+     */
+    extractParams(endpoint) {
+        const [path, query] = endpoint.split('?');
+        if (!query) return { path, params: null };
+        
+        const params = {};
+        query.split('&').forEach(pair => {
+            const [key, value] = pair.split('=');
+            params[key] = value;
+        });
+        
+        return { path, params };
+    }
 
     /**
-     * Базовый метод для GET запросов
+     * Базовый метод для GET запросов (С КЭШИРОВАНИЕМ)
      */
     async get(endpoint, includeAuth = true) {
         try {
+            // 🆕 Проверяем кэш
+            if (this.cache) {
+                const { path, params } = this.extractParams(endpoint);
+                const cached = this.cache.get(path, params);
+                
+                if (cached !== null) {
+                    return cached;
+                }
+            }
+            
+            // Запрос к API
             const headers = includeAuth ? this.getHeaders(false) : {
                 'ngrok-skip-browser-warning': 'true'
             };
@@ -97,7 +131,15 @@ class APIClient {
                 throw new Error(errorDetail);
             }
 
-            return await response.json();
+            const data = await response.json();
+            
+            // 🆕 Сохраняем в кэш
+            if (this.cache) {
+                const { path, params } = this.extractParams(endpoint);
+                this.cache.set(path, data, params);
+            }
+
+            return data;
         } catch (error) {
             console.error(`GET ${endpoint} error:`, error);
             throw error;
@@ -132,7 +174,14 @@ class APIClient {
                 throw new Error(errorDetail);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // 🆕 Инвалидация кэша после изменений
+            if (this.cache) {
+                this.invalidateCache(endpoint);
+            }
+
+            return result;
         } catch (error) {
             console.error(`POST ${endpoint} error:`, error);
             throw error;
@@ -167,7 +216,14 @@ class APIClient {
                 throw new Error(errorDetail);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // 🆕 Инвалидация кэша после изменений
+            if (this.cache) {
+                this.invalidateCache(endpoint);
+            }
+
+            return result;
         } catch (error) {
             console.error(`PUT ${endpoint} error:`, error);
             throw error;
@@ -201,10 +257,39 @@ class APIClient {
                 throw new Error(errorDetail);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // 🆕 Инвалидация кэша после изменений
+            if (this.cache) {
+                this.invalidateCache(endpoint);
+            }
+
+            return result;
         } catch (error) {
             console.error(`DELETE ${endpoint} error:`, error);
             throw error;
+        }
+    }
+    
+    /**
+     * 🆕 Инвалидация кэша при изменениях
+     */
+    invalidateCache(endpoint) {
+        if (!this.cache) return;
+        
+        // Определяем что очистить
+        if (endpoint.includes('/products')) {
+            this.cache.clear('products');
+        } else if (endpoint.includes('/stores')) {
+            this.cache.clear('stores');
+        } else if (endpoint.includes('/categories')) {
+            this.cache.clear('categories');
+        } else if (endpoint.includes('/family')) {
+            this.cache.clear('family');
+        } else if (endpoint.includes('/expenses') || endpoint.includes('/purchases')) {
+            this.cache.clear('statistics');
+            this.cache.clear('purchases');
+            this.cache.clear('prices');
         }
     }
 
@@ -212,7 +297,6 @@ class APIClient {
      * Обновить информацию о пользователе (для первого входа)
      */
     async updateUserInfo(userData) {
-        // ✅ Согласно OpenAPI, endpoint /auth/update-info
         return this.post('/auth/update-info', userData);
     }
 
@@ -220,7 +304,6 @@ class APIClient {
      * Получить информацию о текущем пользователе
      */
     async getCurrentUserInfo() {
-        // ✅ Согласно OpenAPI, endpoint /auth/me
         return this.get('/auth/me');
     }
 
@@ -264,7 +347,6 @@ class APIClient {
 
     /**
      * Получить список продуктов
-     * ✅ Параметры в правильном порядке согласно бэкенду
      */
     async getProducts(category_id = null, search = null, limit = 100) {
         let endpoint = '/products';
@@ -289,15 +371,12 @@ class APIClient {
 
     /**
      * Создать продукт
-     * ✅ Поддержка двух форматов: объект ИЛИ параметры
      */
     async createProduct(nameOrData, categoryId = null, brand = null, unit = 'unidad', barcode = null) {
-        // Если первый параметр - объект, используем его
         if (typeof nameOrData === 'object') {
             return this.post('/products/create', nameOrData);
         }
 
-        // Иначе создаём объект из параметров
         return this.post('/products/create', {
             name: nameOrData,
             category_id: categoryId,
@@ -308,7 +387,7 @@ class APIClient {
     }
 
     /**
-     * ✅ НОВОЕ: Получить продукт по штрих-коду
+     * Получить продукт по штрих-коду
      */
     async getProductByBarcode(barcode) {
         return this.get(`/products/by-code/${encodeURIComponent(barcode)}`);
@@ -332,8 +411,7 @@ class APIClient {
     }
 
     /**
-     * ✅ НОВОЕ: Обновить штрих-код продукта
-     * Бэкенд ожидает Query параметры, а не Body
+     * Обновить штрих-код продукта
      */
     async updateProductBarcode(productId, barcode) {
         return this.put(`/products/barcode?product_id=${encodeURIComponent(productId)}&barcode=${encodeURIComponent(barcode)}`);
@@ -352,15 +430,12 @@ class APIClient {
 
     /**
      * Создать магазин
-     * ✅ Поддержка двух форматов: объект ИЛИ параметры
      */
     async createStore(nameOrData, storeType = 'Магазин') {
-        // Если первый параметр - объект, используем его
         if (typeof nameOrData === 'object') {
             return this.post('/stores', nameOrData);
         }
 
-        // Иначе создаём объект из параметров
         return this.post('/stores', {
             name: nameOrData,
             store_type: storeType
@@ -380,15 +455,12 @@ class APIClient {
 
     /**
      * Создать категорию
-     * ✅ Поддержка двух форматов: объект ИЛИ параметры
      */
     async createCategory(nameOrData, description = null, parentId = null) {
-        // Если первый параметр - объект, используем его
         if (typeof nameOrData === 'object') {
             return this.post('/categories', nameOrData);
         }
 
-        // Иначе создаём объект из параметров
         return this.post('/categories', {
             name: nameOrData,
             description: description,
@@ -415,17 +487,17 @@ class APIClient {
     }
 
     /**
-     * ✅ НОВОЕ: Создать расход (новое название метода)
+     * Создать расход
      */
     async createExpense(storeId, productId, quantity, unitPrice, purchaseDate = null) {
-    return this.post('/expenses/manual', {
-        store_id: storeId,
-        product_id: productId,
-        quantity: quantity,
-        unit_price: unitPrice,
-        purchase_date: purchaseDate || new Date().toISOString()  // ISO 8601 с таймзоной
-    });
-}
+        return this.post('/expenses/manual', {
+            store_id: storeId,
+            product_id: productId,
+            quantity: quantity,
+            unit_price: unitPrice,
+            purchase_date: purchaseDate || new Date().toISOString()
+        });
+    }
 
     /**
      * Создать покупку вручную (старое название для обратной совместимости)
@@ -440,7 +512,6 @@ class APIClient {
 
     /**
      * Получить тренды цен
-     * ✅ Исправлено: параметр product_pattern вместо search
      */
     async getPriceTrends(days = 30, search = null, limit = 20) {
         let endpoint = `/prices/trends?days=${days}&limit=${limit}`;
@@ -495,7 +566,14 @@ class APIClient {
                 throw new Error(errorDetail);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // Очищаем кэш после загрузки
+            if (this.cache) {
+                this.cache.clear();
+            }
+
+            return result;
         } catch (error) {
             console.error('Upload XML error:', error);
             throw error;
@@ -535,7 +613,14 @@ class APIClient {
                 throw new Error(errorDetail);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // Очищаем кэш после загрузки
+            if (this.cache) {
+                this.cache.clear();
+            }
+
+            return result;
         } catch (error) {
             console.error('Upload multiple XML error:', error);
             throw error;
@@ -666,6 +751,23 @@ class APIClient {
     isAuthenticated() {
         return this.telegramUserId !== null;
     }
+    
+    /**
+     * 🆕 Получить статистику кэша
+     */
+    getCacheStats() {
+        return this.cache ? this.cache.getStats() : null;
+    }
+    
+    /**
+     * 🆕 Очистить весь кэш
+     */
+    clearCache(pattern = null) {
+        if (this.cache) {
+            return this.cache.clear(pattern);
+        }
+        return 0;
+    }
 }
 
 // Создаём глобальный экземпляр API
@@ -679,7 +781,8 @@ if (typeof module !== 'undefined' && module.exports) {
 // Делаем API глобально доступным
 window.API = API;
 
-console.log('✅ API клиент инициализирован v4.1.0', {
+console.log('✅ API клиент инициализирован v4.2.0', {
     baseURL: API.baseURL,
-    telegramUserId: API.telegramUserId
+    telegramUserId: API.telegramUserId,
+    cacheEnabled: API.cache !== null
 });
