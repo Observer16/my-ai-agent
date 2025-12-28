@@ -2,7 +2,7 @@
  * Система кэширования для API
  * Использует localStorage для хранения данных
  * 
- * Версия: 1.0.0
+ * Версия: 1.1.0
  */
 
 class CacheManager {
@@ -13,18 +13,18 @@ class CacheManager {
         // TTL для разных типов данных (в секундах)
         this.ttls = {
             // Справочники (меняются редко)
-            'stores': 3600,           // 1 час
-            'categories': 3600,       // 1 час
+            'stores': 21600,           // 6 час
+            'categories': 21600,       // 6 часов
             'products': 1800,         // 30 минут
             
             // Статистика (можно показать старую)
-            'statistics/monthly': 600,  // 10 минут
-            'statistics': 300,          // 5 минут
+            'statistics/monthly': 3600,  // 11 час
+            'statistics': 1800,          // 30 минут
             
             // История и анализ (исторические данные)
             'prices/trends': 3600,    // 1 час
             'prices/compare': 1800,   // 30 минут
-            'purchases/recent': 300,  // 5 минут
+            'purchases/recent': 1800,  // 30 минут
             
             // Семья (средняя частота изменений)
             'family/members': 600,    // 10 минут
