@@ -166,7 +166,7 @@ const Medications = (function() {
             const response = await HealthAPI.deactivateMedication(id);
 
             if (response && response.success) {
-                showToast('✅ Лекарство удалено', 'success');
+                showToast(' Лекарство удалено', 'success');
                 await HealthModule.refreshData();
                 renderMedicationsList();
             } else {
