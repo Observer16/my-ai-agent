@@ -108,7 +108,7 @@ const MedicationFormModal = (function() {
                     is_active: s.is_active !== false
                 }));
 
-                console.log('✅ Данные лекарства загружены:', formData);
+                console.log(' Данные лекарства загружены:', formData);
             } else {
                 throw new Error('Лекарство не найдено');
             }
