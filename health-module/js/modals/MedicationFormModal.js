@@ -971,8 +971,8 @@ const MedicationFormModal = (function() {
                 reminder_minutes: reminderMinutes,
                 is_active: true
             });
-            console.log('✅ Расписание добавлено:', formData.schedules);
-            showToast('✅ Время приёма добавлено', 'success');
+            console.log(' Расписание добавлено:', formData.schedules);
+            showToast(' Время приёма добавлено', 'success');
         }
 
         // Закрываем форму и обновляем список
@@ -1056,16 +1056,16 @@ const MedicationFormModal = (function() {
 
                 if (scheduleErrors.length > 0) {
                     console.warn('⚠️ Ошибки обновления расписаний:', scheduleErrors);
-                    showToast('✅ Лекарство обновлено, но есть проблемы с расписаниями', 'warning');
+                    showToast(' Лекарство обновлено, но есть проблемы с расписаниями', 'warning');
                 } else {
-                    showToast('✅ Лекарство обновлено', 'success');
+                    showToast(' Лекарство обновлено', 'success');
                 }
 
             } else {
                 // СОЗДАНИЕ нового лекарства (с расписаниями)
                 result = await HealthAPI.createMedication(medicationData);
                 if (result.success) {
-                    showToast('✅ Лекарство добавлено', 'success');
+                    showToast(' Лекарство добавлено', 'success');
                 }
             }
 
