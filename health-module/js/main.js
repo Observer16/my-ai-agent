@@ -22,7 +22,7 @@ window.HealthUI.__isMainModule = true;
 window.markMedicationTaken = async function(medicationId) {
     const success = await HealthModule.logMedication(medicationId, 'taken');
     if (success) {
-        HealthUI.showToast('✅ Лекарство отмечено как принятое', 'success');
+        HealthUI.showToast(' Лекарство отмечено как принятое', 'success');
         HealthModule.refreshData();
     }
 };
