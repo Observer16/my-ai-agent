@@ -57,7 +57,7 @@
 
 <!-- Кнопки создания внизу -->
 <div class="create-buttons">
-    <button class="create-btn" onclick="showCreateProductModal()">📦 Создать товар</button>
+    <button class="create-btn" onclick="showEditStoreModal()">✏️ Редактировать магазин</button>
     <button class="create-btn" onclick="showCreateCategoryModal()">📂 Создать категорию</button>
 </div>
 
@@ -158,6 +158,45 @@
     </div>
 </div>
 
+<!-- Модальное окно редактирования магазина -->
+<div class="modal" id="edit-store-modal">
+    <div class="modal-content">
+        <div class="modal-header">Редактировать магазин</div>
+        <div class="form-group">
+            <label class="form-label">Выберите магазин</label>
+            <select class="form-select" id="store-select" onchange="loadStoreData()">
+                <option value="">-- Выберите магазин --</option>
+            </select>
+        </div>
+        <div id="store-edit-fields" style="display: none;">
+            <div class="form-group">
+                <label class="form-label">Название *</label>
+                <input type="text" class="form-input" id="store-name" placeholder="Название магазина">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Тип магазина</label>
+                <input type="text" class="form-input" id="store-type" placeholder="Например: Супермаркет">
+            </div>
+            <div class="form-group">
+                <label class="form-label">RUC (опционально)</label>
+                <input type="text" class="form-input" id="store-ruc" placeholder="RUC магазина">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Адрес (опционально)</label>
+                <textarea class="form-textarea" id="store-address" placeholder="Адрес магазина"></textarea>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn secondary" onclick="closeModal('edit-store-modal')">
+                Отмена
+            </button>
+            <button class="modal-btn primary" onclick="updateStore()" id="save-store-btn" style="display: none;">
+                Сохранить
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
 <script src="../js/api.js"></script>
@@ -166,8 +205,10 @@
     const tg = window.Telegram.WebApp;
     let allProducts = [];
     let allCategories = [];
+    let allStores = [];
     let currentCategoryFilter = null;
     let currentProductEdit = null;
+    let currentStoreEdit = null;
     let searchTimeout = null;
 
     // Инициализация приложения
@@ -184,7 +225,8 @@
         try {
             await Promise.all([
                 loadStatistics(),
-                loadCategories()
+                loadCategories(),
+                loadStores()
             ]);
             await loadProducts();
             tg.HapticFeedback.notificationOccurred('success');
@@ -215,6 +257,86 @@
             populateCategorySelects();
         } catch (error) {
             console.error('Ошибка загрузки категорий:', error);
+        }
+    }
+
+    // Загрузка магазинов
+    async function loadStores() {
+        try {
+            allStores = await API.getStores();
+            populateStoreSelect();
+        } catch (error) {
+            console.error('Ошибка загрузки магазинов:', error);
+        }
+    }
+
+    // Заполнение селекта магазинов
+    function populateStoreSelect() {
+        const select = document.getElementById('store-select');
+        select.innerHTML = '<option value="">-- Выберите магазин --</option>' +
+            allStores.map(store => `<option value="${store.id}">${escapeHtml(store.name)}</option>`).join('');
+    }
+
+    // Загрузка данных магазина
+    function loadStoreData() {
+        const storeId = document.getElementById('store-select').value;
+        if (!storeId) {
+            document.getElementById('store-edit-fields').style.display = 'none';
+            document.getElementById('save-store-btn').style.display = 'none';
+            return;
+        }
+
+        const store = allStores.find(s => s.id === storeId);
+        if (!store) return;
+
+        currentStoreEdit = store;
+        document.getElementById('store-name').value = store.name;
+        document.getElementById('store-type').value = store.store_type || '';
+        document.getElementById('store-ruc').value = store.ruc || '';
+        document.getElementById('store-address').value = store.address || '';
+        document.getElementById('store-edit-fields').style.display = 'block';
+        document.getElementById('save-store-btn').style.display = 'block';
+    }
+
+    // Показать модальное окно редактирования магазина
+    function showEditStoreModal() {
+        if (allStores.length === 0) {
+            tg.showAlert('Нет доступных магазинов для редактирования');
+            return;
+        }
+        document.getElementById('store-select').value = '';
+        document.getElementById('store-edit-fields').style.display = 'none';
+        document.getElementById('save-store-btn').style.display = 'none';
+        openModal('edit-store-modal');
+        tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    // Обновить магазин
+    async function updateStore() {
+        if (!currentStoreEdit) return;
+
+        const name = document.getElementById('store-name').value.trim();
+        if (!name) {
+            tg.showAlert('Введите название магазина');
+            return;
+        }
+
+        try {
+            const storeData = {
+                name: name,
+                store_type: document.getElementById('store-type').value.trim() || null,
+                ruc: document.getElementById('store-ruc').value.trim() || null,
+                address: document.getElementById('store-address').value.trim() || null
+            };
+
+            await API.updateStore(currentStoreEdit.id, storeData);
+            closeModal('edit-store-modal');
+            await loadStores();
+            tg.showAlert(`✅ Магазин "${name}" обновлён`);
+            tg.HapticFeedback.notificationOccurred('success');
+        } catch (error) {
+            console.error('Ошибка обновления магазина:', error);
+            tg.showAlert('Ошибка обновления: ' + error.message);
         }
     }
 
