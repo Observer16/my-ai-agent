@@ -25,10 +25,10 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
 }
 .tabs::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
+    display: none;
 }
 .tab {
     flex: 0 0 auto;
@@ -126,9 +126,11 @@ body {
     opacity: 0.7;
     margin-bottom: 8px;
 }
+
+/* Стили для цен товаров */
 .product-prices {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     font-size: 13px;
     flex-wrap: wrap;
 }
@@ -136,8 +138,35 @@ body {
     background: var(--tg-theme-bg-color, #fff);
     padding: 6px 12px;
     border-radius: 8px;
+    border: 2px solid transparent;
 }
-.price-badge strong {
+
+/* Цветовая дифференциация цен */
+.price-badge.price-min {
+    border-color: #22c55e;
+}
+.price-badge.price-min strong {
+    color: #22c55e;
+}
+
+.price-badge.price-max {
+    border-color: #ef4444;
+}
+.price-badge.price-max strong {
+    color: #ef4444;
+}
+
+.price-badge.price-avg {
+    border-color: #f59e0b;
+}
+.price-badge.price-avg strong {
+    color: #f59e0b;
+}
+
+.price-badge.price-single {
+    border-color: var(--tg-theme-button-color, #3390ec);
+}
+.price-badge.price-single strong {
     color: var(--tg-theme-button-color, #3390ec);
 }
 
