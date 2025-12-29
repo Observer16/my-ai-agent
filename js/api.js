@@ -346,6 +346,13 @@ class APIClient {
     // ============================================================================
 
     /**
+     * Обновить товар
+     */
+    async updateProduct(productId, productData) {
+        return this.put(`/products/${productId}`, productData);
+    }
+
+    /**
      * Получить список продуктов
      */
     async getProducts(category_id = null, search = null, limit = 100) {

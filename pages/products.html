@@ -185,17 +185,40 @@
 <!-- Модальное окно редактирования товара -->
 <div class="modal" id="edit-product-modal">
     <div class="modal-content">
-        <div class="modal-header">Изменить категорию</div>
-        <div id="edit-product-info" style="margin-bottom: 15px;"></div>
+        <div class="modal-header">Редактировать товар</div>
+        <div class="form-group">
+            <label class="form-label">Название *</label>
+            <input type="text" class="form-input" id="edit-product-name" placeholder="Название товара">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Бренд</label>
+            <input type="text" class="form-input" id="edit-product-brand" placeholder="Бренд (опционально)">
+        </div>
         <div class="form-group">
             <label class="form-label">Категория</label>
-            <select class="form-select" id="edit-product-category"></select>
+            <select class="form-select" id="edit-product-category">
+                <option value="">Без категории</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Единица измерения</label>
+            <select class="form-select" id="edit-product-unit">
+                <option value="unidad">Штука</option>
+                <option value="kg">Килограмм</option>
+                <option value="g">Грамм</option>
+                <option value="l">Литр</option>
+                <option value="ml">Миллилитр</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Штрих-код</label>
+            <input type="text" class="form-input" id="edit-product-barcode" placeholder="Штрих-код (опционально)" inputmode="numeric">
         </div>
         <div class="modal-actions">
             <button class="modal-btn secondary" onclick="closeModal('edit-product-modal')">
                 Отмена
             </button>
-            <button class="modal-btn primary" onclick="updateProductCategory()">
+            <button class="modal-btn primary" onclick="updateProduct()">
                 Сохранить
             </button>
         </div>
@@ -788,49 +811,60 @@
 
     // Показать модальное окно редактирования товара
     function showEditProductModal(productId, productName, categoryId) {
-        currentProductEdit = productId;
+        // Находим полные данные товара
+        const product = allProducts.find(p => p.id === productId);
 
-        const editInfo = document.getElementById('edit-product-info');
-        editInfo.innerHTML = '';
+        if (!product) {
+            tg.showAlert('Товар не найден');
+            return;
+        }
 
-        const nameDiv = document.createElement('div');
-        nameDiv.style.fontWeight = '600';
-        nameDiv.style.marginBottom = '5px';
-        nameDiv.innerText = productName;
+        currentProductEdit = product;
 
-        const idDiv = document.createElement('div');
-        idDiv.style.fontSize = '12px';
-        idDiv.style.opacity = '0.7';
-        idDiv.innerText = `ID: ${productId}`;
-
-        editInfo.appendChild(nameDiv);
-        editInfo.appendChild(idDiv);
-
-        const select = document.getElementById('edit-product-category');
-        select.value = categoryId !== 'null' ? categoryId : '';
+        // Заполняем все поля формы
+        document.getElementById('edit-product-name').value = product.name || '';
+        document.getElementById('edit-product-brand').value = product.brand || '';
+        document.getElementById('edit-product-category').value = product.category_id || '';
+        document.getElementById('edit-product-unit').value = product.unit || 'unidad';
+        document.getElementById('edit-product-barcode').value = product.barcode || '';
 
         openModal('edit-product-modal');
         tg.HapticFeedback.impactOccurred('light');
     }
 
-    // Обновить категорию товара
-    async function updateProductCategory() {
-        const categoryId = document.getElementById('edit-product-category').value;
-
+    // Обновить товар
+    async function updateProduct() {
         if (!currentProductEdit) {
             tg.showAlert('Ошибка: товар не выбран');
             return;
         }
 
+        const name = document.getElementById('edit-product-name').value.trim();
+
+        if (!name) {
+            tg.showAlert('Введите название товара');
+            return;
+        }
+
         try {
-            await API.updateProductCategory(currentProductEdit, categoryId ? parseInt(categoryId) : null);
+            const productData = {
+                name: name,
+                brand: document.getElementById('edit-product-brand').value.trim() || null,
+                category_id: document.getElementById('edit-product-category').value ?
+                    parseInt(document.getElementById('edit-product-category').value) : null,
+                unit: document.getElementById('edit-product-unit').value,
+                barcode: document.getElementById('edit-product-barcode').value.trim() || null
+            };
+
+            await API.updateProduct(currentProductEdit.id, productData);
 
             closeModal('edit-product-modal');
             await loadProducts(currentCategoryFilter);
 
+            tg.showAlert(`✅ Товар "${name}" обновлён`);
             tg.HapticFeedback.notificationOccurred('success');
         } catch (error) {
-            console.error('Ошибка обновления категории товара:', error);
+            console.error('Ошибка обновления товара:', error);
             tg.showAlert('Ошибка обновления: ' + error.message);
         }
     }
