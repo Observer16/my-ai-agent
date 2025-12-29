@@ -13,6 +13,7 @@ body {
 .header h1 { font-size: 20px; margin-bottom: 5px; }
 .header p { font-size: 13px; opacity: 0.9; }
 
+/* Табы с горизонтальной прокруткой (карусель) */
 .tabs {
     display: flex;
     background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -21,14 +22,23 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+}
+.tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
 }
 .tab {
-    flex: 1;
-    padding: 10px;
+    flex: 0 0 auto;
+    min-width: 120px;
+    padding: 10px 15px;
     text-align: center;
     border-radius: 8px;
     cursor: pointer;
     font-size: 13px;
+    white-space: nowrap;
 }
 .tab.active {
     background: var(--tg-theme-button-color, #3390ec);
