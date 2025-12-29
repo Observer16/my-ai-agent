@@ -476,6 +476,13 @@ class APIClient {
     }
 
     /**
+     * Редактировать категорию
+     */
+    async updateCategory(categoryId, categoryData) {
+        return this.put(`/categories/${categoryId}`, categoryData);
+    }
+
+    /**
      * Удалить категорию
      */
     async deleteCategory(categoryId) {
