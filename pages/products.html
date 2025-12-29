@@ -12,12 +12,13 @@
 <body>
 <div class="header">
     <h1>📦 Управление товарами</h1>
-    <p>Товары и категории</p>
+    <p>Товары, категории и получатели</p>
 </div>
 
 <div class="tabs">
     <div class="tab active" onclick="switchTab('products')">🛒 Товары</div>
     <div class="tab" onclick="switchTab('categories')">📂 Категории</div>
+    <div class="tab" onclick="switchTab('stores')">👥 Получатели</div>
 </div>
 
 <!-- Товары -->
@@ -55,10 +56,22 @@
     <div id="categories-list"></div>
 </div>
 
+<!-- Получатели (Магазины) -->
+<div id="tab-stores" class="content">
+    <div id="stores-list"></div>
+</div>
+
 <!-- Кнопки создания внизу -->
 <div class="create-buttons">
-    <button class="create-btn" onclick="showEditStoreModal()">✏️ Редактировать магазин</button>
-    <button class="create-btn" onclick="showCreateCategoryModal()">📂 Создать категорию</button>
+    <!-- Кнопка для категорий -->
+    <button class="create-btn" id="btn-create-category" onclick="showCreateCategoryModal()" style="display: none;">
+        📂 Создать категорию
+    </button>
+    
+    <!-- Кнопка для получателей -->
+    <button class="create-btn" id="btn-edit-store" onclick="showEditStoreModal()" style="display: none;">
+        ✏️ Редактировать
+    </button>
 </div>
 
 <!-- Модальное окно создания категории -->
@@ -210,6 +223,7 @@
     let currentProductEdit = null;
     let currentStoreEdit = null;
     let searchTimeout = null;
+    let currentTab = 'products';
 
     // Инициализация приложения
     function init() {
@@ -218,6 +232,7 @@
         tg.BackButton.onClick(() => window.location.href = '../index.html');
 
         loadData();
+        updateButtonsVisibility();
     }
 
     // Загрузка всех данных
@@ -265,9 +280,39 @@
         try {
             allStores = await API.getStores();
             populateStoreSelect();
+            renderStoresList();
         } catch (error) {
             console.error('Ошибка загрузки магазинов:', error);
         }
+    }
+
+    // Рендеринг списка магазинов
+    function renderStoresList() {
+        const container = document.getElementById('stores-list');
+
+        if (!allStores || allStores.length === 0) {
+            container.innerHTML = '<div class="empty">🏪 Магазины не найдены</div>';
+            return;
+        }
+
+        const html = allStores.map(store => {
+            const name = escapeHtml(store.name);
+            const storeType = store.store_type ? escapeHtml(store.store_type) : 'Магазин';
+            const ruc = store.ruc ? escapeHtml(store.ruc) : '';
+            const address = store.address ? escapeHtml(store.address) : '';
+
+            return `
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-name">${name}</div>
+                    <div class="product-category" style="background: var(--tg-theme-button-color, #3390ec);">${storeType}</div>
+                </div>
+                ${ruc ? `<div class="category-description">📄 RUC: ${ruc}</div>` : ''}
+                ${address ? `<div class="category-description">📍 ${address}</div>` : ''}
+            </div>
+        `}).join('');
+
+        container.innerHTML = html;
     }
 
     // Заполнение селекта магазинов
@@ -344,7 +389,6 @@
     function updateCategoryStatistics() {
         document.getElementById('total-categories').textContent = allCategories.length;
 
-        // Обновляем uncategorized, если товары уже загружены
         if (allProducts.length > 0) {
             const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
             document.getElementById('uncategorized').textContent = uncategorizedCount;
@@ -401,7 +445,6 @@
         }
 
         const html = products.map(p => {
-            // Экранирование HTML для безопасности
             const name = escapeHtml(p.name);
             const categoryName = p.category_name ? escapeHtml(p.category_name) : '';
             const brand = p.brand ? escapeHtml(p.brand) : '';
@@ -486,12 +529,10 @@
     function populateCategorySelects() {
         const mainCategories = allCategories.filter(c => !c.parent_id);
 
-        // Для создания новой категории
         const parentSelect = document.getElementById('new-category-parent');
         parentSelect.innerHTML = '<option value="">Нет (основная категория)</option>' +
             mainCategories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`).join('');
 
-        // Для создания товара
         const productCategorySelect = document.getElementById('new-product-category');
         productCategorySelect.innerHTML = '<option value="">Без категории</option>' +
             allCategories.map(cat => `
@@ -500,7 +541,6 @@
                 </option>
             `).join('');
 
-        // Для редактирования товара
         const editSelect = document.getElementById('edit-product-category');
         editSelect.innerHTML = '<option value="">Без категории</option>' +
             allCategories.map(cat => `
@@ -508,6 +548,23 @@
                     ${cat.parent_name ? '  ↳ ' : ''}${escapeHtml(cat.name)}
                 </option>
             `).join('');
+    }
+
+    // Обновление видимости кнопок в зависимости от активного таба
+    function updateButtonsVisibility() {
+        const btnCreateCategory = document.getElementById('btn-create-category');
+        const btnEditStore = document.getElementById('btn-edit-store');
+
+        // Скрываем все кнопки
+        btnCreateCategory.style.display = 'none';
+        btnEditStore.style.display = 'none';
+
+        // Показываем нужную кнопку в зависимости от таба
+        if (currentTab === 'categories') {
+            btnCreateCategory.style.display = 'block';
+        } else if (currentTab === 'stores') {
+            btnEditStore.style.display = 'block';
+        }
     }
 
     // Фильтр по категории
@@ -601,8 +658,6 @@
                 barcode: barcode
             };
 
-            console.log('📦 Создаём товар (products.html):', productData);
-
             await API.createProduct(productData);
 
             closeModal('create-product-modal');
@@ -640,9 +695,8 @@
     function showEditProductModal(productId, productName, categoryId) {
         currentProductEdit = productId;
 
-        // Используем innerText вместо innerHTML для безопасности
         const editInfo = document.getElementById('edit-product-info');
-        editInfo.innerHTML = ''; // Очищаем
+        editInfo.innerHTML = '';
 
         const nameDiv = document.createElement('div');
         nameDiv.style.fontWeight = '600';
@@ -688,7 +742,6 @@
 
     // Переключение табов
     function switchTab(tab) {
-        // Находим активную кнопку таба
         const tabs = document.querySelectorAll('.tab');
         const clickedTab = event.target;
 
@@ -697,6 +750,9 @@
 
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.getElementById(`tab-${tab}`).classList.add('active');
+
+        currentTab = tab;
+        updateButtonsVisibility();
 
         tg.HapticFeedback.impactOccurred('light');
     }
