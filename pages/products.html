@@ -481,6 +481,42 @@
             const categoryName = p.category_name ? escapeHtml(p.category_name) : '';
             const brand = p.brand ? escapeHtml(p.brand) : '';
 
+            // Определяем какие цены показывать
+            let pricesHtml = '';
+            if (p.min_price) {
+                const minPrice = p.min_price.toFixed(0);
+                const maxPrice = p.max_price.toFixed(0);
+                const avgPrice = p.avg_price ? p.avg_price.toFixed(0) : null;
+
+                // Если все цены одинаковые - показываем только одну
+                if (minPrice === maxPrice) {
+                    pricesHtml = `
+                        <div class="product-prices">
+                            <div class="price-badge price-single">
+                                <strong>${minPrice} ₲</strong>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Если разные цены - показываем мин, макс и среднюю
+                    pricesHtml = `
+                        <div class="product-prices">
+                            <div class="price-badge price-min">
+                                <strong>${minPrice} ₲</strong>
+                            </div>
+                            ${avgPrice && avgPrice !== minPrice && avgPrice !== maxPrice ? `
+                                <div class="price-badge price-avg">
+                                    <strong>${avgPrice} ₲</strong>
+                                </div>
+                            ` : ''}
+                            <div class="price-badge price-max">
+                                <strong>${maxPrice} ₲</strong>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
             return `
             <div class="product-card" onclick="showEditProductModal('${p.id}', '${name}', ${p.category_id || 'null'})">
                 <div class="product-header">
@@ -494,21 +530,7 @@
                     ${p.stores_count ? `<span>🏪 ${p.stores_count} магазинов</span>` : ''}
                     ${p.last_purchase_date ? `<span>📅 ${formatDate(p.last_purchase_date)}</span>` : ''}
                 </div>
-                ${p.min_price ? `
-                    <div class="product-prices">
-                        <div class="price-badge">
-                            <strong>${p.min_price.toFixed(0)} ₲</strong> мин
-                        </div>
-                        <div class="price-badge">
-                            <strong>${p.max_price.toFixed(0)} ₲</strong> макс
-                        </div>
-                        ${p.avg_price ? `
-                            <div class="price-badge">
-                                <strong>${p.avg_price.toFixed(0)} ₲</strong> сред
-                            </div>
-                        ` : ''}
-                    </div>
-                ` : ''}
+                ${pricesHtml}
             </div>
         `}).join('');
 
