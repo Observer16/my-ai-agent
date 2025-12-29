@@ -20,16 +20,16 @@
 
 <div class="form">
     <div class="form-group">
-        <label class="form-label">Магазин *</label>
+        <label class="form-label">Получатель *</label>
         <div class="custom-select-wrapper">
             <div class="custom-select" id="store-display" onclick="toggleStoreList()">
-                <span id="store-display-text">Выберите магазин...</span>
+                <span id="store-display-text">Выберите получателя...</span>
             </div>
             <span class="custom-select-arrow">▼</span>
             <div class="store-list" id="store-list"></div>
         </div>
         <input type="hidden" id="selected-store-id">
-        <a href="#" class="create-link" onclick="showCreateStore(event)">+ Создать новый магазин</a>
+        <a href="#" class="create-link" onclick="showCreateStore(event)">+ Создать нового получателя</a>
     </div>
 
     <div class="form-group">
@@ -121,7 +121,7 @@
 
     <div class="summary">
         <div class="summary-row"><span>Товар:</span><span id="summary-product">-</span></div>
-        <div class="summary-row"><span>Магазин:</span><span id="summary-store">-</span></div>
+        <div class="summary-row"><span>Получатель:</span><span id="summary-store">-</span></div>
         <div class="summary-row"><span>Количество:</span><span id="summary-quantity">-</span></div>
         <div class="summary-row total"><span>Итого:</span><span id="summary-total">0 ₲</span></div>
     </div>

@@ -171,32 +171,32 @@
     </div>
 </div>
 
-<!-- Модальное окно редактирования магазина -->
+<!-- Модальное окно редактирования получателя -->
 <div class="modal" id="edit-store-modal">
     <div class="modal-content">
-        <div class="modal-header">Редактировать магазин</div>
+        <div class="modal-header">Редактировать получателя</div>
         <div class="form-group">
-            <label class="form-label">Выберите магазин</label>
+            <label class="form-label">Выберите получателя</label>
             <select class="form-select" id="store-select" onchange="loadStoreData()">
-                <option value="">-- Выберите магазин --</option>
+                <option value="">-- Выберите получателя --</option>
             </select>
         </div>
         <div id="store-edit-fields" style="display: none;">
             <div class="form-group">
                 <label class="form-label">Название *</label>
-                <input type="text" class="form-input" id="store-name" placeholder="Название магазина">
+                <input type="text" class="form-input" id="store-name" placeholder="Название получателя">
             </div>
             <div class="form-group">
-                <label class="form-label">Тип магазина</label>
+                <label class="form-label">Тип получателя</label>
                 <input type="text" class="form-input" id="store-type" placeholder="Например: Супермаркет">
             </div>
             <div class="form-group">
                 <label class="form-label">RUC (опционально)</label>
-                <input type="text" class="form-input" id="store-ruc" placeholder="RUC магазина">
+                <input type="text" class="form-input" id="store-ruc" placeholder="RUC получателя">
             </div>
             <div class="form-group">
                 <label class="form-label">Адрес (опционально)</label>
-                <textarea class="form-textarea" id="store-address" placeholder="Адрес магазина"></textarea>
+                <textarea class="form-textarea" id="store-address" placeholder="Адрес получателя"></textarea>
             </div>
         </div>
         <div class="modal-actions">
@@ -315,14 +315,14 @@
         container.innerHTML = html;
     }
 
-    // Заполнение селекта магазинов
+    // Заполнение селекта получателей
     function populateStoreSelect() {
         const select = document.getElementById('store-select');
-        select.innerHTML = '<option value="">-- Выберите магазин --</option>' +
+        select.innerHTML = '<option value="">- Выберите получателя -</option>' +
             allStores.map(store => `<option value="${store.id}">${escapeHtml(store.name)}</option>`).join('');
     }
 
-    // Загрузка данных магазина
+    // Загрузка данных получателя
     function loadStoreData() {
         const storeId = document.getElementById('store-select').value;
         if (!storeId) {
@@ -343,10 +343,10 @@
         document.getElementById('save-store-btn').style.display = 'block';
     }
 
-    // Показать модальное окно редактирования магазина
+    // Показать модальное окно редактирования получателя
     function showEditStoreModal() {
         if (allStores.length === 0) {
-            tg.showAlert('Нет доступных магазинов для редактирования');
+            tg.showAlert('Нет доступных получателей для редактирования');
             return;
         }
         document.getElementById('store-select').value = '';
@@ -356,13 +356,13 @@
         tg.HapticFeedback.impactOccurred('medium');
     }
 
-    // Обновить магазин
+    // Обновить получателя
     async function updateStore() {
         if (!currentStoreEdit) return;
 
         const name = document.getElementById('store-name').value.trim();
         if (!name) {
-            tg.showAlert('Введите название магазина');
+            tg.showAlert('Введите название получателя');
             return;
         }
 
@@ -377,10 +377,10 @@
             await API.updateStore(currentStoreEdit.id, storeData);
             closeModal('edit-store-modal');
             await loadStores();
-            tg.showAlert(`✅ Магазин "${name}" обновлён`);
+            tg.showAlert(`✅ Получатель "${name}" обновлён`);
             tg.HapticFeedback.notificationOccurred('success');
         } catch (error) {
-            console.error('Ошибка обновления магазина:', error);
+            console.error('Ошибка обновления получателя:', error);
             tg.showAlert('Ошибка обновления: ' + error.message);
         }
     }

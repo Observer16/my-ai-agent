@@ -882,7 +882,7 @@ async function saveExpense() {
         }
     }
 
-    if (!storeId) { tg.showAlert('Выберите магазин'); return; }
+    if (!storeId) { tg.showAlert('Выберите получателя'); return; }
     if (!productId) { tg.showAlert('Выберите товар'); return; }
     if (!qty || qty <= 0) {
         tg.showAlert(isWeightMode ? 'Введите вес/объём' : 'Введите количество');
