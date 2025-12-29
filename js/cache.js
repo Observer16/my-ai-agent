@@ -13,12 +13,12 @@ class CacheManager {
         // TTL для разных типов данных (в секундах)
         this.ttls = {
             // Справочники (меняются редко)
-            'stores': 21600,           // 6 час
+            'stores': 21600,           // 6 часов
             'categories': 21600,       // 6 часов
             'products': 1800,         // 30 минут
             
             // Статистика (можно показать старую)
-            'statistics/monthly': 3600,  // 11 час
+            'statistics/monthly': 39600,  // 11 час
             'statistics': 1800,          // 30 минут
             
             // История и анализ (исторические данные)
@@ -27,8 +27,8 @@ class CacheManager {
             'purchases/recent': 1800,  // 30 минут
             
             // Семья (средняя частота изменений)
-            'family/members': 600,    // 10 минут
-            'family/info': 300        // 5 минут
+            'family/members': 3600,    // 1 час
+            'family/info': 3600        // 1 час
         };
         
         // Не кэшировать эти endpoints
