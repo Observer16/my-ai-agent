@@ -5,6 +5,13 @@ const Diary = (function() {
 
     function init() {
         console.log('📔 Инициализация компонента Diary');
+        
+        // Проверка зависимостей
+        if (typeof HealthConstants === 'undefined') {
+            console.error('❌ HealthConstants не загружен!');
+            return;
+        }
+        
         initCalendar();
         initTodayButton();
         loadProfileWeight(); // Загрузить вес из профиля
@@ -159,14 +166,28 @@ const Diary = (function() {
         // Определяем какой вес показать: из записи, или из профиля
         const displayWeight = entry?.weight_kg || profileWeight || '';
 
-        // Получаем настроения из HealthConstants
-        const moodOptions = [
-            { value: '', label: 'Не указано' },
-            ...HealthConstants.getMoodsWithEmojis().map(mood => ({
-                value: mood.value,
-                label: mood.label
-            }))
-        ];
+        // Получаем настроения из HealthConstants (с проверкой)
+        let moodOptions = [{ value: '', label: 'Не указано' }];
+        
+        if (typeof HealthConstants !== 'undefined' && HealthConstants.getMoodsWithEmojis) {
+            moodOptions = [
+                { value: '', label: 'Не указано' },
+                ...HealthConstants.getMoodsWithEmojis().map(mood => ({
+                    value: mood.value,
+                    label: mood.label
+                }))
+            ];
+        } else {
+            console.warn('⚠️ HealthConstants недоступен, используем fallback настроения');
+            // Fallback настроения
+            moodOptions = [
+                { value: '', label: 'Не указано' },
+                { value: 'радость', label: 'Радость' },
+                { value: 'удовлетворение', label: 'Удовлетворение' },
+                { value: 'нейтрально', label: 'Нейтрально' },
+                { value: 'грусть', label: 'Грусть' }
+            ];
+        }
 
         const moodOptionsHtml = moodOptions.map(option => {
             const selected = entry?.mood === option.value ? 'selected' : '';
@@ -381,7 +402,8 @@ const Diary = (function() {
                 showToast('✅ Запись сохранена', 'success');
                 await loadDate(date); // Перезагрузить форму
             } else {
-                const errors = failed.map(f => `${f.field}: ${f.error}`).join(', ');\n                showToast(`⚠️ Частично сохранено. Ошибки: ${errors}`, 'warning');
+                const errors = failed.map(f => `${f.field}: ${f.error}`).join(', ');
+                showToast(`⚠️ Частично сохранено. Ошибки: ${errors}`, 'warning');
                 await loadDate(date); // Всё равно перезагрузить
             }
         } catch (error) {
@@ -412,3 +434,5 @@ if (typeof window !== 'undefined') {
 }
 
 window.showSymptomPicker = () => Diary.showSymptomPicker();
+
+console.log('✅ Diary module loaded');
