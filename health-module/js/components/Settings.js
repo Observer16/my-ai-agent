@@ -124,7 +124,7 @@ const SettingsComponent = {
                             min="50"
                             max="250"
                             step="1"
-                            placeholder="170"
+                            placeholder=""
                             value="${profile.height_cm || ''}"
                         />
                     </div>
@@ -143,7 +143,7 @@ const SettingsComponent = {
                             min="20"
                             max="300"
                             step="0.1"
-                            placeholder="70.5"
+                            placeholder=""
                             value="${profile.weight_kg || ''}"
                         />
                     </div>
@@ -166,7 +166,7 @@ const SettingsComponent = {
                             min="50"
                             max="200"
                             step="0.5"
-                            placeholder="95.0"
+                            placeholder=""
                             value="${profile.chest_cm || ''}"
                         />
                     </div>
@@ -185,7 +185,7 @@ const SettingsComponent = {
                             min="40"
                             max="200"
                             step="0.5"
-                            placeholder="80.0"
+                            placeholder=""
                             value="${profile.waist_cm || ''}"
                         />
                     </div>
@@ -204,7 +204,7 @@ const SettingsComponent = {
                             min="50"
                             max="200"
                             step="0.5"
-                            placeholder="100.0"
+                            placeholder=""
                             value="${profile.hips_cm || ''}"
                         />
                     </div>
@@ -223,7 +223,7 @@ const SettingsComponent = {
                             min="20"
                             max="60"
                             step="0.5"
-                            placeholder="37.0"
+                            placeholder=""
                             value="${profile.neck_cm || ''}"
                         />
                     </div>
@@ -242,7 +242,7 @@ const SettingsComponent = {
                             min="15"
                             max="60"
                             step="0.5"
-                            placeholder="32.0"
+                            placeholder=""
                             value="${profile.biceps_cm || ''}"
                         />
                     </div>
