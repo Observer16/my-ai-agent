@@ -274,9 +274,19 @@ const HealthModule = (function() {
                 // 6. Показываем уведомление
                 showToast('✅ Пол обновлен', 'success');
 
-                // 7. Обновляем UI
-                if (window.Dashboard && typeof Dashboard.init === 'function') {
-                    setTimeout(() => Dashboard.init(), 500);
+                // 7. Обновляем UI только для вкладки dashboard (если она активна)
+                // Получаем текущую активную вкладку
+                const activeTab = document.querySelector('.health-tab.active');
+                const currentTab = activeTab?.dataset?.tab;
+                
+                if (currentTab === 'dashboard') {
+                    // Обновляем Dashboard только если он сейчас открыт
+                    if (window.Dashboard && typeof Dashboard.init === 'function') {
+                        setTimeout(() => Dashboard.init(), 500);
+                        console.log('🔄 Dashboard обновлён после смены пола');
+                    }
+                } else {
+                    console.log('ℹ️ Dashboard не активен, обновление будет при переходе на вкладку');
                 }
 
                 return { success: true, gender };
