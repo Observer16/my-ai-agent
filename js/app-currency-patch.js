@@ -1,40 +1,77 @@
-// js/app-currency-patch.js
-/**
- * Патч для app.js - добавляет поддержку валют
- * Загружается ПОСЛЕ app.js
- */
+// app.js - ПАТЧ для инициализации валюты
+// Добавить в начало DOMContentLoaded (после строки console.log('🚀 Загрузка приложения...'))
 
-// Сохраняем оригинальную функцию formatCurrency
-const originalFormatCurrency = window.formatCurrency;
-
-// Переопределяем formatCurrency для использования динамической валюты
-window.formatCurrency = function(amount) {
-    // Используем formatAmount из currency.js если доступен
-    if (typeof formatAmount === 'function') {
-        return formatAmount(amount);
-    }
-    // Fallback на оригинальную функцию
-    return originalFormatCurrency(amount);
-};
-
-// Добавляем функцию открытия настроек
-window.openSettings = function() {
-    const tg = window.Telegram.WebApp;
-    tg.HapticFeedback.impactOccurred('light');
-    window.location.href = 'pages/settings.html';
-};
-
-// Инициализация валюты при загрузке приложения
 document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof initCurrency === 'function') {
-        await initCurrency();
-        console.log('✅ Валюта инициализирована');
-        
-        // Перезагружаем данные dashboard с новой валютой
-        if (typeof loadMonthlyStats === 'function') {
-            await loadMonthlyStats();
-        }
-    }
+    console.log('🚀 Загрузка приложения...');
+    
+    // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛЮТЫ
+    await initCurrency();
+    
+    // Показать приветствие
+    showGreeting();
+    
+    // ✅ ВАЖНО: Сначала обновляем информацию о пользователе
+    await updateUserOnFirstLogin();
+    // ... остальной код без изменений
 });
 
-console.log('✅ Патч валют применён к app.js');
+// ============================================================================
+// 🆕 ЗАМЕНИТЬ функцию formatCurrency() на эту версию:
+// ============================================================================
+
+/**
+ * Форматировать валюту (использует динамическую валюту из currency.js)
+ */
+function formatCurrency(amount) {
+    if (amount == null || isNaN(amount)) {
+        return `0 ${getCurrencySymbol()}`;
+    }
+
+    const numAmount = Number(amount);
+    if (numAmount === 0) {
+        return `0 ${getCurrencySymbol()}`;
+    }
+
+    const absAmount = Math.abs(numAmount);
+    const sign = numAmount < 0 ? '-' : '';
+
+    // Для сумм >= 1000 всегда используем K (тысячи)
+    if (absAmount >= 1000) {
+        const thousands = numAmount / 1000;
+
+        // Проверяем, является ли число тысяч целым
+        if (Math.abs(thousands) % 1 === 0) {
+            // Целые тысячи: 1 551 000 → 1 551K
+            const integerThousands = Math.abs(thousands);
+            const formatted = formatNumberWithSpaces(integerThousands);
+            return `${sign}${formatted}K ${getCurrencySymbol()}`;
+        } else {
+            // Дробные тысячи: 1 551 234 → 1 551.2K
+            // Округляем до одного знака после запятой
+            const rounded = Math.round(thousands * 10) / 10;
+
+            // Разделяем на целую и дробную части
+            const absRounded = Math.abs(rounded);
+            const integerPart = Math.floor(absRounded);
+            const fractionalPart = Math.round((absRounded - integerPart) * 10);
+
+            const formattedInteger = formatNumberWithSpaces(integerPart);
+
+            return `${sign}${formattedInteger}.${fractionalPart}K ${getCurrencySymbol()}`;
+        }
+    }
+    // Для сумм < 1000
+    else {
+        if (Number.isInteger(numAmount)) {
+            return `${sign}${Math.abs(numAmount).toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+        } else {
+            // Для дробных чисел показываем 1 знак после запятой
+            const absNum = Math.abs(numAmount);
+            const formatted = absNum.toLocaleString('ru-RU', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+            return `${sign}${formatted} ${getCurrencySymbol()}`;
+        }
+    }
+}
