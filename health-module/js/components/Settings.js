@@ -10,7 +10,13 @@ const SettingsComponent = {
     state: {
         profile: null,
         loading: false,
-        saving: false
+        saving: false,
+        genderOptions: [
+            { value: 'male', label: 'Мужской' },
+            { value: 'female', label: 'Женский' },
+            { value: 'other', label: 'Другой' },
+            { value: 'prefer_not_to_say', label: 'Не указывать' }
+        ]
     },
 
     /**
@@ -67,19 +73,26 @@ const SettingsComponent = {
                 </div>
 
                 <form id="profile-form" class="profile-form">
-                    <!-- Пол (только отображение, изменяется через API gender) -->
+                    <!-- Пол -->
                     <div class="form-group">
                         <label class="form-label">
                             <span>Пол</span>
-                            <span class="form-hint">Изменяется через настройки аккаунта</span>
                         </label>
-                        <input 
-                            type="text" 
-                            class="form-input" 
-                            value="${this.formatGender(profile.gender)}"
-                            readonly
-                            disabled
-                        />
+                        <select 
+                            id="gender"
+                            name="gender"
+                            class="form-input form-select"
+                        >
+                            <option value="">Не указан</option>
+                            ${this.state.genderOptions.map(opt => `
+                                <option 
+                                    value="${opt.value}" 
+                                    ${profile.gender === opt.value ? 'selected' : ''}
+                                >
+                                    ${opt.label}
+                                </option>
+                            `).join('')}
+                        </select>
                     </div>
 
                     <!-- Дата рождения -->
@@ -92,7 +105,7 @@ const SettingsComponent = {
                             type="date" 
                             id="birth_date"
                             name="birth_date"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             value="${profile.birth_date || ''}"
                         />
                     </div>
@@ -107,7 +120,7 @@ const SettingsComponent = {
                             type="number" 
                             id="height_cm"
                             name="height_cm"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="50"
                             max="250"
                             step="1"
@@ -126,7 +139,7 @@ const SettingsComponent = {
                             type="number" 
                             id="weight_kg"
                             name="weight_kg"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="20"
                             max="300"
                             step="0.1"
@@ -149,7 +162,7 @@ const SettingsComponent = {
                             type="number" 
                             id="chest_cm"
                             name="chest_cm"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="50"
                             max="200"
                             step="0.5"
@@ -168,7 +181,7 @@ const SettingsComponent = {
                             type="number" 
                             id="waist_cm"
                             name="waist_cm"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="40"
                             max="200"
                             step="0.5"
@@ -187,7 +200,7 @@ const SettingsComponent = {
                             type="number" 
                             id="hips_cm"
                             name="hips_cm"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="50"
                             max="200"
                             step="0.5"
@@ -206,7 +219,7 @@ const SettingsComponent = {
                             type="number" 
                             id="neck_cm"
                             name="neck_cm"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="20"
                             max="60"
                             step="0.5"
@@ -225,7 +238,7 @@ const SettingsComponent = {
                             type="number" 
                             id="biceps_cm"
                             name="biceps_cm"
-                            class="form-input" 
+                            class="form-input form-input-compact" 
                             min="15"
                             max="60"
                             step="0.5"
@@ -253,19 +266,6 @@ const SettingsComponent = {
                 </form>
             </div>
         `;
-    },
-
-    /**
-     * Форматирование пола для отображения
-     */
-    formatGender(gender) {
-        const genderMap = {
-            'male': 'Мужской',
-            'female': 'Женский',
-            'other': 'Другой',
-            'prefer_not_to_say': 'Не указан'
-        };
-        return genderMap[gender] || 'Не указан';
     },
 
     /**
@@ -309,6 +309,38 @@ const SettingsComponent = {
         if (form) {
             form.addEventListener('submit', (e) => this.handleSubmit(e));
         }
+
+        // Слушаем изменение пола для обновления через отдельный эндпоинт
+        const genderSelect = document.getElementById('gender');
+        if (genderSelect) {
+            genderSelect.addEventListener('change', (e) => this.handleGenderChange(e));
+        }
+    },
+
+    /**
+     * Обработка изменения пола
+     */
+    async handleGenderChange(event) {
+        const newGender = event.target.value;
+        
+        if (!newGender) return;
+
+        try {
+            const response = await HealthAPI.updateUserGender(newGender);
+
+            if (response.success) {
+                this.state.profile.gender = newGender;
+                this.showSuccess('✅ Пол обновлён');
+            } else {
+                this.showError(response.error || 'Ошибка обновления пола');
+                // Возвращаем старое значение
+                event.target.value = this.state.profile.gender || '';
+            }
+        } catch (error) {
+            console.error('❌ Error updating gender:', error);
+            this.showError('Не удалось обновить пол');
+            event.target.value = this.state.profile.gender || '';
+        }
     },
 
     /**
@@ -326,8 +358,10 @@ const SettingsComponent = {
             const formData = new FormData(event.target);
             const data = {};
 
-            // Собираем только заполненные поля
+            // Собираем только заполненные поля (кроме gender - он обрабатывается отдельно)
             for (const [key, value] of formData.entries()) {
+                if (key === 'gender') continue; // Пол обновляется через отдельный эндпоинт
+                
                 if (value && value.trim() !== '') {
                     // Преобразуем числа
                     if (key !== 'birth_date') {
