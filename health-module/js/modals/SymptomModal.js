@@ -5,71 +5,60 @@ const SymptomModal = (function() {
     let intensity = 3;
     let currentDate = null;
 
-    function show(data = {}) {
+    async function show(data = {}) {
         currentDate = data.date || new Date().toISOString().split('T')[0];
         console.log('🤕 Открытие модального окна симптомов для даты:', currentDate);
 
-        const state = HealthModule.getState();
-        const categories = state.userOptions?.symptom_categories || [];
-        const symptomsByCategory = state.userOptions?.symptoms_by_category || {};
+        // Загружаем опции через кэш
+        let categories = [];
+        let symptomsByCategory = {};
 
-        // Если нет данных, используем базовые категории
-        const finalCategories = categories.length > 0 ? categories : getDefaultCategories();
-        const finalSymptomsByCategory = Object.keys(symptomsByCategory).length > 0
-            ? symptomsByCategory
-            : getDefaultSymptomsByCategory();
+        if (typeof OptionsCache !== 'undefined' && OptionsCache.getUserOptions) {
+            try {
+                const optionsResult = await OptionsCache.getUserOptions();
+                
+                if (optionsResult.success && optionsResult.data) {
+                    categories = optionsResult.data.symptom_categories || [];
+                    symptomsByCategory = optionsResult.data.symptoms_by_category || {};
+                    
+                    console.log('✅ Опции для SymptomModal загружены:', {
+                        source: optionsResult.source,
+                        categoriesCount: categories.length,
+                        categories
+                    });
+                } else {
+                    console.error('❌ Не удалось загрузить опции:', optionsResult.error);
+                    showToast('❌ Ошибка загрузки опций симптомов', 'error');
+                    return;
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки опций для SymptomModal:', error);
+                showToast('❌ Ошибка загрузки опций симптомов', 'error');
+                return;
+            }
+        } else {
+            // Fallback на state только если OptionsCache недоступен
+            console.warn('⚠️ OptionsCache недоступен, используем state');
+            const state = HealthModule.getState();
+            categories = state.userOptions?.symptom_categories || [];
+            symptomsByCategory = state.userOptions?.symptoms_by_category || {};
+        }
 
-        const content = renderModalContent(finalCategories);
+        // Если опции пустые - показываем ошибку
+        if (categories.length === 0) {
+            console.error('❌ Опции симптомов пустые');
+            showToast('❌ Не удалось загрузить список симптомов', 'error');
+            return;
+        }
+
+        const content = renderModalContent(categories);
         const modalHtml = BaseModal.createModalStructure('🤕 Добавить симптом', content, 'large');
 
         BaseModal.show(modalHtml);
 
-        // Инициализируем обработчики ПОСЛЕ вставки в DOM
         setTimeout(() => {
-            initEventHandlers(finalCategories, finalSymptomsByCategory);
+            initEventHandlers(categories, symptomsByCategory);
         }, 10);
-    }
-
-    function getDefaultCategories() {
-        const state = HealthModule.getState();
-        const userGender = state.userGender || 'other';
-
-        const baseCategories = ['общее', 'голова', 'живот', 'прочее'];
-
-        if (userGender === 'female') {
-            return [...baseCategories, 'гинекология'];
-        } else if (userGender === 'male') {
-            return [...baseCategories, 'урология'];
-        }
-
-        return baseCategories;
-    }
-
-    function getDefaultSymptomsByCategory() {
-        const state = HealthModule.getState();
-        const userGender = state.userGender || 'other';
-
-        const symptoms = {
-            "общее": ["усталость", "слабость", "температура", "озноб", "потливость", "бессонница", "сонливость"],
-            "голова": ["головная боль", "головокружение", "мигрень", "давление", "гул", "потрескивание"],
-            "живот": ["боль в животе", "тошнота", "рвота", "диарея", "запор", "вздутие", "изжога"],
-            "прочее": ["боль в спине", "боль в груди", "кашель", "насморк", "боль в горле"]
-        };
-
-        if (userGender === 'female') {
-            symptoms["гинекология"] = [
-                "менструальная боль", "задержка месячных", "обильные месячные",
-                "скудные месячные", "нерегулярный цикл", "ПМС", "овуляторная боль",
-                "выделения", "зуд", "боль в груди", "набухание груди"
-            ];
-        } else if (userGender === 'male') {
-            symptoms["урология"] = [
-                "дискомфорт в паху", "боль при мочеиспускании",
-                "частое мочеиспускание", "проблемы с эрекцией"
-            ];
-        }
-
-        return symptoms;
     }
 
     function renderModalContent(categories) {
@@ -168,7 +157,6 @@ const SymptomModal = (function() {
             }).join('')}
         `;
 
-        // Сбрасываем выбранный симптом
         selectedSymptom = null;
     }
 
@@ -186,7 +174,6 @@ const SymptomModal = (function() {
         }
 
         try {
-            // Формируем данные нового симптома
             const symptomData = {
                 category: selectedCategory,
                 name: selectedSymptom,
@@ -195,7 +182,6 @@ const SymptomModal = (function() {
 
             console.log('📤 Отправка симптома:', symptomData);
 
-            // ✅ ИСПРАВЛЕНО: Бэкенд теперь добавляет, а не заменяет
             const result = await HealthAPI.addSymptoms(currentDate, {
                 symptoms: [symptomData]
             });
@@ -206,15 +192,12 @@ const SymptomModal = (function() {
                 showToast('✅ Симптом добавлен', 'success');
                 close();
 
-                // Обновляем данные
                 await HealthModule.refreshData();
 
-                // Перезагружаем дневник если он открыт
                 if (window.Diary && window.Diary.loadDate) {
                     Diary.loadDate(currentDate);
                 }
 
-                // Обновляем Dashboard если он открыт
                 if (window.Dashboard && window.Dashboard.init) {
                     Dashboard.init();
                 }
@@ -238,14 +221,12 @@ const SymptomModal = (function() {
 
     function close() {
         BaseModal.close();
-        // Сброс состояния
         selectedCategory = null;
         selectedSymptom = null;
         intensity = 3;
         currentDate = null;
     }
 
-    // Публичный API
     return {
         show,
         save,
@@ -253,7 +234,6 @@ const SymptomModal = (function() {
     };
 })();
 
-// Экспорт в window
 if (typeof window !== 'undefined') {
     window.SymptomModal = SymptomModal;
 }
