@@ -310,7 +310,6 @@ const SettingsComponent = {
             form.addEventListener('submit', (e) => this.handleSubmit(e));
         }
 
-        // Слушаем изменение пола для обновления через отдельный эндпоинт
         const genderSelect = document.getElementById('gender');
         if (genderSelect) {
             genderSelect.addEventListener('change', (e) => this.handleGenderChange(e));
@@ -318,7 +317,7 @@ const SettingsComponent = {
     },
 
     /**
-     * Обработка изменения пола
+     * Обработка изменения пола через централизованный HealthModule
      */
     async handleGenderChange(event) {
         const newGender = event.target.value;
@@ -326,14 +325,18 @@ const SettingsComponent = {
         if (!newGender) return;
 
         try {
-            const response = await HealthAPI.updateUserGender(newGender);
+            console.log('⚧️ Обновление пола через Settings:', newGender);
 
-            if (response.success) {
+            // Используем централизованный метод через HealthModule
+            const result = await HealthModule.updateGender(newGender);
+
+            if (result.success) {
                 this.state.profile.gender = newGender;
-                this.showSuccess('✅ Пол обновлён');
+                this.showSuccess('✅ Пол обновлён. Опции обновлены.');
+                
+                console.log('✅ Пол обновлён, другие компоненты обновятся автоматически');
             } else {
-                this.showError(response.error || 'Ошибка обновления пола');
-                // Возвращаем старое значение
+                this.showError(result.error || 'Ошибка обновления пола');
                 event.target.value = this.state.profile.gender || '';
             }
         } catch (error) {
@@ -358,12 +361,10 @@ const SettingsComponent = {
             const formData = new FormData(event.target);
             const data = {};
 
-            // Собираем только заполненные поля (кроме gender - он обрабатывается отдельно)
             for (const [key, value] of formData.entries()) {
-                if (key === 'gender') continue; // Пол обновляется через отдельный эндпоинт
+                if (key === 'gender') continue;
                 
                 if (value && value.trim() !== '') {
-                    // Преобразуем числа
                     if (key !== 'birth_date') {
                         data[key] = parseFloat(value);
                     } else {
@@ -437,5 +438,4 @@ const SettingsComponent = {
     }
 };
 
-// Экспорт для использования
 window.SettingsComponent = SettingsComponent;
