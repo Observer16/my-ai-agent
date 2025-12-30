@@ -1,10 +1,10 @@
 // js/api-extensions.js
 /**
- * Расширения API клиента для поддержки настроек и PATCH метода
- * Версия: 1.0.0
+ * Расширения для API клиента
+ * Добавляет методы PATCH и работы с настройками пользователя
  */
 
-// Добавляем метод PATCH в APIClient
+// Добавляем метод PATCH
 APIClient.prototype.patch = async function(endpoint, data = {}) {
     try {
         const fullUrl = `${this.baseURL}${endpoint}`;
@@ -64,4 +64,4 @@ APIClient.prototype.getSupportedCurrencies = async function() {
     return this.get('/users/currencies');
 };
 
-console.log('✅ API расширения загружены (PATCH, настройки пользователя)');
+console.log('✅ API расширения загружены (PATCH, настройки)');
