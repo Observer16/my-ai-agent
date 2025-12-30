@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Настройки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/style.css">
@@ -12,49 +12,63 @@
     <h1>⚙️ Настройки</h1>
 </div>
 
-<!-- Валюта -->
-<div class="settings-section">
-    <h2>💰 Валюта</h2>
+<!-- Настройки валюты -->
+<div class="module-card">
+    <div class="module-header">
+        <div class="module-icon">💰</div>
+        <div class="module-title">Валюта</div>
+    </div>
     <div class="settings-item">
-        <label for="currency-select">Предпочитаемая валюта</label>
+        <label for="currency-select">Ваша валюта</label>
         <select id="currency-select" class="settings-select">
-            <option value="">Загрузка...</option>
+            <option value="PYG">₲ Парагвайский гуарани (PYG)</option>
+            <option value="USD">$ Доллар США (USD)</option>
+            <option value="EUR">€ Евро (EUR)</option>
+            <option value="RUB">₽ Российский рубль (RUB)</option>
+            <option value="BRL">R$ Бразильский реал (BRL)</option>
+            <option value="UAH">₴ Украинская гривна (UAH)</option>
         </select>
-        <div class="settings-hint">Выберите валюту для отображения цен и расходов</div>
+    </div>
+    <div class="settings-description">
+        Все суммы будут отображаться в выбранной валюте
     </div>
 </div>
 
 <!-- Семья -->
-<div class="settings-section">
-    <h2>👥 Семья</h2>
-    <div id="family-status" class="settings-item">
-        <div class="loading">Загрузка...</div>
+<div class="module-card" onclick="openFamily()">
+    <div class="module-header">
+        <div class="module-icon">👥</div>
+        <div class="module-title">Моя семья</div>
+    </div>
+    <div class="module-description" id="family-status">
+        Загрузка...
     </div>
 </div>
 
-<!-- Информация о приложении -->
-<div class="settings-section">
-    <h2>ℹ️ О приложении</h2>
+<!-- Информация о пользователе -->
+<div class="module-card">
+    <div class="module-header">
+        <div class="module-icon">👤</div>
+        <div class="module-title">Профиль</div>
+    </div>
     <div class="settings-item">
-        <div class="settings-info-row">
-            <span>Версия</span>
-            <span>v0.5</span>
-        </div>
-        <div class="settings-info-row">
-            <span>Telegram ID</span>
-            <span id="user-telegram-id">-</span>
-        </div>
+        <div class="settings-label">Имя</div>
+        <div class="settings-value" id="user-name">-</div>
+    </div>
+    <div class="settings-item">
+        <div class="settings-label">Telegram ID</div>
+        <div class="settings-value" id="user-telegram-id">-</div>
+    </div>
+    <div class="settings-item">
+        <div class="settings-label">Часовой пояс</div>
+        <div class="settings-value" id="user-timezone">-</div>
     </div>
 </div>
 
-<!-- Скрипты -->
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
-<script src="../js/api.js"></script>
-<script src="../js/api-extensions.js"></script>
 <script src="../js/currency.js"></script>
-<script src="../js/timezone.js"></script>
-<script src="../js/timezone-init.js"></script>
+<script src="../js/api.js"></script>
 <script src="../js/settings.js"></script>
 </body>
 </html>
