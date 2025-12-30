@@ -1,48 +1,40 @@
 // health-module/js/health-constants.js
+// Константы для модуля здоровья
 
-/**
- * Константы для модуля здоровья
- */
-const HealthConstants = (function() {
-    const constants = {
-        // Настроения с эмодзи
-        MOOD_EMOJIS: {
-            'радость': '😄',
-            'удовлетворение': '🙂',
-            'нейтрально': '😐',
-            'грусть': '😔',
-            'возбуждение': '😍',
-            'тревога': '😰',
-            'гнев': '😠',
-            'спокойствие': '😌'
-        },
+const HealthConstants = {
+    // Настроения из formatters.js (10 вариантов)
+    MOOD_EMOJIS: {
+        'радость': '😄',
+        'удовлетворение': '🙂',
+        'нейтрально': '😐',
+        'грусть': '😔',
+        'стресс': '😫',
+        'раздражительность': '😠',
+        'беспокойство': '😟',
+        'усталость': '😴',
+        'энергичность': '⚡️',
+        'спокойствие': '😌'
+    },
+    
+    getMoodOptions: function() {
+        return Object.keys(this.MOOD_EMOJIS);
+    },
+    
+    getMoodEmoji: function(mood) {
+        return this.MOOD_EMOJIS[mood] || '😐';
+    },
+    
+    getMoodsWithEmojis: function() {
+        return Object.entries(this.MOOD_EMOJIS).map(([value, emoji]) => ({
+            value,
+            emoji,
+            label: value.charAt(0).toUpperCase() + value.slice(1)
+        }));
+    }
+};
 
-        // Получить список настроений
-        getMoodOptions: function() {
-            return Object.keys(this.MOOD_EMOJIS);
-        },
+console.log('✅ HealthConstants загружен');
 
-        // Получить эмодзи для настроения
-        getMoodEmoji: function(mood) {
-            return this.MOOD_EMOJIS[mood] || '😐';
-        },
-
-        // Получить все настроения с эмодзи
-        getMoodsWithEmojis: function() {
-            return Object.entries(this.MOOD_EMOJIS).map(([value, emoji]) => ({
-                value,
-                emoji,
-                label: value.charAt(0).toUpperCase() + value.slice(1)
-            }));
-        }
-    };
-
-    return constants;
-})();
-
-// Экспорт
 if (typeof window !== 'undefined') {
     window.HealthConstants = HealthConstants;
 }
-
-console.log('✅ HealthConstants загружен');
