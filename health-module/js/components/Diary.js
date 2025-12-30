@@ -3,17 +3,16 @@ const Diary = (function() {
     let currentDate = null;
 
     function init() {
-        // Проверка зависимостей
         if (typeof HealthConstants === 'undefined') {
             console.error('❌ HealthConstants не загружен!');
             return;
         }
-        
+
         console.log('📔 Инициализация компонента Diary');
         initCalendar();
         initTodayButton();
         loadToday();
-        
+
         console.log('✅ Diary module loaded');
     }
 
@@ -41,19 +40,16 @@ const Diary = (function() {
 
         html += '<div class="calendar-grid">';
 
-        // Дни недели
         const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         weekDays.forEach(day => {
             html += `<div class="calendar-weekday">${day}</div>`;
         });
 
-        // Пустые ячейки до первого дня
         const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
         for (let i = 0; i < firstDayOfWeek; i++) {
             html += '<div class="calendar-day empty"></div>';
         }
 
-        // Дни месяца
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
@@ -111,16 +107,15 @@ const Diary = (function() {
 
         const formattedDate = HealthFormatters.formatDate(date, { weekday: 'long' });
 
-        // Загружаем актуальные опции через кэш
         let sexualActivityOptions = [];
-        
+
         if (typeof OptionsCache !== 'undefined' && OptionsCache.getUserOptions) {
             try {
                 const optionsResult = await OptionsCache.getUserOptions();
-                
+
                 if (optionsResult.success && optionsResult.data) {
                     sexualActivityOptions = optionsResult.data.sexual_activity_options || [];
-                    
+
                     if (HealthConfig.DEBUG) {
                         console.log('✅ Опции для Diary загружены:', {
                             source: optionsResult.source,
@@ -150,9 +145,8 @@ const Diary = (function() {
             return `<option value="${option}" ${selected}>${label}</option>`;
         }).join('');
 
-        // Получаем настроения из HealthConstants (с проверкой)
         let moodOptions = [{ value: '', label: 'Не указано' }];
-        
+
         if (typeof HealthConstants !== 'undefined' && HealthConstants.getMoodsWithEmojis) {
             const moods = HealthConstants.getMoodsWithEmojis();
             moodOptions = [
@@ -173,7 +167,6 @@ const Diary = (function() {
             ];
         }
 
-        // Генерируем options БЕЗ эмодзи - только текст
         const moodOptionsHtml = moodOptions.map(option => {
             const selected = entry?.mood === option.value ? 'selected' : '';
             return `<option value="${option.value}" ${selected}>${option.label}</option>`;
@@ -240,19 +233,41 @@ const Diary = (function() {
             return '<p class="no-symptoms">Симптомы не добавлены</p>';
         }
 
-        // Добавить inline styles для компактности
-        let html = '<div class="symptoms-tags" style="display: flex; flex-wrap: wrap; gap: 8px;">';
+        let html = '<div class="symptoms-tags" style="display: flex; flex-direction: column; gap: 12px;">';
 
         symptoms.forEach(symptom => {
             const color = HealthFormatters.getIntensityColor(symptom.intensity);
 
-            // Inline styles: display: inline-flex и width: auto
             html += `
-                <div class="symptom-tag" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 16px; border: 2px solid ${color}; width: auto;">
-                    <span class="symptom-name">${symptom.name}</span>
-                    <div class="symptom-right">
-                        <span class="symptom-intensity">${'●'.repeat(symptom.intensity)}</span>
-                        <button class="symptom-remove" onclick="Diary.removeSymptom('${symptom.id}', '${currentDate}')">×</button>
+                <div class="symptom-tag" style="
+                    display: flex;
+                    flex-direction: column;
+                    padding: 12px 16px;
+                    border-radius: 12px;
+                    border: 2px solid ${color};
+                    width: calc(100% - 32px);
+                    position: relative;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <span class="symptom-name" style="flex: 1; font-size: 16px; font-weight: 500;">${symptom.name}</span>
+                        <button class="symptom-remove"
+                                onclick="Diary.removeSymptom('${symptom.id}', '${currentDate}')"
+                                style="
+                                    background: none;
+                                    border: none;
+                                    color: var(--health-text-light);
+                                    font-size: 24px;
+                                    cursor: pointer;
+                                    padding: 0;
+                                    width: 24px;
+                                    height: 24px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">×</button>
+                    </div>
+                    <div style="display: flex; justify-content: center;">
+                        <span class="symptom-intensity" style="color: ${color}; font-size: 18px;">${'●'.repeat(symptom.intensity)}</span>
                     </div>
                 </div>
             `;
@@ -275,6 +290,26 @@ const Diary = (function() {
     async function removeSymptom(symptomId, date) {
         console.log('🗑️ Удаление симптома:', symptomId, 'для даты:', date);
         showToast('⚠️ Функция в разработке', 'info');
+    }
+
+    async function addSymptom(symptomData) {
+        console.log('➕ Добавление симптома:', symptomData);
+
+        try {
+            const response = await HealthAPI.addSymptom(currentDate, symptomData);
+
+            if (response.success) {
+                showToast('✅ Симптом добавлен', 'success');
+
+                // Перезагрузить данные чтобы симптомы отобразились сразу
+                await loadDate(currentDate);
+            } else {
+                showToast('❌ Ошибка добавления симптома', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Ошибка:', error);
+            showToast('❌ Ошибка добавления симптома', 'error');
+        }
     }
 
     async function saveEntry(date) {
@@ -332,6 +367,7 @@ const Diary = (function() {
         loadDate,
         selectMood,
         removeSymptom,
+        addSymptom,
         saveEntry,
         showMoodPicker,
         showSymptomPicker
