@@ -68,6 +68,45 @@ const HealthAPI = (function() {
     }
 
     /**
+     * Получить профиль пользователя
+     */
+    async function getUserProfile() {
+        try {
+            const response = await fetch(`${BASE_URL}/health/profile`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            console.error('❌ Ошибка получения профиля:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Обновить профиль пользователя
+     */
+    async function updateUserProfile(profileData) {
+        try {
+            const response = await fetch(`${BASE_URL}/health/profile`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify(profileData)
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            console.error('❌ Ошибка обновления профиля:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Получить информацию о пользователе
      */
     async function getUserInfo() {
@@ -816,6 +855,8 @@ const HealthAPI = (function() {
         checkLowStock,
         deactivateMedication,
         getMedication,
+        getUserProfile,
+        updateUserProfile,
         // 🆕 Telegram API
         getTelegramStatus,
         generateLinkCode,
