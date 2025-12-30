@@ -1,12 +1,26 @@
 // js/components/Diary.js
 const Diary = (function() {
     let currentDate = null;
+    let profileWeight = null; // Вес из профиля
 
     function init() {
         console.log('📔 Инициализация компонента Diary');
         initCalendar();
         initTodayButton();
+        loadProfileWeight(); // Загрузить вес из профиля
         loadToday();
+    }
+
+    async function loadProfileWeight() {
+        try {
+            const result = await HealthAPI.getUserProfile();
+            if (result.success && result.data?.weight_kg) {
+                profileWeight = result.data.weight_kg;
+                console.log('⚖️ Вес из профиля загружен:', profileWeight);
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки веса из профиля:', error);
+        }
     }
 
     function initCalendar() {
@@ -142,13 +156,31 @@ const Diary = (function() {
             return `<option value="${option}" ${selected}>${label}</option>`;
         }).join('');
 
+        // Определяем какой вес показать: из записи, или из профиля
+        const displayWeight = entry?.weight_kg || profileWeight || '';
+
+        const moodOptions = [
+            { value: '', label: 'Не указано' },
+            { value: 'радость', label: 'Радость' },
+            { value: 'удовлетворение', label: 'Удовлетворение' },
+            { value: 'нейтрально', label: 'Нейтрально' },
+            { value: 'грусть', label: 'Грусть' }
+        ];
+
+        const moodOptionsHtml = moodOptions.map(option => {
+            const selected = entry?.mood === option.value ? 'selected' : '';
+            return `<option value="${option.value}" ${selected}>${option.label}</option>`;
+        }).join('');
+
         return `
             <div class="entry-form">
                 <h3>📅 ${formattedDate}</h3>
 
                 <div class="form-section">
                     <label>Настроение</label>
-                    ${renderMoodOptions(entry?.mood)}
+                    <select id="mood-input" class="modal-input">
+                        ${moodOptionsHtml}
+                    </select>
                 </div>
 
                 <div class="form-section">
@@ -161,7 +193,7 @@ const Diary = (function() {
                 <div class="form-section">
                     <label>Вес (кг)</label>
                     <input type="number" id="weight-input" min="20" max="300" step="0.1"
-                           value="${entry?.weight_kg || ''}"
+                           value="${displayWeight}"
                            placeholder="Например: 70.5">
                 </div>
 
@@ -203,33 +235,6 @@ const Diary = (function() {
         `;
     }
 
-    function renderMoodOptions(currentMood) {
-        const moods = [
-            { value: 'радость', emoji: '😄', label: 'Радость' },
-            { value: 'удовлетворение', emoji: '🙂', label: 'Удовлетворение' },
-            { value: 'нейтрально', emoji: '😐', label: 'Нейтрально' },
-            { value: 'грусть', emoji: '😔', label: 'Грусть' }
-        ];
-
-        let html = '<div class="mood-selector-inline">';
-        
-        moods.forEach(mood => {
-            const isActive = currentMood === mood.value;
-            const activeClass = isActive ? 'mood-active' : '';
-            
-            html += `
-                <div class="mood-option ${activeClass}" 
-                     onclick="Diary.selectMood('${currentDate}', '${mood.value}')">
-                    <span class="mood-emoji">${mood.emoji}</span>
-                    <span class="mood-label">${mood.label}</span>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        return html;
-    }
-
     function renderSymptomsList(symptoms) {
         if (!symptoms || symptoms.length === 0) {
             return '<p class="no-symptoms">Симптомы не добавлены</p>';
@@ -250,24 +255,6 @@ const Diary = (function() {
 
         html += '</div>';
         return html;
-    }
-
-    async function selectMood(date, mood) {
-        console.log('😊 Выбор настроения:', mood, 'для даты:', date);
-
-        try {
-            const result = await HealthAPI.addMood(date, mood);
-            
-            if (result.success) {
-                showToast('✅ Настроение сохранено', 'success');
-                await loadDate(date); // Перезагрузить форму
-            } else {
-                throw new Error(result.error || 'Ошибка сохранения');
-            }
-        } catch (error) {
-            console.error('❌ Ошибка сохранения настроения:', error);
-            showToast(`❌ ${error.message}`, 'error');
-        }
     }
 
     function validateEntry(field, value) {
@@ -299,12 +286,21 @@ const Diary = (function() {
     async function saveEntry(date) {
         console.log('💾 Сохранение записи за дату:', date);
 
+        const mood = document.getElementById('mood-input')?.value;
         const sleep = document.getElementById('sleep-input')?.value;
         const weight = document.getElementById('weight-input')?.value;
         const notes = document.getElementById('notes-input')?.value;
         const sexualActivity = document.getElementById('sexual-activity-input')?.value;
 
         const promises = [];
+        
+        // Сохранение настроения
+        if (mood) {
+            promises.push(
+                HealthAPI.addMood(date, mood)
+                    .then(result => ({ field: 'настроение', success: result.success, error: result.error }))
+            );
+        }
         
         // Валидация и сохранение сна
         if (sleep) {
@@ -319,17 +315,33 @@ const Diary = (function() {
             );
         }
         
-        // Валидация и сохранение веса
+        // Валидация и сохранение веса (и в запись, и в профиль)
         if (weight) {
             const validation = validateEntry('weight', weight);
             if (!validation.valid) {
                 showToast(`❌ ${validation.error}`, 'error');
                 return;
             }
+            const weightValue = parseFloat(weight);
+            
+            // Сохраняем в запись
             promises.push(
-                HealthAPI.addWeight(date, parseFloat(weight))
-                    .then(result => ({ field: 'вес', success: result.success, error: result.error }))
+                HealthAPI.addWeight(date, weightValue)
+                    .then(result => ({ field: 'вес (запись)', success: result.success, error: result.error }))
             );
+            
+            // Сохраняем в профиль, если изменился
+            if (profileWeight !== weightValue) {
+                promises.push(
+                    HealthAPI.updateUserProfile({ weight_kg: weightValue })
+                        .then(result => {
+                            if (result.success) {
+                                profileWeight = weightValue; // Обновляем локальное значение
+                            }
+                            return { field: 'вес (профиль)', success: result.success, error: result.error };
+                        })
+                );
+            }
         }
         
         // Сохранение заметок
@@ -390,7 +402,6 @@ const Diary = (function() {
     return {
         init,
         loadDate,
-        selectMood,
         saveEntry,
         showSymptomPicker
     };
