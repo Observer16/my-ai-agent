@@ -148,9 +148,7 @@ const Diary = (function() {
 
                 <div class="form-section">
                     <label>Настроение</label>
-                    <div class="mood-selector">
-                        ${renderMoodOptions(entry?.mood)}
-                    </div>
+                    ${renderMoodOptions(entry?.mood)}
                 </div>
 
                 <div class="form-section">
@@ -160,6 +158,12 @@ const Diary = (function() {
                            placeholder="Например: 7.5">
                 </div>
 
+                <div class="form-section">
+                    <label>Вес (кг)</label>
+                    <input type="number" id="weight-input" min="20" max="300" step="0.1"
+                           value="${entry?.weight_kg || ''}"
+                           placeholder="Например: 70.5">
+                </div>
 
                 <div class="form-section">
                     <label>
@@ -201,32 +205,29 @@ const Diary = (function() {
 
     function renderMoodOptions(currentMood) {
         const moods = [
-            { value: 'радость', emoji: '😄' },
-            { value: 'удовлетворение', emoji: '🙂' },
-            { value: 'нейтрально', emoji: '😐' },
-            { value: 'грусть', emoji: '😔' }
+            { value: 'радость', emoji: '😄', label: 'Радость' },
+            { value: 'удовлетворение', emoji: '🙂', label: 'Удовлетворение' },
+            { value: 'нейтрально', emoji: '😐', label: 'Нейтрально' },
+            { value: 'грусть', emoji: '😔', label: 'Грусть' }
         ];
 
-        if (currentMood) {
-            const activeMood = moods.find(mood => mood.value === currentMood);
-            if (activeMood) {
-                return `
-                    <div class="current-mood-display">
-                        <span class="mood-emoji">${activeMood.emoji}</span>
-                        <span class="mood-text">${activeMood.value}</span>
-                        <button class="btn-link" onclick="Diary.showMoodPicker('${currentDate}')">
-                            Изменить
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        return `
-            <button class="btn-secondary" onclick="Diary.showMoodPicker('${currentDate}')">
-                + Выбрать настроение
-            </button>
-        `;
+        let html = '<div class="mood-selector-inline">';
+        
+        moods.forEach(mood => {
+            const isActive = currentMood === mood.value;
+            const activeClass = isActive ? 'mood-active' : '';
+            
+            html += `
+                <div class="mood-option ${activeClass}" 
+                     onclick="Diary.selectMood('${currentDate}', '${mood.value}')">
+                    <span class="mood-emoji">${mood.emoji}</span>
+                    <span class="mood-label">${mood.label}</span>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        return html;
     }
 
     function renderSymptomsList(symptoms) {
@@ -242,10 +243,7 @@ const Diary = (function() {
             html += `
                 <div class="symptom-tag" style="border-color: ${color}">
                     <span class="symptom-name">${symptom.name}</span>
-                    <div class="symptom-right">
                     <span class="symptom-intensity">${'●'.repeat(symptom.intensity)}</span>
-                    <button class="symptom-remove" onclick="Diary.removeSymptom('${symptom.id}', '${currentDate}')">×</button>
-                    </div>
                 </div>
             `;
         });
@@ -257,53 +255,133 @@ const Diary = (function() {
     async function selectMood(date, mood) {
         console.log('😊 Выбор настроения:', mood, 'для даты:', date);
 
-        const success = await HealthModule.updateHealthEntry(date, 'mood', mood);
-        if (success) {
-            showToast('✅ Настроение сохранено', 'success');
-            loadDate(date);
+        try {
+            const result = await HealthAPI.addMood(date, mood);
+            
+            if (result.success) {
+                showToast('✅ Настроение сохранено', 'success');
+                await loadDate(date); // Перезагрузить форму
+            } else {
+                throw new Error(result.error || 'Ошибка сохранения');
+            }
+        } catch (error) {
+            console.error('❌ Ошибка сохранения настроения:', error);
+            showToast(`❌ ${error.message}`, 'error');
         }
     }
 
-    async function removeSymptom(symptomId, date) {
-        console.log('🗑️ Удаление симптома:', symptomId, 'для даты:', date);
-        showToast('⚠️ Функция в разработке', 'info');
+    function validateEntry(field, value) {
+        switch(field) {
+            case 'sleep':
+                const sleep = parseFloat(value);
+                if (isNaN(sleep) || sleep < 0 || sleep > 24) {
+                    return { valid: false, error: 'Сон должен быть от 0 до 24 часов' };
+                }
+                break;
+                
+            case 'weight':
+                const weight = parseFloat(value);
+                if (isNaN(weight) || weight < 20 || weight > 300) {
+                    return { valid: false, error: 'Вес должен быть от 20 до 300 кг' };
+                }
+                break;
+                
+            case 'notes':
+                if (value.length > 1000) {
+                    return { valid: false, error: 'Заметки слишком длинные (макс 1000 символов)' };
+                }
+                break;
+        }
+        
+        return { valid: true };
     }
 
     async function saveEntry(date) {
         console.log('💾 Сохранение записи за дату:', date);
 
         const sleep = document.getElementById('sleep-input')?.value;
+        const weight = document.getElementById('weight-input')?.value;
         const notes = document.getElementById('notes-input')?.value;
         const sexualActivity = document.getElementById('sexual-activity-input')?.value;
 
         const promises = [];
+        
+        // Валидация и сохранение сна
+        if (sleep) {
+            const validation = validateEntry('sleep', sleep);
+            if (!validation.valid) {
+                showToast(`❌ ${validation.error}`, 'error');
+                return;
+            }
+            promises.push(
+                HealthAPI.addSleep(date, parseFloat(sleep))
+                    .then(result => ({ field: 'сон', success: result.success, error: result.error }))
+            );
+        }
+        
+        // Валидация и сохранение веса
+        if (weight) {
+            const validation = validateEntry('weight', weight);
+            if (!validation.valid) {
+                showToast(`❌ ${validation.error}`, 'error');
+                return;
+            }
+            promises.push(
+                HealthAPI.addWeight(date, parseFloat(weight))
+                    .then(result => ({ field: 'вес', success: result.success, error: result.error }))
+            );
+        }
+        
+        // Сохранение заметок
+        if (notes) {
+            const validation = validateEntry('notes', notes);
+            if (!validation.valid) {
+                showToast(`❌ ${validation.error}`, 'error');
+                return;
+            }
+            promises.push(
+                HealthAPI.addNotes(date, notes)
+                    .then(result => ({ field: 'заметки', success: result.success, error: result.error }))
+            );
+        }
+        
+        // Сохранение сексуальной активности
+        if (sexualActivity) {
+            promises.push(
+                HealthAPI.addSexualActivity(date, sexualActivity)
+                    .then(result => ({ field: 'сексуальная активность', success: result.success, error: result.error }))
+            );
+        }
 
-        if (sleep) promises.push(HealthModule.updateHealthEntry(date, 'sleep', parseFloat(sleep)));
-        if (notes) promises.push(HealthModule.updateHealthEntry(date, 'notes', notes));
-        if (sexualActivity) promises.push(HealthModule.updateHealthEntry(date, 'sexual_activity', sexualActivity));
+        if (promises.length === 0) {
+            showToast('⚠️ Нет изменений для сохранения', 'info');
+            return;
+        }
 
         try {
-            await Promise.all(promises);
-            showToast('✅ Запись сохранена', 'success');
+            const results = await Promise.all(promises);
+            
+            // Проверяем результаты
+            const failed = results.filter(r => !r.success);
+            
+            if (failed.length === 0) {
+                showToast('✅ Запись сохранена', 'success');
+                await loadDate(date); // Перезагрузить форму
+            } else {
+                const errors = failed.map(f => `${f.field}: ${f.error}`).join(', ');
+                showToast(`⚠️ Частично сохранено. Ошибки: ${errors}`, 'warning');
+                await loadDate(date); // Всё равно перезагрузить
+            }
         } catch (error) {
             console.error('❌ Ошибка сохранения:', error);
             showToast('❌ Ошибка сохранения', 'error');
         }
     }
 
-    function showMoodPicker(date) {
-        console.log('😊 Открытие выбора настроения для даты:', date);
-        if (window.SimpleModalManager) {
-            SimpleModalManager.show('mood-picker', { date });
-        } else {
-            showToast('⚠️ Функция в разработке', 'info');
-        }
-    }
-
     function showSymptomPicker() {
         console.log('🔍 Открытие выбора симптомов...');
         if (window.SimpleModalManager) {
-            SimpleModalManager.show('symptom-picker');
+            SimpleModalManager.show('symptom-picker', { date: currentDate });
         } else {
             showToast('⚠️ Функция в разработке', 'info');
         }
@@ -313,9 +391,7 @@ const Diary = (function() {
         init,
         loadDate,
         selectMood,
-        removeSymptom,
         saveEntry,
-        showMoodPicker,
         showSymptomPicker
     };
 })();
