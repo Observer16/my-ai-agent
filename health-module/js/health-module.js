@@ -266,7 +266,10 @@ const HealthModule = (function() {
                 });
 
                 // 5. Обновляем localStorage
-                StorageHelper.set('user_gender', gender);
+                if (window.HealthStorage && typeof HealthStorage.saveUserGender === 'function') {
+                    HealthStorage.saveUserGender(gender);
+                    console.log('💾 Гендер сохранён в localStorage');
+                }
 
                 // 6. Показываем уведомление
                 showToast('✅ Пол обновлен', 'success');
