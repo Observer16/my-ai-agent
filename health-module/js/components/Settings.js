@@ -1,6 +1,6 @@
 /**
- * Компонент "Настройки"
- * Управление Telegram уведомлениями и настройками модуля здоровья
+ * Компонент "Настройки здоровья"
+ * Управление профилем пользователя (рост, вес, мерки тела)
  */
 
 const SettingsComponent = {
@@ -8,12 +8,9 @@ const SettingsComponent = {
      * Состояние компонента
      */
     state: {
-        telegramStatus: null,
-        linkCode: null,
-        notifications: null,
+        profile: null,
         loading: false,
-        countdown: 0,
-        countdownTimer: null
+        saving: false
     },
 
     /**
@@ -28,254 +25,276 @@ const SettingsComponent = {
                         Настройки здоровья
                     </h1>
                     <p class="settings-subtitle">
-                        Управление уведомлениями и интеграциями
+                        Профиль и антропометрические данные
                     </p>
                 </div>
 
                 <div id="settings-error" class="settings-error" style="display: none;"></div>
+                <div id="settings-success" class="settings-success" style="display: none;"></div>
 
                 <div class="settings-content">
-                    ${this.renderTelegramSection()}
+                    ${this.renderProfileSection()}
                 </div>
             </div>
         `;
     },
 
     /**
-     * Рендер секции Telegram
+     * Рендер секции профиля
      */
-    renderTelegramSection() {
-        return `
-            <div class="settings-section telegram-section">
-                <div class="section-header">
-                    <div class="section-icon">🔗</div>
-                    <div class="section-info">
-                        <h2 class="section-title">Telegram Уведомления</h2>
-                        <p class="section-description">
-                            Получай напоминания о приёме лекарств
-                        </p>
-                    </div>
-                </div>
-
-                <div id="telegram-status-container">
-                    ${this.renderTelegramStatus()}
-                </div>
-
-                <div id="telegram-link-code-container">
-                    ${this.renderLinkCodeSection()}
-                </div>
-            </div>
-        `;
-    },
-
-    /**
-     * Рендер статуса привязки
-     */
-    renderTelegramStatus() {
-        if (!this.state.telegramStatus) {
+    renderProfileSection() {
+        if (this.state.loading) {
             return `
-                <div class="status-card status-loading">
-                    <div class="loading-spinner-small"></div>
-                    <p>Загрузка статуса...</p>
+                <div class="settings-section">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка профиля...</p>
                 </div>
             `;
         }
 
-        if (this.state.telegramStatus.is_linked) {
-            // Проверяем статус уведомлений
-            const notifEnabled = this.state.notifications?.enabled ?? true;
+        const profile = this.state.profile || {};
 
-            return `
-                <div class="status-card status-linked">
-                    <div class="status-content">
-                        <div class="status-icon">✅</div>
-                        <div class="status-text">
-                            <p class="status-title">Аккаунт привязан</p>
-                            <p class="status-info">
-                                @${this.state.telegramStatus.username || 'пользователь'}
-                                ${this.state.telegramStatus.telegram_id ? `(ID: ${this.state.telegramStatus.telegram_id})` : ''}
-                            </p>
-                            ${this.state.telegramStatus.linked_at ? `
-                                <p class="status-date">
-                                    Привязан: ${new Date(this.state.telegramStatus.linked_at).toLocaleString('ru-RU')}
-                                </p>
-                            ` : ''}
-                        </div>
+        return `
+            <div class="settings-section profile-section">
+                <div class="section-header">
+                    <div class="section-icon">👤</div>
+                    <div class="section-info">
+                        <h2 class="section-title">Профиль пользователя</h2>
+                        <p class="section-description">
+                            Основные данные для анализа здоровья
+                        </p>
+                    </div>
+                </div>
+
+                <form id="profile-form" class="profile-form">
+                    <!-- Пол (только отображение, изменяется через API gender) -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Пол</span>
+                            <span class="form-hint">Изменяется через настройки аккаунта</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input" 
+                            value="${this.formatGender(profile.gender)}"
+                            readonly
+                            disabled
+                        />
                     </div>
 
-                    <div class="notification-status ${notifEnabled ? 'enabled' : 'disabled'}">
-                        <span class="status-icon">${notifEnabled ? '🔔' : '🔕'}</span>
-                        <span class="status-text">
-                            Уведомления ${notifEnabled ? 'включены' : 'отключены'}
-                        </span>
+                    <!-- Дата рождения -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Дата рождения</span>
+                            ${profile.age ? `<span class="form-hint">Возраст: ${profile.age} лет</span>` : ''}
+                        </label>
+                        <input 
+                            type="date" 
+                            id="birth_date"
+                            name="birth_date"
+                            class="form-input" 
+                            value="${profile.birth_date || ''}"
+                        />
                     </div>
 
-                    <div class="button-center">
-                        <button
-                            onclick="SettingsComponent.toggleNotifications(${!notifEnabled})"
-                            class="btn ${notifEnabled ? 'btn-secondary' : 'btn-primary'}"
-                            ${this.state.loading ? 'disabled' : ''}
+                    <!-- Рост -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Рост</span>
+                            <span class="form-hint">в сантиметрах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="height_cm"
+                            name="height_cm"
+                            class="form-input" 
+                            min="50"
+                            max="250"
+                            step="1"
+                            placeholder="170"
+                            value="${profile.height_cm || ''}"
+                        />
+                    </div>
+
+                    <!-- Вес -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Вес</span>
+                            <span class="form-hint">в килограммах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="weight_kg"
+                            name="weight_kg"
+                            class="form-input" 
+                            min="20"
+                            max="300"
+                            step="0.1"
+                            placeholder="70.5"
+                            value="${profile.weight_kg || ''}"
+                        />
+                    </div>
+
+                    <div class="form-divider">
+                        <span>Мерки тела</span>
+                    </div>
+
+                    <!-- Обхват груди -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Обхват груди</span>
+                            <span class="form-hint">в сантиметрах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="chest_cm"
+                            name="chest_cm"
+                            class="form-input" 
+                            min="50"
+                            max="200"
+                            step="0.5"
+                            placeholder="95.0"
+                            value="${profile.chest_cm || ''}"
+                        />
+                    </div>
+
+                    <!-- Обхват талии -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Обхват талии</span>
+                            <span class="form-hint">в сантиметрах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="waist_cm"
+                            name="waist_cm"
+                            class="form-input" 
+                            min="40"
+                            max="200"
+                            step="0.5"
+                            placeholder="80.0"
+                            value="${profile.waist_cm || ''}"
+                        />
+                    </div>
+
+                    <!-- Обхват бёдер -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Обхват бёдер</span>
+                            <span class="form-hint">в сантиметрах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="hips_cm"
+                            name="hips_cm"
+                            class="form-input" 
+                            min="50"
+                            max="200"
+                            step="0.5"
+                            placeholder="100.0"
+                            value="${profile.hips_cm || ''}"
+                        />
+                    </div>
+
+                    <!-- Обхват шеи -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Обхват шеи</span>
+                            <span class="form-hint">в сантиметрах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="neck_cm"
+                            name="neck_cm"
+                            class="form-input" 
+                            min="20"
+                            max="60"
+                            step="0.5"
+                            placeholder="37.0"
+                            value="${profile.neck_cm || ''}"
+                        />
+                    </div>
+
+                    <!-- Обхват бицепса -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Обхват бицепса</span>
+                            <span class="form-hint">в сантиметрах</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="biceps_cm"
+                            name="biceps_cm"
+                            class="form-input" 
+                            min="15"
+                            max="60"
+                            step="0.5"
+                            placeholder="32.0"
+                            value="${profile.biceps_cm || ''}"
+                        />
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="form-actions">
+                        <button 
+                            type="submit" 
+                            class="btn btn-primary btn-block"
+                            ${this.state.saving ? 'disabled' : ''}
                         >
-                            ${notifEnabled ? '🔕 Отключить уведомления' : '🔔 Включить уведомления'}
+                            ${this.state.saving ? `
+                                <div class="loading-spinner-small"></div>
+                                <span>Сохранение...</span>
+                            ` : `
+                                <span>💾</span>
+                                <span>Сохранить</span>
+                            `}
                         </button>
                     </div>
-                </div>
-            `;
-        } else {
-            return `
-                <div class="status-card status-not-linked">
-                    <div class="status-icon">ℹ️</div>
-                    <div class="status-text">
-                        <p class="status-title">Аккаунт не привязан</p>
-                        <p class="status-info">
-                            Привяжи Telegram для получения уведомлений о приёме лекарств
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
+                </form>
+            </div>
+        `;
     },
 
     /**
-     * Рендер секции с кодом привязки
+     * Форматирование пола для отображения
      */
-    renderLinkCodeSection() {
-        // Если аккаунт уже привязан - не показываем
-        if (this.state.telegramStatus?.is_linked) {
-            return '';
-        }
-
-        // Если нет кода - показываем кнопку
-        if (!this.state.linkCode) {
-            return `
-                <button
-                    onclick="SettingsComponent.generateLinkCode()"
-                    class="btn btn-primary btn-block"
-                    ${this.state.loading ? 'disabled' : ''}
-                >
-                    ${this.state.loading ? `
-                        <div class="loading-spinner-small"></div>
-                        <span>Генерация...</span>
-                    ` : `
-                        <span>🔗</span>
-                        <span>Получить код привязки</span>
-                    `}
-                </button>
-            `;
-        }
-
-        // Показываем инструкцию с кодом
-        return `
-            <div class="link-code-instructions">
-                <div class="instructions-header">
-                    <span class="instructions-icon">⏱️</span>
-                    <div>
-                        <h3 class="instructions-title">Инструкция по привязке</h3>
-                        <p class="countdown-text">
-                            Код действителен ${this.formatCountdown(this.state.countdown)}
-                        </p>
-                    </div>
-                </div>
-
-                <ol class="instructions-list">
-                    <li>Открой Telegram</li>
-                    <li>Найди бота <code>@YourHealthBot</code></li>
-                    <li>Отправь команду:</li>
-                </ol>
-
-                <div class="code-input-group">
-                    <input
-                        type="text"
-                        readonly
-                        value="/link ${this.state.linkCode.link_code}"
-                        class="code-input"
-                        id="link-code-input"
-                    />
-                    <button
-                        onclick="SettingsComponent.copyCode()"
-                        class="btn btn-copy"
-                        title="Скопировать"
-                    >
-                        📋
-                    </button>
-                </div>
-
-                <button
-                    onclick="SettingsComponent.clearLinkCode()"
-                    class="btn btn-link btn-sm"
-                >
-                    Сгенерировать новый код
-                </button>
-            </div>
-        `;
+    formatGender(gender) {
+        const genderMap = {
+            'male': 'Мужской',
+            'female': 'Женский',
+            'other': 'Другой',
+            'prefer_not_to_say': 'Не указан'
+        };
+        return genderMap[gender] || 'Не указан';
     },
 
     /**
      * Инициализация компонента
      */
     async init() {
-        await this.loadAllData();
+        await this.loadProfile();
+        this.attachEventListeners();
     },
 
     /**
-     * Загрузка всех данных
+     * Загрузка профиля
      */
-    async loadAllData() {
-        await Promise.all([
-            this.loadTelegramStatus(),
-            this.loadNotificationSettings()
-        ]);
-    },
-
-    /**
-     * Загрузка статуса Telegram
-     */
-    async loadTelegramStatus() {
-        try {
-            const response = await HealthAPI.getTelegramStatus();
-            if (response.success) {
-                this.state.telegramStatus = response.data;
-                this.updateView();
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки статуса Telegram:', error);
-        }
-    },
-
-    /**
-     * Загрузка настроек уведомлений
-     */
-    async loadNotificationSettings() {
-        try {
-            const response = await HealthAPI.getNotificationSettings();
-            if (response.success) {
-                this.state.notifications = response.data;
-                this.updateView();
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки настроек:', error);
-        }
-    },
-
-    /**
-     * Генерация кода привязки
-     */
-    async generateLinkCode() {
+    async loadProfile() {
         this.state.loading = true;
         this.updateView();
 
         try {
-            const response = await HealthAPI.generateLinkCode();
+            const response = await HealthAPI.getUserProfile();
+            
             if (response.success) {
-                this.state.linkCode = response.data;
-                this.startCountdown();
-                this.updateView();
+                this.state.profile = response.data;
+                console.log('✅ Profile loaded:', this.state.profile);
             } else {
-                this.showError(response.error || 'Ошибка генерации кода');
+                this.showError('Ошибка загрузки профиля');
             }
         } catch (error) {
-            console.error('Ошибка генерации кода:', error);
-            this.showError('Не удалось сгенерировать код');
+            console.error('❌ Error loading profile:', error);
+            this.showError('Не удалось загрузить профиль');
         } finally {
             this.state.loading = false;
             this.updateView();
@@ -283,119 +302,64 @@ const SettingsComponent = {
     },
 
     /**
-     * Переключение уведомлений
+     * Привязка обработчиков событий
      */
-    async toggleNotifications(enabled) {
-        this.state.loading = true;
+    attachEventListeners() {
+        const form = document.getElementById('profile-form');
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleSubmit(e));
+        }
+    },
+
+    /**
+     * Обработка отправки формы
+     */
+    async handleSubmit(event) {
+        event.preventDefault();
+
+        if (this.state.saving) return;
+
+        this.state.saving = true;
         this.updateView();
 
         try {
-            let response;
+            const formData = new FormData(event.target);
+            const data = {};
 
-            if (enabled) {
-                // Включаем уведомления
-                response = await HealthAPI.updateNotificationSettings({ enabled: true });
-            } else {
-                // Отключаем через unlinkTelegram (который теперь только отключает уведомления)
-                response = await HealthAPI.unlinkTelegram();
+            // Собираем только заполненные поля
+            for (const [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    // Преобразуем числа
+                    if (key !== 'birth_date') {
+                        data[key] = parseFloat(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
             }
+
+            if (Object.keys(data).length === 0) {
+                this.showError('Нет данных для сохранения');
+                return;
+            }
+
+            console.log('📤 Saving profile:', data);
+
+            const response = await HealthAPI.updateUserProfile(data);
 
             if (response.success) {
-                await this.loadAllData();
-                this.showSuccess(enabled ? '✅ Уведомления включены' : '✅ Уведомления отключены');
+                this.state.profile = response.data;
+                this.showSuccess('✅ Профиль успешно обновлён');
+                this.updateView();
             } else {
-                this.showError('❌ Ошибка изменения настроек');
-                // Восстанавливаем состояние
-                await this.loadNotificationSettings();
+                this.showError(response.error || 'Ошибка сохранения профиля');
             }
         } catch (error) {
-            console.error('Ошибка переключения уведомлений:', error);
-            this.showError('❌ Не удалось изменить настройки');
-            // Восстанавливаем состояние
-            await this.loadNotificationSettings();
+            console.error('❌ Error saving profile:', error);
+            this.showError('Не удалось сохранить профиль');
         } finally {
-            this.state.loading = false;
+            this.state.saving = false;
             this.updateView();
-        }
-    },
-
-    /**
-     * Копирование кода
-     */
-    copyCode() {
-        const input = document.getElementById('link-code-input');
-        if (input) {
-            input.select();
-            document.execCommand('copy');
-            this.showSuccess('Команда скопирована!');
-        }
-    },
-
-    /**
-     * Очистка кода привязки
-     */
-    clearLinkCode() {
-        this.stopCountdown();
-        this.state.linkCode = null;
-        this.state.countdown = 0;
-        this.updateView();
-    },
-
-    /**
-     * Запуск обратного отсчёта
-     */
-    startCountdown() {
-        if (!this.state.linkCode) return;
-
-        this.stopCountdown();
-
-        const expiresAt = new Date(this.state.linkCode.expires_at).getTime();
-
-        this.state.countdownTimer = setInterval(() => {
-            const now = Date.now();
-            const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
-
-            this.state.countdown = remaining;
-
-            if (remaining === 0) {
-                this.clearLinkCode();
-            } else {
-                this.updateCountdownDisplay();
-            }
-        }, 1000);
-
-        // Первый запуск сразу
-        const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-        this.state.countdown = remaining;
-        this.updateCountdownDisplay();
-    },
-
-    /**
-     * Остановка обратного отсчёта
-     */
-    stopCountdown() {
-        if (this.state.countdownTimer) {
-            clearInterval(this.state.countdownTimer);
-            this.state.countdownTimer = null;
-        }
-    },
-
-    /**
-     * Форматирование времени
-     */
-    formatCountdown(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    },
-
-    /**
-     * Обновление отображения таймера
-     */
-    updateCountdownDisplay() {
-        const countdownEl = document.querySelector('.countdown-text');
-        if (countdownEl) {
-            countdownEl.textContent = `Код действителен ${this.formatCountdown(this.state.countdown)}`;
         }
     },
 
@@ -403,16 +367,10 @@ const SettingsComponent = {
      * Обновление вида
      */
     updateView() {
-        // Обновляем статус
-        const statusContainer = document.getElementById('telegram-status-container');
-        if (statusContainer) {
-            statusContainer.innerHTML = this.renderTelegramStatus();
-        }
-
-        // Обновляем код привязки
-        const linkCodeContainer = document.getElementById('telegram-link-code-container');
-        if (linkCodeContainer) {
-            linkCodeContainer.innerHTML = this.renderLinkCodeSection();
+        const container = document.getElementById('health-container');
+        if (container) {
+            container.innerHTML = this.render();
+            this.attachEventListeners();
         }
     },
 
@@ -434,10 +392,13 @@ const SettingsComponent = {
      * Показать успех
      */
     showSuccess(message) {
-        if (typeof toast !== 'undefined') {
-            toast.success(message);
-        } else {
-            alert(message);
+        const successEl = document.getElementById('settings-success');
+        if (successEl) {
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 3000);
         }
     }
 };
