@@ -9,7 +9,6 @@ const SymptomModal = (function() {
         currentDate = data.date || new Date().toISOString().split('T')[0];
         console.log('🤕 Открытие модального окна симптомов для даты:', currentDate);
 
-        // Загружаем опции через кэш
         let categories = [];
         let symptomsByCategory = {};
 
@@ -37,14 +36,12 @@ const SymptomModal = (function() {
                 return;
             }
         } else {
-            // Fallback на state только если OptionsCache недоступен
             console.warn('⚠️ OptionsCache недоступен, используем state');
             const state = HealthModule.getState();
             categories = state.userOptions?.symptom_categories || [];
             symptomsByCategory = state.userOptions?.symptoms_by_category || {};
         }
 
-        // Если опции пустые - показываем ошибку
         if (categories.length === 0) {
             console.error('❌ Опции симптомов пустые');
             showToast('❌ Не удалось загрузить список симптомов', 'error');
@@ -192,15 +189,23 @@ const SymptomModal = (function() {
                 showToast('✅ Симптом добавлен', 'success');
                 close();
 
+                // ВАЖНО: Сначала обновляем данные модуля
                 await HealthModule.refreshData();
 
+                // Затем обновляем Diary компонент с await
                 if (window.Diary && window.Diary.loadDate) {
-                    Diary.loadDate(currentDate);
+                    await Diary.loadDate(currentDate);
                 }
 
+                // И Dashboard
                 if (window.Dashboard && window.Dashboard.init) {
                     Dashboard.init();
                 }
+                
+                // Генерируем событие для других компонентов
+                window.dispatchEvent(new CustomEvent('symptom-added', {
+                    detail: { date: currentDate }
+                }));
             } else {
                 throw new Error(result?.message || 'Ошибка добавления симптома');
             }
