@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="header">
+    <h1>⚙️ Настройки</h1>
+</div>
+
+<!-- Валюта -->
+<div class="settings-section">
+    <h2>💰 Валюта</h2>
+    <div class="settings-item">
+        <label for="currency-select">Предпочитаемая валюта</label>
+        <select id="currency-select" class="settings-select">
+            <option value="">Загрузка...</option>
+        </select>
+        <div class="settings-hint">Выберите валюту для отображения цен и расходов</div>
+    </div>
+</div>
+
+<!-- Семья -->
+<div class="settings-section">
+    <h2>👥 Семья</h2>
+    <div id="family-status" class="settings-item">
+        <div class="loading">Загрузка...</div>
+    </div>
+</div>
+
+<!-- Информация о приложении -->
+<div class="settings-section">
+    <h2>ℹ️ О приложении</h2>
+    <div class="settings-item">
+        <div class="settings-info-row">
+            <span>Версия</span>
+            <span>v0.5</span>
+        </div>
+        <div class="settings-info-row">
+            <span>Telegram ID</span>
+            <span id="user-telegram-id">-</span>
+        </div>
+    </div>
+</div>
+
+<!-- Скрипты -->
+<script src="../js/config.js"></script>
+<script src="../js/cache.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/api-extensions.js"></script>
+<script src="../js/currency.js"></script>
+<script src="../js/timezone.js"></script>
+<script src="../js/timezone-init.js"></script>
+<script src="../js/settings.js"></script>
+</body>
+</html>
