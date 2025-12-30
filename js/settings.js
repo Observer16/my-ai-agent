@@ -9,150 +9,138 @@ tg.BackButton.show();
 tg.BackButton.onClick(() => window.history.back());
 
 let currentSettings = null;
-let availableCurrencies = [];
+let hasChanges = false;
 
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+/**
+ * Инициализация страницы
+ */
 async function init() {
     try {
-        // Показываем Telegram ID
-        document.getElementById('user-telegram-id').textContent = API.getTelegramUserId() || '-';
-        
-        // Загружаем список валют
-        await loadCurrencies();
-        
         // Загружаем текущие настройки
-        await loadSettings();
+        currentSettings = await API.getUserSettings();
+        
+        // Отображаем данные пользователя
+        displayUserInfo(currentSettings);
+        
+        // Устанавливаем текущую валюту в select
+        const currencySelect = document.getElementById('currency-select');
+        if (currencySelect && currentSettings.preferred_currency) {
+            currencySelect.value = currentSettings.preferred_currency;
+        }
         
         // Загружаем информацию о семье
         await loadFamilyStatus();
         
+        // Устанавливаем обработчик изменения валюты
+        currencySelect.addEventListener('change', onCurrencyChange);
+        
         tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
-        console.error('Ошибка инициализации:', e);
-        tg.showAlert('Ошибка загрузки настроек');
+        console.error('Ошибка инициализации настроек:', e);
+        tg.showAlert('Ошибка загрузки настроек: ' + e.message);
     }
 }
 
-// ==================== ВАЛЮТЫ ====================
-async function loadCurrencies() {
+/**
+ * Отобразить информацию о пользователе
+ */
+function displayUserInfo(settings) {
+    const userName = settings.first_name || settings.username || 'Пользователь';
+    document.getElementById('user-name').textContent = userName;
+    document.getElementById('user-telegram-id').textContent = settings.telegram_id || '-';
+    document.getElementById('user-timezone').textContent = settings.timezone || 'UTC';
+}
+
+/**
+ * Загрузить статус семьи
+ */
+async function loadFamilyStatus() {
     try {
-        const response = await API.getSupportedCurrencies();
-        availableCurrencies = response.currencies;
+        const familyInfo = await API.getFamilyInfo();
         
-        const select = document.getElementById('currency-select');
-        select.innerHTML = availableCurrencies.map(c => 
-            `<option value="${c.code}">${c.symbol} ${c.name_ru} (${c.code})</option>`
-        ).join('');
-        
-        // Обработчик изменения валюты
-        select.addEventListener('change', onCurrencyChange);
-        
-        console.log('✅ Валюты загружены:', availableCurrencies.length);
+        if (familyInfo && familyInfo.id) {
+            document.getElementById('family-status').textContent = 
+                `${familyInfo.name} • ${familyInfo.members_count} участников`;
+        } else {
+            document.getElementById('family-status').textContent = 'Нет семьи';
+        }
     } catch (e) {
-        console.error('Ошибка загрузки валют:', e);
-        document.getElementById('currency-select').innerHTML = 
-            '<option value="">Ошибка загрузки</option>';
+        console.warn('Семья не найдена:', e);
+        document.getElementById('family-status').textContent = 'Нет семьи';
     }
 }
 
-async function loadSettings() {
-    try {
-        currentSettings = await API.getUserSettings();
-        
-        // Устанавливаем текущую валюту
-        const select = document.getElementById('currency-select');
-        select.value = currentSettings.preferred_currency || 'PYG';
-        
-        // Обновляем валюту в currency.js
-        setCurrency(currentSettings.preferred_currency || 'PYG');
-        
-        console.log('✅ Настройки загружены:', currentSettings);
-    } catch (e) {
-        console.error('Ошибка загрузки настроек:', e);
-    }
-}
-
+/**
+ * Обработчик изменения валюты
+ */
 async function onCurrencyChange(event) {
     const newCurrency = event.target.value;
     
-    if (!newCurrency) return;
+    if (newCurrency === currentSettings.preferred_currency) {
+        hasChanges = false;
+        tg.MainButton.hide();
+        return;
+    }
+    
+    hasChanges = true;
+    tg.MainButton.setText('💾 Сохранить изменения');
+    tg.MainButton.show();
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+/**
+ * Сохранить настройки
+ */
+async function saveSettings() {
+    if (!hasChanges) {
+        return;
+    }
+    
+    const newCurrency = document.getElementById('currency-select').value;
     
     try {
         tg.MainButton.showProgress();
         
         // Обновляем настройки на сервере
-        await API.updateUserSettings({
+        const updatedSettings = await API.updateUserSettings({
             preferred_currency: newCurrency
         });
         
-        // Обновляем локально
+        // Обновляем валюту в currency.js
         setCurrency(newCurrency);
-        currentSettings.preferred_currency = newCurrency;
+        
+        currentSettings = updatedSettings;
+        hasChanges = false;
         
         tg.MainButton.hideProgress();
-        tg.HapticFeedback.notificationOccurred('success');
+        tg.MainButton.hide();
         
+        // Показываем уведомление
         tg.showPopup({
-            title: '✅ Готово',
-            message: `Валюта изменена на ${newCurrency}`,
-            buttons: [{ type: 'ok' }]
+            title: '✅',
+            message: 'Настройки сохранены',
+            buttons: [{type: 'ok'}]
         });
         
-        console.log('✅ Валюта изменена:', newCurrency);
+        tg.HapticFeedback.notificationOccurred('success');
+        
     } catch (e) {
         tg.MainButton.hideProgress();
-        console.error('Ошибка изменения валюты:', e);
-        tg.showAlert('Ошибка сохранения настроек');
-        
-        // Возвращаем предыдущее значение
-        event.target.value = currentSettings.preferred_currency || 'PYG';
+        console.error('Ошибка сохранения настроек:', e);
+        tg.showAlert('Ошибка сохранения: ' + e.message);
+        tg.HapticFeedback.notificationOccurred('error');
     }
 }
 
-// ==================== СЕМЬЯ ====================
-async function loadFamilyStatus() {
-    const container = document.getElementById('family-status');
-    
-    try {
-        const familyInfo = await API.getFamilyInfo();
-        
-        if (familyInfo && familyInfo.id) {
-            // Пользователь в семье
-            container.innerHTML = `
-                <div class="family-info">
-                    <div class="family-name">👨‍👩‍👧‍👦 ${familyInfo.name}</div>
-                    <div class="family-members">Участников: ${familyInfo.members_count}</div>
-                    <button class="settings-btn" onclick="openFamilyPage()">
-                        Управление семьёй
-                    </button>
-                </div>
-            `;
-        } else {
-            // Пользователь не в семье
-            container.innerHTML = `
-                <div class="family-info">
-                    <div class="family-empty">Вы не состоите в семье</div>
-                    <button class="settings-btn" onclick="openFamilyPage()">
-                        Создать или присоединиться
-                    </button>
-                </div>
-            `;
-        }
-    } catch (e) {
-        console.error('Ошибка загрузки семьи:', e);
-        container.innerHTML = `
-            <div class="family-info">
-                <button class="settings-btn" onclick="openFamilyPage()">
-                    Управление семьёй
-                </button>
-            </div>
-        `;
-    }
-}
-
-function openFamilyPage() {
+/**
+ * Открыть страницу семьи
+ */
+function openFamily() {
     window.location.href = 'family.html';
 }
 
-// ==================== ЗАПУСК ====================
+// Инициализация при загрузке
 init();
+
+// Настройка MainButton
+tg.MainButton.onClick(saveSettings);
