@@ -47,8 +47,6 @@ const Diary = (function() {
 
         // Дни месяца
         for (let day = 1; day <= lastDay.getDate(); day++) {
-            // Формируем дату в формате YYYY-MM-DD без создания Date объекта
-            // чтобы избежать проблем с timezone
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
@@ -86,17 +84,17 @@ const Diary = (function() {
             const response = await HealthAPI.getEntryByDate(date);
 
             if (response.success) {
-                renderEntryForm(date, response.data);
+                await renderEntryForm(date, response.data);
             } else {
-                renderEntryForm(date, null);
+                await renderEntryForm(date, null);
             }
         } catch (error) {
             console.error('❌ Ошибка загрузки записи:', error);
-            renderEntryForm(date, null);
+            await renderEntryForm(date, null);
         }
     }
 
-    function renderEntryForm(date, entry) {
+    async function renderEntryForm(date, entry) {
         const container = document.getElementById('entry-form');
         if (!container) {
             console.warn('⚠️ Контейнер entry-form не найден');
@@ -105,13 +103,39 @@ const Diary = (function() {
 
         const formattedDate = HealthFormatters.formatDate(date, { weekday: 'long' });
 
-        container.innerHTML = renderEntryFormHtml(date, formattedDate, entry);
+        // Загружаем актуальные опции через кэш
+        let sexualActivityOptions = [];
+        
+        if (typeof OptionsCache !== 'undefined' && OptionsCache.getUserOptions) {
+            try {
+                const optionsResult = await OptionsCache.getUserOptions();
+                
+                if (optionsResult.success && optionsResult.data) {
+                    sexualActivityOptions = optionsResult.data.sexual_activity_options || [];
+                    
+                    if (HealthConfig.DEBUG) {
+                        console.log('✅ Опции для Diary загружены:', {
+                            source: optionsResult.source,
+                            optionsCount: sexualActivityOptions.length,
+                            options: sexualActivityOptions
+                        });
+                    }
+                } else {
+                    console.warn('⚠️ Не удалось загрузить опции:', optionsResult.error);
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки опций для Diary:', error);
+            }
+        } else {
+            console.warn('⚠️ OptionsCache недоступен, используем state.userOptions');
+            const state = HealthModule.getState();
+            sexualActivityOptions = state.userOptions?.sexual_activity_options || [];
+        }
+
+        container.innerHTML = renderEntryFormHtml(date, formattedDate, entry, sexualActivityOptions);
     }
 
-    function renderEntryFormHtml(date, formattedDate, entry) {
-        const state = HealthModule.getState();
-        const sexualActivityOptions = state.userOptions?.sexual_activity_options || [];
-
+    function renderEntryFormHtml(date, formattedDate, entry, sexualActivityOptions) {
         const sexualActivityOptionsHtml = sexualActivityOptions.map(option => {
             const selected = entry?.sexual_activity === option ? 'selected' : '';
             const label = option.replace(/_/g, ' ');
@@ -184,7 +208,6 @@ const Diary = (function() {
         ];
 
         if (currentMood) {
-            // Показываем только активное настроение
             const activeMood = moods.find(mood => mood.value === currentMood);
             if (activeMood) {
                 return `
@@ -199,7 +222,6 @@ const Diary = (function() {
             }
         }
 
-        // Если настроение не выбрано, показываем кнопку для выбора
         return `
             <button class="btn-secondary" onclick="Diary.showMoodPicker('${currentDate}')">
                 + Выбрать настроение
@@ -244,7 +266,6 @@ const Diary = (function() {
 
     async function removeSymptom(symptomId, date) {
         console.log('🗑️ Удаление симптома:', symptomId, 'для даты:', date);
-        // TODO: Реализовать удаление симптома через API
         showToast('⚠️ Функция в разработке', 'info');
     }
 
@@ -288,7 +309,6 @@ const Diary = (function() {
         }
     }
 
-    // Публичный API
     return {
         init,
         loadDate,
@@ -298,12 +318,10 @@ const Diary = (function() {
         showMoodPicker,
         showSymptomPicker
     };
-})(); // ← IIFE ЗАВЕРШЕН, Diary создан!
+})();
 
-// Экспорт в window (СНАЧАЛА экспортируем сам модуль)
 if (typeof window !== 'undefined') {
     window.Diary = Diary;
 }
 
-// Глобальная функция для onclick (ТОЛЬКО после экспорта модуля)
 window.showSymptomPicker = () => Diary.showSymptomPicker();
