@@ -1481,3 +1481,59 @@
         justify-content: center;
     }
 }
+
+/* === Inline Mood Selector for Diary === */
+
+.mood-selector-inline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+    .mood-selector-inline {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mood-option {
+    padding: 12px;
+    background: var(--health-card-bg);
+    border: 2px solid var(--health-border);
+    border-radius: var(--health-radius);
+    cursor: pointer;
+    transition: all var(--health-transition-fast);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.mood-option:hover:not(.mood-active) {
+    border-color: var(--health-primary);
+    background: var(--health-hover-bg);
+    transform: translateY(-2px);
+}
+
+.mood-option.mood-active {
+    border-color: var(--health-primary);
+    background: rgba(0, 150, 136, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.1);
+}
+
+.mood-emoji {
+    font-size: 32px;
+}
+
+.mood-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--health-text);
+}
+
+.mood-option.mood-active .mood-label {
+    color: var(--health-primary);
+    font-weight: 600;
+}
