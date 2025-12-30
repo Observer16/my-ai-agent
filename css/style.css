@@ -320,3 +320,5 @@ body {
     text-align: center;
     font-size: 13px;
 }
+
+@import url('settings-styles.css');
