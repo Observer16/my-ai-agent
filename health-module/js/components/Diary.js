@@ -159,12 +159,13 @@ const Diary = (function() {
         // Определяем какой вес показать: из записи, или из профиля
         const displayWeight = entry?.weight_kg || profileWeight || '';
 
+        // Получаем настроения из HealthConstants
         const moodOptions = [
             { value: '', label: 'Не указано' },
-            { value: 'радость', label: 'Радость' },
-            { value: 'удовлетворение', label: 'Удовлетворение' },
-            { value: 'нейтрально', label: 'Нейтрально' },
-            { value: 'грусть', label: 'Грусть' }
+            ...HealthConstants.getMoodsWithEmojis().map(mood => ({
+                value: mood.value,
+                label: mood.label
+            }))
         ];
 
         const moodOptionsHtml = moodOptions.map(option => {
@@ -380,8 +381,7 @@ const Diary = (function() {
                 showToast('✅ Запись сохранена', 'success');
                 await loadDate(date); // Перезагрузить форму
             } else {
-                const errors = failed.map(f => `${f.field}: ${f.error}`).join(', ');
-                showToast(`⚠️ Частично сохранено. Ошибки: ${errors}`, 'warning');
+                const errors = failed.map(f => `${f.field}: ${f.error}`).join(', ');\n                showToast(`⚠️ Частично сохранено. Ошибки: ${errors}`, 'warning');
                 await loadDate(date); // Всё равно перезагрузить
             }
         } catch (error) {
