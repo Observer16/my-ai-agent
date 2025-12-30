@@ -15,19 +15,10 @@ const HealthModule = (function() {
         console.log('🩺 Инициализация модуля здоровья...');
 
         try {
-            // 1. Инициализируем утилиты
             await initUtils();
-
-            // 2. Инициализируем ядро
             await initCore();
-
-            // 3. Инициализируем менеджеры
             await initManagers();
-
-            // 4. Инициализируем вкладки
             await initTabs();
-
-            // 5. Загружаем данные и запускаем
             await startModule();
 
             isInitialized = true;
@@ -61,10 +52,8 @@ const HealthModule = (function() {
      * Инициализация утилит
      */
     async function initUtils() {
-        // Настройка глобальной обработки ошибок
         ErrorHandler.setupGlobalErrorHandling();
 
-        // Предзагрузка часто используемых компонентов
         await ComponentLoader.preload([
             'health-dashboard.html',
             'health-onboarding.html'
@@ -77,12 +66,9 @@ const HealthModule = (function() {
      * Инициализация ядра
      */
     async function initCore() {
-        // DOM элементы
         DomManager.init();
 
-        // State manager подписывается на события
         StateManager.subscribe((oldState, newState, updates) => {
-            // Логирование важных изменений состояния
             if (updates.isOnboarding !== undefined ||
                 updates.isLoading !== undefined ||
                 updates.userGender !== undefined) {
@@ -119,13 +105,11 @@ const HealthModule = (function() {
      * Запуск модуля
      */
     async function startModule() {
-        // Сбрасываем состояние
         StateManager.updateState({
             isLoading: true,
             isOnboarding: false
         });
 
-        // Показываем загрузку
         DomManager.showLoading();
 
         try {
@@ -139,21 +123,24 @@ const HealthModule = (function() {
 
                 if (typeof OptionsCache !== 'undefined' && OptionsCache.getUserOptions) {
                     try {
-                        OptionsCache.getUserOptions().then(result => {
+                        const optionsResult = await OptionsCache.getUserOptions();
+                        
+                        if (optionsResult.success && optionsResult.data) {
+                            // Сохраняем опции в state
+                            StateManager.updateState({ userOptions: optionsResult.data });
+                            
                             if (HealthConfig.DEBUG) {
-                                console.log('⚡ Опции предзагружены:', {
-                                    success: result.success,
-                                    source: result.source || 'unknown',
-                                    hasSexualOptions: !!result.data?.sexual_activity_options,
-                                    hasMoodOptions: !!result.data?.mood_options,
-                                    optionsCount: result.data ? Object.keys(result.data).length : 0
+                                console.log('⚡ Опции предзагружены и сохранены в state:', {
+                                    success: optionsResult.success,
+                                    source: optionsResult.source || 'unknown',
+                                    hasSexualOptions: !!optionsResult.data?.sexual_activity_options,
+                                    hasMoodOptions: !!optionsResult.data?.mood_options,
+                                    optionsCount: optionsResult.data ? Object.keys(optionsResult.data).length : 0
                                 });
                             }
-                        }).catch(error => {
-                            console.warn('⚠️ Не удалось предзагрузить опции:', error);
-                        });
+                        }
                     } catch (error) {
-                        console.warn('⚠️ Ошибка при предзагрузке опций:', error);
+                        console.warn('⚠️ Не удалось предзагрузить опции:', error);
                     }
                 } else {
                     console.warn('⚠️ OptionsCache не доступен для предзагрузки');
@@ -175,10 +162,8 @@ const HealthModule = (function() {
             if (needsOnboarding) {
                 console.log('🔄 Начинаем процесс онбординга...');
 
-                // Скрываем загрузку перед показом онбординга
                 DomManager.hideLoading();
 
-                // Показываем онбординг и ждем его завершения
                 await OnboardingManager.show();
 
                 console.log('✅ Онбординг завершен, продолжаем загрузку dashboard...');
@@ -187,7 +172,10 @@ const HealthModule = (function() {
                 const newGender = StateManager.getState().userGender;
                 if (newGender && typeof OptionsCache !== 'undefined') {
                     try {
-                        await OptionsCache.getUserOptions();
+                        const optionsResult = await OptionsCache.getUserOptions();
+                        if (optionsResult.success && optionsResult.data) {
+                            StateManager.updateState({ userOptions: optionsResult.data });
+                        }
                         console.log('✅ Опции загружены после онбординга');
                     } catch (error) {
                         console.warn('⚠️ Не удалось загрузить опции после онбординга:', error);
@@ -239,7 +227,7 @@ const HealthModule = (function() {
         restart,
         getState: () => StateManager.getState(),
 
-        // Обновление гендера с инвалидацией кэша
+        // Обновление гендера с инвалидацией кэша и обновлением опций
         updateGender: async function(gender) {
             try {
                 console.log('⚡ Обновление гендера через HealthModule.updateGender():', gender);
@@ -257,16 +245,33 @@ const HealthModule = (function() {
                     console.log('🗑️ Кэш опций инвалидирован после смены гендера');
                 }
 
-                // 3. Обновляем состояние
-                StateManager.updateState({ userGender: gender });
+                // 3. Загружаем новые опции с сервера
+                let newOptions = null;
+                if (window.OptionsCache && typeof OptionsCache.getUserOptions === 'function') {
+                    try {
+                        const optionsResult = await OptionsCache.getUserOptions();
+                        if (optionsResult.success && optionsResult.data) {
+                            newOptions = optionsResult.data;
+                            console.log('✅ Новые опции загружены для гендера:', gender);
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Не удалось загрузить новые опции:', error);
+                    }
+                }
 
-                // 4. Обновляем localStorage
+                // 4. Обновляем состояние с новым гендером и опциями
+                StateManager.updateState({ 
+                    userGender: gender,
+                    userOptions: newOptions || StateManager.getState().userOptions
+                });
+
+                // 5. Обновляем localStorage
                 StorageHelper.set('user_gender', gender);
 
-                // 5. Показываем уведомление
+                // 6. Показываем уведомление
                 showToast('✅ Пол обновлен', 'success');
 
-                // 6. Обновляем UI
+                // 7. Обновляем UI
                 if (window.Dashboard && typeof Dashboard.init === 'function') {
                     setTimeout(() => Dashboard.init(), 500);
                 }
