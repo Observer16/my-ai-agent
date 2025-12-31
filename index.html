@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мой AI Агент</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем внешний CSS файл -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/initial-setup.css">
 </head>
@@ -23,7 +22,6 @@
     <div id="family-indicator"></div>
 </div>
 
-<!-- Месячные расходы -->
 <div class="monthly-summary" onclick="openMonthlyStats()">
     <div class="monthly-summary-header">💰 Расходы за текущий месяц</div>
     <div class="monthly-summary-amount" id="monthly-total">-</div>
@@ -33,7 +31,6 @@
     </div>
 </div>
 
-<!-- Здоровье -->
 <div class="module-card" onclick="openModule('health')">
     <div class="module-header">
         <div class="module-icon">💪</div>
@@ -52,7 +49,6 @@
     </div>
 </div>
 
-<!-- Физическая активность -->
 <div class="module-card" onclick="openModule('activity')">
     <div class="module-header">
         <div class="module-icon">🏃</div>
@@ -71,7 +67,6 @@
     </div>
 </div>
 
-<!-- AI Консультант -->
 <div class="module-card" onclick="openModule('doctor')">
     <div class="module-header">
         <div class="module-icon">🩺</div>
@@ -86,9 +81,7 @@
         </div>
     </div>
 </div>
-</div>
 
-<!-- Быстрые действия -->
 <div class="quick-actions">
     <h3>Быстрые действия</h3>
     <div class="action-buttons">
@@ -107,7 +100,6 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ПРИГЛАШЕНИЯ -->
 <div class="invite-modal" id="invite-modal">
     <div class="invite-modal-content">
         <div class="invite-modal-icon">👥</div>
@@ -129,7 +121,6 @@
     </div>
 </div>
 
-<!-- 🆕 ВАЖНО: Порядок загрузки скриптов -->
 <script src="js/config.js"></script>
 <script src="js/cache.js"></script>
 <script src="js/api.js"></script>
@@ -140,5 +131,6 @@
 <script src="js/timezone-init.js"></script>
 <script src="js/initial-setup.js"></script>
 <script src="js/app.js"></script>
+<script src="js/app-initial-setup-patch.js"></script>
 </body>
 </html>
