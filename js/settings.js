@@ -22,6 +22,12 @@ async function init() {
         // Отображаем данные пользователя
         displayUserInfo(currentSettings);
         
+        // Устанавливаем текущий язык в select
+        const languageSelect = document.getElementById('language-select');
+        if (languageSelect && currentSettings.preferred_language) {
+            languageSelect.value = currentSettings.preferred_language;
+        }
+        
         // Устанавливаем текущую валюту в select
         const currencySelect = document.getElementById('currency-select');
         if (currencySelect && currentSettings.preferred_currency) {
@@ -31,7 +37,8 @@ async function init() {
         // Загружаем информацию о семье
         await loadFamilyStatus();
         
-        // Устанавливаем обработчик изменения валюты
+        // Устанавливаем обработчики изменений
+        languageSelect.addEventListener('change', onLanguageChange);
         currencySelect.addEventListener('change', onCurrencyChange);
         
         tg.HapticFeedback.notificationOccurred('success');
@@ -71,14 +78,13 @@ async function loadFamilyStatus() {
 }
 
 /**
- * Обработчик изменения валюты
+ * Обработчик изменения языка
  */
-async function onCurrencyChange(event) {
-    const newCurrency = event.target.value;
+function onLanguageChange(event) {
+    const newLanguage = event.target.value;
     
-    if (newCurrency === currentSettings.preferred_currency) {
-        hasChanges = false;
-        tg.MainButton.hide();
+    if (newLanguage === currentSettings.preferred_language) {
+        checkChanges();
         return;
     }
     
@@ -89,6 +95,40 @@ async function onCurrencyChange(event) {
 }
 
 /**
+ * Обработчик изменения валюты
+ */
+function onCurrencyChange(event) {
+    const newCurrency = event.target.value;
+    
+    if (newCurrency === currentSettings.preferred_currency) {
+        checkChanges();
+        return;
+    }
+    
+    hasChanges = true;
+    tg.MainButton.setText('💾 Сохранить изменения');
+    tg.MainButton.show();
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+/**
+ * Проверить наличие изменений
+ */
+function checkChanges() {
+    const languageSelect = document.getElementById('language-select');
+    const currencySelect = document.getElementById('currency-select');
+    
+    const languageChanged = languageSelect.value !== currentSettings.preferred_language;
+    const currencyChanged = currencySelect.value !== currentSettings.preferred_currency;
+    
+    hasChanges = languageChanged || currencyChanged;
+    
+    if (!hasChanges) {
+        tg.MainButton.hide();
+    }
+}
+
+/**
  * Сохранить настройки
  */
 async function saveSettings() {
@@ -96,6 +136,7 @@ async function saveSettings() {
         return;
     }
     
+    const newLanguage = document.getElementById('language-select').value;
     const newCurrency = document.getElementById('currency-select').value;
     
     try {
@@ -103,8 +144,12 @@ async function saveSettings() {
         
         // Обновляем настройки на сервере
         const updatedSettings = await API.updateUserSettings({
+            preferred_language: newLanguage,
             preferred_currency: newCurrency
         });
+        
+        // Обновляем язык в translations.js
+        setLanguage(newLanguage);
         
         // Обновляем валюту в currency.js
         setCurrency(newCurrency);
