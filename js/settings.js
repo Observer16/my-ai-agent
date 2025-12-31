@@ -139,6 +139,8 @@ async function saveSettings() {
     const newLanguage = document.getElementById('language-select').value;
     const newCurrency = document.getElementById('currency-select').value;
     
+    const languageChanged = newLanguage !== currentSettings.preferred_language;
+    
     try {
         tg.MainButton.showProgress();
         
@@ -160,14 +162,25 @@ async function saveSettings() {
         tg.MainButton.hideProgress();
         tg.MainButton.hide();
         
-        // Показываем уведомление
-        tg.showPopup({
-            title: '✅',
-            message: 'Настройки сохранены',
-            buttons: [{type: 'ok'}]
-        });
-        
         tg.HapticFeedback.notificationOccurred('success');
+        
+        // Если изменился язык - перезагружаем страницу для применения переводов
+        if (languageChanged) {
+            tg.showPopup({
+                title: '✅',
+                message: 'Настройки сохранены. Страница будет обновлена.',
+                buttons: [{type: 'ok'}]
+            }, () => {
+                window.location.reload();
+            });
+        } else {
+            // Просто показываем уведомление
+            tg.showPopup({
+                title: '✅',
+                message: 'Настройки сохранены',
+                buttons: [{type: 'ok'}]
+            });
+        }
         
     } catch (e) {
         tg.MainButton.hideProgress();
