@@ -472,22 +472,6 @@ function formatCurrency(amount) {
     }
 }
 
-    // Для сумм < 1000
-    else {
-        if (Number.isInteger(numAmount)) {
-            return `${sign}${Math.abs(numAmount).toLocaleString('ru-RU')} ₲`;
-        } else {
-            // Для дробных чисел показываем 1 знак после запятой
-            const absNum = Math.abs(numAmount);
-            const formatted = absNum.toLocaleString('ru-RU', {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1
-            });
-            return `${sign}${formatted} ₲`;
-        }
-    }
-}
-
 /**
  * ОТКРЫТЬ УПРАВЛЕНИЕ СЕМЬЁЙ
  */
