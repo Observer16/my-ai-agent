@@ -6,6 +6,9 @@
     let currentYear, currentMonth;
 
     async function init() {
+        // 🆕 Инициализация валюты
+        await initCurrency();
+        
         const now = new Date();
         currentYear = now.getFullYear();
         currentMonth = now.getMonth() + 1;
@@ -259,20 +262,20 @@
     }
 
     function formatMoney(amount) {
-    if (!amount || amount === 0) return '0 ₲';
+        if (!amount || amount === 0) return `0 ${getCurrencySymbol()}`;
 
-    const rounded = Math.round(amount);
+        const rounded = Math.round(amount);
 
-    // Всегда показываем в тысячах для сумм >= 1000
-    if (rounded >= 1000) {
-        const thousands = Math.round(rounded / 1000);
-        return `${thousands.toLocaleString('ru-RU')}K ₲`;
+        // Всегда показываем в тысячах для сумм >= 1000
+        if (rounded >= 1000) {
+            const thousands = Math.round(rounded / 1000);
+            return `${thousands.toLocaleString('ru-RU')}K ${getCurrencySymbol()}`;
+        }
+        // Для сумм < 1 000
+        else {
+            return `${rounded.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+        }
     }
-    // Для сумм < 1 000
-    else {
-        return `${rounded.toLocaleString('ru-RU')} ₲`;
-    }
-}
 
     function showError(message) {
         const errorDiv = document.createElement('div');
