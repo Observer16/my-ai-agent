@@ -84,7 +84,9 @@
 
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
+<script src="../js/currency.js"></script>
 <script src="../js/api.js"></script>
+<script src="../js/api-extensions.js"></script>
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -95,8 +97,10 @@
     let trendsData = [];
     let compareData = [];
 
-    // Инициализация
     async function init() {
+        // 🆕 Инициализация валюты
+        await initCurrency();
+
         try {
             await loadOverview();
             await loadMonthlyBanner();
@@ -286,9 +290,9 @@
                 <div class="product-name">${t.product_name}</div>
                 <div class="store">🏪 ${t.store_name}</div>
                 <div class="prices">
-                    <span class="price-current">${t.current_price.toFixed(0)} ₲</span>
+                    <span class="price-current">${t.current_price.toFixed(0)} ${getCurrencySymbol()}</span>
                     ${t.previous_price ? `
-                        <span class="price-old">${t.previous_price.toFixed(0)} ₲</span>
+                        <span class="price-old">${t.previous_price.toFixed(0)} ${getCurrencySymbol()}</span>
                         <span class="price-change ${t.trend_direction}">
                             ${t.trend_direction === 'up' ? '📈' : '📉'}
                             ${Math.abs(t.percent_change || 0).toFixed(1)}%
@@ -303,25 +307,25 @@
 
     // Функция для точного форматирования цен
     function formatPrice(price) {
-        if (!price && price !== 0) return '0 ₲';
+        if (!price && price !== 0) return `0 ${getCurrencySymbol()}`;
 
         // Если price объект Decimal или число
         const num = typeof price === 'object' && price.toString ?
                     parseFloat(price.toString()) :
                     Number(price);
 
-        if (isNaN(num)) return '0 ₲';
+        if (isNaN(num)) return `0 ${getCurrencySymbol()}`;
 
         // Для целых чисел
         if (Number.isInteger(num)) {
-            return num.toLocaleString('ru-RU') + ' ₲';
+            return num.toLocaleString('ru-RU') + ' ' + getCurrencySymbol();
         }
 
         // Для чисел с плавающей точкой - 2 знака
         return num.toLocaleString('ru-RU', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
-        }) + ' ₲';
+        }) + ' ' + getCurrencySymbol();
     }
 
     // Рендеринг сравнения
@@ -412,33 +416,33 @@
 
     // Утилиты
     function formatMoney(amount) {
-        if (!amount && amount !== 0) return '0 ₲';
+        if (!amount && amount !== 0) return `0 ${getCurrencySymbol()}`;
 
         const numAmount = Number(amount);
-        if (isNaN(numAmount)) return '0 ₲';
+        if (isNaN(numAmount)) return `0 ${getCurrencySymbol()}`;
 
-        if (numAmount === 0) return '0 ₲';
+        if (numAmount === 0) return `0 ${getCurrencySymbol()}`;
 
         const absAmount = Math.abs(numAmount);
 
         // Для сумм >= 1 000 000 (миллион)
         if (absAmount >= 1000000) {
             const millions = (numAmount / 1000000).toFixed(1);
-            return `${millions}M ₲`;
+            return `${millions}M ${getCurrencySymbol()}`;
         }
         // Для сумм >= 1 000 (тысяча)
         else if (absAmount >= 1000) {
             const thousands = (numAmount / 1000).toFixed(1);
-            return `${thousands}K ₲`;
+            return `${thousands}K ${getCurrencySymbol()}`;
         }
         // Для сумм < 1 000
         else {
             // Проверяем, целое ли число
             if (Number.isInteger(numAmount)) {
-                return `${numAmount.toLocaleString('ru-RU')} ₲`;
+                return `${numAmount.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
             } else {
                 // Для дробных чисел показываем 2 знака
-                return `${numAmount.toFixed(2).replace('.', ',')} ₲`;
+                return `${numAmount.toFixed(2).replace('.', ',')} ${getCurrencySymbol()}`;
             }
         }
     }
