@@ -76,9 +76,9 @@ const CONFIG = {
     
     // Настройки отображения
     UI: {
-        // Валюта
+        // Валюта (по умолчанию, может быть переопределена пользователем)
         CURRENCY: 'PYG',
-        CURRENCY_SYMBOL: '₲',
+        // CURRENCY_SYMBOL удалён - теперь используется getCurrencySymbol() из currency.js
         
         // Локаль
         LOCALE: 'es-PY',
