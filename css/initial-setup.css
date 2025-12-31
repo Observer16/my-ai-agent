@@ -1,0 +1,215 @@
+/* css/initial-setup.css */
+/* Стили для модального окна первичной настройки */
+
+.initial-setup-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 20px;
+}
+
+.initial-setup-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.initial-setup-content {
+    background: var(--tg-theme-bg-color, #ffffff);
+    border-radius: 16px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.initial-setup-modal.active .initial-setup-content {
+    transform: scale(1);
+}
+
+.initial-setup-header {
+    padding: 30px 24px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+}
+
+.initial-setup-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    animation: bounce 0.6s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.initial-setup-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--tg-theme-text-color, #000000);
+    margin: 0 0 8px 0;
+}
+
+.initial-setup-subtitle {
+    font-size: 15px;
+    color: var(--tg-theme-hint-color, #999999);
+    margin: 0;
+}
+
+.initial-setup-body {
+    padding: 24px;
+}
+
+.initial-setup-field {
+    margin-bottom: 20px;
+}
+
+.initial-setup-field:last-of-type {
+    margin-bottom: 0;
+}
+
+.initial-setup-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--tg-theme-text-color, #000000);
+}
+
+.label-icon {
+    font-size: 20px;
+}
+
+.label-text {
+    font-size: 15px;
+}
+
+.initial-setup-select {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 2px solid var(--tg-theme-hint-color, #e0e0e0);
+    border-radius: 12px;
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    color: var(--tg-theme-text-color, #000000);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    padding-right: 40px;
+}
+
+.initial-setup-select:focus {
+    outline: none;
+    border-color: var(--tg-theme-button-color, #3390ec);
+}
+
+.initial-setup-info {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--tg-theme-secondary-bg-color, #f0f7ff);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--tg-theme-hint-color, #666666);
+    line-height: 1.5;
+}
+
+.initial-setup-footer {
+    padding: 20px 24px 24px;
+    border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+}
+
+.initial-setup-button {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    background: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #ffffff);
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.initial-setup-button:hover {
+    transform: translateY(-2px);
+}
+
+.initial-setup-button:active {
+    transform: translateY(0);
+}
+
+.initial-setup-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Адаптация для темной темы */
+@media (prefers-color-scheme: dark) {
+    .initial-setup-content {
+        background: var(--tg-theme-bg-color, #1e1e1e);
+    }
+    
+    .initial-setup-select {
+        background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+        border-color: var(--tg-theme-hint-color, #444444);
+    }
+    
+    .initial-setup-info {
+        background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+    }
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+    .initial-setup-modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    .initial-setup-content {
+        max-height: 85vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    
+    .initial-setup-header {
+        padding: 24px 20px 16px;
+    }
+    
+    .initial-setup-icon {
+        font-size: 56px;
+        margin-bottom: 12px;
+    }
+    
+    .initial-setup-title {
+        font-size: 22px;
+    }
+    
+    .initial-setup-body {
+        padding: 20px;
+    }
+    
+    .initial-setup-footer {
+        padding: 16px 20px 20px;
+    }
+}
