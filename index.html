@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мой AI Агент</title>
+    <title data-i18n="home.title">Мой AI Агент</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/initial-setup.css">
 </head>
 <body>
 <div class="header">
-    <h1>🤖 Мой AI Агент</h1>
-    <p>Умный помощник для жизни v0.5</p>
+    <h1>🤖 <span data-i18n="home.title">Мой AI Агент</span></h1>
+    <p data-i18n="home.subtitle">Умный помощник для жизни v0.5</p>
 </div>
 
 <div class="user-greeting">
@@ -23,28 +23,28 @@
 </div>
 
 <div class="monthly-summary" onclick="openMonthlyStats()">
-    <div class="monthly-summary-header">💰 Расходы за текущий месяц</div>
+    <div class="monthly-summary-header" data-i18n="monthly.title">💰 Расходы за текущий месяц</div>
     <div class="monthly-summary-amount" id="monthly-total">-</div>
     <div class="monthly-summary-details">
         <span>📅 <span id="monthly-period">-</span></span>
-        <span>🧾 <span id="monthly-purchases">-</span> покупок</span>
+        <span>🧾 <span id="monthly-purchases">-</span> <span data-i18n="monthly.purchases">покупок</span></span>
     </div>
 </div>
 
 <div class="module-card" onclick="openModule('health')">
     <div class="module-header">
         <div class="module-icon">💪</div>
-        <div class="module-title">Здоровье</div>
+        <div class="module-title" data-i18n="modules.health">Здоровье</div>
     </div>
-    <div class="module-description">
+    <div class="module-description" data-i18n="modules.healthDesc">
         Ежедневная оценка самочувствия, трекинг симптомов и рекомендации
     </div>
     <div class="module-stats">
         <div class="module-stat">
-            <strong id="health-today">-</strong> сегодня
+            <strong id="health-today">-</strong> <span data-i18n="modules.today">сегодня</span>
         </div>
         <div class="module-stat">
-            <strong id="health-week">-</strong> неделя
+            <strong id="health-week">-</strong> <span data-i18n="modules.week">неделя</span>
         </div>
     </div>
 </div>
@@ -52,17 +52,17 @@
 <div class="module-card" onclick="openModule('activity')">
     <div class="module-header">
         <div class="module-icon">🏃</div>
-        <div class="module-title">Активность</div>
+        <div class="module-title" data-i18n="modules.activity">Активность</div>
     </div>
-    <div class="module-description">
+    <div class="module-description" data-i18n="modules.activityDesc">
         Трекер тренировок, шагов и калорий с персональными планами
     </div>
     <div class="module-stats">
         <div class="module-stat">
-            <strong id="activity-steps">-</strong> шагов
+            <strong id="activity-steps">-</strong> <span data-i18n="modules.steps">шагов</span>
         </div>
         <div class="module-stat">
-            <strong id="activity-workouts">-</strong> тренировок
+            <strong id="activity-workouts">-</strong> <span data-i18n="modules.workouts">тренировок</span>
         </div>
     </div>
 </div>
@@ -70,32 +70,32 @@
 <div class="module-card" onclick="openModule('doctor')">
     <div class="module-header">
         <div class="module-icon">🩺</div>
-        <div class="module-title">Медицинский консультант</div>
+        <div class="module-title" data-i18n="modules.doctor">Медицинский консультант</div>
     </div>
-    <div class="module-description">
+    <div class="module-description" data-i18n="modules.doctorDesc">
         AI-помощник для консультаций по здоровью и первой помощи
     </div>
     <div class="module-stats">
-        <div class="module-stat">
+        <div class="module-stat" data-i18n="modules.available247">
             Доступен 24/7
         </div>
     </div>
 </div>
 
 <div class="quick-actions">
-    <h3>Быстрые действия</h3>
+    <h3 data-i18n="actions.title">Быстрые действия</h3>
     <div class="action-buttons">
         <div class="action-btn" onclick="openModule('add-expense')">
-            💳 Добавить расход
+            💳 <span data-i18n="actions.addExpense">Добавить расход</span>
         </div>
         <div class="action-btn" onclick="openModule('products')">
-            📦 Управление
+            📦 <span data-i18n="actions.management">Управление</span>
         </div>
         <div class="action-btn" onclick="openModule('budget')">
-            📊 Анализ цен
+            📊 <span data-i18n="actions.priceAnalysis">Анализ цен</span>
         </div>
         <div class="action-btn" onclick="openSettings()">
-            ⚙️ Настройки
+            ⚙️ <span data-i18n="actions.settings">Настройки</span>
         </div>
     </div>
 </div>
@@ -103,18 +103,18 @@
 <div class="invite-modal" id="invite-modal">
     <div class="invite-modal-content">
         <div class="invite-modal-icon">👥</div>
-        <h2>Приглашение в семью</h2>
+        <h2 data-i18n="family.inviteTitle">Приглашение в семью</h2>
         <div class="invite-modal-text" id="invite-text"></div>
         <div class="invite-message" id="invite-message" style="display: none;"></div>
-        <div class="invite-warning">
+        <div class="invite-warning" data-i18n="family.warning">
             ⚠️ Если вы уже состоите в семье, вы автоматически выйдете из неё
         </div>
         <div class="invite-expiry" id="invite-expiry"></div>
         <div class="invite-modal-buttons">
-            <button class="invite-btn invite-btn-decline" onclick="declineCurrentInvite()">
+            <button class="invite-btn invite-btn-decline" onclick="declineCurrentInvite()" data-i18n="family.decline">
                 ❌ Отклонить
             </button>
-            <button class="invite-btn invite-btn-accept" onclick="acceptCurrentInvite()">
+            <button class="invite-btn invite-btn-accept" onclick="acceptCurrentInvite()" data-i18n="family.accept">
                 ✅ Принять
             </button>
         </div>
@@ -126,12 +126,12 @@
 <script src="js/api.js"></script>
 <script src="js/api-extensions.js"></script>
 <script src="js/translations.js"></script>
+<script src="js/i18n-page-loader.js"></script>
 <script src="js/currency.js"></script>
 <script src="js/timezone.js"></script>
 <script src="js/timezone-init.js"></script>
 <script src="js/initial-setup.js"></script>
 <script src="js/app.js"></script>
 <script src="js/app-initial-setup-patch.js"></script>
-<script src="js/app-language-integration.js"></script>
 </body>
 </html>
