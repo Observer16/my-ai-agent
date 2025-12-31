@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Настройки</title>
+    <title data-i18n="settings.title">Настройки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 <div class="header">
-    <h1>⚙️ Настройки</h1>
+    <h1>⚙️ <span data-i18n="settings.title">Настройки</span></h1>
 </div>
 
 <!-- Настройки языка -->
 <div class="module-card">
     <div class="module-header">
         <div class="module-icon">🗣️</div>
-        <div class="module-title">Язык интерфейса</div>
+        <div class="module-title" data-i18n="settings.language">Язык интерфейса</div>
     </div>
     <div class="settings-item">
-        <label for="language-select">Выберите язык</label>
+        <label for="language-select" data-i18n="initialSetup.selectLanguage">Выберите язык</label>
         <select id="language-select" class="settings-select">
             <option value="ru">Русский</option>
             <option value="en">English</option>
@@ -34,10 +34,10 @@
 <div class="module-card">
     <div class="module-header">
         <div class="module-icon">💰</div>
-        <div class="module-title">Валюта</div>
+        <div class="module-title" data-i18n="settings.currency">Валюта</div>
     </div>
     <div class="settings-item">
-        <label for="currency-select">Ваша валюта</label>
+        <label for="currency-select" data-i18n="initialSetup.selectCurrency">Ваша валюта</label>
         <select id="currency-select" class="settings-select">
             <option value="PYG">₲ Парагвайский гуарани (PYG)</option>
             <option value="USD">$ Доллар США (USD)</option>
@@ -78,7 +78,7 @@
         <div class="settings-value" id="user-telegram-id">-</div>
     </div>
     <div class="settings-item">
-        <div class="settings-label">Часовой пояс</div>
+        <div class="settings-label" data-i18n="settings.timezone">Часовой пояс</div>
         <div class="settings-value" id="user-timezone">-</div>
     </div>
 </div>
@@ -86,6 +86,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
 <script src="../js/translations.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
 <script src="../js/currency.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/api-extensions.js"></script>
