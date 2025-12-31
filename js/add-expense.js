@@ -35,6 +35,9 @@ const storeTypeColors = {
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 async function init() {
+    // 🆕 Инициализация валюты
+    await initCurrency();
+
     try {
         stores = await API.getStores();
         renderStoreList();
@@ -122,7 +125,7 @@ function renderProductResults(products, searchedBarcode = null) {
         return `
             <div class="search-item" onclick="selectProduct('${p.id}','${escapedName.replace(/'/g, "\\'")}','${escapedBarcode}','${p.unit || 'unidad'}')">
                 <div class="search-item-name">${escapedName}</div>
-                <div class="search-item-info">${escapedCategory}${p.min_price ? ` • ${p.min_price}-${p.max_price} ₲` : ''}</div>
+                <div class="search-item-info">${escapedCategory}${p.min_price ? ` • ${p.min_price}-${p.max_price} ${getCurrencySymbol()}` : ''}</div>
                 ${escapedBarcode ? `<div class="search-item-barcode">${escapedBarcode}</div>` : ''}
             </div>
         `;
@@ -581,7 +584,7 @@ function updateSummary() {
         (isWeightMode ? `${qty.toFixed(3)} ${units[currentUnit]||currentUnit}` : `${qty} шт.`) : '-';
 
     document.getElementById('summary-total').textContent = totalAmount > 0 ?
-        `${Math.round(totalAmount).toLocaleString('ru-RU')} ₲` : '0 ₲';
+    `${Math.round(totalAmount).toLocaleString('ru-RU')} ${getCurrencySymbol()}` : `0 ${getCurrencySymbol()}`;
 }
 
 // ==================== СОЗДАНИЕ ТОВАРА ====================

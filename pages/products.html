@@ -266,7 +266,9 @@
 
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
+<script src="../js/currency.js"></script>
 <script src="../js/api.js"></script>
+<script src="../js/api-extensions.js"></script>
 <script>
     // Глобальные переменные
     const tg = window.Telegram.WebApp;
@@ -280,8 +282,10 @@
     let searchTimeout = null;
     let currentTab = 'products';
 
-    // Инициализация приложения
-    function init() {
+    async function init() {
+        // 🆕 Инициализация валюты
+        await initCurrency();
+
         tg.expand();
         tg.BackButton.show();
         tg.BackButton.onClick(() => window.location.href = '../index.html');
@@ -516,7 +520,7 @@
                     pricesHtml = `
                         <div class="product-prices">
                             <div class="price-badge price-single">
-                                <strong>${minPrice} ₲</strong>
+                                <strong>${minPrice} ${getCurrencySymbol()}</strong>
                             </div>
                         </div>
                     `;
@@ -525,15 +529,15 @@
                     pricesHtml = `
                         <div class="product-prices">
                             <div class="price-badge price-min">
-                                <strong>${minPrice} ₲</strong>
+                                <strong>${minPrice} ${getCurrencySymbol()}</strong>
                             </div>
                             ${avgPrice && avgPrice !== minPrice && avgPrice !== maxPrice ? `
                                 <div class="price-badge price-avg">
-                                    <strong>${avgPrice} ₲</strong>
+                                    <strong>${avgPrice} ${getCurrencySymbol()}</strong>
                                 </div>
                             ` : ''}
                             <div class="price-badge price-max">
-                                <strong>${maxPrice} ₲</strong>
+                                <strong>${maxPrice} ${getCurrencySymbol()}</strong>
                             </div>
                         </div>
                     `;
