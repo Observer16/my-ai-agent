@@ -25,7 +25,7 @@
             <option value="en">English</option>
         </select>
     </div>
-    <div class="settings-description">
+    <div class="settings-description" data-i18n="settings.languageDescription">
         Язык интерфейса приложения
     </div>
 </div>
@@ -37,7 +37,7 @@
         <div class="module-title" data-i18n="settings.currency">Валюта</div>
     </div>
     <div class="settings-item">
-        <label for="currency-select" data-i18n="initialSetup.selectCurrency">Ваша валюта</label>
+        <label for="currency-select" data-i18n="settings.yourCurrency">Ваша валюта</label>
         <select id="currency-select" class="settings-select">
             <option value="PYG">₲ Парагвайский гуарани (PYG)</option>
             <option value="USD">$ Доллар США (USD)</option>
@@ -47,7 +47,7 @@
             <option value="UAH">₴ Украинская гривна (UAH)</option>
         </select>
     </div>
-    <div class="settings-description">
+    <div class="settings-description" data-i18n="settings.currencyDescription">
         Все суммы будут отображаться в выбранной валюте
     </div>
 </div>
@@ -56,9 +56,9 @@
 <div class="module-card" onclick="openFamily()">
     <div class="module-header">
         <div class="module-icon">👥</div>
-        <div class="module-title">Моя семья</div>
+        <div class="module-title" data-i18n="family.title">Моя семья</div>
     </div>
-    <div class="module-description" id="family-status">
+    <div class="module-description" id="family-status" data-i18n="common.loading">
         Загрузка...
     </div>
 </div>
@@ -67,14 +67,14 @@
 <div class="module-card">
     <div class="module-header">
         <div class="module-icon">👤</div>
-        <div class="module-title">Профиль</div>
+        <div class="module-title" data-i18n="settings.profile">Профиль</div>
     </div>
     <div class="settings-item">
-        <div class="settings-label">Имя</div>
+        <div class="settings-label" data-i18n="settings.name">Имя</div>
         <div class="settings-value" id="user-name">-</div>
     </div>
     <div class="settings-item">
-        <div class="settings-label">Telegram ID</div>
+        <div class="settings-label" data-i18n="settings.telegramId">Telegram ID</div>
         <div class="settings-value" id="user-telegram-id">-</div>
     </div>
     <div class="settings-item">
