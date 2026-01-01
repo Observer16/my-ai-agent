@@ -135,6 +135,7 @@ const translations = {
             timezone: 'Часовой пояс',
             save: 'Сохранить',
             saved: 'Настройки сохранены',
+            savedReload: 'Настройки сохранены. Страница будет обновлена.',
             profile: 'Профиль',
             name: 'Имя',
             telegramId: 'Telegram ID'
@@ -384,6 +385,7 @@ const translations = {
             timezone: 'Timezone',
             save: 'Save',
             saved: 'Settings saved',
+            savedReload: 'Settings saved. Page will be reloaded.',
             profile: 'Profile',
             name: 'Name',
             telegramId: 'Telegram ID'
