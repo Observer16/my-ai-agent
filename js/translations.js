@@ -23,7 +23,12 @@ const translations = {
             title: 'Расходы за текущий месяц',
             period: 'Период',
             purchases: 'покупок',
-            stores: 'магазинов'
+            stores: 'магазинов',
+            totalSpent: 'Всего потрачено',
+            byCategory: 'По категориям',
+            byStore: 'По магазинам',
+            topCategories: 'Топ категорий',
+            topStores: 'Топ магазинов'
         },
         
         // Модули
@@ -52,6 +57,7 @@ const translations = {
         
         // Семья
         family: {
+            title: 'Моя семья',
             inviteTitle: 'Приглашение в семью',
             invitesYou: 'приглашает вас',
             inFamily: 'в семью',
@@ -62,7 +68,17 @@ const translations = {
             accept: '✅ Принять',
             success: '✅ Успешно!',
             joined: 'Вы вступили в семью',
-            solo: 'Solo'
+            solo: 'Solo',
+            members: 'участников',
+            familyName: 'Название семьи',
+            createFamily: 'Создать семью',
+            inviteMembers: 'Пригласить участников',
+            leaveFamily: 'Покинуть семью',
+            yourFamily: 'Ваша семья',
+            noFamily: 'Нет семьи',
+            inviteLink: 'Ссылка-приглашение',
+            copyLink: 'Скопировать ссылку',
+            linkCopied: 'Ссылка скопирована'
         },
         
         // Настройки
@@ -72,7 +88,10 @@ const translations = {
             currency: 'Валюта',
             timezone: 'Часовой пояс',
             save: 'Сохранить',
-            saved: 'Настройки сохранены'
+            saved: 'Настройки сохранены',
+            profile: 'Профиль',
+            name: 'Имя',
+            telegramId: 'Telegram ID'
         },
         
         // Первичная настройка
@@ -85,6 +104,76 @@ const translations = {
             continue: 'Продолжить'
         },
         
+        // Бюджет / Анализ цен
+        budget: {
+            title: 'Анализ цен',
+            compareProducts: 'Сравнение товаров',
+            selectProduct: 'Выберите товар',
+            priceHistory: 'История цен',
+            bestPrice: 'Лучшая цена',
+            currentPrice: 'Текущая цена',
+            averagePrice: 'Средняя цена',
+            priceChange: 'Изменение цены',
+            lastUpdate: 'Последнее обновление',
+            store: 'Магазин',
+            price: 'Цена',
+            date: 'Дата',
+            noPrices: 'Нет данных о ценах',
+            selectToCompare: 'Выберите товар для сравнения цен'
+        },
+        
+        // Товары
+        products: {
+            title: 'Управление товарами',
+            allProducts: 'Все товары',
+            categories: 'Категории',
+            addProduct: 'Добавить товар',
+            editProduct: 'Редактировать товар',
+            deleteProduct: 'Удалить товар',
+            productName: 'Название товара',
+            category: 'Категория',
+            search: 'Поиск',
+            filter: 'Фильтр',
+            noProducts: 'Нет товаров',
+            totalProducts: 'Всего товаров',
+            addCategory: 'Добавить категорию',
+            categoryName: 'Название категории',
+            selectCategory: 'Выберите категорию',
+            allCategories: 'Все категории',
+            priceComparison: 'Сравнение цен',
+            viewPrices: 'Посмотреть цены',
+            lastPurchase: 'Последняя покупка',
+            averagePrice: 'Средняя цена',
+            minPrice: 'Мин. цена',
+            maxPrice: 'Макс. цена'
+        },
+        
+        // Добавление расхода
+        expense: {
+            title: 'Добавить расход',
+            addExpense: 'Добавить расход',
+            store: 'Магазин',
+            selectStore: 'Выберите магазин',
+            date: 'Дата',
+            time: 'Время',
+            products: 'Товары',
+            addProduct: 'Добавить товар',
+            product: 'Товар',
+            quantity: 'Количество',
+            price: 'Цена',
+            total: 'Итого',
+            save: 'Сохранить',
+            cancel: 'Отмена',
+            selectProduct: 'Выберите товар',
+            enterPrice: 'Введите цену',
+            enterQuantity: 'Введите количество',
+            remove: 'Удалить',
+            expenseSaved: 'Расход сохранён',
+            fillAllFields: 'Заполните все поля',
+            totalAmount: 'Общая сумма',
+            noProducts: 'Добавьте товары'
+        },
+        
         // Общие фразы
         common: {
             loading: 'Загрузка...',
@@ -95,7 +184,17 @@ const translations = {
             close: 'Закрыть',
             refresh: 'Обновить',
             noData: 'Нет данных',
-            inDevelopment: 'В разработке'
+            inDevelopment: 'В разработке',
+            back: 'Назад',
+            save: 'Сохранить',
+            delete: 'Удалить',
+            edit: 'Редактировать',
+            add: 'Добавить',
+            search: 'Поиск',
+            filter: 'Фильтр',
+            all: 'Все',
+            yes: 'Да',
+            no: 'Нет'
         },
         
         // Месяцы
@@ -127,7 +226,12 @@ const translations = {
             title: 'Expenses for current month',
             period: 'Period',
             purchases: 'purchases',
-            stores: 'stores'
+            stores: 'stores',
+            totalSpent: 'Total spent',
+            byCategory: 'By category',
+            byStore: 'By store',
+            topCategories: 'Top categories',
+            topStores: 'Top stores'
         },
         
         // Modules
@@ -156,6 +260,7 @@ const translations = {
         
         // Family
         family: {
+            title: 'My Family',
             inviteTitle: 'Family Invitation',
             invitesYou: 'invites you',
             inFamily: 'to family',
@@ -166,7 +271,17 @@ const translations = {
             accept: '✅ Accept',
             success: '✅ Success!',
             joined: 'You joined the family',
-            solo: 'Solo'
+            solo: 'Solo',
+            members: 'members',
+            familyName: 'Family name',
+            createFamily: 'Create family',
+            inviteMembers: 'Invite members',
+            leaveFamily: 'Leave family',
+            yourFamily: 'Your family',
+            noFamily: 'No family',
+            inviteLink: 'Invite link',
+            copyLink: 'Copy link',
+            linkCopied: 'Link copied'
         },
         
         // Settings
@@ -176,7 +291,10 @@ const translations = {
             currency: 'Currency',
             timezone: 'Timezone',
             save: 'Save',
-            saved: 'Settings saved'
+            saved: 'Settings saved',
+            profile: 'Profile',
+            name: 'Name',
+            telegramId: 'Telegram ID'
         },
         
         // Initial setup
@@ -189,6 +307,76 @@ const translations = {
             continue: 'Continue'
         },
         
+        // Budget / Price analysis
+        budget: {
+            title: 'Price Analysis',
+            compareProducts: 'Compare products',
+            selectProduct: 'Select product',
+            priceHistory: 'Price history',
+            bestPrice: 'Best price',
+            currentPrice: 'Current price',
+            averagePrice: 'Average price',
+            priceChange: 'Price change',
+            lastUpdate: 'Last update',
+            store: 'Store',
+            price: 'Price',
+            date: 'Date',
+            noPrices: 'No price data',
+            selectToCompare: 'Select product to compare prices'
+        },
+        
+        // Products
+        products: {
+            title: 'Product Management',
+            allProducts: 'All products',
+            categories: 'Categories',
+            addProduct: 'Add product',
+            editProduct: 'Edit product',
+            deleteProduct: 'Delete product',
+            productName: 'Product name',
+            category: 'Category',
+            search: 'Search',
+            filter: 'Filter',
+            noProducts: 'No products',
+            totalProducts: 'Total products',
+            addCategory: 'Add category',
+            categoryName: 'Category name',
+            selectCategory: 'Select category',
+            allCategories: 'All categories',
+            priceComparison: 'Price comparison',
+            viewPrices: 'View prices',
+            lastPurchase: 'Last purchase',
+            averagePrice: 'Average price',
+            minPrice: 'Min price',
+            maxPrice: 'Max price'
+        },
+        
+        // Add expense
+        expense: {
+            title: 'Add Expense',
+            addExpense: 'Add expense',
+            store: 'Store',
+            selectStore: 'Select store',
+            date: 'Date',
+            time: 'Time',
+            products: 'Products',
+            addProduct: 'Add product',
+            product: 'Product',
+            quantity: 'Quantity',
+            price: 'Price',
+            total: 'Total',
+            save: 'Save',
+            cancel: 'Cancel',
+            selectProduct: 'Select product',
+            enterPrice: 'Enter price',
+            enterQuantity: 'Enter quantity',
+            remove: 'Remove',
+            expenseSaved: 'Expense saved',
+            fillAllFields: 'Fill all fields',
+            totalAmount: 'Total amount',
+            noProducts: 'Add products'
+        },
+        
         // Common phrases
         common: {
             loading: 'Loading...',
@@ -199,7 +387,17 @@ const translations = {
             close: 'Close',
             refresh: 'Refresh',
             noData: 'No data',
-            inDevelopment: 'In development'
+            inDevelopment: 'In development',
+            back: 'Back',
+            save: 'Save',
+            delete: 'Delete',
+            edit: 'Edit',
+            add: 'Add',
+            search: 'Search',
+            filter: 'Filter',
+            all: 'All',
+            yes: 'Yes',
+            no: 'No'
         },
         
         // Months
