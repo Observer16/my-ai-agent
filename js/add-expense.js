@@ -952,6 +952,6 @@ document.addEventListener('click', (e) => {
 
 // ==================== ЗАПУСК ====================
 init();
-tg.MainButton.setText('💾 Сохранить расход');
+tg.MainButton.setText(`💾 ${t('expense.saveExpense')}`);
 tg.MainButton.show();
 tg.MainButton.onClick(saveExpense);
