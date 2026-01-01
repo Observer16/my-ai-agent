@@ -44,7 +44,7 @@ async function init() {
         tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
         console.error('Ошибка инициализации настроек:', e);
-        tg.showAlert('Ошибка загрузки настроек: ' + e.message);
+        tg.showAlert(t('common.error') + ': ' + e.message);
     }
 }
 
@@ -52,7 +52,7 @@ async function init() {
  * Отобразить информацию о пользователе
  */
 function displayUserInfo(settings) {
-    const userName = settings.first_name || settings.username || 'Пользователь';
+    const userName = settings.first_name || settings.username || t('settings.user');
     document.getElementById('user-name').textContent = userName;
     document.getElementById('user-telegram-id').textContent = settings.telegram_id || '-';
     document.getElementById('user-timezone').textContent = settings.timezone || 'UTC';
@@ -67,13 +67,13 @@ async function loadFamilyStatus() {
         
         if (familyInfo && familyInfo.id) {
             document.getElementById('family-status').textContent = 
-                `${familyInfo.name} • ${familyInfo.members_count} участников`;
+                `${familyInfo.name} • ${familyInfo.members_count} ${t('settings.members')}`;
         } else {
-            document.getElementById('family-status').textContent = 'Нет семьи';
+            document.getElementById('family-status').textContent = t('settings.noFamily');
         }
     } catch (e) {
         console.warn('Семья не найдена:', e);
-        document.getElementById('family-status').textContent = 'Нет семьи';
+        document.getElementById('family-status').textContent = t('settings.noFamily');
     }
 }
 
@@ -89,7 +89,7 @@ function onLanguageChange(event) {
     }
     
     hasChanges = true;
-    tg.MainButton.setText('💾 Сохранить изменения');
+    tg.MainButton.setText(`💾 ${t('settings.saveChanges')}`);
     tg.MainButton.show();
     tg.HapticFeedback.impactOccurred('light');
 }
@@ -106,7 +106,7 @@ function onCurrencyChange(event) {
     }
     
     hasChanges = true;
-    tg.MainButton.setText('💾 Сохранить изменения');
+    tg.MainButton.setText(`💾 ${t('settings.saveChanges')}`);
     tg.MainButton.show();
     tg.HapticFeedback.impactOccurred('light');
 }
@@ -191,7 +191,7 @@ async function saveSettings() {
     } catch (e) {
         tg.MainButton.hideProgress();
         console.error('Ошибка сохранения настроек:', e);
-        tg.showAlert('Ошибка сохранения: ' + e.message);
+        tg.showAlert(t('common.error') + ': ' + e.message);
         tg.HapticFeedback.notificationOccurred('error');
     }
 }
