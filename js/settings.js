@@ -150,9 +150,6 @@ async function saveSettings() {
             preferred_currency: newCurrency
         });
         
-        // Обновляем язык в translations.js
-        setLanguage(newLanguage);
-        
         // Обновляем валюту в currency.js
         setCurrency(newCurrency);
         
@@ -164,8 +161,11 @@ async function saveSettings() {
         
         tg.HapticFeedback.notificationOccurred('success');
         
-        // Если изменился язык - перезагружаем страницу для применения переводов
+        // Если изменился язык - сохраняем в localStorage и перезагружаем страницу
         if (languageChanged) {
+            // ВАЖНО: Сохраняем новый язык в localStorage ПЕРЕД перезагрузкой
+            localStorage.setItem('preferred_language', newLanguage);
+            
             tg.showPopup({
                 title: '✅',
                 message: 'Настройки сохранены. Страница будет обновлена.',
