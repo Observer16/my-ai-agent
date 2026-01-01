@@ -11,6 +11,29 @@ tg.BackButton.onClick(() => window.history.back());
 let currentSettings = null;
 let hasChanges = false;
 
+// Список валют с символами
+const CURRENCIES = [
+    { code: 'PYG', symbol: '₲' },
+    { code: 'USD', symbol: '$' },
+    { code: 'EUR', symbol: '€' },
+    { code: 'RUB', symbol: '₽' },
+    { code: 'BRL', symbol: 'R$' },
+    { code: 'UAH', symbol: '₴' }
+];
+
+/**
+ * Заполнить список валют с переводами
+ */
+function populateCurrencySelect() {
+    const select = document.getElementById('currency-select');
+    if (!select) return;
+    
+    select.innerHTML = CURRENCIES.map(curr => {
+        const name = t(`settings.currency.${curr.code}`);
+        return `<option value="${curr.code}">${curr.symbol} ${name} (${curr.code})</option>`;
+    }).join('');
+}
+
 /**
  * Инициализация страницы
  */
@@ -18,6 +41,9 @@ async function init() {
     try {
         // Загружаем текущие настройки
         currentSettings = await API.getUserSettings();
+        
+        // Заполняем список валют с переводами
+        populateCurrencySelect();
         
         // Отображаем данные пользователя
         displayUserInfo(currentSettings);
