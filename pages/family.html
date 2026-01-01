@@ -5,67 +5,243 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title data-i18n="family.title">Моя семья</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/family.css">
 </head>
 <body>
-<div class="header">
-    <h1>👥 <span data-i18n="family.title">Моя семья</span></h1>
-</div>
-
-<div id="family-info" class="family-info">
-    <div class="loading" data-i18n="common.loading">Загрузка...</div>
-</div>
-
-<div id="family-content" style="display: none;">
-    <div class="family-card">
-        <div class="family-header">
-            <div class="family-name" id="family-name">-</div>
-            <div class="family-members" id="family-members">-</div>
-        </div>
-        
-        <div class="family-actions">
-            <button class="action-button" onclick="showInviteModal()">
-                <span data-i18n="family.inviteMembers">Пригласить участников</span>
-            </button>
-            <button class="action-button danger" onclick="leaveFamily()">
-                <span data-i18n="family.leaveFamily">Покинуть семью</span>
-            </button>
-        </div>
-        
-        <div class="members-list" id="members-list"></div>
+    <div class="header">
+        <h1>👥 <span data-i18n="family.title">Моя семья</span></h1>
+        <p data-i18n="family.management">Управление семейной группой</p>
     </div>
-</div>
 
-<div id="no-family" style="display: none;">
-    <div class="empty-state">
-        <div class="empty-icon">👤</div>
-        <div class="empty-title" data-i18n="family.noFamily">Нет семьи</div>
-        <button class="create-family-btn" onclick="createFamily()">
-            <span data-i18n="family.createFamily">Создать семью</span>
-        </button>
+    <!-- Индикатор статуса семьи -->
+    <div class="family-status" id="family-status">
+        <div class="loading" data-i18n="common.loading">Загрузка информации о семье...</div>
     </div>
-</div>
 
-<!-- Modal для приглашения -->
-<div class="modal" id="invite-modal" style="display: none;">
-    <div class="modal-content">
-        <h2 data-i18n="family.inviteMembers">Пригласить участников</h2>
-        <div class="invite-link-container">
-            <div class="invite-link" id="invite-link">-</div>
-            <button class="copy-link-btn" onclick="copyInviteLink()">
-                <span data-i18n="family.copyLink">Скопировать ссылку</span>
-            </button>
+    <!-- Основной контент (виден только если есть семья) -->
+    <div class="family-content" id="family-content" style="display: none;">
+
+        <!-- Информация о семье -->
+        <div class="family-info-card">
+            <div class="family-info-header">
+                <h2 id="family-name"></h2>
+                <div class="family-actions">
+                    <button class="icon-btn" onclick="showFamilyActions()" data-i18n-target="title" data-i18n="family.actions" title="Действия">⚙️</button>
+                </div>
+            </div>
+            <div class="family-info-details">
+                <div class="info-row">
+                    <span class="info-label" data-i18n="family.created">Создана:</span>
+                    <span class="info-value" id="family-created-at"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label" data-i18n="family.members">Участники:</span>
+                    <span class="info-value" id="family-members-count"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label" data-i18n="family.status">Статус:</span>
+                    <span class="info-value" id="family-status-badge"></span>
+                </div>
+            </div>
         </div>
-        <button class="modal-close" onclick="closeInviteModal()" data-i18n="common.close">Закрыть</button>
-    </div>
-</div>
 
-<script src="../js/config.js"></script>
-<script src="../js/cache.js"></script>
-<script src="../js/translations.js"></script>
-<script src="../js/i18n-page-loader.js"></script>
-<script src="../js/api.js"></script>
-<script src="../js/family.js"></script>
+        <!-- Список участников -->
+        <div class="section">
+            <div class="section-header">
+                <h3 data-i18n="family.familyMembers">Участники семьи</h3>
+                <button class="add-btn" onclick="showInviteForm()" data-i18n="family.invite">+ Пригласить</button>
+            </div>
+            <div class="members-list" id="members-list">
+                <!-- Список участников загружается динамически -->
+            </div>
+        </div>
+
+        <!-- Входящие приглашения -->
+        <div class="section" id="invites-section" style="display: none;">
+            <div class="section-header">
+                <h3 data-i18n="family.incomingInvites">Входящие приглашения</h3>
+            </div>
+            <div class="invites-list" id="pending-invites">
+                <!-- Список приглашений загружается динамически -->
+            </div>
+        </div>
+
+        <!-- Активные приглашения (созданные текущим пользователем) -->
+        <div class="section" id="created-invites-section" style="display: none;">
+            <div class="section-header">
+                <h3 data-i18n="family.sentInvites">Отправленные приглашения</h3>
+            </div>
+            <div class="created-invites-list" id="created-invites">
+                <!-- Список созданных приглашений -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Контент для режима Solo (без семьи) -->
+    <div class="solo-content" id="solo-content" style="display: none;">
+        <div class="solo-card">
+            <div class="solo-icon">👤</div>
+            <h2 data-i18n="family.soloMode">Вы работаете в одиночку</h2>
+            <p class="solo-description" data-i18n="family.soloDescription">
+                В семейном режиме все участники видят общие покупки, товары и аналитику.
+            </p>
+
+            <div class="solo-actions">
+                <button class="action-btn primary" onclick="showCreateFamilyModal()">
+                    👥 <span data-i18n="family.createFamily">Создать семью</span>
+                </button>
+                <button class="action-btn secondary" onclick="checkForInvites()">
+                    🔍 <span data-i18n="family.checkInvites">Проверить приглашения</span>
+                </button>
+            </div>
+
+            <div class="solo-features">
+                <h4 data-i18n="family.benefits">Преимущества семьи:</h4>
+                <ul>
+                    <li data-i18n="family.benefit1">📊 Общая статистика расходов</li>
+                    <li data-i18n="family.benefit2">🔄 Синхронизация списка товаров</li>
+                    <li data-i18n="family.benefit3">👥 Совместное управление категориями</li>
+                    <li data-i18n="family.benefit4">💬 Общие отчёты и аналитика</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания семьи -->
+    <div class="modal" id="create-family-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="family.createNewFamily">Создать новую семью</h3>
+                <button class="modal-close" onclick="closeModal('create-family-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-family-name" data-i18n="family.familyName">Название семьи</label>
+                    <input type="text" id="new-family-name"
+                           data-i18n-target="placeholder" data-i18n="family.familyNamePlaceholder"
+                           placeholder="Например: Семья Ивановых"
+                           maxlength="50">
+                </div>
+                <div class="form-info">
+                    <p data-i18n="family.creatorNote">📝 Вы станете создателем семьи и сможете приглашать других участников.</p>
+                    <p data-i18n="family.leaveWarning">⚠️ Если вы уже состоите в семье, вы автоматически выйдете из неё.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('create-family-modal')" data-i18n="common.cancel">Отмена</button>
+                <button class="btn primary" onclick="createFamily()" data-i18n="family.createFamily">Создать семью</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно приглашения -->
+    <div class="modal" id="invite-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="family.inviteToFamily">Пригласить в семью</h3>
+                <button class="modal-close" onclick="closeModal('invite-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="invite-telegram-id" data-i18n="family.telegramId">Telegram ID пользователя *</label>
+                    <input type="number" id="invite-telegram-id"
+                           data-i18n-target="placeholder" data-i18n="family.enterTelegramId"
+                           placeholder="Введите Telegram ID"
+                           inputmode="numeric">
+                    <div class="form-hint" data-i18n="family.telegramIdHint">ID можно узнать через бота @userinfobot</div>
+                </div>
+                <div class="form-group">
+                    <label for="invite-message" data-i18n="family.personalMessage">Персональное сообщение (необязательно)</label>
+                    <textarea id="invite-message"
+                              data-i18n-target="placeholder" data-i18n="family.writeMessage"
+                              placeholder="Напишите приветственное сообщение..."
+                              maxlength="500"
+                              rows="3"></textarea>
+                    <div class="char-counter"><span id="message-chars">0</span>/500</div>
+                </div>
+                <div class="form-info">
+                    <p data-i18n="family.inviteValid">📧 Приглашение будет действовать 7 дней</p>
+                    <p data-i18n="family.userNotification">👤 Пользователь получит уведомление в приложении</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('invite-modal')" data-i18n="common.cancel">Отмена</button>
+                <button class="btn primary" onclick="sendInvite()" data-i18n="family.sendInvite">Отправить приглашение</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно действий с семьей -->
+    <div class="modal" id="family-actions-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="family.familyActions">Действия с семьей</h3>
+                <button class="modal-close" onclick="closeModal('family-actions-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="actions-list">
+                    <button class="action-item" onclick="copyInviteLink()">
+                        <span class="action-icon">🔗</span>
+                        <span class="action-text" data-i18n="family.copyLink">Скопировать ссылку-приглашение</span>
+                    </button>
+                    <button class="action-item" onclick="showInviteForm()">
+                        <span class="action-icon">👤</span>
+                        <span class="action-text" data-i18n="family.inviteMember">Пригласить участника</span>
+                    </button>
+                    <button class="action-item" onclick="renameFamily()">
+                        <span class="action-icon">✏️</span>
+                        <span class="action-text" data-i18n="family.renameFamily">Переименовать семью</span>
+                    </button>
+                    <div class="action-divider"></div>
+                    <button class="action-item danger" onclick="showLeaveConfirm()">
+                        <span class="action-icon">🚪</span>
+                        <span class="action-text" data-i18n="family.leaveFamily">Выйти из семьи</span>
+                    </button>
+                    <button class="action-item danger" id="delete-family-btn" style="display: none;" onclick="showDeleteConfirm()">
+                        <span class="action-icon">🗑️</span>
+                        <span class="action-text" data-i18n="family.deleteFamily">Удалить семью</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подтверждение выхода -->
+    <div class="modal" id="leave-confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="family.leaveFamily">Выйти из семьи</h3>
+                <button class="modal-close" onclick="closeModal('leave-confirm-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-message" data-i18n="family.leaveConfirm">
+                    ⚠️ Вы уверены, что хотите выйти из семьи?
+                </div>
+                <div class="confirm-details">
+                    <p data-i18n="family.leaveDetail1">• Вы вернетесь в одиночный режим</p>
+                    <p data-i18n="family.leaveDetail2">• Все ваши данные останутся в семье</p>
+                    <p data-i18n="family.leaveDetail3">• Вы сможете вступить в другую семью</p>
+                    <p id="last-member-warning" style="display: none; color: #ef4444;" data-i18n="family.lastMemberWarning">
+                        ⚠️ Вы последний участник. Семья будет деактивирована.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('leave-confirm-modal')" data-i18n="common.cancel">Отмена</button>
+                <button class="btn danger" onclick="leaveFamily()" data-i18n="family.leaveFamily">Выйти из семьи</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление об успехе/ошибке -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Скрипты -->
+    <script src="../js/config.js"></script>
+    <script src="../js/cache.js"></script>
+    <script src="../js/translations.js"></script>
+    <script src="../js/i18n-page-loader.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/family.js"></script>
 </body>
 </html>
