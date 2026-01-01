@@ -22,15 +22,19 @@
             const stats = await API.getMonthlyStatistics(currentYear, currentMonth);
 
             if (!stats) {
-                showError('Нет данных за этот период');
+                showError(t('monthlyStats.noData'));
                 return;
             }
 
             // Отображаем период
             const monthNames = typeof getMonthName === 'function' ? 
                 Array.from({length: 12}, (_, i) => getMonthName(i)) :
-                ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                [
+                    t('monthlyStats.january'), t('monthlyStats.february'), t('monthlyStats.march'),
+                    t('monthlyStats.april'), t('monthlyStats.may'), t('monthlyStats.june'),
+                    t('monthlyStats.july'), t('monthlyStats.august'), t('monthlyStats.september'),
+                    t('monthlyStats.october'), t('monthlyStats.november'), t('monthlyStats.december')
+                ];
             
             const periodEl = document.getElementById('period-display');
             if (periodEl) {
@@ -90,7 +94,7 @@
 
         } catch (error) {
             console.error('Ошибка загрузки статистики:', error);
-            showError('Ошибка загрузки данных');
+            showError(t('monthlyStats.errorLoading'));
         }
     }
 
@@ -99,7 +103,7 @@
         if (!container) return;
 
         if (!dailyData || dailyData.length === 0) {
-            container.innerHTML = '<div class="empty">Нет данных за этот период</div>';
+            container.innerHTML = `<div class="empty">${t('monthlyStats.noData')}</div>`;
             return;
         }
 
@@ -114,8 +118,12 @@
             const [year, month, dayOfMonth] = day.purchase_day.split('-').map(Number);
             const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
 
-            const monthNames = ['янв', 'фев', 'мар', 'апр', 'май', 'июн',
-                               'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+            const monthNames = [
+                t('monthlyStats.janShort'), t('monthlyStats.febShort'), t('monthlyStats.marShort'),
+                t('monthlyStats.aprShort'), t('monthlyStats.mayShort'), t('monthlyStats.junShort'),
+                t('monthlyStats.julShort'), t('monthlyStats.augShort'), t('monthlyStats.sepShort'),
+                t('monthlyStats.octShort'), t('monthlyStats.novShort'), t('monthlyStats.decShort')
+            ];
             const dateStr = `${dayOfMonth} ${monthNames[month - 1]}`;
 
             const percent = (day.day_spent / maxAmount) * 100;
@@ -139,7 +147,7 @@
         if (!container) return;
 
         if (!categories || categories.length === 0) {
-            container.innerHTML = '<div class="empty">Нет данных о категориях</div>';
+            container.innerHTML = `<div class="empty">${t('monthlyStats.noCategoriesData')}</div>`;
             return;
         }
 
@@ -156,7 +164,7 @@
                         <div class="card-bar-fill" style="width: ${percent}%"></div>
                     </div>
                     <div class="card-details">
-                        ${cat.items_count} позиций • ${percent.toFixed(1)}% от общей суммы
+                        ${cat.items_count} ${t('monthlyStats.positions')} • ${percent.toFixed(1)}% ${t('monthlyStats.ofTotal')}
                     </div>
                 </div>
             `;
@@ -170,7 +178,7 @@
         if (!container) return;
 
         if (!stores || stores.length === 0) {
-            container.innerHTML = '<div class="empty">Нет данных о магазинах</div>';
+            container.innerHTML = `<div class="empty">${t('monthlyStats.noStoresData')}</div>`;
             return;
         }
 
@@ -187,7 +195,7 @@
                         <div class="card-bar-fill" style="width: ${percent}%"></div>
                     </div>
                     <div class="card-details">
-                        ${store.visits_count} визитов • ${percent.toFixed(1)}% от общей суммы
+                        ${store.visits_count} ${t('monthlyStats.visits')} • ${percent.toFixed(1)}% ${t('monthlyStats.ofTotal')}
                     </div>
                 </div>
             `;
@@ -201,13 +209,14 @@
         if (!container) return;
 
         if (!purchases || purchases.length === 0) {
-            container.innerHTML = '<div class="empty">Нет данных о покупках</div>';
+            container.innerHTML = `<div class="empty">${t('monthlyStats.noPurchasesData')}</div>`;
             return;
         }
 
         const html = purchases.map(purchase => {
             const date = new Date(purchase.purchase_date);
-            const dateStr = date.toLocaleDateString('ru-RU', {
+            const locale = getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US';
+            const dateStr = date.toLocaleDateString(locale, {
                 day: '2-digit',
                 month: 'short',
                 hour: '2-digit',
@@ -223,9 +232,9 @@
                     <div class="card-details">
                         <div class="purchase-info">
                             <span class="purchase-date">${dateStr}</span>
-                            <span class="purchase-items">${purchase.items_count} товаров</span>
+                            <span class="purchase-items">${purchase.items_count} ${t('monthlyStats.products')}</span>
                         </div>
-                        <div class="purchase-invoice">Чек: ${purchase.invoice_number}</div>
+                        <div class="purchase-invoice">${t('monthlyStats.receipt')}: ${purchase.invoice_number}</div>
                     </div>
                 </div>
             `;
@@ -239,7 +248,7 @@
         if (!container) return;
 
         if (!weekdayStats || weekdayStats.length === 0) {
-            container.innerHTML = '<div class="empty">Нет данных по дням недели</div>';
+            container.innerHTML = `<div class="empty">${t('monthlyStats.noWeekdayData')}</div>`;
             return;
         }
 
@@ -254,8 +263,8 @@
                     </div>
                     <div class="weekday-details">
                         <div class="weekday-info">
-                            <span>${day.purchases_count} покупок</span>
-                            <span>Средний чек: ${formatMoney(day.avg_spent)}</span>
+                            <span>${day.purchases_count} ${t('monthlyStats.purchases')}</span>
+                            <span>${t('monthlyStats.avgCheck')}: ${formatMoney(day.avg_spent)}</span>
                         </div>
                     </div>
                 </div>
@@ -298,15 +307,16 @@
         if (!amount || amount === 0) return `0 ${getCurrencySymbol()}`;
 
         const rounded = Math.round(amount);
+        const locale = getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US';
 
         // Всегда показываем в тысячах для сумм >= 1000
         if (rounded >= 1000) {
             const thousands = Math.round(rounded / 1000);
-            return `${thousands.toLocaleString('ru-RU')}K ${getCurrencySymbol()}`;
+            return `${thousands.toLocaleString(locale)}K ${getCurrencySymbol()}`;
         }
         // Для сумм < 1 000
         else {
-            return `${rounded.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+            return `${rounded.toLocaleString(locale)} ${getCurrencySymbol()}`;
         }
     }
 
