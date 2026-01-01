@@ -166,9 +166,15 @@ async function saveSettings() {
             // ВАЖНО: Сохраняем новый язык в localStorage ПЕРЕД перезагрузкой
             localStorage.setItem('preferred_language', newLanguage);
             
+            // Временно переключаем язык для получения переведенного сообщения
+            const oldLang = getCurrentLanguage();
+            setLanguage(newLanguage);
+            const message = t('settings.savedReload');
+            setLanguage(oldLang); // Возвращаем обратно (на случай если popup отменят)
+            
             tg.showPopup({
                 title: '✅',
-                message: 'Настройки сохранены. Страница будет обновлена.',
+                message: message,
                 buttons: [{type: 'ok'}]
             }, () => {
                 window.location.reload();
@@ -177,7 +183,7 @@ async function saveSettings() {
             // Просто показываем уведомление
             tg.showPopup({
                 title: '✅',
-                message: 'Настройки сохранены',
+                message: t('settings.saved'),
                 buttons: [{type: 'ok'}]
             });
         }
