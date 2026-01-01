@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Управление</title>
+    <title data-i18n="products.title">Управление</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- Подключаем внешний CSS файл -->
     <link rel="stylesheet" href="../css/products.css">
 </head>
 <body>
 <div class="header">
-    <h1>📦 Управление</h1>
-    <p>Товары, категории и получатели</p>
+    <h1>📦 <span data-i18n="products.title">Управление</span></h1>
+    <p data-i18n="products.subtitle">Товары, категории и получатели</p>
 </div>
 
 <div class="tabs">
-    <div class="tab active" onclick="switchTab('products')">🛒 Товары</div>
-    <div class="tab" onclick="switchTab('categories')">📂 Категории</div>
-    <div class="tab" onclick="switchTab('stores')">👥 Получатели</div>
+    <div class="tab active" onclick="switchTab('products')">🛒 <span data-i18n="products.tabProducts">Товары</span></div>
+    <div class="tab" onclick="switchTab('categories')">📂 <span data-i18n="products.tabCategories">Категории</span></div>
+    <div class="tab" onclick="switchTab('stores')">👥 <span data-i18n="products.tabRecipients">Получатели</span></div>
 </div>
 
 <!-- Товары -->
@@ -26,25 +24,27 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-value" id="total-products">-</div>
-            <div class="stat-label">Товаров</div>
+            <div class="stat-label" data-i18n="products.products">Товаров</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="total-categories">-</div>
-            <div class="stat-label">Категорий</div>
+            <div class="stat-label" data-i18n="products.categories">Категорий</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="uncategorized">-</div>
-            <div class="stat-label">Без категории</div>
+            <div class="stat-label" data-i18n="products.uncategorized">Без категории</div>
         </div>
     </div>
 
     <div class="search">
-        <input type="text" id="product-search" placeholder="🔍 Поиск товара..."
+        <input type="text" id="product-search" 
+               data-i18n-target="placeholder" data-i18n="products.searchProduct"
+               placeholder="🔍 Поиск товара..."
                onkeyup="searchProducts(this.value)">
     </div>
 
     <div class="filter-section">
-        <div class="filter-label">Категория</div>
+        <div class="filter-label" data-i18n="products.category">Категория</div>
         <div class="category-filter" id="category-filters"></div>
     </div>
 
@@ -63,42 +63,42 @@
 
 <!-- Кнопки создания внизу -->
 <div class="create-buttons">
-    <!-- Кнопка для категорий -->
     <button class="create-btn" id="btn-create-category" onclick="showCreateCategoryModal()" style="display: none;">
-        📂 Создать категорию
+        📂 <span data-i18n="products.createCategory">Создать категорию</span>
     </button>
     
-    <!-- Кнопка для получателей -->
     <button class="create-btn" id="btn-edit-store" onclick="showEditStoreModal()" style="display: none;">
-        ✏️ Редактировать
+        ✏️ <span data-i18n="products.edit">Редактировать</span>
     </button>
 </div>
 
 <!-- Модальное окно создания категории -->
 <div class="modal" id="create-category-modal">
     <div class="modal-content">
-        <div class="modal-header">Новая категория</div>
+        <div class="modal-header" data-i18n="products.newCategory">Новая категория</div>
         <div class="form-group">
-            <label class="form-label">Название *</label>
+            <label class="form-label"><span data-i18n="products.name">Название</span> *</label>
             <input type="text" class="form-input" id="new-category-name"
+                   data-i18n-target="placeholder" data-i18n="products.enterCategoryName"
                    placeholder="Например: Фрукты">
         </div>
         <div class="form-group">
-            <label class="form-label">Описание</label>
+            <label class="form-label" data-i18n="products.description">Описание</label>
             <textarea class="form-textarea" id="new-category-description"
+                      data-i18n-target="placeholder" data-i18n="products.descriptionOptional"
                       placeholder="Описание категории (опционально)"></textarea>
         </div>
         <div class="form-group">
-            <label class="form-label">Родительская категория</label>
+            <label class="form-label" data-i18n="products.parentCategory">Родительская категория</label>
             <select class="form-select" id="new-category-parent">
-                <option value="">Нет (основная категория)</option>
+                <option value="" data-i18n="products.noParent">Нет (основная категория)</option>
             </select>
         </div>
         <div class="modal-actions">
-            <button class="modal-btn secondary" onclick="closeModal('create-category-modal')">
+            <button class="modal-btn secondary" onclick="closeModal('create-category-modal')" data-i18n="common.cancel">
                 Отмена
             </button>
-            <button class="modal-btn primary" onclick="createCategory()">
+            <button class="modal-btn primary" onclick="createCategory()" data-i18n="products.create">
                 Создать
             </button>
         </div>
@@ -108,28 +108,30 @@
 <!-- Модальное окно редактирования категории -->
 <div class="modal" id="edit-category-modal">
     <div class="modal-content">
-        <div class="modal-header">Редактировать категорию</div>
+        <div class="modal-header" data-i18n="products.editCategory">Редактировать категорию</div>
         <div class="form-group">
-            <label class="form-label">Название *</label>
+            <label class="form-label"><span data-i18n="products.name">Название</span> *</label>
             <input type="text" class="form-input" id="edit-category-name"
+                   data-i18n-target="placeholder" data-i18n="products.enterCategoryName"
                    placeholder="Название категории">
         </div>
         <div class="form-group">
-            <label class="form-label">Описание</label>
+            <label class="form-label" data-i18n="products.description">Описание</label>
             <textarea class="form-textarea" id="edit-category-description"
+                      data-i18n-target="placeholder" data-i18n="products.descriptionOptional"
                       placeholder="Описание категории (опционально)"></textarea>
         </div>
         <div class="form-group">
-            <label class="form-label">Родительская категория</label>
+            <label class="form-label" data-i18n="products.parentCategory">Родительская категория</label>
             <select class="form-select" id="edit-category-parent">
-                <option value="">Нет (основная категория)</option>
+                <option value="" data-i18n="products.noParent">Нет (основная категория)</option>
             </select>
         </div>
         <div class="modal-actions">
-            <button class="modal-btn secondary" onclick="closeModal('edit-category-modal')">
+            <button class="modal-btn secondary" onclick="closeModal('edit-category-modal')" data-i18n="common.cancel">
                 Отмена
             </button>
-            <button class="modal-btn primary" onclick="updateCategory()">
+            <button class="modal-btn primary" onclick="updateCategory()" data-i18n="products.save">
                 Сохранить
             </button>
         </div>
@@ -139,43 +141,46 @@
 <!-- Модальное окно создания товара -->
 <div class="modal" id="create-product-modal">
     <div class="modal-content">
-        <div class="modal-header">Новый товар</div>
+        <div class="modal-header" data-i18n="products.newProduct">Новый товар</div>
         <div class="form-group">
-            <label class="form-label">Название *</label>
+            <label class="form-label"><span data-i18n="products.name">Название</span> *</label>
             <input type="text" class="form-input" id="new-product-name"
+                   data-i18n-target="placeholder" data-i18n="products.enterProductName"
                    placeholder="Например: Яблоки">
         </div>
         <div class="form-group">
-            <label class="form-label">Бренд</label>
+            <label class="form-label" data-i18n="products.brand">Бренд</label>
             <input type="text" class="form-input" id="new-product-brand"
+                   data-i18n-target="placeholder" data-i18n="products.brandOptional"
                    placeholder="Бренд (опционально)">
         </div>
         <div class="form-group">
-            <label class="form-label">Категория</label>
+            <label class="form-label" data-i18n="products.category">Категория</label>
             <select class="form-select" id="new-product-category">
-                <option value="">Без категории</option>
+                <option value="" data-i18n="products.uncategorized">Без категории</option>
             </select>
         </div>
         <div class="form-group">
-            <label class="form-label">Единица измерения</label>
+            <label class="form-label" data-i18n="products.unit">Единица измерения</label>
             <select class="form-select" id="new-product-unit">
-                <option value="unidad">Штука</option>
-                <option value="kg">Килограмм</option>
-                <option value="g">Грамм</option>
-                <option value="l">Литр</option>
-                <option value="ml">Миллилитр</option>
+                <option value="unidad" data-i18n="products.unitPiece">Штука</option>
+                <option value="kg" data-i18n="products.unitKg">Килограмм</option>
+                <option value="g" data-i18n="products.unitG">Грамм</option>
+                <option value="l" data-i18n="products.unitL">Литр</option>
+                <option value="ml" data-i18n="products.unitMl">Миллилитр</option>
             </select>
         </div>
         <div class="form-group">
-            <label class="form-label">Штрих-код</label>
+            <label class="form-label" data-i18n="products.barcode">Штрих-код</label>
             <input type="text" class="form-input" id="new-product-barcode"
+                   data-i18n-target="placeholder" data-i18n="products.barcodeOptional"
                    placeholder="Штрих-код (опционально)" inputmode="numeric">
         </div>
         <div class="modal-actions">
-            <button class="modal-btn secondary" onclick="closeModal('create-product-modal')">
+            <button class="modal-btn secondary" onclick="closeModal('create-product-modal')" data-i18n="common.cancel">
                 Отмена
             </button>
-            <button class="modal-btn primary" onclick="createProduct()">
+            <button class="modal-btn primary" onclick="createProduct()" data-i18n="products.create">
                 Создать
             </button>
         </div>
@@ -185,40 +190,46 @@
 <!-- Модальное окно редактирования товара -->
 <div class="modal" id="edit-product-modal">
     <div class="modal-content">
-        <div class="modal-header">Редактировать товар</div>
+        <div class="modal-header" data-i18n="products.editProduct">Редактировать товар</div>
         <div class="form-group">
-            <label class="form-label">Название *</label>
-            <input type="text" class="form-input" id="edit-product-name" placeholder="Название товара">
+            <label class="form-label"><span data-i18n="products.name">Название</span> *</label>
+            <input type="text" class="form-input" id="edit-product-name" 
+                   data-i18n-target="placeholder" data-i18n="products.enterProductName"
+                   placeholder="Название товара">
         </div>
         <div class="form-group">
-            <label class="form-label">Бренд</label>
-            <input type="text" class="form-input" id="edit-product-brand" placeholder="Бренд (опционально)">
+            <label class="form-label" data-i18n="products.brand">Бренд</label>
+            <input type="text" class="form-input" id="edit-product-brand" 
+                   data-i18n-target="placeholder" data-i18n="products.brandOptional"
+                   placeholder="Бренд (опционально)">
         </div>
         <div class="form-group">
-            <label class="form-label">Категория</label>
+            <label class="form-label" data-i18n="products.category">Категория</label>
             <select class="form-select" id="edit-product-category">
-                <option value="">Без категории</option>
+                <option value="" data-i18n="products.uncategorized">Без категории</option>
             </select>
         </div>
         <div class="form-group">
-            <label class="form-label">Единица измерения</label>
+            <label class="form-label" data-i18n="products.unit">Единица измерения</label>
             <select class="form-select" id="edit-product-unit">
-                <option value="unidad">Штука</option>
-                <option value="kg">Килограмм</option>
-                <option value="g">Грамм</option>
-                <option value="l">Литр</option>
-                <option value="ml">Миллилитр</option>
+                <option value="unidad" data-i18n="products.unitPiece">Штука</option>
+                <option value="kg" data-i18n="products.unitKg">Килограмм</option>
+                <option value="g" data-i18n="products.unitG">Грамм</option>
+                <option value="l" data-i18n="products.unitL">Литр</option>
+                <option value="ml" data-i18n="products.unitMl">Миллилитр</option>
             </select>
         </div>
         <div class="form-group">
-            <label class="form-label">Штрих-код</label>
-            <input type="text" class="form-input" id="edit-product-barcode" placeholder="Штрих-код (опционально)" inputmode="numeric">
+            <label class="form-label" data-i18n="products.barcode">Штрих-код</label>
+            <input type="text" class="form-input" id="edit-product-barcode" 
+                   data-i18n-target="placeholder" data-i18n="products.barcodeOptional"
+                   placeholder="Штрих-код (опционально)" inputmode="numeric">
         </div>
         <div class="modal-actions">
-            <button class="modal-btn secondary" onclick="closeModal('edit-product-modal')">
+            <button class="modal-btn secondary" onclick="closeModal('edit-product-modal')" data-i18n="common.cancel">
                 Отмена
             </button>
-            <button class="modal-btn primary" onclick="updateProduct()">
+            <button class="modal-btn primary" onclick="updateProduct()" data-i18n="products.save">
                 Сохранить
             </button>
         </div>
@@ -228,716 +239,74 @@
 <!-- Модальное окно редактирования получателя -->
 <div class="modal" id="edit-store-modal">
     <div class="modal-content">
-        <div class="modal-header">Редактировать получателя</div>
+        <div class="modal-header" data-i18n="products.editRecipient">Редактировать получателя</div>
         <div class="form-group">
-            <label class="form-label">Выберите получателя</label>
+            <label class="form-label" data-i18n="products.selectRecipient">Выберите получателя</label>
             <select class="form-select" id="store-select" onchange="loadStoreData()">
-                <option value="">-- Выберите получателя --</option>
+                <option value="">-- <span data-i18n="products.selectRecipient">Выберите получателя</span> --</option>
             </select>
         </div>
         <div id="store-edit-fields" style="display: none;">
             <div class="form-group">
-                <label class="form-label">Название *</label>
-                <input type="text" class="form-input" id="store-name" placeholder="Название получателя">
+                <label class="form-label"><span data-i18n="products.name">Название</span> *</label>
+                <input type="text" class="form-input" id="store-name" 
+                       data-i18n-target="placeholder" data-i18n="products.recipientName"
+                       placeholder="Название получателя">
             </div>
             <div class="form-group">
-                <label class="form-label">Тип получателя</label>
-                <input type="text" class="form-input" id="store-type" placeholder="Например: Супермаркет">
+                <label class="form-label" data-i18n="products.recipientType">Тип получателя</label>
+                <input type="text" class="form-input" id="store-type" 
+                       data-i18n-target="placeholder" data-i18n="products.supermarket"
+                       placeholder="Например: Супермаркет">
             </div>
             <div class="form-group">
-                <label class="form-label">RUC (опционально)</label>
-                <input type="text" class="form-input" id="store-ruc" placeholder="RUC получателя">
+                <label class="form-label" data-i18n="products.rucOptional">RUC (опционально)</label>
+                <input type="text" class="form-input" id="store-ruc" 
+                       data-i18n-target="placeholder" data-i18n="products.recipientRuc"
+                       placeholder="RUC получателя">
             </div>
             <div class="form-group">
-                <label class="form-label">Адрес (опционально)</label>
-                <textarea class="form-textarea" id="store-address" placeholder="Адрес получателя"></textarea>
+                <label class="form-label" data-i18n="products.addressOptional">Адрес (опционально)</label>
+                <textarea class="form-textarea" id="store-address" 
+                          data-i18n-target="placeholder" data-i18n="products.recipientAddress"
+                          placeholder="Адрес получателя"></textarea>
             </div>
         </div>
         <div class="modal-actions">
-            <button class="modal-btn secondary" onclick="closeModal('edit-store-modal')">
+            <button class="modal-btn secondary" onclick="closeModal('edit-store-modal')" data-i18n="common.cancel">
                 Отмена
             </button>
-            <button class="modal-btn primary" onclick="updateStore()" id="save-store-btn" style="display: none;">
+            <button class="modal-btn primary" onclick="updateStore()" id="save-store-btn" style="display: none;" data-i18n="products.save">
                 Сохранить
             </button>
         </div>
     </div>
 </div>
 
+<!-- NEW: Модульная система i18n -->
+<script src="../js/i18n/core.js"></script>
+<script src="../js/i18n/common.js"></script>
+<script src="../js/i18n/products.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
+<!-- END: i18n -->
+
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
 <script src="../js/currency.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/api-extensions.js"></script>
+
+<!-- NEW: Модульные скрипты products -->
+<script src="../js/products/products-utils.js"></script>
+<script src="../js/products/products-render.js"></script>
+<script src="../js/products/products-modals.js"></script>
+<script src="../js/products/products-crud.js"></script>
+<script src="../js/products/products-init.js"></script>
+<!-- END: products modules -->
+
 <script>
-    // Глобальные переменные
-    const tg = window.Telegram.WebApp;
-    let allProducts = [];
-    let allCategories = [];
-    let allStores = [];
-    let currentCategoryFilter = null;
-    let currentProductEdit = null;
-    let currentCategoryEdit = null;
-    let currentStoreEdit = null;
-    let searchTimeout = null;
-    let currentTab = 'products';
-
-    async function init() {
-        // 🆕 Инициализация валюты
-        await initCurrency();
-
-        tg.expand();
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => window.location.href = '../index.html');
-
-        loadData();
-        updateButtonsVisibility();
-    }
-
-    // Загрузка всех данных
-    async function loadData() {
-        try {
-            await Promise.all([
-                loadStatistics(),
-                loadCategories(),
-                loadStores()
-            ]);
-            await loadProducts();
-            tg.HapticFeedback.notificationOccurred('success');
-        } catch (error) {
-            console.error('Ошибка инициализации:', error);
-            tg.showAlert('Ошибка загрузки данных');
-        }
-    }
-
-    // Загрузка статистики
-    async function loadStatistics() {
-        try {
-            const stats = await API.getStatistics();
-            document.getElementById('total-products').textContent = stats.unique_products || 0;
-        } catch (error) {
-            console.error('Ошибка загрузки статистики:', error);
-            document.getElementById('total-products').textContent = '-';
-        }
-    }
-
-    // Загрузка категорий
-    async function loadCategories() {
-        try {
-            allCategories = await API.getCategories();
-            updateCategoryStatistics();
-            renderCategoryFilters();
-            renderCategoriesList();
-            populateCategorySelects();
-        } catch (error) {
-            console.error('Ошибка загрузки категорий:', error);
-        }
-    }
-
-    // Загрузка магазинов
-    async function loadStores() {
-        try {
-            allStores = await API.getStores();
-            populateStoreSelect();
-            renderStoresList();
-        } catch (error) {
-            console.error('Ошибка загрузки магазинов:', error);
-        }
-    }
-
-    // Рендеринг списка магазинов
-    function renderStoresList() {
-        const container = document.getElementById('stores-list');
-
-        if (!allStores || allStores.length === 0) {
-            container.innerHTML = '<div class="empty">🏪 Магазины не найдены</div>';
-            return;
-        }
-
-        const html = allStores.map(store => {
-            const name = escapeHtml(store.name);
-            const storeType = store.store_type ? escapeHtml(store.store_type) : 'Магазин';
-            const ruc = store.ruc ? escapeHtml(store.ruc) : '';
-            const address = store.address ? escapeHtml(store.address) : '';
-
-            return `
-            <div class="category-card">
-                <div class="category-header">
-                    <div class="category-name">${name}</div>
-                    <div class="product-category" style="background: var(--tg-theme-button-color, #3390ec);">${storeType}</div>
-                </div>
-                ${ruc ? `<div class="category-description">📄 RUC: ${ruc}</div>` : ''}
-                ${address ? `<div class="category-description">📍 ${address}</div>` : ''}
-            </div>
-        `}).join('');
-
-        container.innerHTML = html;
-    }
-
-    // Заполнение селекта получателей
-    function populateStoreSelect() {
-        const select = document.getElementById('store-select');
-        select.innerHTML = '<option value="">-- Выберите получателя --</option>' +
-            allStores.map(store => `<option value="${store.id}">${escapeHtml(store.name)}</option>`).join('');
-    }
-
-    // Загрузка данных получателя
-    function loadStoreData() {
-        const storeId = document.getElementById('store-select').value;
-        if (!storeId) {
-            document.getElementById('store-edit-fields').style.display = 'none';
-            document.getElementById('save-store-btn').style.display = 'none';
-            return;
-        }
-
-        const store = allStores.find(s => s.id === storeId);
-        if (!store) return;
-
-        currentStoreEdit = store;
-        document.getElementById('store-name').value = store.name;
-        document.getElementById('store-type').value = store.store_type || '';
-        document.getElementById('store-ruc').value = store.ruc || '';
-        document.getElementById('store-address').value = store.address || '';
-        document.getElementById('store-edit-fields').style.display = 'block';
-        document.getElementById('save-store-btn').style.display = 'block';
-    }
-
-    // Показать модальное окно редактирования получателя
-    function showEditStoreModal() {
-        if (allStores.length === 0) {
-            tg.showAlert('Нет доступных получателей для редактирования');
-            return;
-        }
-        document.getElementById('store-select').value = '';
-        document.getElementById('store-edit-fields').style.display = 'none';
-        document.getElementById('save-store-btn').style.display = 'none';
-        openModal('edit-store-modal');
-        tg.HapticFeedback.impactOccurred('medium');
-    }
-
-    // Обновить получателя
-    async function updateStore() {
-        if (!currentStoreEdit) return;
-
-        const name = document.getElementById('store-name').value.trim();
-        if (!name) {
-            tg.showAlert('Введите название получателя');
-            return;
-        }
-
-        try {
-            const storeData = {
-                name: name,
-                store_type: document.getElementById('store-type').value.trim() || null,
-                ruc: document.getElementById('store-ruc').value.trim() || null,
-                address: document.getElementById('store-address').value.trim() || null
-            };
-
-            await API.updateStore(currentStoreEdit.id, storeData);
-            closeModal('edit-store-modal');
-            await loadStores();
-            tg.showAlert(`✅ Получатель "${name}" обновлён`);
-            tg.HapticFeedback.notificationOccurred('success');
-        } catch (error) {
-            console.error('Ошибка обновления получателя:', error);
-            tg.showAlert('Ошибка обновления: ' + error.message);
-        }
-    }
-
-    // Обновление статистики категорий
-    function updateCategoryStatistics() {
-        document.getElementById('total-categories').textContent = allCategories.length;
-
-        if (allProducts.length > 0) {
-            const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
-            document.getElementById('uncategorized').textContent = uncategorizedCount;
-        }
-    }
-
-    // Загрузка товаров
-    async function loadProducts(categoryId = null, search = null) {
-        showLoading('products-list');
-        try {
-            allProducts = await API.getProducts(categoryId, search, 50);
-            renderProducts(allProducts);
-            updateUncategorizedCount();
-        } catch (error) {
-            console.error('Ошибка загрузки товаров:', error);
-            showError('products-list', error.message);
-        }
-    }
-
-    // Обновление счетчика товаров без категории
-    function updateUncategorizedCount() {
-        const uncategorizedCount = allProducts.filter(p => !p.category_id).length;
-        document.getElementById('uncategorized').textContent = uncategorizedCount;
-    }
-
-    // Рендеринг фильтров категорий
-    function renderCategoryFilters() {
-        const container = document.getElementById('category-filters');
-        const mainCategories = allCategories.filter(c => !c.parent_id);
-
-        const html = `
-            <div class="category-chip ${!currentCategoryFilter ? 'active' : ''}"
-                 onclick="filterByCategory(null)">
-                Все
-            </div>
-            ${mainCategories.map(cat => `
-                <div class="category-chip ${currentCategoryFilter === cat.id ? 'active' : ''}"
-                     onclick="filterByCategory(${cat.id})">
-                    ${cat.name} (${cat.products_count || 0})
-                </div>
-            `).join('')}
-        `;
-
-        container.innerHTML = html;
-    }
-
-    // Рендеринг товаров
-    function renderProducts(products) {
-        const container = document.getElementById('products-list');
-
-        if (!products || products.length === 0) {
-            container.innerHTML = '<div class="empty">📦 Товары не найдены</div>';
-            return;
-        }
-
-        const html = products.map(p => {
-            const name = escapeHtml(p.name);
-            const categoryName = p.category_name ? escapeHtml(p.category_name) : '';
-            const brand = p.brand ? escapeHtml(p.brand) : '';
-
-            // Определяем какие цены показывать
-            let pricesHtml = '';
-            if (p.min_price) {
-                const minPrice = p.min_price.toFixed(0);
-                const maxPrice = p.max_price.toFixed(0);
-                const avgPrice = p.avg_price ? p.avg_price.toFixed(0) : null;
-
-                // Если все цены одинаковые - показываем только одну
-                if (minPrice === maxPrice) {
-                    pricesHtml = `
-                        <div class="product-prices">
-                            <div class="price-badge price-single">
-                                <strong>${minPrice} ${getCurrencySymbol()}</strong>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Если разные цены - показываем мин, макс и среднюю
-                    pricesHtml = `
-                        <div class="product-prices">
-                            <div class="price-badge price-min">
-                                <strong>${minPrice} ${getCurrencySymbol()}</strong>
-                            </div>
-                            ${avgPrice && avgPrice !== minPrice && avgPrice !== maxPrice ? `
-                                <div class="price-badge price-avg">
-                                    <strong>${avgPrice} ${getCurrencySymbol()}</strong>
-                                </div>
-                            ` : ''}
-                            <div class="price-badge price-max">
-                                <strong>${maxPrice} ${getCurrencySymbol()}</strong>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            return `
-            <div class="product-card" onclick="showEditProductModal('${p.id}', '${name}', ${p.category_id || 'null'})">
-                <div class="product-header">
-                    <div class="product-name">${name}</div>
-                    ${categoryName ? `
-                        <div class="product-category">${categoryName}</div>
-                    ` : ''}
-                </div>
-                <div class="product-info">
-                    ${brand ? `<span>🏷️ ${brand}</span>` : ''}
-                    ${p.stores_count ? `<span>🏪 ${p.stores_count} магазинов</span>` : ''}
-                    ${p.last_purchase_date ? `<span>📅 ${formatDate(p.last_purchase_date)}</span>` : ''}
-                </div>
-                ${pricesHtml}
-            </div>
-        `}).join('');
-
-        container.innerHTML = html;
-    }
-
-    // Рендеринг списка категорий
-    function renderCategoriesList() {
-        const container = document.getElementById('categories-list');
-
-        if (!allCategories || allCategories.length === 0) {
-            container.innerHTML = '<div class="empty">📂 Категории не найдены</div>';
-            return;
-        }
-
-        const html = allCategories.map(cat => {
-            const name = escapeHtml(cat.name);
-            const parentName = cat.parent_name ? escapeHtml(cat.parent_name) : '';
-            const description = cat.description ? escapeHtml(cat.description) : '';
-
-            return `
-            <div class="category-card">
-                <div class="category-header">
-                    <div class="category-name">
-                        ${name}
-                        ${parentName ? `<div style="font-size:11px;opacity:0.6;margin-top:2px;">↳ ${parentName}</div>` : ''}
-                    </div>
-                    <div class="category-count">${cat.products_count || 0}</div>
-                </div>
-                ${description ? `
-                    <div class="category-description">${description}</div>
-                ` : ''}
-                <div class="category-actions">
-                    <button class="category-btn edit" onclick="filterByCategory(${cat.id}); switchTab('products')">
-                        👁️ Товары
-                    </button>
-                    <button class="category-btn edit" onclick="showEditCategoryModal(${cat.id})">
-                        ✏️ Редактировать
-                    </button>
-                    ${(cat.products_count || 0) === 0 ? `
-                        <button class="category-btn delete" onclick="deleteCategory(${cat.id}, '${name.replace(/'/g, "\\'")}')">
-                            🗑️ Удалить
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `}).join('');
-
-        container.innerHTML = html;
-    }
-
-    // Заполнение селектов категорий
-    function populateCategorySelects() {
-        const mainCategories = allCategories.filter(c => !c.parent_id);
-
-        const parentSelect = document.getElementById('new-category-parent');
-        parentSelect.innerHTML = '<option value="">Нет (основная категория)</option>' +
-            mainCategories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`).join('');
-
-        const editParentSelect = document.getElementById('edit-category-parent');
-        editParentSelect.innerHTML = '<option value="">Нет (основная категория)</option>' +
-            mainCategories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`).join('');
-
-        const productCategorySelect = document.getElementById('new-product-category');
-        productCategorySelect.innerHTML = '<option value="">Без категории</option>' +
-            allCategories.map(cat => `
-                <option value="${cat.id}">
-                    ${cat.parent_name ? '  ↳ ' : ''}${escapeHtml(cat.name)}
-                </option>
-            `).join('');
-
-        const editSelect = document.getElementById('edit-product-category');
-        editSelect.innerHTML = '<option value="">Без категории</option>' +
-            allCategories.map(cat => `
-                <option value="${cat.id}">
-                    ${cat.parent_name ? '  ↳ ' : ''}${escapeHtml(cat.name)}
-                </option>
-            `).join('');
-    }
-
-    // Обновление видимости кнопок в зависимости от активного таба
-    function updateButtonsVisibility() {
-        const btnCreateCategory = document.getElementById('btn-create-category');
-        const btnEditStore = document.getElementById('btn-edit-store');
-
-        btnCreateCategory.style.display = 'none';
-        btnEditStore.style.display = 'none';
-
-        if (currentTab === 'categories') {
-            btnCreateCategory.style.display = 'block';
-        } else if (currentTab === 'stores') {
-            btnEditStore.style.display = 'block';
-        }
-    }
-
-    // Фильтр по категории
-    function filterByCategory(categoryId) {
-        currentCategoryFilter = categoryId;
-        loadProducts(categoryId);
-        renderCategoryFilters();
-        tg.HapticFeedback.impactOccurred('light');
-    }
-
-    // Поиск товаров
-    function searchProducts(query) {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            loadProducts(currentCategoryFilter, query || null);
-        }, 500);
-    }
-
-    // Показать модальное окно создания категории
-    function showCreateCategoryModal() {
-        document.getElementById('new-category-name').value = '';
-        document.getElementById('new-category-description').value = '';
-        document.getElementById('new-category-parent').value = '';
-        openModal('create-category-modal');
-        tg.HapticFeedback.impactOccurred('medium');
-    }
-
-    // Показать модальное окно редактирования категории
-    function showEditCategoryModal(categoryId) {
-        const category = allCategories.find(c => c.id === categoryId);
-        if (!category) return;
-
-        currentCategoryEdit = category;
-        
-        document.getElementById('edit-category-name').value = category.name;
-        document.getElementById('edit-category-description').value = category.description || '';
-        document.getElementById('edit-category-parent').value = category.parent_id || '';
-        
-        openModal('edit-category-modal');
-        tg.HapticFeedback.impactOccurred('medium');
-    }
-
-    // Создать категорию
-    async function createCategory() {
-        const name = document.getElementById('new-category-name').value.trim();
-
-        if (!name) {
-            tg.showAlert('Введите название категории');
-            return;
-        }
-
-        try {
-            const description = document.getElementById('new-category-description').value.trim() || null;
-            const parentId = document.getElementById('new-category-parent').value || null;
-
-            await API.createCategory(name, description, parentId ? parseInt(parentId) : null);
-
-            closeModal('create-category-modal');
-            await loadCategories();
-            switchTab('categories');
-
-            tg.showPopup({
-                title: 'Успех',
-                message: `Категория "${name}" создана`,
-                buttons: [{type: 'ok'}]
-            });
-
-            tg.HapticFeedback.notificationOccurred('success');
-        } catch (error) {
-            console.error('Ошибка создания категории:', error);
-            tg.showAlert('Ошибка создания категории: ' + error.message);
-        }
-    }
-
-    // Обновить категорию
-    async function updateCategory() {
-        if (!currentCategoryEdit) return;
-
-        const name = document.getElementById('edit-category-name').value.trim();
-
-        if (!name) {
-            tg.showAlert('Введите название категории');
-            return;
-        }
-
-        try {
-            const description = document.getElementById('edit-category-description').value.trim() || null;
-            const parentId = document.getElementById('edit-category-parent').value || null;
-
-            await API.updateCategory(currentCategoryEdit.id, {
-                name: name,
-                description: description,
-                parent_id: parentId ? parseInt(parentId) : null
-            });
-
-            closeModal('edit-category-modal');
-            await loadCategories();
-
-            tg.showAlert(`✅ Категория "${name}" обновлена`);
-            tg.HapticFeedback.notificationOccurred('success');
-        } catch (error) {
-            console.error('Ошибка обновления категории:', error);
-            tg.showAlert('Ошибка обновления: ' + error.message);
-        }
-    }
-
-    // Создать товар
-    async function createProduct() {
-        const name = document.getElementById('new-product-name').value.trim();
-
-        if (!name) {
-            tg.showAlert('Введите название товара');
-            return;
-        }
-
-        try {
-            const brand = document.getElementById('new-product-brand').value.trim() || null;
-            const categoryId = document.getElementById('new-product-category').value || null;
-            const unit = document.getElementById('new-product-unit').value;
-            const barcode = document.getElementById('new-product-barcode').value.trim() || null;
-
-            const productData = {
-                name: name,
-                category_id: categoryId ? parseInt(categoryId) : null,
-                brand: brand,
-                unit: unit,
-                barcode: barcode
-            };
-
-            await API.createProduct(productData);
-
-            closeModal('create-product-modal');
-            await loadProducts();
-            switchTab('products');
-
-            tg.showAlert(`✅ Товар "${name}" создан`);
-            tg.HapticFeedback.notificationOccurred('success');
-        } catch (error) {
-            console.error('❌ Ошибка создания товара:', error);
-            tg.showAlert('Ошибка создания товара: ' + error.message);
-        }
-    }
-
-    // Удалить категорию
-    async function deleteCategory(categoryId, categoryName) {
-        tg.showConfirm(
-            `Удалить категорию "${categoryName}"?`,
-            async (confirmed) => {
-                if (confirmed) {
-                    try {
-                        await API.deleteCategory(categoryId);
-                        await loadCategories();
-                        tg.HapticFeedback.notificationOccurred('success');
-                    } catch (error) {
-                        console.error('Ошибка удаления категории:', error);
-                        tg.showAlert('Ошибка удаления: ' + error.message);
-                    }
-                }
-            }
-        );
-    }
-
-    // Показать модальное окно редактирования товара
-    function showEditProductModal(productId, productName, categoryId) {
-        // Находим полные данные товара
-        const product = allProducts.find(p => p.id === productId);
-
-        if (!product) {
-            tg.showAlert('Товар не найден');
-            return;
-        }
-
-        currentProductEdit = product;
-
-        // Заполняем все поля формы
-        document.getElementById('edit-product-name').value = product.name || '';
-        document.getElementById('edit-product-brand').value = product.brand || '';
-        document.getElementById('edit-product-category').value = product.category_id || '';
-        document.getElementById('edit-product-unit').value = product.unit || 'unidad';
-        document.getElementById('edit-product-barcode').value = product.barcode || '';
-
-        openModal('edit-product-modal');
-        tg.HapticFeedback.impactOccurred('light');
-    }
-
-    // Обновить товар
-    async function updateProduct() {
-        if (!currentProductEdit) {
-            tg.showAlert('Ошибка: товар не выбран');
-            return;
-        }
-
-        const name = document.getElementById('edit-product-name').value.trim();
-
-        if (!name) {
-            tg.showAlert('Введите название товара');
-            return;
-        }
-
-        try {
-            const productData = {
-                name: name,
-                brand: document.getElementById('edit-product-brand').value.trim() || null,
-                category_id: document.getElementById('edit-product-category').value ?
-                    parseInt(document.getElementById('edit-product-category').value) : null,
-                unit: document.getElementById('edit-product-unit').value,
-                barcode: document.getElementById('edit-product-barcode').value.trim() || null
-            };
-
-            await API.updateProduct(currentProductEdit.id, productData);
-
-            closeModal('edit-product-modal');
-            await loadProducts(currentCategoryFilter);
-
-            tg.showAlert(`✅ Товар "${name}" обновлён`);
-            tg.HapticFeedback.notificationOccurred('success');
-        } catch (error) {
-            console.error('Ошибка обновления товара:', error);
-            tg.showAlert('Ошибка обновления: ' + error.message);
-        }
-    }
-
-    // Переключение табов
-    function switchTab(tab) {
-        const tabs = document.querySelectorAll('.tab');
-        const clickedTab = event.target;
-
-        tabs.forEach(t => t.classList.remove('active'));
-        clickedTab.classList.add('active');
-
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.getElementById(`tab-${tab}`).classList.add('active');
-
-        currentTab = tab;
-        updateButtonsVisibility();
-
-        tg.HapticFeedback.impactOccurred('light');
-    }
-
-    // Вспомогательные функции
-    function formatDate(dateStr) {
-        if (!dateStr) return '';
-
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return dateStr;
-
-        const now = new Date();
-        const diffTime = now - date;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 0) return 'Сегодня';
-        if (diffDays === 1) return 'Вчера';
-        if (diffDays < 7) return `${diffDays} дн. назад`;
-
-        return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function openModal(id) {
-        document.getElementById(id).classList.add('active');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('active');
-    }
-
-    function showLoading(id) {
-        const container = document.getElementById(id);
-        if (container) {
-            container.innerHTML = '<div class="loading">⏳ Загрузка...</div>';
-        }
-    }
-
-    function showError(id, msg) {
-        const container = document.getElementById(id);
-        if (container) {
-            container.innerHTML = `<div class="error">❌ ${escapeHtml(msg)}</div>`;
-        }
-    }
-
-    // Запуск приложения
-    init();
+// Запуск приложения
+init();
 </script>
 </body>
 </html>
