@@ -4,6 +4,16 @@
     box-sizing: border-box;
 }
 
+/* Скрываем body до применения переводов */
+body:not(.i18n-ready) {
+    opacity: 0;
+    transition: opacity 0.15s ease-in;
+}
+
+body.i18n-ready {
+    opacity: 1;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
     background: var(--tg-theme-bg-color, #fff);
