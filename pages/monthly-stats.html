@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-i18n="monthly.title">Статистика за месяц</title>
+    <title data-i18n="monthlyStats.title">Статистика за месяц</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/monthly-stats.css">
 </head>
 <body>
 <div class="header">
-    <h1>📊 <span data-i18n="monthly.title">Статистика за месяц</span></h1>
-    <p data-i18n="monthly.detailedAnalysis">Детальный анализ расходов</p>
+    <h1>📊 <span data-i18n="monthlyStats.title">Статистика за месяц</span></h1>
+    <p data-i18n="monthlyStats.detailedAnalysis">Детальный анализ расходов</p>
 </div>
 
 <div class="period-selector">
@@ -22,52 +22,52 @@
 <div class="summary-grid">
     <div class="summary-card">
         <div class="summary-value" id="total-spent">-</div>
-        <div class="summary-label" data-i18n="monthly.totalSpent">Всего потрачено</div>
+        <div class="summary-label" data-i18n="monthlyStats.totalSpent">Всего потрачено</div>
     </div>
     <div class="summary-card">
         <div class="summary-value" id="avg-purchase">-</div>
-        <div class="summary-label" data-i18n="monthly.avgCheck">Средний чек</div>
+        <div class="summary-label" data-i18n="monthlyStats.avgCheck">Средний чек</div>
     </div>
     <div class="summary-card">
         <div class="summary-value" id="total-purchases">-</div>
-        <div class="summary-label" data-i18n="monthly.purchases">Покупок</div>
+        <div class="summary-label" data-i18n="monthlyStats.purchases">Покупок</div>
     </div>
     <div class="summary-card">
         <div class="summary-value" id="unique-stores">-</div>
-        <div class="summary-label" data-i18n="monthly.recipients">Получателей</div>
+        <div class="summary-label" data-i18n="monthlyStats.recipients">Получателей</div>
     </div>
     <div class="summary-card">
         <div class="summary-value" id="total-items">-</div>
-        <div class="summary-label" data-i18n="monthly.items">Товаров</div>
+        <div class="summary-label" data-i18n="monthlyStats.items">Товаров</div>
     </div>
     <div class="summary-card">
         <div class="summary-value" id="unique-products">-</div>
-        <div class="summary-label" data-i18n="monthly.uniqueProducts">Уникальных товаров</div>
+        <div class="summary-label" data-i18n="monthlyStats.uniqueProducts">Уникальных товаров</div>
     </div>
 </div>
 
 <div class="section">
-    <div class="section-title">📈 <span data-i18n="monthly.expensesByDays">Расходы по дням</span></div>
+    <div class="section-title">📈 <span data-i18n="monthlyStats.expensesByDays">Расходы по дням</span></div>
     <div class="chart-container" id="daily-chart"></div>
 </div>
 
 <div class="section">
-    <div class="section-title">🏷️ <span data-i18n="monthly.topCategories">Топ категорий</span></div>
+    <div class="section-title">🏷️ <span data-i18n="monthlyStats.topCategories">Топ категорий</span></div>
     <div id="categories-list"></div>
 </div>
 
 <div class="section">
-    <div class="section-title">🏪 <span data-i18n="monthly.topStores">Топ магазинов</span></div>
+    <div class="section-title">🏪 <span data-i18n="monthlyStats.topStores">Топ магазинов</span></div>
     <div id="stores-list"></div>
 </div>
 
 <div class="section">
-    <div class="section-title">🛒 <span data-i18n="monthly.topPurchases">Крупнейшие покупки</span></div>
+    <div class="section-title">🛒 <span data-i18n="monthlyStats.topPurchases">Крупнейшие покупки</span></div>
     <div id="purchases-list"></div>
 </div>
 
 <div class="section">
-    <div class="section-title">📅 <span data-i18n="monthly.weekdayStats">Статистика по дням недели</span></div>
+    <div class="section-title">📅 <span data-i18n="monthlyStats.weekdayStats">Статистика по дням недели</span></div>
     <div id="weekday-stats"></div>
 </div>
 
