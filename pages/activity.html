@@ -3,40 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Активность</title>
+    <title data-i18n="activity.title">Активность</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 <div class="header">
-    <h1>🏃 Физическая активность</h1>
-    <p>Трекер тренировок и активности</p>
+    <h1>🏃 <span data-i18n="activity.title">Физическая активность</span></h1>
+    <p data-i18n="activity.subtitle">Трекер тренировок и активности</p>
 </div>
 
 <div class="stats">
     <div class="stat">
         <div class="value" id="steps-today">-</div>
-        <div class="label">Шаги сегодня</div>
+        <div class="label" data-i18n="activity.stepsToday">Шаги сегодня</div>
     </div>
     <div class="stat">
         <div class="value" id="workouts-week">-</div>
-        <div class="label">Тренировок неделя</div>
+        <div class="label" data-i18n="activity.workoutsWeek">Тренировок неделя</div>
     </div>
     <div class="stat">
         <div class="value" id="calories-today">-</div>
-        <div class="label">Калорий сегодня</div>
+        <div class="label" data-i18n="activity.caloriesToday">Калорий сегодня</div>
     </div>
 </div>
 
-<div class="section-title">📊 Тренировки</div>
+<div class="section-title">📊 <span data-i18n="activity.workouts">Тренировки</span></div>
 <div id="workouts-list"></div>
 
 <div class="empty" style="margin-top: 100px;">
     <div style="font-size: 64px; margin-bottom: 20px;">🏗️</div>
-    <h3>Модуль в разработке</h3>
-    <p>Скоро здесь будет полноценный трекер активности</p>
+    <h3 data-i18n="activity.inDevelopment">Модуль в разработке</h3>
+    <p data-i18n="activity.comingSoon">Скоро здесь будет полноценный трекер активности</p>
 </div>
 
+<!-- NEW: Модульная система i18n -->
+<script src="../js/i18n/core.js"></script>
+<script src="../js/i18n/common.js"></script>
+<script src="../js/i18n/activity.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
+<!-- END: i18n -->
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
 <script src="../js/api.js"></script>
