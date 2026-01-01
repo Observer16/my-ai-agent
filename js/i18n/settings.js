@@ -1,0 +1,55 @@
+// js/i18n/settings.js - Переводы настроек
+
+registerTranslations('settings', {
+    ru: {
+        title: 'Настройки',
+        language: 'Язык интерфейса',
+        languageDescription: 'Язык интерфейса приложения',
+        currency: 'Валюта',
+        yourCurrency: 'Ваша валюта',
+        currencyDescription: 'Все суммы будут отображаться в выбранной валюте',
+        timezone: 'Часовой пояс',
+        save: 'Сохранить',
+        saved: 'Настройки сохранены',
+        savedReload: 'Настройки сохранены. Страница будет обновлена.',
+        profile: 'Профиль',
+        name: 'Имя',
+        telegramId: 'Telegram ID'
+    },
+    en: {
+        title: 'Settings',
+        language: 'Interface Language',
+        languageDescription: 'Application interface language',
+        currency: 'Currency',
+        yourCurrency: 'Your currency',
+        currencyDescription: 'All amounts will be displayed in selected currency',
+        timezone: 'Timezone',
+        save: 'Save',
+        saved: 'Settings saved',
+        savedReload: 'Settings saved. Page will be reloaded.',
+        profile: 'Profile',
+        name: 'Name',
+        telegramId: 'Telegram ID'
+    }
+});
+
+registerTranslations('initialSetup', {
+    ru: {
+        welcome: 'Добро пожаловать!',
+        subtitle: 'Настройте приложение под себя',
+        selectLanguage: 'Выберите язык',
+        selectCurrency: 'Выберите валюту',
+        selectTimezone: 'Выберите часовой пояс',
+        continue: 'Продолжить'
+    },
+    en: {
+        welcome: 'Welcome!',
+        subtitle: 'Customize the app for yourself',
+        selectLanguage: 'Select language',
+        selectCurrency: 'Select currency',
+        selectTimezone: 'Select timezone',
+        continue: 'Continue'
+    }
+});
+
+console.log('✅ i18n/settings.js загружен');
