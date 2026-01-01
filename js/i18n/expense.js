@@ -32,7 +32,8 @@ registerTranslations('expense', {
         tryAgain: 'Ещё раз',
         use: 'Использовать',
         orEnterManually: 'Или введите вручную...',
-        initializing: 'Инициализация...'
+        initializing: 'Инициализация...',
+        saveExpense: 'Сохранить расход'
     },
     en: {
         title: 'Add Expense',
@@ -65,7 +66,8 @@ registerTranslations('expense', {
         tryAgain: 'Try again',
         use: 'Use',
         orEnterManually: 'Or enter manually...',
-        initializing: 'Initializing...'
+        initializing: 'Initializing...',
+        saveExpense: 'Save Expense'
     }
 });
 
