@@ -67,6 +67,13 @@ function applyDataI18n() {
 }
 
 /**
+ * Показать страницу после применения переводов
+ */
+function showPage() {
+    document.body.classList.add('i18n-ready');
+}
+
+/**
  * Инициализация i18n для страницы
  */
 async function initPageI18n() {
@@ -78,16 +85,19 @@ async function initPageI18n() {
     // Применяем переводы
     applyDataI18n();
     
+    // Показываем страницу
+    showPage();
+    
     console.log('✅ i18n инициализирован, текущий язык:', getCurrentLanguage());
 }
 
 // Автоматическая инициализация при загрузке страницы
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initPageI18n, 100);
+        setTimeout(initPageI18n, 0);
     });
 } else {
-    setTimeout(initPageI18n, 100);
+    setTimeout(initPageI18n, 0);
 }
 
 console.log('✅ i18n-page-loader.js загружен');
