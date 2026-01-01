@@ -138,7 +138,10 @@ const translations = {
             savedReload: 'Настройки сохранены. Страница будет обновлена.',
             profile: 'Профиль',
             name: 'Имя',
-            telegramId: 'Telegram ID'
+            telegramId: 'Telegram ID',
+            languageDescription: 'Язык интерфейса приложения',
+            yourCurrency: 'Ваша валюта',
+            currencyDescription: 'Все суммы будут отображаться в выбранной валюте'
         },
         
         // Первичная настройка
@@ -385,6 +388,9 @@ const translations = {
             timezone: 'Timezone',
             save: 'Save',
             saved: 'Settings saved',
+            languageDescription: 'Application interface language',
+            yourCurrency: 'Your currency',
+            currencyDescription: 'All amounts will be displayed in selected currency',
             savedReload: 'Settings saved. Page will be reloaded.',
             profile: 'Profile',
             name: 'Name',
