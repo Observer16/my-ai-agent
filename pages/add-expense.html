@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Добавить расход</title>
+    <title data-i18n="expense.title">Добавить расход</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <!-- Quagga.js - лучшая библиотека для штрих-кодов (не QR) -->
@@ -14,33 +14,34 @@
 </head>
 <body>
 <div class="header">
-    <h1>Добавить расход</h1>
-    <p>Ручное внесение покупки</p>
+    <h1 data-i18n="expense.title">Добавить расход</h1>
+    <p data-i18n="expense.subtitle">Ручное внесение покупки</p>
 </div>
 
 <div class="form">
     <div class="form-group">
-        <label class="form-label">Получатель *</label>
+        <label class="form-label"><span data-i18n="expense.recipient">Получатель</span> *</label>
         <div class="custom-select-wrapper">
             <div class="custom-select" id="store-display" onclick="toggleStoreList()">
-                <span id="store-display-text">Выберите получателя...</span>
+                <span id="store-display-text" data-i18n="expense.selectRecipient">Выберите получателя...</span>
             </div>
             <span class="custom-select-arrow">▼</span>
             <div class="store-list" id="store-list"></div>
         </div>
         <input type="hidden" id="selected-store-id">
-        <a href="#" class="create-link" onclick="showCreateStore(event)">+ Создать нового получателя</a>
+        <a href="#" class="create-link" onclick="showCreateStore(event)">+ <span data-i18n="expense.createRecipient">Создать нового получателя</span></a>
     </div>
 
     <div class="form-group">
-        <label class="form-label">Товар *</label>
+        <label class="form-label"><span data-i18n="expense.product">Товар</span> *</label>
         <div class="search-tabs">
-            <div class="search-tab active" onclick="switchSearchMode('name', this)">По названию</div>
-            <div class="search-tab" onclick="switchSearchMode('barcode', this)">По штрих-коду</div>
+            <div class="search-tab active" onclick="switchSearchMode('name', this)" data-i18n="expense.searchByName">По названию</div>
+            <div class="search-tab" onclick="switchSearchMode('barcode', this)" data-i18n="expense.searchByBarcode">По штрих-коду</div>
         </div>
 
         <div id="search-by-name">
             <input type="text" class="form-input" id="product-search"
+                   data-i18n-target="placeholder" data-i18n="expense.startTyping"
                    placeholder="Начните вводить название..."
                    oninput="searchProducts(this.value)">
         </div>
@@ -48,10 +49,11 @@
         <div id="search-by-barcode" style="display: none;">
             <div class="barcode-input-wrapper">
                 <input type="text" class="form-input" id="barcode-search"
+                       data-i18n-target="placeholder" data-i18n="expense.enterBarcode"
                        placeholder="Введите штрих-код..."
                        oninput="searchByBarcode(this.value)"
                        inputmode="numeric">
-                <button class="scan-btn" onclick="openScanner()">Фото</button>
+                <button class="scan-btn" onclick="openScanner()" data-i18n="expense.photo">Фото</button>
             </div>
         </div>
 
@@ -63,7 +65,7 @@
             <div class="selected-product-details" id="selected-product-display-details">-</div>
         </div>
 
-        <a href="#" class="create-link" onclick="showCreateProduct(event)">+ Создать новый товар</a>
+        <a href="#" class="create-link" onclick="showCreateProduct(event)">+ <span data-i18n="expense.createProduct">Создать новый товар</span></a>
     </div>
 
     <input type="hidden" id="selected-product-id">
@@ -72,65 +74,67 @@
 
     <div class="barcode-field" id="add-barcode-field">
         <div class="form-group">
-            <label class="form-label">Добавить штрих-код к товару</label>
+            <label class="form-label" data-i18n="expense.addBarcodeToProduct">Добавить штрих-код к товару</label>
             <div class="barcode-input-wrapper">
-                <input type="text" class="form-input" id="new-barcode" placeholder="Введите штрих-код..."
+                <input type="text" class="form-input" id="new-barcode" 
+                       data-i18n-target="placeholder" data-i18n="expense.enterBarcode"
+                       placeholder="Введите штрих-код..."
                        inputmode="numeric">
-                <button class="scan-btn" onclick="openScannerForNewBarcode()">Фото</button>
+                <button class="scan-btn" onclick="openScannerForNewBarcode()" data-i18n="expense.photo">Фото</button>
             </div>
         </div>
     </div>
 
     <div class="toggle-container">
-        <span class="toggle-label">Весовой товар</span>
+        <span class="toggle-label" data-i18n="expense.weighted">Весовой товар</span>
         <div class="toggle-switch" id="weight-toggle" onclick="toggleWeightMode()"></div>
     </div>
 
     <div class="form-group" id="unit-selector-group" style="display: none;">
-        <label class="form-label">Единица измерения</label>
+        <label class="form-label" data-i18n="expense.unit">Единица измерения</label>
         <div class="unit-selector">
-            <div class="unit-btn active" onclick="selectUnit('kg', this)">кг</div>
-            <div class="unit-btn" onclick="selectUnit('g', this)">грамм</div>
-            <div class="unit-btn" onclick="selectUnit('l', this)">литр</div>
-            <div class="unit-btn" onclick="selectUnit('ml', this)">мл</div>
+            <div class="unit-btn active" onclick="selectUnit('kg', this)" data-i18n="expense.kg">кг</div>
+            <div class="unit-btn" onclick="selectUnit('g', this)" data-i18n="expense.g">грамм</div>
+            <div class="unit-btn" onclick="selectUnit('l', this)" data-i18n="expense.l">литр</div>
+            <div class="unit-btn" onclick="selectUnit('ml', this)" data-i18n="expense.ml">мл</div>
         </div>
     </div>
 
     <div class="form-row">
         <div class="form-group">
-            <label class="form-label" id="quantity-label">Количество *</label>
+            <label class="form-label" id="quantity-label"><span data-i18n="expense.quantity">Количество</span> *</label>
             <input type="number" class="form-input" id="quantity" value="1" min="0.001" step="1"
                    onchange="updateSummary()" oninput="updateSummary()">
         </div>
         <div class="form-group" id="unit-price-group">
-            <label class="form-label" id="price-label">Цена за ед. *</label>
+            <label class="form-label" id="price-label"><span data-i18n="expense.pricePerUnit">Цена за ед.</span> *</label>
             <input type="number" class="form-input" id="unit-price" min="0" step="1" placeholder="0"
                    onchange="updatePriceFromUnit()" oninput="updatePriceFromUnit()">
         </div>
         <div class="form-group" id="total-price-group" style="display: none;">
-            <label class="form-label">Общая сумма *</label>
+            <label class="form-label"><span data-i18n="expense.totalAmount">Общая сумма</span> *</label>
             <input type="number" class="form-input" id="total-price" min="0" step="1" placeholder="0"
                    onchange="updatePriceFromTotal()" oninput="updatePriceFromTotal()">
         </div>
     </div>
 
     <div class="form-group">
-        <label class="form-label">Дата покупки</label>
+        <label class="form-label" data-i18n="expense.purchaseDate">Дата покупки</label>
         <input type="date" class="form-input" id="purchase-date">
     </div>
 
     <div class="summary">
-        <div class="summary-row"><span>Товар:</span><span id="summary-product">-</span></div>
-        <div class="summary-row"><span>Получатель:</span><span id="summary-store">-</span></div>
-        <div class="summary-row"><span>Количество:</span><span id="summary-quantity">-</span></div>
-        <div class="summary-row total"><span>Итого:</span><span id="summary-total">-</span></div>
+        <div class="summary-row"><span data-i18n="expense.product">Товар:</span><span id="summary-product">-</span></div>
+        <div class="summary-row"><span data-i18n="expense.recipient">Получатель:</span><span id="summary-store">-</span></div>
+        <div class="summary-row"><span data-i18n="expense.quantity">Количество:</span><span id="summary-quantity">-</span></div>
+        <div class="summary-row total"><span data-i18n="expense.total">Итого:</span><span id="summary-total">-</span></div>
     </div>
 </div>
 
 <!-- СКАНЕР -->
 <div class="scanner-modal" id="scanner-modal">
     <div class="scanner-header">
-        <h3>Сканер штрих-кода</h3>
+        <h3 data-i18n="expense.scanner">Сканер штрих-кода</h3>
         <button class="scanner-close" onclick="closeScanner()">✕</button>
     </div>
 
@@ -141,34 +145,43 @@
         <!-- Визуальная подсказка -->
         <div class="scanner-guide">
             <div class="scanner-frame-guide"></div>
-            <div class="scanner-hint-text">Наведите на штрих-код</div>
+            <div class="scanner-hint-text" data-i18n="expense.aimAtBarcode">Наведите на штрих-код</div>
         </div>
     </div>
 
     <div class="scanner-bottom">
         <div class="scanner-result" id="scanner-result">
-            <div>Найден код:</div>
+            <div data-i18n="expense.codeFound">Найден код:</div>
             <div class="scanner-result-code" id="scanned-code">-</div>
         </div>
 
         <div class="scanner-buttons" id="scanner-buttons-found" style="display: none;">
-            <button class="scanner-btn secondary" onclick="rescanBarcode()">Ещё раз</button>
-            <button class="scanner-btn primary" onclick="useScannedBarcode()">Использовать</button>
+            <button class="scanner-btn secondary" onclick="rescanBarcode()" data-i18n="expense.tryAgain">Ещё раз</button>
+            <button class="scanner-btn primary" onclick="useScannedBarcode()" data-i18n="expense.use">Использовать</button>
         </div>
 
         <div class="scanner-buttons" id="scanner-buttons-default">
-            <button class="scanner-btn secondary" onclick="closeScanner()">Отмена</button>
+            <button class="scanner-btn secondary" onclick="closeScanner()" data-i18n="common.cancel">Отмена</button>
         </div>
 
         <div class="scanner-manual">
-            <input type="text" id="manual-barcode" placeholder="Или введите вручную..." inputmode="numeric">
+            <input type="text" id="manual-barcode" 
+                   data-i18n-target="placeholder" data-i18n="expense.orEnterManually"
+                   placeholder="Или введите вручную..." 
+                   inputmode="numeric">
             <button onclick="useManualBarcode()">OK</button>
         </div>
 
-        <div class="scanner-status" id="scanner-status">Инициализация...</div>
+        <div class="scanner-status" id="scanner-status" data-i18n="expense.initializing">Инициализация...</div>
     </div>
 </div>
 
+<!-- NEW: Модульная система i18n -->
+<script src="../js/i18n/core.js"></script>
+<script src="../js/i18n/common.js"></script>
+<script src="../js/i18n/expense.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
+<!-- END: i18n -->
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
 <script src="../js/currency.js"></script>
