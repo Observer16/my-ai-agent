@@ -4,8 +4,8 @@
     box-sizing: border-box;
 }
 
-/* Скрываем body до применения переводов */
-body:not(.i18n-ready) {
+/* Скрываем body до применения переводов ТОЛЬКО на страницах с data-i18n */
+body:has([data-i18n]):not(.i18n-ready) {
     opacity: 0;
     transition: opacity 0.15s ease-in;
 }
