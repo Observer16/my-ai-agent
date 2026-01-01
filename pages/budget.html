@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Покупки</title>
+    <title data-i18n="budget.title">Покупки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/budget.css">
 </head>
 <body>
 <div class="header">
-    <h1>💰 Покупки в супермаркетах</h1>
-    <p>Анализ цен и экономия</p>
+    <h1>💰 <span data-i18n="budget.title">Покупки в супермаркетах</span></h1>
+    <p data-i18n="budget.subtitle">Анализ цен и экономия</p>
 </div>
 
 <!-- Баннер месячных расходов -->
 <div class="monthly-banner" id="monthly-banner" onclick="openMonthlyStats()">
     <div class="monthly-banner-header">
-        <span>💰 Расходы за текущий месяц</span>
+        <span>💰 <span data-i18n="budget.monthlyExpenses">Расходы за текущий месяц</span></span>
         <span class="monthly-banner-arrow">→</span>
     </div>
     <div class="monthly-banner-amount" id="monthly-banner-amount">-</div>
     <div class="monthly-banner-details">
         <span>📅 <span id="monthly-banner-period">-</span></span>
-        <span>🧾 <span id="monthly-banner-purchases">-</span> покупок</span>
-        <span>🏪 <span id="monthly-banner-stores">-</span> магазинов</span>
+        <span>🧾 <span id="monthly-banner-purchases">-</span> <span data-i18n="budget.purchases">покупок</span></span>
+        <span>🏪 <span id="monthly-banner-stores">-</span> <span data-i18n="budget.stores">магазинов</span></span>
     </div>
 </div>
 
 <div class="tabs">
-    <div class="tab active" onclick="switchTab('overview')">📊 Обзор</div>
-    <div class="tab" onclick="switchTab('trends')">📈 Тренды</div>
-    <div class="tab" onclick="switchTab('compare')">🏪 Сравнение</div>
+    <div class="tab active" onclick="switchTab('overview')">📊 <span data-i18n="budget.tabOverview">Обзор</span></div>
+    <div class="tab" onclick="switchTab('trends')">📈 <span data-i18n="budget.tabTrends">Тренды</span></div>
+    <div class="tab" onclick="switchTab('compare')">🏪 <span data-i18n="budget.tabCompare">Сравнение</span></div>
 </div>
 
 <!-- Обзор -->
@@ -38,36 +38,36 @@
     <div class="stats">
         <div class="stat">
             <div class="value" id="total">-</div>
-            <div class="label">Расходы</div>
+            <div class="label" data-i18n="budget.expenses">Расходы</div>
         </div>
         <div class="stat">
             <div class="value" id="purchases">-</div>
-            <div class="label">Покупок</div>
+            <div class="label" data-i18n="budget.purchasesCount">Покупок</div>
         </div>
         <div class="stat">
             <div class="value" id="products">-</div>
-            <div class="label">Товаров</div>
+            <div class="label" data-i18n="budget.productsCount">Товаров</div>
         </div>
         <div class="stat">
             <div class="value" id="stores">-</div>
-            <div class="label">Получателей</div>
+            <div class="label" data-i18n="budget.recipients">Получателей</div>
         </div>
     </div>
 
-    <div class="section-title">🧾 Последние чеки</div>
+    <div class="section-title">🧾 <span data-i18n="budget.recentReceipts">Последние чеки</span></div>
     <div id="recent-receipts"></div>
 </div>
 
 <!-- Тренды -->
 <div id="tab-trends" class="content">
     <div class="filters">
-        <button class="filter-btn active" onclick="filterTrends(7)">7 дней</button>
-        <button class="filter-btn" onclick="filterTrends(30)">30 дней</button>
-        <button class="filter-btn" onclick="filterTrends(90)">90 дней</button>
+        <button class="filter-btn active" onclick="filterTrends(7)" data-i18n="budget.filter7days">7 дней</button>
+        <button class="filter-btn" onclick="filterTrends(30)" data-i18n="budget.filter30days">30 дней</button>
+        <button class="filter-btn" onclick="filterTrends(90)" data-i18n="budget.filter90days">90 дней</button>
     </div>
 
     <div class="search">
-        <input type="text" id="trends-search" placeholder="🔍 Поиск товара..." onkeyup="searchTrends(this.value)">
+        <input type="text" id="trends-search" data-i18n-target="placeholder" data-i18n="budget.searchProduct" placeholder="🔍 Поиск товара..." onkeyup="searchTrends(this.value)">
     </div>
 
     <div id="trends-list"></div>
@@ -76,12 +76,18 @@
 <!-- Сравнение -->
 <div id="tab-compare" class="content">
     <div class="search">
-        <input type="text" id="compare-search" placeholder="🔍 Поиск товара..." onkeyup="searchCompare(this.value)">
+        <input type="text" id="compare-search" data-i18n-target="placeholder" data-i18n="budget.searchProduct" placeholder="🔍 Поиск товара..." onkeyup="searchCompare(this.value)">
     </div>
 
     <div id="compare-list"></div>
 </div>
 
+<!-- NEW: Модульная система i18n -->
+<script src="../js/i18n/core.js"></script>
+<script src="../js/i18n/common.js"></script>
+<script src="../js/i18n/budget.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
+<!-- END: i18n -->
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
 <script src="../js/currency.js"></script>
@@ -98,7 +104,6 @@
     let compareData = [];
 
     async function init() {
-        // 🆕 Инициализация валюты
         await initCurrency();
 
         try {
@@ -110,57 +115,40 @@
         }
     }
 
-    // Загрузка баннера месячных расходов
     async function loadMonthlyBanner() {
         try {
             const stats = await API.getMonthlyStatistics();
-
-            // Форматируем сумму
             document.getElementById('monthly-banner-amount').textContent = formatMoney(stats.summary.total_spent);
-
-            // Период
+            
             const now = new Date();
-            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                               'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-            document.getElementById('monthly-banner-period').textContent = monthNames[now.getMonth()];
-
-            // Количество покупок
+            const monthName = getMonthName(now.getMonth());
+            document.getElementById('monthly-banner-period').textContent = monthName;
             document.getElementById('monthly-banner-purchases').textContent = stats.summary.total_purchases;
-
-            // Количество магазинов
             document.getElementById('monthly-banner-stores').textContent = stats.summary.unique_stores;
-
         } catch (error) {
             console.error('Ошибка загрузки месячной статистики:', error);
-            // Скрываем баннер при ошибке
             document.getElementById('monthly-banner').style.display = 'none';
         }
     }
 
-    // Открыть статистику за месяц
     function openMonthlyStats() {
         tg.HapticFeedback.impactOccurred('medium');
         window.location.href = 'monthly-stats.html';
     }
 
-    // Загрузка обзора
     async function loadOverview() {
         try {
-            // Загружаем статистику
             const stats = await API.getStatistics();
             document.getElementById('total').textContent = formatMoney(stats.total_spent);
             document.getElementById('purchases').textContent = stats.total_purchases;
             document.getElementById('products').textContent = stats.unique_products;
             document.getElementById('stores').textContent = stats.unique_stores;
-
-            // Загружаем последние чеки
             await loadRecentReceipts();
         } catch (error) {
             showError('recent-receipts', error.message);
         }
     }
 
-    // Загрузка последних чеков
     async function loadRecentReceipts() {
         showLoading('recent-receipts');
         try {
@@ -171,12 +159,11 @@
         }
     }
 
-    // Рендеринг последних чеков
     function renderReceipts(receipts) {
         const container = document.getElementById('recent-receipts');
 
         if (!receipts?.length) {
-            container.innerHTML = '<div class="empty">🧾 Нет данных о покупках</div>';
+            container.innerHTML = `<div class="empty">🧾 ${t('budget.noReceipts')}</div>`;
             return;
         }
 
@@ -189,14 +176,14 @@
                     <div class="receipt-header">
                         <div>
                             <div class="receipt-store">🏪 ${r.store_name}</div>
-                            <div class="receipt-store-type">${r.store_type || 'Магазин'}</div>
+                            <div class="receipt-store-type">${r.store_type || t('budget.storeType')}</div>
                         </div>
                         <div class="receipt-amount">${formatMoney(r.total_amount)}</div>
                     </div>
                     <div class="receipt-info">
                         <span>📅 ${date}</span>
                         <span>🕐 ${time}</span>
-                        <span>📦 ${r.items_count} поз.</span>
+                        <span>📦 ${r.items_count} ${t('budget.positions')}</span>
                         ${r.payment_method ? `<span>💳 ${r.payment_method}</span>` : ''}
                     </div>
                 </div>
@@ -206,24 +193,19 @@
         container.innerHTML = html;
     }
 
-    // Форматирование даты чека
     function formatReceiptDate(dateStr) {
         if (!dateStr) return '-';
 
-        // Парсим UTC дату
         const date = new Date(dateStr);
         const now = new Date();
-
-        // Вычисляем разницу в днях
         const diffTime = now - date;
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays === 0) return 'Сегодня';
-        if (diffDays === 1) return 'Вчера';
-        if (diffDays < 7) return `${diffDays} дн. назад`;
+        if (diffDays === 0) return t('budget.today');
+        if (diffDays === 1) return t('budget.yesterday');
+        if (diffDays < 7) return `${diffDays} ${t('budget.daysAgo')}`;
 
-        // Форматируем в локальной таймзоне
-        return date.toLocaleDateString('ru-RU', {
+        return date.toLocaleDateString(getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US', {
             day: 'numeric',
             month: 'short',
             year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
@@ -232,17 +214,13 @@
 
     function formatReceiptTime(dateStr) {
         if (!dateStr) return '-';
-
         const date = new Date(dateStr);
-
-        // Форматируем в локальной таймзоне
-        return date.toLocaleTimeString('ru-RU', {
+        return date.toLocaleTimeString(getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US', {
             hour: '2-digit',
             minute: '2-digit'
         });
     }
 
-    // Загрузка трендов
     async function loadTrends(days = 7, search = null) {
         showLoading('trends-list');
         try {
@@ -253,7 +231,6 @@
         }
     }
 
-    // Загрузка сравнения
     async function loadCompare(search = null) {
         showLoading('compare-list');
         try {
@@ -262,42 +239,40 @@
         } catch (error) {
             console.error('Ошибка загрузки сравнения:', error);
 
-            let errorMessage = 'Произошла ошибка при загрузке данных';
-
+            let errorMessage = t('budget.error');
             if (error.message.includes('403') || error.message.includes('Доступ запрещен')) {
-                errorMessage = '🔒 Недостаточно прав для просмотра сравнения';
+                errorMessage = '🔒 ' + t('budget.accessDenied');
             } else if (error.message.includes('401') || error.message.includes('авторизац')) {
-                errorMessage = '🔑 Требуется авторизация в Telegram';
+                errorMessage = '🔑 ' + t('budget.authRequired');
             } else if (error.message) {
-                errorMessage = `Ошибка: ${error.message}`;
+                errorMessage = `${t('common.error')}: ${error.message}`;
             }
 
             showError('compare-list', errorMessage);
         }
     }
 
-    // Рендеринг трендов
     function renderTrends(trends, containerId) {
         const container = document.getElementById(containerId);
 
         if (!trends?.length) {
-            container.innerHTML = '<div class="empty">📊 Нет данных</div>';
+            container.innerHTML = `<div class="empty">📊 ${t('budget.noTrendsData')}</div>`;
             return;
         }
 
-        const html = trends.map(t => `
-            <div class="card ${t.trend_direction}">
-                <div class="product-name">${t.product_name}</div>
-                <div class="store">🏪 ${t.store_name}</div>
+        const html = trends.map(t_item => `
+            <div class="card ${t_item.trend_direction}">
+                <div class="product-name">${t_item.product_name}</div>
+                <div class="store">🏪 ${t_item.store_name}</div>
                 <div class="prices">
-                    <span class="price-current">${t.current_price.toFixed(0)} ${getCurrencySymbol()}</span>
-                    ${t.previous_price ? `
-                        <span class="price-old">${t.previous_price.toFixed(0)} ${getCurrencySymbol()}</span>
-                        <span class="price-change ${t.trend_direction}">
-                            ${t.trend_direction === 'up' ? '📈' : '📉'}
-                            ${Math.abs(t.percent_change || 0).toFixed(1)}%
+                    <span class="price-current">${t_item.current_price.toFixed(0)} ${getCurrencySymbol()}</span>
+                    ${t_item.previous_price ? `
+                        <span class="price-old">${t_item.previous_price.toFixed(0)} ${getCurrencySymbol()}</span>
+                        <span class="price-change ${t_item.trend_direction}">
+                            ${t_item.trend_direction === 'up' ? '📈' : '📉'}
+                            ${Math.abs(t_item.percent_change || 0).toFixed(1)}%
                         </span>
-                    ` : '<span>🆕 Новый</span>'}
+                    ` : `<span>🆕 ${t('budget.newProduct')}</span>`}
                 </div>
             </div>
         `).join('');
@@ -305,30 +280,25 @@
         container.innerHTML = html;
     }
 
-    // Функция для точного форматирования цен
     function formatPrice(price) {
         if (!price && price !== 0) return `0 ${getCurrencySymbol()}`;
 
-        // Если price объект Decimal или число
         const num = typeof price === 'object' && price.toString ?
                     parseFloat(price.toString()) :
                     Number(price);
 
         if (isNaN(num)) return `0 ${getCurrencySymbol()}`;
 
-        // Для целых чисел
         if (Number.isInteger(num)) {
-            return num.toLocaleString('ru-RU') + ' ' + getCurrencySymbol();
+            return num.toLocaleString(getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US') + ' ' + getCurrencySymbol();
         }
 
-        // Для чисел с плавающей точкой - 2 знака
-        return num.toLocaleString('ru-RU', {
+        return num.toLocaleString(getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }) + ' ' + getCurrencySymbol();
     }
 
-    // Рендеринг сравнения
     function renderCompare(data) {
         const container = document.getElementById('compare-list');
 
@@ -337,11 +307,10 @@
                 <div class="empty">
                     <div style="font-size: 48px; margin-bottom: 10px;">🏪</div>
                     <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">
-                        Нет данных для сравнения
+                        ${t('budget.noCompareData')}
                     </div>
                     <div style="font-size: 13px; opacity: 0.7; line-height: 1.5;">
-                        Для сравнения нужны покупки одного товара<br>
-                        в разных магазинах
+                        ${t('budget.compareDescription')}
                     </div>
                 </div>
             `;
@@ -366,9 +335,8 @@
         container.innerHTML = html;
     }
 
-    // Переключение табов
     function switchTab(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t_el => t_el.classList.remove('active'));
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
 
         event.target.classList.add('active');
@@ -383,7 +351,6 @@
         tg.HapticFeedback.impactOccurred('light');
     }
 
-    // Фильтр трендов
     function filterTrends(days) {
         currentDays = days;
 
@@ -396,7 +363,6 @@
         tg.HapticFeedback.impactOccurred('light');
     }
 
-    // Поиск трендов
     let searchTrendsTimeout;
     function searchTrends(query) {
         clearTimeout(searchTrendsTimeout);
@@ -405,7 +371,6 @@
         }, 500);
     }
 
-    // Поиск сравнения
     let searchCompareTimeout;
     function searchCompare(query) {
         clearTimeout(searchCompareTimeout);
@@ -414,7 +379,6 @@
         }, 500);
     }
 
-    // Утилиты
     function formatMoney(amount) {
         if (!amount && amount !== 0) return `0 ${getCurrencySymbol()}`;
 
@@ -425,23 +389,18 @@
 
         const absAmount = Math.abs(numAmount);
 
-        // Для сумм >= 1 000 000 (миллион)
         if (absAmount >= 1000000) {
             const millions = (numAmount / 1000000).toFixed(1);
             return `${millions}M ${getCurrencySymbol()}`;
         }
-        // Для сумм >= 1 000 (тысяча)
         else if (absAmount >= 1000) {
             const thousands = (numAmount / 1000).toFixed(1);
             return `${thousands}K ${getCurrencySymbol()}`;
         }
-        // Для сумм < 1 000
         else {
-            // Проверяем, целое ли число
             if (Number.isInteger(numAmount)) {
-                return `${numAmount.toLocaleString('ru-RU')} ${getCurrencySymbol()}`;
+                return `${numAmount.toLocaleString(getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US')} ${getCurrencySymbol()}`;
             } else {
-                // Для дробных чисел показываем 2 знака
                 return `${numAmount.toFixed(2).replace('.', ',')} ${getCurrencySymbol()}`;
             }
         }
@@ -452,7 +411,7 @@
         container.innerHTML = `
             <div style="text-align:center; padding:40px;">
                 <div style="font-size:48px; animation: spin 1s linear infinite;">⏳</div>
-                <div style="margin-top:10px; opacity:0.7;">Загрузка...</div>
+                <div style="margin-top:10px; opacity:0.7;">${t('budget.loading')}</div>
             </div>
         `;
     }
@@ -467,11 +426,9 @@
         `;
     }
 
-    // Запуск
     init();
 
-    // Main Button
-    tg.MainButton.setText('🔄 Обновить');
+    tg.MainButton.setText('🔄 ' + t('budget.refresh'));
     tg.MainButton.show();
     tg.MainButton.onClick(() => {
         if (typeof API !== 'undefined' && API.clearCache) {
