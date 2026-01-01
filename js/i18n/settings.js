@@ -12,9 +12,13 @@ registerTranslations('settings', {
         save: 'Сохранить',
         saved: 'Настройки сохранены',
         savedReload: 'Настройки сохранены. Страница будет обновлена.',
+        saveChanges: 'Сохранить изменения',
         profile: 'Профиль',
         name: 'Имя',
-        telegramId: 'Telegram ID'
+        telegramId: 'Telegram ID',
+        user: 'Пользователь',
+        noFamily: 'Нет семьи',
+        members: 'участников'
     },
     en: {
         title: 'Settings',
@@ -27,9 +31,13 @@ registerTranslations('settings', {
         save: 'Save',
         saved: 'Settings saved',
         savedReload: 'Settings saved. Page will be reloaded.',
+        saveChanges: 'Save changes',
         profile: 'Profile',
         name: 'Name',
-        telegramId: 'Telegram ID'
+        telegramId: 'Telegram ID',
+        user: 'User',
+        noFamily: 'No family',
+        members: 'members'
     }
 });
 
