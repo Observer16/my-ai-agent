@@ -3,79 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Статистика за месяц</title>
+    <title data-i18n="monthly.title">Расходы за текущий месяц</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/monthly-stats.css">
 </head>
 <body>
 <div class="header">
-    <h1>📊 Статистика за месяц</h1>
-    <p>Детальный анализ расходов</p>
+    <h1>💰 <span data-i18n="monthly.title">Расходы за текущий месяц</span></h1>
 </div>
 
-<div class="period-selector">
-    <button class="period-nav-btn" onclick="previousMonth()">←</button>
-    <div class="period-display" id="period-display">-</div>
-    <button class="period-nav-btn" onclick="nextMonth()">→</button>
+<div class="stats-card">
+    <div class="stats-title" data-i18n="monthly.totalSpent">Всего потрачено</div>
+    <div class="stats-amount" id="total-amount">0 ₲</div>
+    <div class="stats-period" id="period">-</div>
 </div>
 
-<div class="summary-grid">
-    <div class="summary-card">
-        <div class="summary-value" id="total-spent">-</div>
-        <div class="summary-label">Всего потрачено</div>
+<div class="stats-summary">
+    <div class="summary-item">
+        <div class="summary-label" data-i18n="monthly.purchases">покупок</div>
+        <div class="summary-value" id="total-purchases">0</div>
     </div>
-    <div class="summary-card">
-        <div class="summary-value" id="avg-purchase">-</div>
-        <div class="summary-label">Средний чек</div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-value" id="total-purchases">-</div>
-        <div class="summary-label">Покупок</div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-value" id="unique-stores">-</div>
-        <div class="summary-label">Получателей</div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-value" id="total-items">-</div>
-        <div class="summary-label">Товаров</div>
-    </div>
-    <div class="summary-card">
-        <div class="summary-value" id="unique-products">-</div>
-        <div class="summary-label">Уникальных товаров</div>
+    <div class="summary-item">
+        <div class="summary-label" data-i18n="monthly.stores">магазинов</div>
+        <div class="summary-value" id="total-stores">0</div>
     </div>
 </div>
 
-<div class="section">
-    <div class="section-title">📈 Расходы по дням</div>
-    <div class="chart-container" id="daily-chart"></div>
-</div>
-
-<div class="section">
-    <div class="section-title">🏷️ Топ категорий</div>
+<div class="categories-section">
+    <h2 data-i18n="monthly.topCategories">Топ категорий</h2>
     <div id="categories-list"></div>
 </div>
 
-<div class="section">
-    <div class="section-title">🏪 Топ магазинов</div>
+<div class="stores-section">
+    <h2 data-i18n="monthly.topStores">Топ магазинов</h2>
     <div id="stores-list"></div>
-</div>
-
-<div class="section">
-    <div class="section-title">🛒 Крупнейшие покупки</div>
-    <div id="purchases-list"></div>
-</div>
-
-<div class="section">
-    <div class="section-title">📅 Статистика по дням недели</div>
-    <div id="weekday-stats"></div>
 </div>
 
 <script src="../js/config.js"></script>
 <script src="../js/cache.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
 <script src="../js/currency.js"></script>
 <script src="../js/api.js"></script>
-<script src="../js/api-extensions.js"></script>
 <script src="../js/monthly-stats.js"></script>
 </body>
 </html>
