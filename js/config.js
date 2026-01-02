@@ -7,7 +7,7 @@ const CONFIG = {
     API_URL: 'https://api.smartsaving.fun',
     
     // Версия приложения
-    VERSION: '4.1.7',
+    VERSION: '4.3.1',
     
     // Endpoints
     ENDPOINTS: {

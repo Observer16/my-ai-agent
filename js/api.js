@@ -1,6 +1,6 @@
 /**
  * API клиент для системы семейного бюджета
- * Версия: 4.2.0 - С кэшированием
+ * Версия: - С кэшированием
  */
 
 class APIClient {
@@ -876,7 +876,7 @@ if (typeof module !== 'undefined' && module.exports) {
 // Делаем API глобально доступным
 window.API = API;
 
-console.log('✅ API клиент инициализирован v4.2.0', {
+console.log('✅ API клиент инициализирован', {
     baseURL: API.baseURL,
     telegramUserId: API.telegramUserId,
     cacheEnabled: API.cache !== null
