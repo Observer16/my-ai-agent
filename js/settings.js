@@ -12,7 +12,7 @@ let currentSettings = null;
 let hasChanges = false;
 
 // Список валют с символами
-const CURRENCIES = [
+const AVAILABLE_CURRENCIES = [
     { code: 'PYG', symbol: '₲' },
     { code: 'USD', symbol: '$' },
     { code: 'EUR', symbol: '€' },
@@ -28,7 +28,7 @@ function populateCurrencySelect() {
     const select = document.getElementById('currency-select');
     if (!select) return;
     
-    select.innerHTML = CURRENCIES.map(curr => {
+    select.innerHTML = AVAILABLE_CURRENCIES.map(curr => {
         const name = t(`settings.currency.${curr.code}`);
         return `<option value="${curr.code}">${curr.symbol} ${name} (${curr.code})</option>`;
     }).join('');
