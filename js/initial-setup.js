@@ -19,11 +19,23 @@ async function checkInitialSetup() {
         // Проверяем настройки пользователя на сервере
         const settings = await API.getUserSettings();
         
-        // Если язык и валюта уже установлены, считаем настройку завершенной
-        if (settings.preferred_language && settings.preferred_currency) {
-            console.log('✅ Настройки пользователя уже сохранены на сервере');
+        // Проверяем флаг setup_completed от бэкенда (если есть)
+        if (settings.setup_completed === true) {
+            console.log('✅ Настройки пользователя подтверждены сервером');
             localStorage.setItem('initial_setup_completed', 'true');
             return false;
+        }
+        
+        // Дополнительная проверка: если есть хоть один расход, значит пользователь уже работает
+        try {
+            const expenses = await API.getExpenses({ limit: 1 });
+            if (expenses && expenses.length > 0) {
+                console.log('✅ Найдены расходы - пользователь уже работает');
+                localStorage.setItem('initial_setup_completed', 'true');
+                return false;
+            }
+        } catch (e) {
+            // Игнорируем ошибку, продолжаем проверку
         }
         
         // Нужна первичная настройка
@@ -32,6 +44,7 @@ async function checkInitialSetup() {
         
     } catch (error) {
         console.error('Ошибка проверки первичной настройки:', error);
+        // В случае ошибки НЕ показываем модалку, чтобы не блокировать приложение
         return false;
     }
 }
@@ -151,7 +164,8 @@ async function completeInitialSetup() {
         await API.initialSetup({
             preferred_language: selectedLanguage,
             preferred_currency: selectedCurrency,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+            setup_completed: true  // Добавляем флаг завершения настройки
         });
         
         // Устанавливаем язык и валюту локально
