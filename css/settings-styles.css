@@ -124,6 +124,10 @@
     color: var(--tg-theme-text-color, #000);
 }
 
+.timezone-modal-content .settings-select {
+    font-size: 14px;
+}
+
 .timezone-modal-buttons {
     display: flex;
     gap: 10px;
