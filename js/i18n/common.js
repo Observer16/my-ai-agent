@@ -71,4 +71,24 @@ registerTranslations('months', {
     ]
 });
 
+// Переводы валют
+registerTranslations('currency', {
+    ru: {
+        PYG: 'Парагвайский гуарани',
+        USD: 'Доллар США',
+        EUR: 'Евро',
+        RUB: 'Российский рубль',
+        BRL: 'Бразильский реал',
+        UAH: 'Украинская гривна'
+    },
+    en: {
+        PYG: 'Paraguayan Guarani',
+        USD: 'US Dollar',
+        EUR: 'Euro',
+        RUB: 'Russian Ruble',
+        BRL: 'Brazilian Real',
+        UAH: 'Ukrainian Hryvnia'
+    }
+});
+
 console.log('✅ i18n/common.js загружен');
