@@ -74,20 +74,20 @@ registerTranslations('months', {
 // Переводы валют
 registerTranslations('currency', {
     ru: {
-        PYG: 'Парагвайский гуарани',
         USD: 'Доллар США',
         EUR: 'Евро',
-        RUB: 'Российский рубль',
+        PYG: 'Парагвайский гуарани',
         BRL: 'Бразильский реал',
-        UAH: 'Украинская гривна'
+        UAH: 'Украинская гривна',
+        RUB: 'Российский рубль'
     },
     en: {
-        PYG: 'Paraguayan Guarani',
         USD: 'US Dollar',
         EUR: 'Euro',
-        RUB: 'Russian Ruble',
+        PYG: 'Paraguayan Guarani',
         BRL: 'Brazilian Real',
-        UAH: 'Ukrainian Hryvnia'
+        UAH: 'Ukrainian Hryvnia',
+        RUB: 'Russian Ruble',
     }
 });
 
