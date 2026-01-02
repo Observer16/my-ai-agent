@@ -39,6 +39,9 @@ function populateCurrencySelect() {
  */
 async function init() {
     try {
+        // Устанавливаем начальный текст загрузки
+        document.getElementById('family-status').textContent = t('common.loading');
+        
         // Загружаем текущие настройки
         currentSettings = await API.getUserSettings();
         
