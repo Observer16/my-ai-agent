@@ -21,6 +21,25 @@ const AVAILABLE_CURRENCIES = [
     { code: 'UAH', symbol: '₴' }
 ];
 
+// Популярные часовые пояса
+const COMMON_TIMEZONES = [
+    { value: 'America/Asuncion', label: 'Paraguay (America/Asuncion)' },
+    { value: 'America/Sao_Paulo', label: 'Brazil (America/Sao_Paulo)' },
+    { value: 'America/Argentina/Buenos_Aires', label: 'Argentina (America/Argentina/Buenos_Aires)' },
+    { value: 'America/New_York', label: 'USA East (America/New_York)' },
+    { value: 'America/Los_Angeles', label: 'USA West (America/Los_Angeles)' },
+    { value: 'America/Chicago', label: 'USA Central (America/Chicago)' },
+    { value: 'Europe/London', label: 'UK (Europe/London)' },
+    { value: 'Europe/Paris', label: 'France (Europe/Paris)' },
+    { value: 'Europe/Berlin', label: 'Germany (Europe/Berlin)' },
+    { value: 'Europe/Moscow', label: 'Russia Moscow (Europe/Moscow)' },
+    { value: 'Asia/Dubai', label: 'UAE (Asia/Dubai)' },
+    { value: 'Asia/Tokyo', label: 'Japan (Asia/Tokyo)' },
+    { value: 'Asia/Shanghai', label: 'China (Asia/Shanghai)' },
+    { value: 'Australia/Sydney', label: 'Australia (Australia/Sydney)' },
+    { value: 'UTC', label: 'UTC' }
+];
+
 /**
  * Заполнить список валют с переводами
  */
@@ -84,7 +103,7 @@ function displayUserInfo(settings) {
     const userName = settings.first_name || settings.username || t('settings.user');
     document.getElementById('user-name').textContent = userName;
     document.getElementById('user-telegram-id').textContent = settings.telegram_id || '-';
-    document.getElementById('user-timezone').textContent = settings.timezone || 'UTC';
+    document.getElementById('user-timezone-display').textContent = settings.timezone || 'UTC';
 }
 
 /**
@@ -103,6 +122,101 @@ async function loadFamilyStatus() {
     } catch (e) {
         console.warn('Семья не найдена:', e);
         document.getElementById('family-status').textContent = t('settings.noFamily');
+    }
+}
+
+/**
+ * Изменить часовой пояс
+ */
+async function changeTimezone() {
+    try {
+        tg.HapticFeedback.impactOccurred('medium');
+        
+        // Создаем HTML для выбора timezone
+        const optionsHtml = COMMON_TIMEZONES.map(tz => 
+            `<option value="${tz.value}" ${tz.value === currentSettings.timezone ? 'selected' : ''}>${tz.label}</option>`
+        ).join('');
+        
+        const modalHtml = `
+            <div class="timezone-modal" id="timezone-modal">
+                <div class="timezone-modal-content">
+                    <h3>${t('settings.selectNewTimezone')}</h3>
+                    <select id="timezone-select" class="settings-select">
+                        ${optionsHtml}
+                    </select>
+                    <div class="timezone-modal-buttons">
+                        <button class="timezone-btn timezone-btn-cancel" onclick="closeTimezoneModal()">
+                            ${t('common.cancel')}
+                        </button>
+                        <button class="timezone-btn timezone-btn-save" onclick="saveTimezone()">
+                            ${t('common.save')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        setTimeout(() => {
+            document.getElementById('timezone-modal').classList.add('active');
+        }, 10);
+        
+    } catch (e) {
+        console.error('Ошибка открытия модального окна:', e);
+        tg.showAlert(t('common.error'));
+    }
+}
+
+/**
+ * Закрыть модальное окно timezone
+ */
+function closeTimezoneModal() {
+    const modal = document.getElementById('timezone-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+/**
+ * Сохранить новый часовой пояс
+ */
+async function saveTimezone() {
+    try {
+        const select = document.getElementById('timezone-select');
+        const newTimezone = select.value;
+        
+        if (newTimezone === currentSettings.timezone) {
+            closeTimezoneModal();
+            return;
+        }
+        
+        tg.HapticFeedback.impactOccurred('medium');
+        
+        // Отправляем на сервер
+        const updatedSettings = await API.updateUserSettings({
+            timezone: newTimezone
+        });
+        
+        currentSettings = updatedSettings;
+        
+        // Обновляем отображение
+        document.getElementById('user-timezone-display').textContent = newTimezone;
+        
+        closeTimezoneModal();
+        
+        tg.showPopup({
+            title: '✅',
+            message: t('settings.timezoneChanged'),
+            buttons: [{type: 'ok'}]
+        });
+        
+        tg.HapticFeedback.notificationOccurred('success');
+        
+    } catch (e) {
+        console.error('Ошибка сохранения timezone:', e);
+        tg.showAlert(t('common.error') + ': ' + e.message);
+        tg.HapticFeedback.notificationOccurred('error');
     }
 }
 
