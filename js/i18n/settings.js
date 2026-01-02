@@ -18,15 +18,7 @@ registerTranslations('settings', {
         telegramId: 'Telegram ID',
         user: 'Пользователь',
         noFamily: 'Нет семьи',
-        members: 'участников',
-        
-        // Валюты
-        'currency.PYG': 'Парагвайский гуарани',
-        'currency.USD': 'Доллар США',
-        'currency.EUR': 'Евро',
-        'currency.RUB': 'Российский рубль',
-        'currency.BRL': 'Бразильский реал',
-        'currency.UAH': 'Украинская гривна'
+        members: 'участников'
     },
     en: {
         title: 'Settings',
@@ -45,15 +37,7 @@ registerTranslations('settings', {
         telegramId: 'Telegram ID',
         user: 'User',
         noFamily: 'No family',
-        members: 'members',
-        
-        // Currencies
-        'currency.PYG': 'Paraguayan Guarani',
-        'currency.USD': 'US Dollar',
-        'currency.EUR': 'Euro',
-        'currency.RUB': 'Russian Ruble',
-        'currency.BRL': 'Brazilian Real',
-        'currency.UAH': 'Ukrainian Hryvnia'
+        members: 'members'
     }
 });
 
