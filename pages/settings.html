@@ -47,6 +47,24 @@
     </div>
 </div>
 
+<!-- Настройки часового пояса -->
+<div class="module-card">
+    <div class="module-header">
+        <div class="module-icon">🌍</div>
+        <div class="module-title" data-i18n="settings.timezone">Часовой пояс</div>
+    </div>
+    <div class="settings-item">
+        <div class="settings-label" data-i18n="settings.currentTimezone">Текущий часовой пояс</div>
+        <div class="settings-value" id="user-timezone-display">-</div>
+    </div>
+    <button class="settings-change-btn" onclick="changeTimezone()" data-i18n="settings.changeTimezone">
+        🔄 Изменить часовой пояс
+    </button>
+    <div class="settings-description" data-i18n="settings.timezoneDescription">
+        Используется для правильного отображения дат и времени
+    </div>
+</div>
+
 <!-- Семья -->
 <div class="module-card" onclick="openFamily()">
     <div class="module-header">
@@ -70,10 +88,6 @@
     <div class="settings-item">
         <div class="settings-label" data-i18n="settings.telegramId">Telegram ID</div>
         <div class="settings-value" id="user-telegram-id">-</div>
-    </div>
-    <div class="settings-item">
-        <div class="settings-label" data-i18n="settings.timezone">Часовой пояс</div>
-        <div class="settings-value" id="user-timezone">-</div>
     </div>
 </div>
 
