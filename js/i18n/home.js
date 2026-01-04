@@ -15,6 +15,21 @@ registerTranslations('home', {
     }
 });
 
+registerTranslations('nav', {
+    ru: {
+        finance: 'Финансы',
+        health: 'Здоровье',
+        activity: 'Активность',
+        doctor: 'Мед. консультант'
+    },
+    en: {
+        finance: 'Finance',
+        health: 'Health',
+        activity: 'Activity',
+        doctor: 'Medical'
+    }
+});
+
 registerTranslations('modules', {
     ru: {
         health: 'Здоровье',
@@ -50,14 +65,16 @@ registerTranslations('actions', {
         addExpense: 'Добавить расход',
         management: 'Управление',
         priceAnalysis: 'Анализ цен',
-        settings: 'Настройки'
+        settings: 'Настройки',
+        instructions: 'Инструкции'
     },
     en: {
         title: 'Quick Actions',
         addExpense: 'Add Expense',
         management: 'Management',
         priceAnalysis: 'Price Analysis',
-        settings: 'Settings'
+        settings: 'Settings',
+        instructions: 'Instructions'
     }
 });
 
