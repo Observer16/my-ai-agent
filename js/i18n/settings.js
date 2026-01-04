@@ -48,6 +48,54 @@ registerTranslations('settings', {
         user: 'User',
         noFamily: 'No family',
         members: 'members'
+    },
+    es: {
+        title: 'Configuración',
+        language: 'Idioma de la interfaz',
+        languageDescription: 'Idioma de la interfaz de la aplicación',
+        currency: 'Moneda',
+        yourCurrency: 'Tu moneda',
+        currencyDescription: 'Todas las cantidades se mostrarán en la moneda seleccionada',
+        timezone: 'Zona horaria',
+        currentTimezone: 'Zona horaria actual',
+        changeTimezone: '🔄 Cambiar zona horaria',
+        timezoneDescription: 'Se utiliza para mostrar correctamente fechas y horas',
+        timezoneChanged: 'Zona horaria cambiada',
+        selectNewTimezone: 'Seleccionar nueva zona horaria',
+        save: 'Guardar',
+        saved: 'Configuración guardada',
+        savedReload: 'Configuración guardada. La página se recargará.',
+        saveChanges: 'Guardar cambios',
+        profile: 'Perfil',
+        name: 'Nombre',
+        telegramId: 'ID de Telegram',
+        user: 'Usuario',
+        noFamily: 'Sin familia',
+        members: 'miembros'
+    },
+    uk: {
+        title: 'Налаштування',
+        language: 'Мова інтерфейсу',
+        languageDescription: 'Мова інтерфейсу програми',
+        currency: 'Валюта',
+        yourCurrency: 'Ваша валюта',
+        currencyDescription: 'Всі суми будуть відображатися у вибраній валюті',
+        timezone: 'Часовий пояс',
+        currentTimezone: 'Поточний часовий пояс',
+        changeTimezone: '🔄 Змінити часовий пояс',
+        timezoneDescription: 'Використовується для правильного відображення дат та часу',
+        timezoneChanged: 'Часовий пояс змінено',
+        selectNewTimezone: 'Виберіть новий часовий пояс',
+        save: 'Зберегти',
+        saved: 'Налаштування збережено',
+        savedReload: 'Налаштування збережено. Сторінка буде перезавантажена.',
+        saveChanges: 'Зберегти зміни',
+        profile: 'Профіль',
+        name: "Ім'я",
+        telegramId: 'Telegram ID',
+        user: 'Користувач',
+        noFamily: 'Немає сім\'ї',
+        members: 'учасників'
     }
 });
 
@@ -67,6 +115,22 @@ registerTranslations('initialSetup', {
         selectCurrency: 'Select currency',
         selectTimezone: 'Select timezone',
         continue: 'Continue'
+    },
+    es: {
+        welcome: '¡Bienvenido!',
+        subtitle: 'Personaliza la aplicación para ti',
+        selectLanguage: 'Seleccionar idioma',
+        selectCurrency: 'Seleccionar moneda',
+        selectTimezone: 'Seleccionar zona horaria',
+        continue: 'Continuar'
+    },
+    uk: {
+        welcome: 'Ласкаво просимо!',
+        subtitle: 'Налаштуйте програму для себе',
+        selectLanguage: 'Виберіть мову',
+        selectCurrency: 'Виберіть валюту',
+        selectTimezone: 'Виберіть часовий пояс',
+        continue: 'Продовжити'
     }
 });
 
