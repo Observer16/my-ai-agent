@@ -73,15 +73,15 @@ function showGreeting() {
 
     if (user) {
         const hour = new Date().getHours();
-        let greeting = 'Добрый день';
-        if (hour < 6) greeting = 'Доброй ночи';
-        else if (hour < 12) greeting = 'Доброе утро';
-        else if (hour < 18) greeting = 'Добрый день';
-        else greeting = 'Добрый вечер';
+        let greetingKey = 'greeting.day';
+        if (hour < 6) greetingKey = 'greeting.night';
+        else if (hour < 12) greetingKey = 'greeting.morning';
+        else if (hour < 18) greetingKey = 'greeting.day';
+        else greetingKey = 'greeting.evening';
 
-        greetingEl.textContent = `${greeting}, ${user.first_name}! 👋`;
+        greetingEl.textContent = `${t(greetingKey)}, ${user.first_name}! 👋`;
     } else {
-        greetingEl.textContent = 'Добро пожаловать! 👋';
+        greetingEl.textContent = `${t('home.welcome')} 👋`;
     }
 }
 
