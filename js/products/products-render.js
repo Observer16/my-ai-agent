@@ -101,12 +101,15 @@ function renderCategoriesList() {
         const name = escapeHtml(cat.name);
         const parentName = cat.parent_name ? escapeHtml(cat.parent_name) : '';
         const description = cat.description ? escapeHtml(cat.description) : '';
+        const isSystem = cat.is_system || false;
+        const needsTranslation = cat.needs_translation || false;
 
         return `
-        <div class="category-card">
+        <div class="category-card ${isSystem ? 'system-category' : ''}">
             <div class="category-header">
                 <div class="category-name">
-                    ${name}
+                    ${isSystem ? '🔒 ' : ''}${name}
+                    ${needsTranslation ? ' <span style="color: orange;">⚠️</span>' : ''}
                     ${parentName ? `<div style="font-size:11px;opacity:0.6;margin-top:2px;">↳ ${parentName}</div>` : ''}
                 </div>
                 <div class="category-count">${cat.products_count || 0}</div>
@@ -118,10 +121,12 @@ function renderCategoriesList() {
                 <button class="category-btn edit" onclick="filterByCategory(${cat.id}); switchTab('products')">
                     👁️ ${t('products.viewProducts')}
                 </button>
-                <button class="category-btn edit" onclick="showEditCategoryModal(${cat.id})">
-                    ✏️ ${t('products.edit')}
-                </button>
-                ${(cat.products_count || 0) === 0 ? `
+                ${!isSystem ? `
+                    <button class="category-btn edit" onclick="showEditCategoryModal(${cat.id})">
+                        ✏️ ${t('products.edit')}
+                    </button>
+                ` : ''}
+                ${!isSystem && (cat.products_count || 0) === 0 ? `
                     <button class="category-btn delete" onclick="deleteCategory(${cat.id}, '${name.replace(/'/g, "\\'")}')">
                         🗑️ ${t('products.delete')}
                     </button>

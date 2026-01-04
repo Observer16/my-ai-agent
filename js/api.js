@@ -463,8 +463,21 @@ class APIClient {
     /**
      * Получить список категорий
      */
-    async getCategories() {
-        return this.get('/categories');
+    async getCategories(language = null) {
+        let endpoint = '/categories';
+
+        // Получаем язык из настроек пользователя если не передан явно
+        if (!language) {
+            try {
+                const settings = await this.getUserSettings();
+                language = settings.preferred_language || 'ru';
+            } catch (e) {
+                language = 'ru'; // fallback
+            }
+        }
+
+        endpoint += `?language=${language}`;
+        return this.get(endpoint);
     }
 
     /**
