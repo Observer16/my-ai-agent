@@ -19,7 +19,7 @@ registerTranslations('monthlyStats', {
         topStores: 'Топ магазинов',
         topPurchases: 'Крупнейшие покупки',
         weekdayStats: 'Статистика по дням недели',
-        
+
         // Месяцы полные
         january: 'Январь',
         february: 'Февраль',
@@ -33,7 +33,7 @@ registerTranslations('monthlyStats', {
         october: 'Октябрь',
         november: 'Ноябрь',
         december: 'Декабрь',
-        
+
         // Месяцы короткие
         janShort: 'янв',
         febShort: 'фев',
@@ -47,7 +47,7 @@ registerTranslations('monthlyStats', {
         octShort: 'окт',
         novShort: 'ноя',
         decShort: 'дек',
-        
+
         // Сообщения
         noData: 'Нет данных за этот период',
         noCategoriesData: 'Нет данных о категориях',
@@ -55,7 +55,7 @@ registerTranslations('monthlyStats', {
         noPurchasesData: 'Нет данных о покупках',
         noWeekdayData: 'Нет данных по дням недели',
         errorLoading: 'Ошибка загрузки данных',
-        
+
         // Детали
         positions: 'позиций',
         visits: 'визитов',
@@ -81,7 +81,7 @@ registerTranslations('monthlyStats', {
         topStores: 'Top stores',
         topPurchases: 'Largest purchases',
         weekdayStats: 'Weekday statistics',
-        
+
         // Months full
         january: 'January',
         february: 'February',
@@ -95,7 +95,7 @@ registerTranslations('monthlyStats', {
         october: 'October',
         november: 'November',
         december: 'December',
-        
+
         // Months short
         janShort: 'Jan',
         febShort: 'Feb',
@@ -109,7 +109,7 @@ registerTranslations('monthlyStats', {
         octShort: 'Oct',
         novShort: 'Nov',
         decShort: 'Dec',
-        
+
         // Messages
         noData: 'No data for this period',
         noCategoriesData: 'No category data',
@@ -117,13 +117,137 @@ registerTranslations('monthlyStats', {
         noPurchasesData: 'No purchase data',
         noWeekdayData: 'No weekday data',
         errorLoading: 'Error loading data',
-        
+
         // Details
         positions: 'items',
         visits: 'visits',
         products: 'products',
         receipt: 'Receipt',
         ofTotal: 'of total'
+    },
+    es: {
+        title: 'Estadísticas Mensuales',
+        detailedAnalysis: 'Análisis detallado de gastos',
+        period: 'Período',
+        purchases: 'compras',
+        stores: 'tiendas',
+        recipients: 'Destinatarios',
+        items: 'Artículos',
+        uniqueProducts: 'Productos únicos',
+        totalSpent: 'Total gastado',
+        avgCheck: 'Recibo promedio',
+        expensesByDays: 'Gastos por días',
+        byCategory: 'Por categoría',
+        byStore: 'Por tienda',
+        topCategories: 'Categorías principales',
+        topStores: 'Tiendas principales',
+        topPurchases: 'Compras más grandes',
+        weekdayStats: 'Estadísticas por día de semana',
+
+        // Meses completos
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+
+        // Meses cortos
+        janShort: 'ene',
+        febShort: 'feb',
+        marShort: 'mar',
+        aprShort: 'abr',
+        mayShort: 'may',
+        junShort: 'jun',
+        julShort: 'jul',
+        augShort: 'ago',
+        sepShort: 'sep',
+        octShort: 'oct',
+        novShort: 'nov',
+        decShort: 'dic',
+
+        // Mensajes
+        noData: 'No hay datos para este período',
+        noCategoriesData: 'No hay datos de categorías',
+        noStoresData: 'No hay datos de tiendas',
+        noPurchasesData: 'No hay datos de compras',
+        noWeekdayData: 'No hay datos por día de semana',
+        errorLoading: 'Error al cargar datos',
+
+        // Detalles
+        positions: 'artículos',
+        visits: 'visitas',
+        products: 'productos',
+        receipt: 'Recibo',
+        ofTotal: 'del total'
+    },
+    uk: {
+        title: 'Статистика за місяць',
+        detailedAnalysis: 'Детальний аналіз витрат',
+        period: 'Період',
+        purchases: 'покупок',
+        stores: 'магазинів',
+        recipients: 'Отримувачів',
+        items: 'Товарів',
+        uniqueProducts: 'Унікальних товарів',
+        totalSpent: 'Всього витрачено',
+        avgCheck: 'Середній чек',
+        expensesByDays: 'Витрати по днях',
+        byCategory: 'За категоріями',
+        byStore: 'За магазинами',
+        topCategories: 'Топ категорій',
+        topStores: 'Топ магазинів',
+        topPurchases: 'Найбільші покупки',
+        weekdayStats: 'Статистика за днями тижня',
+
+        // Місяці повні
+        january: 'Січень',
+        february: 'Лютий',
+        march: 'Березень',
+        april: 'Квітень',
+        may: 'Травень',
+        june: 'Червень',
+        july: 'Липень',
+        august: 'Серпень',
+        september: 'Вересень',
+        october: 'Жовтень',
+        november: 'Листопад',
+        december: 'Грудень',
+
+        // Місяці короткі
+        janShort: 'січ',
+        febShort: 'лют',
+        marShort: 'бер',
+        aprShort: 'кві',
+        mayShort: 'тра',
+        junShort: 'чер',
+        julShort: 'лип',
+        augShort: 'сер',
+        sepShort: 'вер',
+        octShort: 'жов',
+        novShort: 'лис',
+        decShort: 'гру',
+
+        // Повідомлення
+        noData: 'Немає даних за цей період',
+        noCategoriesData: 'Немає даних про категорії',
+        noStoresData: 'Немає даних про магазини',
+        noPurchasesData: 'Немає даних про покупки',
+        noWeekdayData: 'Немає даних за днями тижня',
+        errorLoading: 'Помилка завантаження даних',
+
+        // Деталі
+        positions: 'позицій',
+        visits: 'візитів',
+        products: 'товарів',
+        receipt: 'Чек',
+        ofTotal: 'від загальної суми'
     }
 });
 

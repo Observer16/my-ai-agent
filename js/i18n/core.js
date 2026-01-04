@@ -5,7 +5,9 @@
  */
 const translations = {
     ru: {},
-    en: {}
+    en: {},
+    es: {},
+    uk: {}
 };
 
 /**
@@ -16,7 +18,7 @@ let currentLanguage = 'ru';
 /**
  * Регистрация переводов для секции
  * @param {string} section - Название секции (например 'family', 'settings')
- * @param {object} data - Объект с переводами { ru: {...}, en: {...} }
+ * @param {object} data - Объект с переводами { ru: {...}, en: {...}, es: {...}, uk: {...} }
  */
 function registerTranslations(section, data) {
     if (data.ru) {
@@ -24,6 +26,12 @@ function registerTranslations(section, data) {
     }
     if (data.en) {
         translations.en[section] = data.en;
+    }
+    if (data.es) {
+        translations.es[section] = data.es;
+    }
+    if (data.uk) {
+        translations.uk[section] = data.uk;
     }
 }
 
@@ -39,7 +47,7 @@ function initLanguage() {
 
 /**
  * Установить текущий язык
- * @param {string} lang - Код языка ('ru' или 'en')
+ * @param {string} lang - Код языка ('ru', 'en', 'es' или 'uk')
  * @returns {boolean} - true если язык установлен успешно
  */
 function setLanguage(lang) {
@@ -68,7 +76,7 @@ function getCurrentLanguage() {
 function t(key, params = {}) {
     const keys = key.split('.');
     let value = translations[currentLanguage];
-    
+
     // Проходим по вложенным ключам
     for (const k of keys) {
         if (value && typeof value === 'object') {
@@ -79,24 +87,24 @@ function t(key, params = {}) {
             return key;
         }
     }
-    
+
     // Если значение - массив, возвращаем его
     if (Array.isArray(value)) {
         return value;
     }
-    
+
     // Если значение не строка, возвращаем ключ
     if (typeof value !== 'string') {
         console.warn(`Translation value is not a string: ${key}`);
         return key;
     }
-    
+
     // Подставляем параметры в строку
     let result = value;
     for (const [param, val] of Object.entries(params)) {
         result = result.replace(`{${param}}`, val);
     }
-    
+
     return result;
 }
 
