@@ -9,18 +9,6 @@ let allPendingInvites = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Загрузка приложения...');
-
-    // Проверка параметра refresh
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('refresh') === '1') {
-        console.log('🔄 Очистка кэша');
-        cacheManager.clear(); // Без window и await
-        window.history.replaceState({}, '', window.location.pathname + window.location.hash);
-    }
-
-    try {
-        // Обновление информации пользователя
-        const telegramUser = window.Telegram.WebApp.initDataUnsafe?.user;
     
     // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛЮТЫ
     await initCurrency();
