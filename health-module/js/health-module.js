@@ -15,6 +15,9 @@ const HealthModule = (function() {
         console.log('🩺 Инициализация модуля здоровья...');
 
         try {
+            // Настройка кнопки "Назад" для возврата на главную
+            setupBackButton();
+            
             await initUtils();
             await initCore();
             await initManagers();
@@ -28,6 +31,23 @@ const HealthModule = (function() {
             console.error('💥 Критическая ошибка инициализации:', error);
             ErrorHandler.show(`Ошибка загрузки модуля: ${error.message}`, { type: 'error' });
             throw error;
+        }
+    }
+
+    /**
+     * Настройка кнопки "Назад" Telegram
+     */
+    function setupBackButton() {
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+            const tg = Telegram.WebApp;
+            
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                console.log('🔙 Возврат на главную страницу');
+                window.location.href = '../index.html';
+            });
+            
+            console.log('✅ Кнопка "Назад" настроена');
         }
     }
 
@@ -126,7 +146,6 @@ const HealthModule = (function() {
                         const optionsResult = await OptionsCache.getUserOptions();
                         
                         if (optionsResult.success && optionsResult.data) {
-                            // Сохраняем опции в state
                             StateManager.updateState({ userOptions: optionsResult.data });
                             
                             if (HealthConfig.DEBUG) {
@@ -275,12 +294,10 @@ const HealthModule = (function() {
                 showToast('✅ Пол обновлен', 'success');
 
                 // 7. Обновляем UI только для вкладки dashboard (если она активна)
-                // Получаем текущую активную вкладку
                 const activeTab = document.querySelector('.health-tab.active');
                 const currentTab = activeTab?.dataset?.tab;
                 
                 if (currentTab === 'dashboard') {
-                    // Обновляем Dashboard только если он сейчас открыт
                     if (window.Dashboard && typeof Dashboard.init === 'function') {
                         setTimeout(() => Dashboard.init(), 500);
                         console.log('🔄 Dashboard обновлён после смены пола');
