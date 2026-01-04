@@ -13,13 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Проверка параметра refresh
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('refresh') === '1') {
-        console.log('🔄 Обнаружен параметр refresh - очистка кэша');
-        if (window.cacheManager) {
-            await window.cacheManager.clear();
-        }
-        // Убираем только ?refresh=1 из URL
-        const newUrl = window.location.pathname + window.location.hash;
-        window.history.replaceState({}, '', newUrl);
+        console.log('🔄 Очистка кэша');
+        cacheManager.clear(); // Без window и await
+        window.history.replaceState({}, '', window.location.pathname + window.location.hash);
     }
 
     try {
