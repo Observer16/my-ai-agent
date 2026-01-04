@@ -1,7 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.BackButton.show();
-tg.BackButton.onClick(() => window.history.back());
+tg.BackButton.onClick(() => {
+    tg.MainButton.hide();
+    window.history.back();
+});
 
 let stores = [];
 let allProducts = [];
