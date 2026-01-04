@@ -505,6 +505,512 @@ const translations = {
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
         ]
+    },
+
+    es: {
+        // Saludos
+        greeting: {
+            night: 'Buenas noches',
+            morning: 'Buenos días',
+            day: 'Buenas tardes',
+            evening: 'Buenas tardes'
+        },
+
+        // Pantalla principal
+        home: {
+            title: 'Mi Agente AI',
+            subtitle: 'Asistente inteligente para la vida',
+            welcome: '¡Bienvenido!',
+            telegramApp: 'Telegram Mini App'
+        },
+
+        // Estadísticas mensuales
+        monthly: {
+            title: 'Estadísticas Mensuales',
+            detailedAnalysis: 'Análisis detallado de gastos',
+            period: 'Período',
+            purchases: 'Compras',
+            stores: 'tiendas',
+            recipients: 'Destinatarios',
+            items: 'Artículos',
+            uniqueProducts: 'Productos únicos',
+            totalSpent: 'Total gastado',
+            avgCheck: 'Recibo promedio',
+            expensesByDays: 'Gastos por días',
+            byCategory: 'Por categoría',
+            byStore: 'Por tienda',
+            topCategories: 'Categorías principales',
+            topStores: 'Tiendas principales',
+            topPurchases: 'Compras más grandes',
+            weekdayStats: 'Estadísticas por día de semana'
+        },
+
+        // Módulos
+        modules: {
+            health: 'Salud',
+            healthDesc: 'Seguimiento diario del bienestar, monitoreo de síntomas y recomendaciones',
+            activity: 'Actividad',
+            activityDesc: 'Seguimiento de entrenamientos, pasos y calorías con planes personalizados',
+            doctor: 'Consultor Médico',
+            doctorDesc: 'Asistente AI para consultas de salud y primeros auxilios',
+            available247: 'Disponible 24/7',
+            today: 'hoy',
+            week: 'semana',
+            steps: 'pasos',
+            workouts: 'entrenamientos'
+        },
+
+        // Acciones rápidas
+        actions: {
+            title: 'Acciones Rápidas',
+            addExpense: 'Agregar Gasto',
+            management: 'Gestión',
+            priceAnalysis: 'Análisis de Precios',
+            settings: 'Configuración'
+        },
+
+        // Familia
+        family: {
+            title: 'Mi Familia',
+            management: 'Gestión del grupo familiar',
+            inviteTitle: 'Invitación Familiar',
+            invitesYou: 'te invita',
+            inFamily: 'a la familia',
+            warning: '⚠️ Si ya estás en una familia, automáticamente saldrás de ella',
+            expiresIn: '⏳ Invitación válida por',
+            hours: 'h.',
+            decline: '❌ Rechazar',
+            accept: '✅ Aceptar',
+            success: '✅ ¡Éxito!',
+            joined: 'Te uniste a la familia',
+            solo: 'Solo',
+            members: 'Miembros',
+            familyMembers: 'Miembros de la familia',
+            familyName: 'Nombre de la familia',
+            createFamily: 'Crear familia',
+            createNewFamily: 'Crear nueva familia',
+            inviteMembers: 'Invitar miembros',
+            invite: '+ Invitar',
+            inviteToFamily: 'Invitar a la familia',
+            inviteMember: 'Invitar miembro',
+            leaveFamily: 'Salir de la familia',
+            yourFamily: 'Tu familia',
+            noFamily: 'Sin familia',
+            inviteLink: 'Enlace de invitación',
+            copyLink: 'Copiar enlace de invitación',
+            linkCopied: 'Enlace copiado',
+            actions: 'Acciones',
+            created: 'Creada:',
+            status: 'Estado:',
+            incomingInvites: 'Invitaciones entrantes',
+            sentInvites: 'Invitaciones enviadas',
+            soloMode: 'Estás trabajando solo',
+            soloDescription: 'En modo familiar, todos los miembros ven compras, productos y análisis compartidos.',
+            checkInvites: 'Verificar invitaciones',
+            benefits: 'Beneficios de la familia:',
+            benefit1: '📊 Estadísticas de gastos compartidas',
+            benefit2: '🔄 Sincronización de lista de productos',
+            benefit3: '👥 Gestión conjunta de categorías',
+            benefit4: '💬 Informes y análisis compartidos',
+            familyNamePlaceholder: 'Por ejemplo: Familia García',
+            creatorNote: '📝 Te convertirás en el creador de la familia y podrás invitar a otros miembros.',
+            leaveWarning: '⚠️ Si ya estás en una familia, automáticamente saldrás de ella.',
+            telegramId: 'ID de Telegram *',
+            enterTelegramId: 'Ingrese ID de Telegram',
+            telegramIdHint: 'El ID se puede encontrar a través de @userinfobot',
+            personalMessage: 'Mensaje personal (opcional)',
+            writeMessage: 'Escribe un mensaje de bienvenida...',
+            inviteValid: '📧 La invitación será válida por 7 días',
+            userNotification: '👤 El usuario recibirá una notificación en la aplicación',
+            sendInvite: 'Enviar invitación',
+            familyActions: 'Acciones familiares',
+            renameFamily: 'Renombrar familia',
+            deleteFamily: 'Eliminar familia',
+            leaveConfirm: '⚠️ ¿Estás seguro de que quieres salir de la familia?',
+            leaveDetail1: '• Volverás al modo individual',
+            leaveDetail2: '• Todos tus datos permanecerán en la familia',
+            leaveDetail3: '• Podrás unirte a otra familia',
+            lastMemberWarning: '⚠️ Eres el último miembro. La familia será desactivada.'
+        },
+
+        // Configuración
+        settings: {
+            title: 'Configuración',
+            language: 'Idioma de la interfaz',
+            currency: 'Moneda',
+            timezone: 'Zona horaria',
+            save: 'Guardar',
+            saved: 'Configuración guardada',
+            savedReload: 'Configuración guardada. La página se recargará.',
+            profile: 'Perfil',
+            name: 'Nombre',
+            telegramId: 'ID de Telegram',
+            languageDescription: 'Idioma de la interfaz de la aplicación',
+            yourCurrency: 'Tu moneda',
+            currencyDescription: 'Todas las cantidades se mostrarán en la moneda seleccionada'
+        },
+
+        // Configuración inicial
+        initialSetup: {
+            welcome: '¡Bienvenido!',
+            subtitle: 'Personaliza la aplicación para ti',
+            selectLanguage: 'Seleccionar idioma',
+            selectCurrency: 'Seleccionar moneda',
+            selectTimezone: 'Seleccionar zona horaria',
+            continue: 'Continuar'
+        },
+
+        // Presupuesto / Análisis de precios
+        budget: {
+            title: 'Análisis de Precios',
+            compareProducts: 'Comparar productos',
+            selectProduct: 'Seleccionar producto',
+            priceHistory: 'Historial de precios',
+            bestPrice: 'Mejor precio',
+            currentPrice: 'Precio actual',
+            averagePrice: 'Precio promedio',
+            priceChange: 'Cambio de precio',
+            lastUpdate: 'Última actualización',
+            store: 'Tienda',
+            price: 'Precio',
+            date: 'Fecha',
+            noPrices: 'Sin datos de precios',
+            selectToCompare: 'Seleccionar producto para comparar precios'
+        },
+
+        // Productos
+        products: {
+            title: 'Gestión de Productos',
+            allProducts: 'Todos los productos',
+            categories: 'Categorías',
+            addProduct: 'Agregar producto',
+            editProduct: 'Editar producto',
+            deleteProduct: 'Eliminar producto',
+            productName: 'Nombre del producto',
+            category: 'Categoría',
+            search: 'Buscar',
+            filter: 'Filtrar',
+            noProducts: 'Sin productos',
+            totalProducts: 'Total de productos',
+            addCategory: 'Agregar categoría',
+            categoryName: 'Nombre de categoría',
+            selectCategory: 'Seleccionar categoría',
+            allCategories: 'Todas las categorías',
+            priceComparison: 'Comparación de precios',
+            viewPrices: 'Ver precios',
+            lastPurchase: 'Última compra',
+            averagePrice: 'Precio promedio',
+            minPrice: 'Precio mínimo',
+            maxPrice: 'Precio máximo'
+        },
+
+        // Agregar gasto
+        expense: {
+            title: 'Agregar Gasto',
+            addExpense: 'Agregar gasto',
+            store: 'Tienda',
+            selectStore: 'Seleccionar tienda',
+            date: 'Fecha',
+            time: 'Hora',
+            products: 'Productos',
+            addProduct: 'Agregar producto',
+            product: 'Producto',
+            quantity: 'Cantidad',
+            price: 'Precio',
+            total: 'Total',
+            save: 'Guardar',
+            cancel: 'Cancelar',
+            selectProduct: 'Seleccionar producto',
+            enterPrice: 'Ingresar precio',
+            enterQuantity: 'Ingresar cantidad',
+            remove: 'Eliminar',
+            expenseSaved: 'Gasto guardado',
+            fillAllFields: 'Completar todos los campos',
+            totalAmount: 'Monto total',
+            noProducts: 'Agregar productos'
+        },
+
+        // Frases comunes
+        common: {
+            loading: 'Cargando...',
+            error: 'Error',
+            success: 'Éxito',
+            cancel: 'Cancelar',
+            ok: 'OK',
+            close: 'Cerrar',
+            refresh: 'Actualizar',
+            noData: 'Sin datos',
+            inDevelopment: 'En desarrollo',
+            back: 'Atrás',
+            save: 'Guardar',
+            delete: 'Eliminar',
+            edit: 'Editar',
+            add: 'Agregar',
+            search: 'Buscar',
+            filter: 'Filtrar',
+            all: 'Todos',
+            yes: 'Sí',
+            no: 'No'
+        },
+
+        // Meses
+        months: [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ]
+    },
+
+    uk: {
+        // Вітання
+        greeting: {
+            night: 'Доброї ночі',
+            morning: 'Доброго ранку',
+            day: 'Доброго дня',
+            evening: 'Доброго вечора'
+        },
+
+        // Головний екран
+        home: {
+            title: 'Мій AI Агент',
+            subtitle: 'Розумний помічник для життя',
+            welcome: 'Ласкаво просимо!',
+            telegramApp: 'Telegram Mini App'
+        },
+
+        // Місячна статистика
+        monthly: {
+            title: 'Статистика за місяць',
+            detailedAnalysis: 'Детальний аналіз витрат',
+            period: 'Період',
+            purchases: 'Покупок',
+            stores: 'магазинів',
+            recipients: 'Отримувачів',
+            items: 'Товарів',
+            uniqueProducts: 'Унікальних товарів',
+            totalSpent: 'Всього витрачено',
+            avgCheck: 'Середній чек',
+            expensesByDays: 'Витрати по днях',
+            byCategory: 'За категоріями',
+            byStore: 'За магазинами',
+            topCategories: 'Топ категорій',
+            topStores: 'Топ магазинів',
+            topPurchases: 'Найбільші покупки',
+            weekdayStats: 'Статистика за днями тижня'
+        },
+
+        // Модулі
+        modules: {
+            health: 'Здоров\'я',
+            healthDesc: 'Щоденна оцінка самопочуття, відстеження симптомів та рекомендації',
+            activity: 'Активність',
+            activityDesc: 'Трекер тренувань, кроків та калорій з персональними планами',
+            doctor: 'Медичний консультант',
+            doctorDesc: 'AI-помічник для консультацій зі здоров\'я та першої допомоги',
+            available247: 'Доступний 24/7',
+            today: 'сьогодні',
+            week: 'тиждень',
+            steps: 'кроків',
+            workouts: 'тренувань'
+        },
+
+        // Швидкі дії
+        actions: {
+            title: 'Швидкі дії',
+            addExpense: 'Додати витрату',
+            management: 'Управління',
+            priceAnalysis: 'Аналіз цін',
+            settings: 'Налаштування'
+        },
+
+        // Сім'я
+        family: {
+            title: 'Моя сім\'я',
+            management: 'Управління сімейною групою',
+            inviteTitle: 'Запрошення до сім\'ї',
+            invitesYou: 'запрошує вас',
+            inFamily: 'до сім\'ї',
+            warning: '⚠️ Якщо ви вже перебуваєте в сім\'ї, ви автоматично вийдете з неї',
+            expiresIn: '⏳ Запрошення дійсне ще',
+            hours: 'год.',
+            decline: '❌ Відхилити',
+            accept: '✅ Прийняти',
+            success: '✅ Успішно!',
+            joined: 'Ви вступили до сім\'ї',
+            solo: 'Solo',
+            members: 'Учасники',
+            familyMembers: 'Учасники сім\'ї',
+            familyName: 'Назва сім\'ї',
+            createFamily: 'Створити сім\'ю',
+            createNewFamily: 'Створити нову сім\'ю',
+            inviteMembers: 'Запросити учасників',
+            invite: '+ Запросити',
+            inviteToFamily: 'Запросити до сім\'ї',
+            inviteMember: 'Запросити учасника',
+            leaveFamily: 'Вийти з сім\'ї',
+            yourFamily: 'Ваша сім\'я',
+            noFamily: 'Немає сім\'ї',
+            inviteLink: 'Посилання-запрошення',
+            copyLink: 'Скопіювати посилання-запрошення',
+            linkCopied: 'Посилання скопійовано',
+            actions: 'Дії',
+            created: 'Створена:',
+            status: 'Статус:',
+            incomingInvites: 'Вхідні запрошення',
+            sentInvites: 'Відправлені запрошення',
+            soloMode: 'Ви працюєте самостійно',
+            soloDescription: 'У сімейному режимі всі учасники бачать спільні покупки, товари та аналітику.',
+            checkInvites: 'Перевірити запрошення',
+            benefits: 'Переваги сім\'ї:',
+            benefit1: '📊 Спільна статистика витрат',
+            benefit2: '🔄 Синхронізація списку товарів',
+            benefit3: '👥 Спільне управління категоріями',
+            benefit4: '💬 Спільні звіти та аналітика',
+            familyNamePlaceholder: 'Наприклад: Сім\'я Петренків',
+            creatorNote: '📝 Ви станете творцем сім\'ї і зможете запрошувати інших учасників.',
+            leaveWarning: '⚠️ Якщо ви вже перебуваєте в сім\'ї, ви автоматично вийдете з неї.',
+            telegramId: 'Telegram ID користувача *',
+            enterTelegramId: 'Введіть Telegram ID',
+            telegramIdHint: 'ID можна дізнатися через бота @userinfobot',
+            personalMessage: 'Персональне повідомлення (необов\'язково)',
+            writeMessage: 'Напишіть вітальне повідомлення...',
+            inviteValid: '📧 Запрошення буде дійсне 7 днів',
+            userNotification: '👤 Користувач отримає сповіщення в додатку',
+            sendInvite: 'Відправити запрошення',
+            familyActions: 'Дії з сім\'єю',
+            renameFamily: 'Перейменувати сім\'ю',
+            deleteFamily: 'Видалити сім\'ю',
+            leaveConfirm: '⚠️ Ви впевнені, що хочете вийти з сім\'ї?',
+            leaveDetail1: '• Ви повернетеся в одиночний режим',
+            leaveDetail2: '• Всі ваші дані залишаться в сім\'ї',
+            leaveDetail3: '• Ви зможете вступити в іншу сім\'ю',
+            lastMemberWarning: '⚠️ Ви останній учасник. Сім\'я буде деактивована.'
+        },
+
+        // Налаштування
+        settings: {
+            title: 'Налаштування',
+            language: 'Мова інтерфейсу',
+            currency: 'Валюта',
+            timezone: 'Часовий пояс',
+            save: 'Зберегти',
+            saved: 'Налаштування збережено',
+            savedReload: 'Налаштування збережено. Сторінка буде перезавантажена.',
+            profile: 'Профіль',
+            name: "Ім'я",
+            telegramId: 'Telegram ID',
+            languageDescription: 'Мова інтерфейсу програми',
+            yourCurrency: 'Ваша валюта',
+            currencyDescription: 'Всі суми будуть відображатися у вибраній валюті'
+        },
+
+        // Початкове налаштування
+        initialSetup: {
+            welcome: 'Ласкаво просимо!',
+            subtitle: 'Налаштуйте програму для себе',
+            selectLanguage: 'Виберіть мову',
+            selectCurrency: 'Виберіть валюту',
+            selectTimezone: 'Виберіть часовий пояс',
+            continue: 'Продовжити'
+        },
+
+        // Бюджет / Аналіз цін
+        budget: {
+            title: 'Аналіз цін',
+            compareProducts: 'Порівняння товарів',
+            selectProduct: 'Виберіть товар',
+            priceHistory: 'Історія цін',
+            bestPrice: 'Найкраща ціна',
+            currentPrice: 'Поточна ціна',
+            averagePrice: 'Середня ціна',
+            priceChange: 'Зміна ціни',
+            lastUpdate: 'Останнє оновлення',
+            store: 'Магазин',
+            price: 'Ціна',
+            date: 'Дата',
+            noPrices: 'Немає даних про ціни',
+            selectToCompare: 'Виберіть товар для порівняння цін'
+        },
+
+        // Товари
+        products: {
+            title: 'Управління товарами',
+            allProducts: 'Всі товари',
+            categories: 'Категорії',
+            addProduct: 'Додати товар',
+            editProduct: 'Редагувати товар',
+            deleteProduct: 'Видалити товар',
+            productName: 'Назва товару',
+            category: 'Категорія',
+            search: 'Пошук',
+            filter: 'Фільтр',
+            noProducts: 'Немає товарів',
+            totalProducts: 'Всього товарів',
+            addCategory: 'Додати категорію',
+            categoryName: 'Назва категорії',
+            selectCategory: 'Виберіть категорію',
+            allCategories: 'Всі категорії',
+            priceComparison: 'Порівняння цін',
+            viewPrices: 'Переглянути ціни',
+            lastPurchase: 'Остання покупка',
+            averagePrice: 'Середня ціна',
+            minPrice: 'Мін. ціна',
+            maxPrice: 'Макс. ціна'
+        },
+
+        // Додавання витрати
+        expense: {
+            title: 'Додати витрату',
+            addExpense: 'Додати витрату',
+            store: 'Магазин',
+            selectStore: 'Виберіть магазин',
+            date: 'Дата',
+            time: 'Час',
+            products: 'Товари',
+            addProduct: 'Додати товар',
+            product: 'Товар',
+            quantity: 'Кількість',
+            price: 'Ціна',
+            total: 'Разом',
+            save: 'Зберегти',
+            cancel: 'Скасувати',
+            selectProduct: 'Виберіть товар',
+            enterPrice: 'Введіть ціну',
+            enterQuantity: 'Введіть кількість',
+            remove: 'Видалити',
+            expenseSaved: 'Витрату збережено',
+            fillAllFields: 'Заповніть усі поля',
+            totalAmount: 'Загальна сума',
+            noProducts: 'Додайте товари'
+        },
+
+        // Загальні фрази
+        common: {
+            loading: 'Завантаження...',
+            error: 'Помилка',
+            success: 'Успішно',
+            cancel: 'Скасувати',
+            ok: 'OK',
+            close: 'Закрити',
+            refresh: 'Оновити',
+            noData: 'Немає даних',
+            inDevelopment: 'У розробці',
+            back: 'Назад',
+            save: 'Зберегти',
+            delete: 'Видалити',
+            edit: 'Редагувати',
+            add: 'Додати',
+            search: 'Пошук',
+            filter: 'Фільтр',
+            all: 'Всі',
+            yes: 'Так',
+            no: 'Ні'
+        },
+
+        // Місяці
+        months: [
+            'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+            'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
+        ]
     }
 };
 
