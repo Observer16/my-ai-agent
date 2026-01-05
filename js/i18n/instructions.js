@@ -8,6 +8,14 @@ registerTranslations('instructions', {
     en: {
         title: 'Instructions',
         subtitle: 'User Guide'
+    },
+    es: {
+        title: 'Instrucciones',
+        subtitle: 'Guía del Usuario'
+    },
+    uk: {
+        title: 'Інструкції',
+        subtitle: 'Керівництво користувача'
     }
 });
 

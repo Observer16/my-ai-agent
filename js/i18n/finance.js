@@ -8,6 +8,14 @@ registerTranslations('finance', {
     en: {
         title: 'Finance',
         subtitle: 'Expense management and analytics'
+    },
+    es: {
+        title: 'Finanzas',
+        subtitle: 'Gestión de gastos y análisis'
+    },
+    uk: {
+        title: 'Фінанси',
+        subtitle: 'Управління витратами та аналітика'
     }
 });
 

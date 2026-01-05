@@ -12,6 +12,18 @@ registerTranslations('greeting', {
         morning: 'Good morning',
         day: 'Good afternoon',
         evening: 'Good evening'
+    },
+    es: {
+        night: 'Buenas noches',
+        morning: 'Buenos días',
+        day: 'Buenas tardes',
+        evening: 'Buenas tardes'
+    },
+    uk: {
+        night: 'Доброї ночі',
+        morning: 'Доброго ранку',
+        day: 'Доброго дня',
+        evening: 'Доброго вечора'
     }
 });
 
@@ -57,6 +69,48 @@ registerTranslations('common', {
         all: 'All',
         yes: 'Yes',
         no: 'No'
+    },
+    es: {
+        loading: 'Cargando...',
+        error: 'Error',
+        success: 'Éxito',
+        cancel: 'Cancelar',
+        ok: 'OK',
+        close: 'Cerrar',
+        refresh: 'Actualizar',
+        noData: 'Sin datos',
+        inDevelopment: 'En desarrollo',
+        back: 'Atrás',
+        save: 'Guardar',
+        delete: 'Eliminar',
+        edit: 'Editar',
+        add: 'Agregar',
+        search: 'Buscar',
+        filter: 'Filtrar',
+        all: 'Todos',
+        yes: 'Sí',
+        no: 'No'
+    },
+    uk: {
+        loading: 'Завантаження...',
+        error: 'Помилка',
+        success: 'Успішно',
+        cancel: 'Скасувати',
+        ok: 'OK',
+        close: 'Закрити',
+        refresh: 'Оновити',
+        noData: 'Немає даних',
+        inDevelopment: 'У розробці',
+        back: 'Назад',
+        save: 'Зберегти',
+        delete: 'Видалити',
+        edit: 'Редагувати',
+        add: 'Додати',
+        search: 'Пошук',
+        filter: 'Фільтр',
+        all: 'Всі',
+        yes: 'Так',
+        no: 'Ні'
     }
 });
 
@@ -68,6 +122,14 @@ registerTranslations('months', {
     en: [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
+    ],
+    es: [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ],
+    uk: [
+        'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+        'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
     ]
 });
 
@@ -88,6 +150,22 @@ registerTranslations('currency', {
         BRL: 'Brazilian Real',
         UAH: 'Ukrainian Hryvnia',
         RUB: 'Russian Ruble',
+    },
+    es: {
+        USD: 'Dólar Estadounidense',
+        EUR: 'Euro',
+        PYG: 'Guaraní Paraguayo',
+        BRL: 'Real Brasileño',
+        UAH: 'Grivna Ucraniana',
+        RUB: 'Rublo Ruso',
+    },
+    uk: {
+        USD: 'Долар США',
+        EUR: 'Євро',
+        PYG: 'Парагвайський гуарані',
+        BRL: 'Бразильський реал',
+        UAH: 'Українська гривня',
+        RUB: 'Російський рубль'
     }
 });
 

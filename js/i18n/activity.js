@@ -20,6 +20,26 @@ registerTranslations('activity', {
         workouts: 'Workouts',
         inDevelopment: 'Module in development',
         comingSoon: 'Full activity tracker coming soon'
+    },
+    es: {
+        title: 'Actividad Física',
+        subtitle: 'Seguimiento de entrenamientos y actividad',
+        stepsToday: 'Pasos hoy',
+        workoutsWeek: 'Entrenamientos esta semana',
+        caloriesToday: 'Calorías hoy',
+        workouts: 'Entrenamientos',
+        inDevelopment: 'Módulo en desarrollo',
+        comingSoon: 'Seguimiento completo de actividad próximamente'
+    },
+    uk: {
+        title: 'Фізична активність',
+        subtitle: 'Трекер тренувань та активності',
+        stepsToday: 'Кроків сьогодні',
+        workoutsWeek: 'Тренувань тиждень',
+        caloriesToday: 'Калорій сьогодні',
+        workouts: 'Тренування',
+        inDevelopment: 'Модуль у розробці',
+        comingSoon: 'Незабаром тут буде повноцінний трекер активності'
     }
 });
 

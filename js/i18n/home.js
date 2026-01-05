@@ -12,6 +12,18 @@ registerTranslations('home', {
         subtitle: 'Smart assistant for life',
         welcome: 'Welcome!',
         telegramApp: 'Telegram Mini App'
+    },
+    es: {
+        title: 'Mi Agente AI',
+        subtitle: 'Asistente inteligente para la vida',
+        welcome: '¡Bienvenido!',
+        telegramApp: 'Telegram Mini App'
+    },
+    uk: {
+        title: 'Мій AI Агент',
+        subtitle: 'Розумний помічник для життя',
+        welcome: 'Ласкаво просимо!',
+        telegramApp: 'Telegram Mini App'
     }
 });
 
@@ -27,6 +39,18 @@ registerTranslations('nav', {
         health: 'Health',
         activity: 'Activity',
         doctor: 'Medical'
+    },
+    es: {
+        finance: 'Finanzas',
+        health: 'Salud',
+        activity: 'Actividad',
+        doctor: 'Médico'
+    },
+    uk: {
+        finance: 'Фінанси',
+        health: 'Здоров\'я',
+        activity: 'Активність',
+        doctor: 'Мед. консультант'
     }
 });
 
@@ -56,6 +80,32 @@ registerTranslations('modules', {
         week: 'week',
         steps: 'steps',
         workouts: 'workouts'
+    },
+    es: {
+        health: 'Salud',
+        healthDesc: 'Seguimiento diario del bienestar, monitoreo de síntomas y recomendaciones',
+        activity: 'Actividad',
+        activityDesc: 'Seguimiento de entrenamientos, pasos y calorías con planes personalizados',
+        doctor: 'Consultor Médico',
+        doctorDesc: 'Asistente AI para consultas de salud y primeros auxilios',
+        available247: 'Disponible 24/7',
+        today: 'hoy',
+        week: 'semana',
+        steps: 'pasos',
+        workouts: 'entrenamientos'
+    },
+    uk: {
+        health: 'Здоров\'я',
+        healthDesc: 'Щоденна оцінка самопочуття, відстеження симптомів та рекомендації',
+        activity: 'Активність',
+        activityDesc: 'Трекер тренувань, кроків та калорій з персональними планами',
+        doctor: 'Медичний консультант',
+        doctorDesc: 'AI-помічник для консультацій зі здоров\'я та першої допомоги',
+        available247: 'Доступний 24/7',
+        today: 'сьогодні',
+        week: 'тиждень',
+        steps: 'кроків',
+        workouts: 'тренувань'
     }
 });
 
@@ -75,6 +125,22 @@ registerTranslations('actions', {
         priceAnalysis: 'Price Analysis',
         settings: 'Settings',
         instructions: 'Instructions'
+    },
+    es: {
+        title: 'Acciones Rápidas',
+        addExpense: 'Agregar Gasto',
+        management: 'Gestión',
+        priceAnalysis: 'Análisis de Precios',
+        settings: 'Configuración',
+        instructions: 'Instrucciones'
+    },
+    uk: {
+        title: 'Швидкі дії',
+        addExpense: 'Додати витрату',
+        management: 'Управління',
+        priceAnalysis: 'Аналіз цін',
+        settings: 'Налаштування',
+        instructions: 'Інструкції'
     }
 });
 
