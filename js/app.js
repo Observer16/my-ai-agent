@@ -6,8 +6,14 @@
 let currentInvite = null;
 let allPendingInvites = [];
 
+// Флаг, что настройка в процессе
+let isSettingUp = false;
+
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Загрузка приложения...');
+
+    // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛЮТЫ
+    await initCurrency();
 
     // Показать приветствие
     showGreeting();
@@ -15,10 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ✅ ВАЖНО: Сначала обновляем информацию о пользователе
     await updateUserOnFirstLogin();
 
-    // ✅ НОВОЕ: Проверяем и показываем первоначальную настройку (но БЕЗ await)
-    checkAndShowInitialSetup().catch(error => {
-        console.error('Ошибка проверки настройки:', error);
-    });
+    // ✅ НОВОЕ: Проверяем и показываем первоначальную настройку
+    // НЕ используем await, чтобы не блокировать загрузку
+    checkAndShowInitialSetup();
 
     // Затем проверяем приглашения
     await checkPendingInvites();
@@ -41,6 +46,7 @@ async function checkAndShowInitialSetup() {
 
         if (needsSetup) {
             console.log('📝 Показываем окно первичной настройки');
+            isSettingUp = true;
 
             // Небольшая задержка чтобы интерфейс успел загрузиться
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -298,4 +304,62 @@ function openSettings() {
     window.location.href = 'pages/settings.html';
 }
 
-console.log('✅ App.js загружен');
+// ==============================================
+// 🆕 ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ ОБНОВЛЕНИЯ ПОСЛЕ НАСТРОЙКИ
+// ==============================================
+
+/**
+ * Обновить все данные приложения после изменения настроек
+ */
+window.refreshAppAfterSetup = async function(language, currency) {
+    console.log('🔄 Обновление приложения после настройки:', { language, currency });
+
+    try {
+        // 1. Устанавливаем новый язык и валюту
+        if (language && typeof setLanguage === 'function') {
+            setLanguage(language);
+        }
+
+        if (currency && typeof setCurrency === 'function') {
+            setCurrency(currency);
+        }
+
+        // 2. Обновляем переводы интерфейса
+        if (typeof window.i18n?.updatePage === 'function') {
+            window.i18n.updatePage();
+        } else if (typeof updatePageTranslations === 'function') {
+            updatePageTranslations();
+        }
+
+        // 3. Обновляем приветствие
+        showGreeting();
+
+        // 4. Обновляем данные dashboard
+        await loadDashboardData();
+
+        // 5. Обновляем информацию о семье
+        await loadFamilyInfo();
+
+        console.log('✅ Приложение полностью обновлено после настройки');
+        return true;
+
+    } catch (error) {
+        console.error('❌ Ошибка обновления приложения:', error);
+        return false;
+    }
+};
+
+/**
+ * Показать уведомление об успешной настройке
+ */
+window.showSetupSuccess = function() {
+    tg.showPopup({
+        title: '✅ Настройки сохранены!',
+        message: 'Приложение обновлено с вашими настройками.',
+        buttons: [{type: 'ok'}]
+    });
+
+    tg.HapticFeedback.notificationOccurred('success');
+};
+
+console.log('✅ App.js загружен с поддержкой первичной настройки');
