@@ -49,19 +49,31 @@
             border-left: 3px solid var(--primary-color);
         }
 
-        .qr-instruction {
-            display: flex;
+        .qr-platforms-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 10px;
-            flex-wrap: wrap;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
         }
 
-        .qr-platform {
-            flex: 1;
-            min-width: 140px;
-            padding: 10px;
+        .platform-header {
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .platform-content {
+            padding: 12px;
             background: rgba(0,0,0,0.02);
-            border-radius: 8px;
+        }
+
+        .platform-content:nth-child(odd) {
+            background: rgba(0,0,0,0.01);
         }
 
         .quick-guide {
@@ -110,6 +122,21 @@
             counter-reset: step-counter;
             padding-left: 0;
         }
+
+        .store-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .store-tag {
+            padding: 4px 12px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 15px;
+            font-size: 13px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -123,7 +150,6 @@
     <div class="anchor-menu">
         <a href="#qr-flow" class="anchor-btn">📱 Учет по QR-чеку</a>
         <a href="#common" class="anchor-btn">❓ Частые вопросы</a>
-        <a href="#support" class="anchor-btn">🆘 Поддержка</a>
     </div>
 
     <!-- Основная инструкция -->
@@ -134,22 +160,41 @@
         <ol>
             <li class="step">
                 <strong>Найди QR-код на чеке</strong>
-                <p>В нижней части бумажного чека из любого магазина в Парагвае расположен QR-код.</p>
+                <p>В нижней части бумажного чека из магазина в Парагвае расположен QR-код.</p>
+                <div class="step-note">
+                    <strong>Доступно в крупных магазинах:</strong>
+                    <div class="store-examples">
+                        <span class="store-tag">Supermercados Stock</span>
+                        <span class="store-tag">Unión</span>
+                        <span class="store-tag">Shopping del Sol</span>
+                        <span class="store-tag">Gran Vía</span>
+                        <span class="store-tag">и других сетевых магазинах</span>
+                    </div>
+                </div>
             </li>
 
             <li class="step">
                 <strong>Отсканируй QR-код</strong>
-                <p>Используй камеру телефона или специальное приложение:</p>
-                <div class="qr-instruction">
-                    <div class="qr-platform">
-                        <strong>📱 iPhone</strong>
-                        <p>Открой приложение <strong>Камера</strong> и наведи на QR-код. Ссылка появится автоматически.</p>
-                        <div class="step-note">Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</div>
+                <p>Используй камеру телефона. Способ зависит от типа устройства:</p>
+
+                <div class="qr-platforms-table">
+                    <div class="platform-header">📱 iPhone</div>
+                    <div class="platform-header">🤖 Android</div>
+
+                    <div class="platform-content">
+                        <strong>Приложение «Камера»</strong>
+                        <p>Просто открой приложение Камера и наведи на QR-код. Ссылка появится автоматически.</p>
+                        <div class="step-note">
+                            <small>Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</small>
+                        </div>
                     </div>
-                    <div class="qr-platform">
-                        <strong>🤖 Android</strong>
-                        <p>Открой приложение <strong>Камера</strong> или встроенное приложение <strong>Google Объектив</strong>.</p>
-                        <div class="step-note">Также можно использовать приложение «Сканер QR-кодов» от Google</div>
+
+                    <div class="platform-content">
+                        <strong>Встроенные приложения</strong>
+                        <p>Используй приложение <strong>Камера</strong> или <strong>Google Объектив</strong>.</p>
+                        <div class="step-note">
+                            <small>Также можно использовать приложение «Сканер QR-кодов» от Google</small>
+                        </div>
                     </div>
                 </div>
             </li>
@@ -217,27 +262,10 @@
             <strong>Не появляется кнопка «Descargar XML»</strong>
             <p>Обнови страницу и повтори шаги 3-5. Убедись, что интернет-соединение стабильное.</p>
         </div>
-    </div>
-
-    <!-- Поддержка -->
-    <div class="section" id="support">
-        <h2>🆘 Техническая поддержка</h2>
-        <p>Если возникли проблемы с добавлением расходов через QR-код:</p>
 
         <div class="step">
-            <strong>1. Проверь подключение к интернету</strong>
-            <p>Для работы с сайтом SET и отправки файлов нужен стабильный интернет.</p>
-        </div>
-
-        <div class="step">
-            <strong>2. Напиши в поддержку бота</strong>
-            <p>Отправь сообщение с описанием проблемы боту <strong>@HealthWealthBot</strong>.</p>
-            <div class="step-note">Приложи скриншот ошибки для быстрого решения проблемы</div>
-        </div>
-
-        <div class="step">
-            <strong>3. Альтернативный способ добавления</strong>
-            <p>Если QR-код не работает, добавь расход вручную через команду <strong>/add</strong> в боте.</p>
+            <strong>В магазине нет QR-кода на чеке</strong>
+            <p>Не все магазины предоставляют QR-коды. В этом случае добавь расход вручную через команду <strong>/add</strong> в боте.</p>
         </div>
     </div>
 </div>
