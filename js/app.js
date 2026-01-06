@@ -1,4 +1,5 @@
 // Главная логика Mini App
+const tg = window.Telegram.WebApp;
 
 // === ИНИЦИАЛИЗАЦИЯ ===
 
@@ -40,6 +41,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function checkAndShowInitialSetup() {
     try {
         console.log('🔧 Проверка необходимости первичной настройки...');
+
+        // 🆕 Логируем язык Telegram для отладки
+        const tgUser = tg.initDataUnsafe?.user;
+        console.log('🌍 Telegram пользователь:', {
+            language: tgUser?.language_code,
+            firstName: tgUser?.first_name,
+            username: tgUser?.username
+        });
 
         // Проверяем нужна ли первичная настройка
         const needsSetup = await checkInitialSetup();
@@ -354,8 +363,8 @@ window.refreshAppAfterSetup = async function(language, currency) {
  */
 window.showSetupSuccess = function() {
     tg.showPopup({
-        title: '✅ Настройки сохранены!',
-        message: 'Приложение обновлено с вашими настройками.',
+        title: '✅',
+        message: t('settings.saved') || 'Настройки сохранены!',
         buttons: [{type: 'ok'}]
     });
 

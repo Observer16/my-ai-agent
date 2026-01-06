@@ -78,6 +78,99 @@ async function checkInitialSetup() {
 }
 
 /**
+ * 🆕 Определить оптимальный язык для пользователя на основе Telegram
+ */
+function detectBestLanguage(telegramLanguageCode, supportedLanguages) {
+    if (!telegramLanguageCode) return 'en';
+
+    // Нормализуем код языка (например, 'en-US' -> 'en', 'es-ES' -> 'es')
+    const tgLang = telegramLanguageCode.split('-')[0].toLowerCase();
+    const supportedCodes = supportedLanguages.map(lang => lang.code);
+
+    console.log('🔍 Определение лучшего языка:', {
+        telegram: telegramLanguageCode,
+        normalized: tgLang,
+        supported: supportedCodes
+    });
+
+    // 1. Прямое совпадение (en -> en, es -> es, ru -> ru, uk -> uk)
+    if (supportedCodes.includes(tgLang)) {
+        console.log(`✅ Прямое совпадение: ${tgLang}`);
+        return tgLang;
+    }
+
+    // 2. Для русскоязычных пользователей (ru, uk, be, kk, ky и другие языки СНГ)
+    const russianSpeaking = ['ru', 'uk', 'be', 'kk', 'ky', 'tg', 'tt', 'az', 'hy', 'ka'];
+    if (russianSpeaking.includes(tgLang)) {
+        const result = supportedCodes.includes('ru') ? 'ru' : 'en';
+        console.log(`🇷🇺 Русскоязычный пользователь (${tgLang}): ${result}`);
+        return result;
+    }
+
+    // 3. Для испаноговорящих (es, es-419, es-MX, es-AR и т.д.)
+    if (tgLang.startsWith('es')) {
+        const result = supportedCodes.includes('es') ? 'es' : 'en';
+        console.log(`🇪🇸 Испаноговорящий пользователь: ${result}`);
+        return result;
+    }
+
+    // 4. Для португальского
+    if (tgLang.startsWith('pt')) {
+        const result = supportedCodes.includes('pt') ? 'pt' :
+                      supportedCodes.includes('es') ? 'es' : 'en';
+        console.log(`🇵🇹 Португальский пользователь: ${result}`);
+        return result;
+    }
+
+    // 5. Попробуем найти похожий язык (например, 'zh' -> 'en')
+    const languageMap = {
+        'fr': 'en', // Французский -> Английский
+        'de': 'en', // Немецкий -> Английский
+        'it': 'en', // Итальянский -> Английский
+        'pl': 'en', // Польский -> Английский
+        'tr': 'en', // Турецкий -> Английский
+        'ar': 'en', // Арабский -> Английский
+        'ja': 'en', // Японский -> Английский
+        'ko': 'en', // Корейский -> Английский
+        'zh': 'en', // Китайский -> Английский
+        'hi': 'en'  // Хинди -> Английский
+    };
+
+    if (languageMap[tgLang]) {
+        console.log(`🌍 Сопоставление ${tgLang} -> ${languageMap[tgLang]}`);
+        return languageMap[tgLang];
+    }
+
+    // 6. Для остальных - английский
+    console.log(`🌐 Язык ${tgLang} не поддерживается, используем английский`);
+    return 'en';
+}
+
+/**
+ * 🆕 Получить текущий язык системы
+ */
+function getCurrentLanguage() {
+    if (typeof window.i18n?.getCurrentLanguage === 'function') {
+        return window.i18n.getCurrentLanguage();
+    }
+    return localStorage.getItem('preferred_language') || 'ru';
+}
+
+/**
+ * 🆕 Временная установка языка для модального окна
+ */
+function setLanguageForModal(langCode) {
+    if (typeof setLanguage === 'function') {
+        setLanguage(langCode);
+    } else if (typeof window.i18n?.setLanguage === 'function') {
+        window.i18n.setLanguage(langCode);
+    } else {
+        // Fallback: устанавливаем в localStorage
+        localStorage.setItem('preferred_language', langCode);
+    }
+}
+
+/**
  * Показать модальное окно первичной настройки
  */
 async function showInitialSetupModal() {
@@ -88,17 +181,30 @@ async function showInitialSetupModal() {
             API.getSupportedLanguages()
         ]);
 
-        // Определяем язык из Telegram (если доступен)
+        // 🆕 Определяем язык Telegram пользователя
         const tgUser = tg.initDataUnsafe?.user;
-        const tgLanguage = tgUser?.language_code || 'ru';
-        const defaultLanguage = tgLanguage.startsWith('en') ? 'en' : 'ru';
+        const telegramLanguage = tgUser?.language_code;
 
-        // Получаем текущие переводы
+        // 🆕 Определяем оптимальный язык для модалки
+        const bestLanguage = detectBestLanguage(telegramLanguage, languages.languages);
+
+        console.log('🌍 Настройки языка для модалки:', {
+            telegramLanguage,
+            bestLanguage,
+            supported: languages.languages.map(l => l.code)
+        });
+
+        // 🆕 Временная установка языка для отображения модалки
+        const currentLang = getCurrentLanguage();
+        setLanguageForModal(bestLanguage);
+
+        // Получаем переводы на выбранном языке
         const welcomeText = t('initialSetup.welcome') || 'Добро пожаловать!';
         const subtitleText = t('initialSetup.subtitle') || 'Настройте приложение под себя';
         const languageLabel = t('initialSetup.selectLanguage') || 'Выберите язык';
         const currencyLabel = t('initialSetup.selectCurrency') || 'Выберите валюту';
         const continueText = t('initialSetup.continue') || 'Продолжить';
+        const savingText = t('common.saving') || t('settings.save') || 'Сохранение...';
 
         // Создаем HTML модального окна
         const modalHTML = `
@@ -119,7 +225,7 @@ async function showInitialSetupModal() {
                             </label>
                             <select id="setup-language" class="initial-setup-select">
                                 ${languages.languages.map(lang => `
-                                    <option value="${lang.code}" ${lang.code === defaultLanguage ? 'selected' : ''}>
+                                    <option value="${lang.code}" ${lang.code === bestLanguage ? 'selected' : ''}>
                                         ${lang.name_native}
                                     </option>
                                 `).join('')}
@@ -158,6 +264,9 @@ async function showInitialSetupModal() {
 
         // Добавляем модальное окно в DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Восстанавливаем исходный язык
+        setLanguageForModal(currentLang);
 
         // Показываем модальное окно с анимацией
         setTimeout(() => {
@@ -261,4 +370,4 @@ async function completeInitialSetup() {
     }
 }
 
-console.log('✅ Initial-setup.js загружен с поддержкой переводов');
+console.log('✅ Initial-setup.js загружен с автоматическим определением языка Telegram');
