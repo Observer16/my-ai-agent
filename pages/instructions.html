@@ -6,6 +6,111 @@
     <title data-i18n="instructions.title">Инструкции</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .step {
+            margin-bottom: 25px;
+            counter-increment: step-counter;
+            padding-left: 50px;
+            position: relative;
+        }
+
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .step-note {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-top: 5px;
+            padding: 8px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 5px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .qr-instruction {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .qr-platform {
+            flex: 1;
+            min-width: 140px;
+            padding: 10px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 8px;
+        }
+
+        .quick-guide {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4CAF50 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .anchor-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .anchor-btn {
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .anchor-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .file-example {
+            display: inline-block;
+            padding: 5px 10px;
+            background: var(--code-bg);
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        ol {
+            counter-reset: step-counter;
+            padding-left: 0;
+        }
+    </style>
 </head>
 <body>
 <div class="header">
@@ -13,10 +118,128 @@
     <p data-i18n="instructions.subtitle">Руководство пользователя</p>
 </div>
 
-<div style="padding: 20px; text-align: center; margin-top: 50px;">
-    <div style="font-size: 64px; margin-bottom: 20px;">🚧</div>
-    <h2 style="margin-bottom: 10px;" data-i18n="common.inDevelopment">В разработке</h2>
-    <p style="opacity: 0.7; font-size: 14px;">Скоро здесь появятся полезные инструкции</p>
+<div class="container">
+    <!-- Меню быстрых ссылок -->
+    <div class="anchor-menu">
+        <a href="#qr-flow" class="anchor-btn">📱 Учет по QR-чеку</a>
+        <a href="#common" class="anchor-btn">❓ Частые вопросы</a>
+        <a href="#support" class="anchor-btn">🆘 Поддержка</a>
+    </div>
+
+    <!-- Основная инструкция -->
+    <div class="section" id="qr-flow">
+        <h2>🛒 Автоматический учет расходов по QR-чеку (Парагвай)</h2>
+        <p>Следуй этой инструкции, чтобы бот автоматически добавил покупку в нужную категорию расходов.</p>
+
+        <ol>
+            <li class="step">
+                <strong>Найди QR-код на чеке</strong>
+                <p>В нижней части бумажного чека из любого магазина в Парагвае расположен QR-код.</p>
+            </li>
+
+            <li class="step">
+                <strong>Отсканируй QR-код</strong>
+                <p>Используй камеру телефона или специальное приложение:</p>
+                <div class="qr-instruction">
+                    <div class="qr-platform">
+                        <strong>📱 iPhone</strong>
+                        <p>Открой приложение <strong>Камера</strong> и наведи на QR-код. Ссылка появится автоматически.</p>
+                        <div class="step-note">Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</div>
+                    </div>
+                    <div class="qr-platform">
+                        <strong>🤖 Android</strong>
+                        <p>Открой приложение <strong>Камера</strong> или встроенное приложение <strong>Google Объектив</strong>.</p>
+                        <div class="step-note">Также можно использовать приложение «Сканер QR-кодов» от Google</div>
+                    </div>
+                </div>
+            </li>
+
+            <li class="step">
+                <strong>Перейди по ссылке</strong>
+                <p>Нажми на уведомление или ссылку после сканирования. Откроется сайт:
+                <br><strong>https://ekuatia.set.gov.py/consultas/</strong></p>
+            </li>
+
+            <li class="step">
+                <strong>Пройди проверку (капчу)</strong>
+                <p>На сайте поставь галочку в квадрате <strong>«Я не робот»</strong> (reCAPTCHA).</p>
+            </li>
+
+            <li class="step">
+                <strong>Нажми зеленую кнопку «Consultar»</strong>
+                <p>После прохождения капчи нажми зеленую кнопку <strong>«Consultar»</strong> для загрузки данных чека.</p>
+            </li>
+
+            <li class="step">
+                <strong>Скачай файл счета (XML)</strong>
+                <p>В открывшейся фактуре найди и нажми кнопку <strong>«Descargar XML»</strong>.</p>
+                <div class="step-note">
+                    Файл сохранится в телефон с названием из цифр, например:
+                    <span class="file-example">12345678.xml</span>
+                </div>
+            </li>
+
+            <li class="step">
+                <strong>Отправь файл боту</strong>
+                <p>Перейди в чат с ботом <strong>@HealthWealthBot</strong> и отправь ему скачанный XML-файл как документ.</p>
+                <div class="step-note">Важно: отправляй именно файл, а не скриншот или текст!</div>
+            </li>
+        </ol>
+
+        <div class="quick-guide">
+            <h3>📋 Короткая инструкция</h3>
+            <p><strong>QR → Ссылка → Капча → Consultar → Descargar XML → Отправить файл боту</strong></p>
+            <p style="font-size: 12px; opacity: 0.9;">Бот пришлет уведомление о результате обработки</p>
+        </div>
+    </div>
+
+    <!-- Частые вопросы -->
+    <div class="section" id="common">
+        <h2>❓ Частые вопросы</h2>
+
+        <div class="step">
+            <strong>Что делать, если не сканируется QR-код?</strong>
+            <p>Попробуй:
+            <br>1. Увеличить яркость экрана
+            <br>2. Поднести камеру ближе/дальше
+            <br>3. Использовать приложение «QR Code Reader»</p>
+        </div>
+
+        <div class="step">
+            <strong>Файл не отправляется боту</strong>
+            <p>Убедись, что:
+            <br>• Файл имеет расширение <span class="file-example">.xml</span>
+            <br>• Отправляешь его как <strong>документ</strong> (не как фото)
+            <br>• Размер файла не превышает 20 МБ</p>
+        </div>
+
+        <div class="step">
+            <strong>Не появляется кнопка «Descargar XML»</strong>
+            <p>Обнови страницу и повтори шаги 3-5. Убедись, что интернет-соединение стабильное.</p>
+        </div>
+    </div>
+
+    <!-- Поддержка -->
+    <div class="section" id="support">
+        <h2>🆘 Техническая поддержка</h2>
+        <p>Если возникли проблемы с добавлением расходов через QR-код:</p>
+
+        <div class="step">
+            <strong>1. Проверь подключение к интернету</strong>
+            <p>Для работы с сайтом SET и отправки файлов нужен стабильный интернет.</p>
+        </div>
+
+        <div class="step">
+            <strong>2. Напиши в поддержку бота</strong>
+            <p>Отправь сообщение с описанием проблемы боту <strong>@HealthWealthBot</strong>.</p>
+            <div class="step-note">Приложи скриншот ошибки для быстрого решения проблемы</div>
+        </div>
+
+        <div class="step">
+            <strong>3. Альтернативный способ добавления</strong>
+            <p>Если QR-код не работает, добавь расход вручную через команду <strong>/add</strong> в боте.</p>
+        </div>
+    </div>
 </div>
 
 <script src="../js/config.js"></script>
