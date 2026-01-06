@@ -147,27 +147,58 @@ function detectBestLanguage(telegramLanguageCode, supportedLanguages) {
 }
 
 /**
- * 🆕 Получить текущий язык системы
+ * 🆕 Получить тексты для модалки на конкретном языке
+ * Используем статические тексты, чтобы не зависеть от системы i18n
  */
-function getCurrentLanguage() {
-    if (typeof window.i18n?.getCurrentLanguage === 'function') {
-        return window.i18n.getCurrentLanguage();
-    }
-    return localStorage.getItem('preferred_language') || 'ru';
-}
+function getModalTexts(languageCode) {
+    const texts = {
+        'ru': {
+            welcome: 'Добро пожаловать!',
+            subtitle: 'Настройте приложение под себя',
+            selectLanguage: 'Выберите язык',
+            selectCurrency: 'Выберите валюту',
+            info: 'Все суммы будут отображаться в выбранной валюте',
+            continue: 'Продолжить',
+            saving: 'Сохранение...',
+            saved: 'Настройки сохранены!',
+            error: 'Ошибка'
+        },
+        'en': {
+            welcome: 'Welcome!',
+            subtitle: 'Customize the app for yourself',
+            selectLanguage: 'Select language',
+            selectCurrency: 'Select currency',
+            info: 'All amounts will be displayed in selected currency',
+            continue: 'Continue',
+            saving: 'Saving...',
+            saved: 'Settings saved!',
+            error: 'Error'
+        },
+        'es': {
+            welcome: '¡Bienvenido!',
+            subtitle: 'Personaliza la aplicación para ti',
+            selectLanguage: 'Seleccionar idioma',
+            selectCurrency: 'Seleccionar moneda',
+            info: 'Todas las cantidades se mostrarán en la moneda seleccionada',
+            continue: 'Continuar',
+            saving: 'Guardando...',
+            saved: 'Configuración guardada!',
+            error: 'Error'
+        },
+        'uk': {
+            welcome: 'Ласкаво просимо!',
+            subtitle: 'Налаштуйте програму для себе',
+            selectLanguage: 'Виберіть мову',
+            selectCurrency: 'Виберіть валюту',
+            info: 'Всі суми будуть відображатися у вибраній валюті',
+            continue: 'Продовжити',
+            saving: 'Збереження...',
+            saved: 'Налаштування збережено!',
+            error: 'Помилка'
+        }
+    };
 
-/**
- * 🆕 Временная установка языка для модального окна
- */
-function setLanguageForModal(langCode) {
-    if (typeof setLanguage === 'function') {
-        setLanguage(langCode);
-    } else if (typeof window.i18n?.setLanguage === 'function') {
-        window.i18n.setLanguage(langCode);
-    } else {
-        // Fallback: устанавливаем в localStorage
-        localStorage.setItem('preferred_language', langCode);
-    }
+    return texts[languageCode] || texts['en'];
 }
 
 /**
@@ -194,17 +225,8 @@ async function showInitialSetupModal() {
             supported: languages.languages.map(l => l.code)
         });
 
-        // 🆕 Временная установка языка для отображения модалки
-        const currentLang = getCurrentLanguage();
-        setLanguageForModal(bestLanguage);
-
-        // Получаем переводы на выбранном языке
-        const welcomeText = t('initialSetup.welcome') || 'Добро пожаловать!';
-        const subtitleText = t('initialSetup.subtitle') || 'Настройте приложение под себя';
-        const languageLabel = t('initialSetup.selectLanguage') || 'Выберите язык';
-        const currencyLabel = t('initialSetup.selectCurrency') || 'Выберите валюту';
-        const continueText = t('initialSetup.continue') || 'Продолжить';
-        const savingText = t('common.saving') || t('settings.save') || 'Сохранение...';
+        // 🆕 Получаем тексты на выбранном языке
+        const texts = getModalTexts(bestLanguage);
 
         // Создаем HTML модального окна
         const modalHTML = `
@@ -212,8 +234,8 @@ async function showInitialSetupModal() {
                 <div class="initial-setup-content">
                     <div class="initial-setup-header">
                         <div class="initial-setup-icon">🌍</div>
-                        <h2 class="initial-setup-title">${welcomeText}</h2>
-                        <p class="initial-setup-subtitle">${subtitleText}</p>
+                        <h2 class="initial-setup-title">${texts.welcome}</h2>
+                        <p class="initial-setup-subtitle">${texts.subtitle}</p>
                     </div>
 
                     <div class="initial-setup-body">
@@ -221,7 +243,7 @@ async function showInitialSetupModal() {
                         <div class="initial-setup-field">
                             <label class="initial-setup-label">
                                 <span class="label-icon">🗣️</span>
-                                <span class="label-text">${languageLabel}</span>
+                                <span class="label-text">${texts.selectLanguage}</span>
                             </label>
                             <select id="setup-language" class="initial-setup-select">
                                 ${languages.languages.map(lang => `
@@ -236,7 +258,7 @@ async function showInitialSetupModal() {
                         <div class="initial-setup-field">
                             <label class="initial-setup-label">
                                 <span class="label-icon">💰</span>
-                                <span class="label-text">${currencyLabel}</span>
+                                <span class="label-text">${texts.selectCurrency}</span>
                             </label>
                             <select id="setup-currency" class="initial-setup-select">
                                 ${currencies.currencies.map(curr => `
@@ -249,13 +271,13 @@ async function showInitialSetupModal() {
 
                         <!-- Информация -->
                         <div class="initial-setup-info">
-                            💡 ${t('settings.currencyDescription') || 'Все суммы будут отображаться в выбранной валюте'}
+                            💡 ${texts.info}
                         </div>
                     </div>
 
                     <div class="initial-setup-footer">
                         <button class="initial-setup-button" onclick="completeInitialSetup()">
-                            ✅ ${continueText}
+                            ✅ ${texts.continue}
                         </button>
                     </div>
                 </div>
@@ -264,9 +286,6 @@ async function showInitialSetupModal() {
 
         // Добавляем модальное окно в DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-        // Восстанавливаем исходный язык
-        setLanguageForModal(currentLang);
 
         // Показываем модальное окно с анимацией
         setTimeout(() => {
@@ -277,7 +296,8 @@ async function showInitialSetupModal() {
 
     } catch (error) {
         console.error('Ошибка показа модального окна:', error);
-        tg.showAlert(t('common.error') || 'Ошибка' + ': ' + error.message);
+        // Используем простой текст для ошибки
+        tg.showAlert('Ошибка: ' + error.message);
     }
 }
 
@@ -299,19 +319,12 @@ async function completeInitialSetup() {
     try {
         tg.HapticFeedback.impactOccurred('medium');
 
-        // 🆕 ВРЕМЕННО УСТАНАВЛИВАЕМ ЯЗЫК ДЛЯ ПЕРЕВОДОВ
-        const originalLanguage = getCurrentLanguage();
-        setLanguageForModal(selectedLanguage);
+        // 🆕 Получаем тексты на выбранном языке
+        const texts = getModalTexts(selectedLanguage);
 
-        // Получаем переводы НА ВЫБРАННОМ ЯЗЫКЕ
-        const savingText = t('common.saving') || t('settings.save') || 'Сохранение...';
-        const savedText = t('settings.saved') || 'Настройки сохранены!';
-        const errorText = t('common.error') || 'Ошибка';
-        const continueText = t('initialSetup.continue') || 'Продолжить';
-
-        // Показываем индикатор загрузки с правильным переводом
+        // Показываем индикатор загрузки
         const button = document.querySelector('.initial-setup-button');
-        button.textContent = '⏳ ' + savingText;
+        button.textContent = '⏳ ' + texts.saving;
         button.disabled = true;
 
         // Отправляем настройки на сервер
@@ -339,10 +352,10 @@ async function completeInitialSetup() {
                     const success = await window.refreshAppAfterSetup(selectedLanguage, selectedCurrency);
 
                     if (success) {
-                        // 2. Показываем уведомление об успехе (уже на правильном языке)
+                        // 2. Показываем уведомление об успехе
                         tg.showPopup({
                             title: '✅',
-                            message: savedText,
+                            message: texts.saved,
                             buttons: [{type: 'ok'}]
                         });
 
@@ -362,26 +375,21 @@ async function completeInitialSetup() {
                 window.location.reload();
             }
 
-            // 🆕 Восстанавливаем исходный язык (если нужно)
-            // setLanguageForModal(originalLanguage);
-
         }, 300);
 
     } catch (error) {
         console.error('Ошибка сохранения настроек:', error);
 
-        // Используем перевод на выбранном языке для ошибки
-        tg.showAlert(errorText + ': ' + error.message);
+        // Используем текст на выбранном языке для ошибки
+        const texts = getModalTexts(selectedLanguage);
+        tg.showAlert(texts.error + ': ' + error.message);
 
         // Восстанавливаем кнопку
         const button = document.querySelector('.initial-setup-button');
-        button.textContent = '✅ ' + continueText;
+        button.textContent = '✅ ' + texts.continue;
         button.disabled = false;
 
         tg.HapticFeedback.notificationOccurred('error');
-
-        // 🆕 Восстанавливаем исходный язык при ошибке
-        // setLanguageForModal(originalLanguage);
     }
 }
 
