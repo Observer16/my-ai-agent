@@ -876,6 +876,38 @@ class APIClient {
     async getSupportedCurrencies() {
         return this.get('/users/currencies');
     }
+
+    /**
+     * Первичная настройка пользователя
+     */
+    async initialSetup(settings) {
+        return this.post('/users/me/initial-setup', settings);
+    }
+
+    /**
+     * Получить список поддерживаемых языков
+     */
+    async getSupportedLanguages() {
+        return this.get('/users/languages');
+    }
+
+    /**
+     * Получить список расходов (для проверки наличия данных)
+     */
+    async getExpenses(params = {}) {
+        let endpoint = '/expenses';
+        const queryParams = new URLSearchParams();
+
+        if (params.limit) queryParams.append('limit', params.limit);
+        if (params.offset) queryParams.append('offset', params.offset);
+        if (params.start_date) queryParams.append('start_date', params.start_date);
+        if (params.end_date) queryParams.append('end_date', params.end_date);
+
+        const query = queryParams.toString();
+        if (query) endpoint += `?${query}`;
+
+        return this.get(endpoint);
+    }
 }
 
 // Создаём глобальный экземпляр API

@@ -2,6 +2,30 @@
 /**
  * Модальное окно первичной настройки для новых пользователей
  */
+const tg = window.Telegram.WebApp;
+
+// Убедитесь, что эти функции определенны в других файлах
+// Если нет, нужно их определить или импортировать
+if (typeof setLanguage === 'undefined') {
+    console.warn('⚠️ Функция setLanguage не определена. Она должна быть в i18n/core.js');
+    window.setLanguage = function(lang) {
+        localStorage.setItem('preferred_language', lang);
+    };
+}
+
+if (typeof setCurrency === 'undefined') {
+    console.warn('⚠️ Функция setCurrency не определена. Она должна быть в currency.js');
+    window.setCurrency = function(currency) {
+        localStorage.setItem('preferred_currency', currency);
+    };
+}
+
+if (typeof t === 'undefined') {
+    console.warn('⚠️ Функция t (перевод) не определена. Она должна быть в i18n/core.js');
+    window.t = function(key) {
+        return key; // fallback
+    };
+}
 
 /**
  * Проверить, нужна ли первичная настройка
