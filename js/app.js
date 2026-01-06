@@ -1,5 +1,4 @@
 // Главная логика Mini App
-const tg = window.Telegram.WebApp;
 
 // === ИНИЦИАЛИЗАЦИЯ ===
 
