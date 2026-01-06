@@ -1,4 +1,4 @@
-// ГЛАВНАЯ ЛОГИКА MINI APP - ОБНОВЛЕННАЯ ВЕРСИЯ
+// Главная логика Mini App
 const tg = window.Telegram.WebApp;
 
 // === ИНИЦИАЛИЗАЦИЯ ===
@@ -10,17 +10,16 @@ let allPendingInvites = [];
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Загрузка приложения...');
 
-    // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛЮТЫ
-    await initCurrency();
-
     // Показать приветствие
     showGreeting();
 
     // ✅ ВАЖНО: Сначала обновляем информацию о пользователе
     await updateUserOnFirstLogin();
 
-    // ✅ НОВОЕ: Проверяем и показываем первоначальную настройку
-    await checkAndShowInitialSetup();
+    // ✅ НОВОЕ: Проверяем и показываем первоначальную настройку (но БЕЗ await)
+    checkAndShowInitialSetup().catch(error => {
+        console.error('Ошибка проверки настройки:', error);
+    });
 
     // Затем проверяем приглашения
     await checkPendingInvites();
@@ -45,7 +44,7 @@ async function checkAndShowInitialSetup() {
             console.log('📝 Показываем окно первичной настройки');
 
             // Небольшая задержка чтобы интерфейс успел загрузиться
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             await showInitialSetupModal();
         } else {
