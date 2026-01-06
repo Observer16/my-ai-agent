@@ -895,7 +895,7 @@ class APIClient {
      * Получить список расходов (для проверки наличия данных)
      */
     async getExpenses(params = {}) {
-        let endpoint = '/expenses';
+        let endpoint = '/expenses/manual/recent';
         const queryParams = new URLSearchParams();
 
         if (params.limit) queryParams.append('limit', params.limit);
