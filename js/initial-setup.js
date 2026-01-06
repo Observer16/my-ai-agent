@@ -299,9 +299,19 @@ async function completeInitialSetup() {
     try {
         tg.HapticFeedback.impactOccurred('medium');
 
-        // Показываем индикатор загрузки
+        // 🆕 ВРЕМЕННО УСТАНАВЛИВАЕМ ЯЗЫК ДЛЯ ПЕРЕВОДОВ
+        const originalLanguage = getCurrentLanguage();
+        setLanguageForModal(selectedLanguage);
+
+        // Получаем переводы НА ВЫБРАННОМ ЯЗЫКЕ
+        const savingText = t('common.saving') || t('settings.save') || 'Сохранение...';
+        const savedText = t('settings.saved') || 'Настройки сохранены!';
+        const errorText = t('common.error') || 'Ошибка';
+        const continueText = t('initialSetup.continue') || 'Продолжить';
+
+        // Показываем индикатор загрузки с правильным переводом
         const button = document.querySelector('.initial-setup-button');
-        button.textContent = '⏳ ' + (t('common.saving') || t('settings.save') || 'Сохранение...');
+        button.textContent = '⏳ ' + savingText;
         button.disabled = true;
 
         // Отправляем настройки на сервер
@@ -329,16 +339,14 @@ async function completeInitialSetup() {
                     const success = await window.refreshAppAfterSetup(selectedLanguage, selectedCurrency);
 
                     if (success) {
-                        // 2. Показываем уведомление об успехе
-                        if (typeof window.showSetupSuccess === 'function') {
-                            window.showSetupSuccess();
-                        } else {
-                            tg.showPopup({
-                                title: '✅',
-                                message: t('settings.saved') || 'Настройки сохранены!',
-                                buttons: [{type: 'ok'}]
-                            });
-                        }
+                        // 2. Показываем уведомление об успехе (уже на правильном языке)
+                        tg.showPopup({
+                            title: '✅',
+                            message: savedText,
+                            buttons: [{type: 'ok'}]
+                        });
+
+                        tg.HapticFeedback.notificationOccurred('success');
                     } else {
                         // Если обновление не удалось, перезагружаем
                         window.location.reload();
@@ -353,20 +361,27 @@ async function completeInitialSetup() {
                 // В случае ошибки все равно перезагружаем
                 window.location.reload();
             }
-        }, 300);
 
-        tg.HapticFeedback.notificationOccurred('success');
+            // 🆕 Восстанавливаем исходный язык (если нужно)
+            // setLanguageForModal(originalLanguage);
+
+        }, 300);
 
     } catch (error) {
         console.error('Ошибка сохранения настроек:', error);
-        tg.showAlert((t('common.error') || 'Ошибка') + ': ' + error.message);
+
+        // Используем перевод на выбранном языке для ошибки
+        tg.showAlert(errorText + ': ' + error.message);
 
         // Восстанавливаем кнопку
         const button = document.querySelector('.initial-setup-button');
-        button.textContent = '✅ ' + (t('initialSetup.continue') || 'Продолжить');
+        button.textContent = '✅ ' + continueText;
         button.disabled = false;
 
         tg.HapticFeedback.notificationOccurred('error');
+
+        // 🆕 Восстанавливаем исходный язык при ошибке
+        // setLanguageForModal(originalLanguage);
     }
 }
 
