@@ -93,14 +93,21 @@ async function showInitialSetupModal() {
         const tgLanguage = tgUser?.language_code || 'ru';
         const defaultLanguage = tgLanguage.startsWith('en') ? 'en' : 'ru';
 
+        // Получаем текущие переводы
+        const welcomeText = t('initialSetup.welcome') || 'Добро пожаловать!';
+        const subtitleText = t('initialSetup.subtitle') || 'Настройте приложение под себя';
+        const languageLabel = t('initialSetup.selectLanguage') || 'Выберите язык';
+        const currencyLabel = t('initialSetup.selectCurrency') || 'Выберите валюту';
+        const continueText = t('initialSetup.continue') || 'Продолжить';
+
         // Создаем HTML модального окна
         const modalHTML = `
             <div class="initial-setup-modal" id="initial-setup-modal">
                 <div class="initial-setup-content">
                     <div class="initial-setup-header">
                         <div class="initial-setup-icon">🌍</div>
-                        <h2 class="initial-setup-title">${t('initialSetup.welcome') || 'Добро пожаловать!'}</h2>
-                        <p class="initial-setup-subtitle">${t('initialSetup.subtitle') || 'Настройте приложение под себя'}</p>
+                        <h2 class="initial-setup-title">${welcomeText}</h2>
+                        <p class="initial-setup-subtitle">${subtitleText}</p>
                     </div>
 
                     <div class="initial-setup-body">
@@ -108,7 +115,7 @@ async function showInitialSetupModal() {
                         <div class="initial-setup-field">
                             <label class="initial-setup-label">
                                 <span class="label-icon">🗣️</span>
-                                <span class="label-text">${t('initialSetup.language') || 'Язык интерфейса'}</span>
+                                <span class="label-text">${languageLabel}</span>
                             </label>
                             <select id="setup-language" class="initial-setup-select">
                                 ${languages.languages.map(lang => `
@@ -123,7 +130,7 @@ async function showInitialSetupModal() {
                         <div class="initial-setup-field">
                             <label class="initial-setup-label">
                                 <span class="label-icon">💰</span>
-                                <span class="label-text">${t('initialSetup.currency') || 'Валюта'}</span>
+                                <span class="label-text">${currencyLabel}</span>
                             </label>
                             <select id="setup-currency" class="initial-setup-select">
                                 ${currencies.currencies.map(curr => `
@@ -136,13 +143,13 @@ async function showInitialSetupModal() {
 
                         <!-- Информация -->
                         <div class="initial-setup-info">
-                            💡 ${t('initialSetup.info') || 'Вы сможете изменить эти настройки позже в меню настроек'}
+                            💡 ${t('settings.currencyDescription') || 'Все суммы будут отображаться в выбранной валюте'}
                         </div>
                     </div>
 
                     <div class="initial-setup-footer">
                         <button class="initial-setup-button" onclick="completeInitialSetup()">
-                            ✅ ${t('initialSetup.continue') || 'Продолжить'}
+                            ✅ ${continueText}
                         </button>
                     </div>
                 </div>
@@ -185,7 +192,7 @@ async function completeInitialSetup() {
 
         // Показываем индикатор загрузки
         const button = document.querySelector('.initial-setup-button');
-        button.textContent = t('initialSetup.saving') || '⏳ Сохранение...';
+        button.textContent = '⏳ ' + (t('common.saving') || t('settings.save') || 'Сохранение...');
         button.disabled = true;
 
         // Отправляем настройки на сервер
@@ -219,7 +226,7 @@ async function completeInitialSetup() {
                         } else {
                             tg.showPopup({
                                 title: '✅',
-                                message: t('initialSetup.completed') || 'Настройки сохранены!',
+                                message: t('settings.saved') || 'Настройки сохранены!',
                                 buttons: [{type: 'ok'}]
                             });
                         }
@@ -254,42 +261,4 @@ async function completeInitialSetup() {
     }
 }
 
-// 🆕 Добавляем функции перевода для initial-setup
-if (typeof window.i18n === 'undefined') {
-    window.i18n = {};
-}
-
-// Простые fallback переводы для initial-setup
-const setupTranslations = {
-    'ru': {
-        'initialSetup.welcome': 'Добро пожаловать!',
-        'initialSetup.subtitle': 'Настройте приложение под себя',
-        'initialSetup.language': 'Язык интерфейса',
-        'initialSetup.currency': 'Валюта',
-        'initialSetup.info': 'Вы сможете изменить эти настройки позже в меню настроек',
-        'initialSetup.continue': 'Продолжить',
-        'initialSetup.saving': '⏳ Сохранение...',
-        'initialSetup.completed': 'Настройки сохранены!'
-    },
-    'en': {
-        'initialSetup.welcome': 'Welcome!',
-        'initialSetup.subtitle': 'Configure the app for yourself',
-        'initialSetup.language': 'Interface language',
-        'initialSetup.currency': 'Currency',
-        'initialSetup.info': 'You can change these settings later in the settings menu',
-        'initialSetup.continue': 'Continue',
-        'initialSetup.saving': '⏳ Saving...',
-        'initialSetup.completed': 'Settings saved!'
-    }
-};
-
-// Fallback функция t если основная не загружена
-if (typeof t === 'undefined') {
-    window.t = function(key) {
-        const lang = localStorage.getItem('preferred_language') || 'ru';
-        const translations = setupTranslations[lang] || setupTranslations['ru'];
-        return translations[key] || key;
-    };
-}
-
-console.log('✅ Initial-setup.js загружен с поддержкой обновления без перезагрузки');
+console.log('✅ Initial-setup.js загружен с поддержкой переводов');
