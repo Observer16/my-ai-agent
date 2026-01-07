@@ -1,5 +1,4 @@
 // Главная логика Mini App
-const tg = window.Telegram.WebApp;
 
 // === ИНИЦИАЛИЗАЦИЯ ===
 
@@ -7,17 +6,24 @@ const tg = window.Telegram.WebApp;
 let currentInvite = null;
 let allPendingInvites = [];
 
+// Флаг, что настройка в процессе
+let isSettingUp = false;
+
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Загрузка приложения...');
-    
+
     // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛЮТЫ
     await initCurrency();
 
     // Показать приветствие
     showGreeting();
-    
+
     // ✅ ВАЖНО: Сначала обновляем информацию о пользователе
     await updateUserOnFirstLogin();
+
+    // ✅ НОВОЕ: Проверяем и показываем первоначальную настройку
+    // НЕ используем await, чтобы не блокировать загрузку
+    checkAndShowInitialSetup();
 
     // Затем проверяем приглашения
     await checkPendingInvites();
@@ -27,6 +33,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('✅ Приложение готово');
 });
+
+/**
+ * Проверить и показать окно первоначальной настройки
+ */
+async function checkAndShowInitialSetup() {
+    try {
+        console.log('🔧 Проверка необходимости первичной настройки...');
+
+        // 🆕 Логируем язык Telegram для отладки
+        const tgUser = tg.initDataUnsafe?.user;
+        console.log('🌍 Telegram пользователь:', {
+            language: tgUser?.language_code,
+            firstName: tgUser?.first_name,
+            username: tgUser?.username
+        });
+
+        // Проверяем нужна ли первичная настройка
+        const needsSetup = await checkInitialSetup();
+
+        if (needsSetup) {
+            console.log('📝 Показываем окно первичной настройки');
+            isSettingUp = true;
+
+            // Небольшая задержка чтобы интерфейс успел загрузиться
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await showInitialSetupModal();
+        } else {
+            console.log('✅ Первичная настройка не требуется');
+        }
+    } catch (error) {
+        console.error('❌ Ошибка проверки первичной настройки:', error);
+        // Не блокируем работу приложения при ошибке
+    }
+}
 
 /**
  * Обновить информацию о пользователе при первом входе
@@ -271,4 +312,62 @@ function openSettings() {
     window.location.href = 'pages/settings.html';
 }
 
-console.log('✅ App.js загружен');
+// ==============================================
+// 🆕 ГЛОБАЛЬНЫЕ ФУНКЦИИ ДЛЯ ОБНОВЛЕНИЯ ПОСЛЕ НАСТРОЙКИ
+// ==============================================
+
+/**
+ * Обновить все данные приложения после изменения настроек
+ */
+window.refreshAppAfterSetup = async function(language, currency) {
+    console.log('🔄 Обновление приложения после настройки:', { language, currency });
+
+    try {
+        // 1. Устанавливаем новый язык и валюту
+        if (language && typeof setLanguage === 'function') {
+            setLanguage(language);
+        }
+
+        if (currency && typeof setCurrency === 'function') {
+            setCurrency(currency);
+        }
+
+        // 2. Обновляем переводы интерфейса
+        if (typeof window.i18n?.updatePage === 'function') {
+            window.i18n.updatePage();
+        } else if (typeof updatePageTranslations === 'function') {
+            updatePageTranslations();
+        }
+
+        // 3. Обновляем приветствие
+        showGreeting();
+
+        // 4. Обновляем данные dashboard
+        await loadDashboardData();
+
+        // 5. Обновляем информацию о семье
+        await loadFamilyInfo();
+
+        console.log('✅ Приложение полностью обновлено после настройки');
+        return true;
+
+    } catch (error) {
+        console.error('❌ Ошибка обновления приложения:', error);
+        return false;
+    }
+};
+
+/**
+ * Показать уведомление об успешной настройке
+ */
+window.showSetupSuccess = function() {
+    tg.showPopup({
+        title: '✅',
+        message: t('settings.saved') || 'Настройки сохранены!',
+        buttons: [{type: 'ok'}]
+    });
+
+    tg.HapticFeedback.notificationOccurred('success');
+};
+
+console.log('✅ App.js загружен с поддержкой первичной настройки');
