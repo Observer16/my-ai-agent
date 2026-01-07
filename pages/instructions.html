@@ -147,6 +147,10 @@
             background: var(--border-color);
             margin: 25px 0;
         }
+
+        .faq-step .step-number {
+            background: #8b5cf6;
+        }
     </style>
 </head>
 <body>
@@ -158,32 +162,28 @@
 <div class="container">
     <!-- Меню быстрых ссылок -->
     <div class="anchor-menu">
-        <a href="#qr-flow" class="anchor-btn">📱 Учет по QR-чеку</a>
-        <a href="#common" class="anchor-btn">❓ Частые вопросы</a>
+        <a href="#qr-flow" class="anchor-btn" data-i18n="instructions.navQRFlow">📱 Учет по QR-чеку</a>
+        <a href="#common" class="anchor-btn" data-i18n="instructions.navFAQ">❓ Частые вопросы</a>
     </div>
 
     <!-- Основная инструкция -->
     <div class="section" id="qr-flow">
-        <h2>🛒 Автоматический учет расходов по QR-чеку (Парагвай)</h2>
-        <p>Следуй этой инструкции, чтобы бот автоматически добавил покупку в нужную категорию расходов.</p>
+        <h2>🛒 <span data-i18n="instructions.qrFlowTitle">Автоматический учет расходов по QR-чеку (Парагвай)</span></h2>
+        <p data-i18n="instructions.qrFlowDescription">Следуй этой инструкции, чтобы бот автоматически добавил покупку в нужную категорию расходов.</p>
 
         <div class="divider"></div>
 
         <div class="step">
             <div class="step-header">
                 <div class="step-number">1</div>
-                <div class="step-title">Найди QR-код на чеке</div>
+                <div class="step-title" data-i18n="instructions.step1Title">Найди QR-код на чеке</div>
             </div>
             <div class="step-content">
-                <p>В нижней части бумажного чека из магазина в Парагвае расположен QR-код.</p>
+                <p data-i18n="instructions.step1Content">В нижней части бумажного чека из магазина в Парагвае расположен QR-код.</p>
                 <div class="step-note">
-                    <strong>Доступно в крупных магазинах:</strong>
+                    <strong data-i18n="instructions.step1NoteTitle">Доступно в крупных магазинах:</strong>
                     <div class="store-examples">
-                        <span class="store-tag">Supermercados Stock</span>
-                        <span class="store-tag">Unión</span>
-                        <span class="store-tag">Shopping del Sol</span>
-                        <span class="store-tag">Gran Vía</span>
-                        <span class="store-tag">и других сетевых магазинах</span>
+                        <span class="store-tag" data-i18n="instructions.step1Examples">Supermercados Stock, Unión, Shopping del Sol, Gran Vía, и других сетевых магазинах</span>
                     </div>
                 </div>
             </div>
@@ -194,21 +194,21 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-number">2</div>
-                <div class="step-title">Отсканируй QR-код</div>
+                <div class="step-title" data-i18n="instructions.step2Title">Отсканируй QR-код</div>
             </div>
             <div class="step-content">
-                <p>Используй камеру телефона. Способ зависит от типа устройства:</p>
+                <p data-i18n="instructions.step2Content">Используй камеру телефона. Способ зависит от типа устройства:</p>
 
                 <!-- iPhone -->
                 <div class="platform-section">
                     <div class="platform-header">
                         <div class="platform-icon">📱</div>
-                        <div>iPhone</div>
+                        <div data-i18n="instructions.iphoneHeader">iPhone</div>
                     </div>
-                    <p><strong>Приложение «Камера»</strong></p>
-                    <p>Просто открой приложение Камера и наведи на QR-код. Ссылка появится автоматически.</p>
+                    <p><strong data-i18n="instructions.iphoneMethod">Приложение «Камера»</strong></p>
+                    <p data-i18n="instructions.iphoneInstructions">Просто открой приложение Камера и наведи на QR-код. Ссылка появится автоматически.</p>
                     <div class="step-note">
-                        <small>Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</small>
+                        <small data-i18n="instructions.iphoneNote">Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</small>
                     </div>
                 </div>
 
@@ -216,12 +216,12 @@
                 <div class="platform-section">
                     <div class="platform-header">
                         <div class="platform-icon">🤖</div>
-                        <div>Android</div>
+                        <div data-i18n="instructions.androidHeader">Android</div>
                     </div>
-                    <p><strong>Встроенные приложения</strong></p>
-                    <p>Используй приложение <strong>Камера</strong> или <strong>Google Объектив</strong>.</p>
+                    <p><strong data-i18n="instructions.androidMethod">Встроенные приложения</strong></p>
+                    <p data-i18n="instructions.androidInstructions">Используй приложение Камера или Google Объектив.</p>
                     <div class="step-note">
-                        <small>Также можно использовать приложение «Сканер QR-кодов» от Google</small>
+                        <small data-i18n="instructions.androidNote">Также можно использовать приложение «Сканер QR-кодов» от Google</small>
                     </div>
                 </div>
             </div>
@@ -232,10 +232,10 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-number">3</div>
-                <div class="step-title">Перейди по ссылке</div>
+                <div class="step-title" data-i18n="instructions.step3Title">Перейди по ссылке</div>
             </div>
             <div class="step-content">
-                <p>Нажми на уведомление или ссылку после сканирования. Откроется сайт:</p>
+                <p data-i18n="instructions.step3Content">Нажми на уведомление или ссылку после сканирования. Откроется сайт:</p>
                 <p><strong>https://ekuatia.set.gov.py/consultas/</strong></p>
             </div>
         </div>
@@ -245,10 +245,10 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-number">4</div>
-                <div class="step-title">Пройди проверку (капчу)</div>
+                <div class="step-title" data-i18n="instructions.step4Title">Пройди проверку (капчу)</div>
             </div>
             <div class="step-content">
-                <p>На сайте поставь галочку в квадрате <strong>«Я не робот»</strong> (reCAPTCHA).</p>
+                <p data-i18n="instructions.step4Content">На сайте поставь галочку в квадрате «Я не робот» (reCAPTCHA).</p>
             </div>
         </div>
 
@@ -257,10 +257,10 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-number">5</div>
-                <div class="step-title">Нажми зеленую кнопку «Consultar»</div>
+                <div class="step-title" data-i18n="instructions.step5Title">Нажми зеленую кнопку «Consultar»</div>
             </div>
             <div class="step-content">
-                <p>После прохождения капчи нажми зеленую кнопку <strong>«Consultar»</strong> для загрузки данных чека.</p>
+                <p data-i18n="instructions.step5Content">После прохождения капчи нажми зеленую кнопку «Consultar» для загрузки данных чека.</p>
             </div>
         </div>
 
@@ -269,12 +269,12 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-number">6</div>
-                <div class="step-title">Скачай файл счета (XML)</div>
+                <div class="step-title" data-i18n="instructions.step6Title">Скачай файл счета (XML)</div>
             </div>
             <div class="step-content">
-                <p>В открывшейся фактуре найди и нажми кнопку <strong>«Descargar XML»</strong>.</p>
+                <p data-i18n="instructions.step6Content">В открывшейся фактуре найди и нажми кнопку «Descargar XML».</p>
                 <div class="step-note">
-                    Файл сохранится в телефон с названием из цифр, например:
+                    <span data-i18n="instructions.step6Note">Файл сохранится в телефон с названием из цифр, например:</span>
                     <span class="file-example">12345678.xml</span>
                 </div>
             </div>
@@ -285,86 +285,92 @@
         <div class="step">
             <div class="step-header">
                 <div class="step-number">7</div>
-                <div class="step-title">Отправь файл боту</div>
+                <div class="step-title" data-i18n="instructions.step7Title">Отправь файл боту</div>
             </div>
             <div class="step-content">
-                <p>Перейди в чат с ботом <strong>@HealthWealthBot</strong> и отправь ему скачанный XML-файл как документ.</p>
-                <div class="step-note">Важно: отправляй именно файл, а не скриншот или текст!</div>
+                <p data-i18n="instructions.step7Content">Перейди в чат с ботом @HealthWealthBot и отправь ему скачанный XML-файл как документ.</p>
+                <div class="step-note" data-i18n="instructions.step7Note">Важно: отправляй именно файл, а не скриншот или текст!</div>
             </div>
         </div>
 
         <div class="divider"></div>
 
         <div class="quick-guide">
-            <h3>📋 Короткая инструкция</h3>
-            <p><strong>QR → Ссылка → Капча → Consultar → Descargar XML → Отправить файл боту</strong></p>
-            <p style="font-size: 12px; opacity: 0.9;">Бот пришлет уведомление о результате обработки</p>
+            <h3>📋 <span data-i18n="instructions.quickGuideTitle">Короткая инструкция</span></h3>
+            <p><strong data-i18n="instructions.quickGuideSteps">QR → Ссылка → Капча → Consultar → Descargar XML → Отправить файл боту</strong></p>
+            <p style="font-size: 12px; opacity: 0.9;" data-i18n="instructions.quickGuideNote">Бот пришлет уведомление о результате обработки</p>
         </div>
     </div>
 
     <!-- Частые вопросы -->
     <div class="section" id="common">
-        <h2>❓ Частые вопросы</h2>
+        <h2>❓ <span data-i18n="instructions.faqTitle">Частые вопросы</span></h2>
 
-        <div class="step">
+        <div class="step faq-step">
             <div class="step-header">
                 <div class="step-number">Q1</div>
-                <div class="step-title">Что делать, если не сканируется QR-код?</div>
+                <div class="step-title" data-i18n="instructions.faq1Question">Что делать, если не сканируется QR-код?</div>
             </div>
             <div class="step-content">
-                <p>Попробуй:</p>
-                <p>1. Увеличить яркость экрана</p>
-                <p>2. Поднести камеру ближе/дальше</p>
-                <p>3. Использовать приложение «QR Code Reader»</p>
+                <p data-i18n-html="instructions.faq1Answer" data-i18n-target="html">
+                    1. Увеличить яркость экрана<br>
+                    2. Поднести камеру ближе/дальше<br>
+                    3. Использовать приложение «QR Code Reader»
+                </p>
             </div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="step">
+        <div class="step faq-step">
             <div class="step-header">
                 <div class="step-number">Q2</div>
-                <div class="step-title">Файл не отправляется боту</div>
+                <div class="step-title" data-i18n="instructions.faq2Question">Файл не отправляется боту</div>
             </div>
             <div class="step-content">
-                <p>Убедись, что:</p>
-                <p>• Файл имеет расширение <span class="file-example">.xml</span></p>
-                <p>• Отправляешь его как <strong>документ</strong> (не как фото)</p>
-                <p>• Размер файла не превышает 20 МБ</p>
+                <p data-i18n-html="instructions.faq2Answer" data-i18n-target="html">
+                    • Файл имеет расширение <span class="file-example">.xml</span><br>
+                    • Отправляешь его как <strong>документ</strong> (не как фото)<br>
+                    • Размер файла не превышает 20 МБ
+                </p>
             </div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="step">
+        <div class="step faq-step">
             <div class="step-header">
                 <div class="step-number">Q3</div>
-                <div class="step-title">Не появляется кнопка «Descargar XML»</div>
+                <div class="step-title" data-i18n="instructions.faq3Question">Не появляется кнопка «Descargar XML»</div>
             </div>
             <div class="step-content">
-                <p>Обнови страницу и повтори шаги 3-5. Убедись, что интернет-соединение стабильное.</p>
+                <p data-i18n="instructions.faq3Answer">Обнови страницу и повтори шаги 3-5. Убедись, что интернет-соединение стабильное.</p>
             </div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="step">
+        <div class="step faq-step">
             <div class="step-header">
                 <div class="step-number">Q4</div>
-                <div class="step-title">В магазине нет QR-кода на чеке</div>
+                <div class="step-title" data-i18n="instructions.faq4Question">В магазине нет QR-кода на чеке</div>
             </div>
             <div class="step-content">
-                <p>Не все магазины предоставляют QR-коды. В этом случае добавь расход вручную через команду <strong>/add</strong> в боте.</p>
+                <p data-i18n="instructions.faq4Answer">Не все магазины предоставляют QR-коды. В этом случае добавь расход вручную через команду /add в боте.</p>
             </div>
         </div>
     </div>
 </div>
 
 <script src="../js/config.js"></script>
+<script src="../js/cache.js"></script>
 <script src="../js/i18n/core.js"></script>
 <script src="../js/i18n/common.js"></script>
 <script src="../js/i18n/instructions.js"></script>
 <script src="../js/i18n-page-loader.js"></script>
+<script src="../js/currency.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/api-extensions.js"></script>
 <script src="../js/instructions.js"></script>
 </body>
 </html>
