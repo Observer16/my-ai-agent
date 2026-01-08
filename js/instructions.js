@@ -28,8 +28,8 @@ function setupTelegramBackButton() {
         }
     });
 
-    // Меняем цвет кнопки "Назад" (опционально)
-    Telegram.WebApp.BackButton.setColor('#ffffff');
+    // Убираем setColor() - этого метода нет для BackButton
+    // Telegram.WebApp.BackButton.setColor('#ffffff'); // УДАЛИТЬ ЭТУ СТРОКУ
 }
 
 // Убираем кнопку "Назад" при выходе со страницы
@@ -47,19 +47,21 @@ async function getUserInfo() {
     try {
         if (typeof API !== 'undefined' && API.getUserSettings) {
             const settings = await API.getUserSettings();
+            console.log('⚙️ Настройки пользователя:', settings);
             return {
                 timezone: settings?.timezone || 'UTC',
                 preferred_language: settings?.preferred_language || 'ru',
                 preferred_currency: settings?.preferred_currency || 'PYG'
             };
         }
+        console.log('⚠️ API не доступен, используем значения по умолчанию');
         return {
             timezone: 'UTC',
             preferred_language: 'ru',
             preferred_currency: 'PYG'
         };
     } catch (error) {
-        console.error('Ошибка получения информации о пользователе:', error);
+        console.error('❌ Ошибка получения информации о пользователе:', error);
         return {
             timezone: 'UTC',
             preferred_language: 'ru',
@@ -101,7 +103,7 @@ async function isParaguayUser() {
         });
         return false;
     } catch (error) {
-        console.error('Ошибка проверки пользователя:', error);
+        console.error('❌ Ошибка проверки пользователя:', error);
         return false;
     }
 }
@@ -110,6 +112,7 @@ async function isParaguayUser() {
 async function showAppropriateContent() {
     try {
         const isParaguay = await isParaguayUser();
+        console.log('🎯 Результат проверки Парагвая:', isParaguay);
 
         if (isParaguay) {
             // Показываем инструкцию для Парагвая
@@ -119,7 +122,7 @@ async function showAppropriateContent() {
             showInDevelopmentPage();
         }
     } catch (error) {
-        console.error('Ошибка при определении контента:', error);
+        console.error('❌ Ошибка при определении контента:', error);
         // При ошибке показываем страницу "в разработке"
         showInDevelopmentPage();
     }
@@ -131,14 +134,26 @@ function showParaguayInstructions() {
     const inDevelopmentSection = document.querySelector('.in-development-section');
     const qrFlowSection = document.getElementById('qr-flow');
 
+    console.log('🎪 Элементы DOM:');
+    console.log('- xmlInstructions:', xmlInstructions);
+    console.log('- inDevelopmentSection:', inDevelopmentSection);
+    console.log('- qrFlowSection:', qrFlowSection);
+
     if (xmlInstructions) {
         xmlInstructions.style.display = 'block';
+        console.log('📄 XML инструкция показана');
+    } else {
+        console.error('❌ Элемент xmlInstructions не найден!');
     }
+
     if (inDevelopmentSection) {
         inDevelopmentSection.style.display = 'none';
+        console.log('🚧 Секция "в разработке" скрыта');
     }
+
     if (qrFlowSection) {
         qrFlowSection.style.display = 'block';
+        console.log('🛒 Секция QR показана');
     }
 
     console.log('📋 Показана инструкция для Парагвая');
@@ -150,19 +165,29 @@ function showInDevelopmentPage() {
     const inDevelopmentSection = document.querySelector('.in-development-section');
     const qrFlowSection = document.getElementById('qr-flow');
 
+    console.log('🎪 Элементы DOM для "в разработке":');
+    console.log('- xmlInstructions:', xmlInstructions);
+    console.log('- inDevelopmentSection:', inDevelopmentSection);
+    console.log('- qrFlowSection:', qrFlowSection);
+
     // Скрываем XML инструкцию
     if (xmlInstructions) {
         xmlInstructions.style.display = 'none';
+        console.log('📄 XML инструкция скрыта');
     }
 
     // Скрываем раздел QR-инструкции
     if (qrFlowSection) {
         qrFlowSection.style.display = 'none';
+        console.log('🛒 Секция QR скрыта');
     }
 
     // Показываем раздел "в разработке"
     if (inDevelopmentSection) {
         inDevelopmentSection.style.display = 'block';
+        console.log('🚧 Секция "в разработке" показана');
+    } else {
+        console.error('❌ Элемент inDevelopmentSection не найден!');
     }
 
     console.log('🚧 Показана страница "в разработке"');
