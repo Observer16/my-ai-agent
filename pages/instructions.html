@@ -6,152 +6,7 @@
     <title data-i18n="instructions.title">Инструкции</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .section {
-            margin-bottom: 30px;
-            padding: 15px;
-            border-radius: 10px;
-            background: var(--card-bg);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .step {
-            margin-bottom: 25px;
-            counter-increment: step-counter;
-            position: relative;
-        }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .step-number {
-            width: 32px;
-            height: 32px;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .step-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        .step-content {
-            padding-left: 47px;
-        }
-
-        .step-note {
-            font-size: 12px;
-            color: var(--secondary-text);
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0,0,0,0.03);
-            border-radius: 5px;
-            border-left: 3px solid var(--primary-color);
-        }
-
-        .platform-section {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.02);
-            border: 1px solid var(--border-color);
-        }
-
-        .platform-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .platform-icon {
-            font-size: 20px;
-            margin-right: 10px;
-        }
-
-        .quick-guide {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #4CAF50 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .anchor-menu {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .anchor-btn {
-            padding: 8px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            font-size: 14px;
-            text-decoration: none;
-            color: var(--text-color);
-        }
-
-        .anchor-btn:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .file-example {
-            display: inline-block;
-            padding: 5px 10px;
-            background: var(--code-bg);
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 13px;
-            margin: 5px 0;
-        }
-
-        .store-examples {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 10px 0;
-        }
-
-        .store-tag {
-            padding: 4px 12px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 15px;
-            font-size: 13px;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .divider {
-            height: 1px;
-            background: var(--border-color);
-            margin: 25px 0;
-        }
-
-        .faq-step .step-number {
-            background: #8b5cf6;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/instructions.css">
 </head>
 <body>
 <div class="header">
@@ -159,204 +14,149 @@
     <p data-i18n="instructions.subtitle">Руководство пользователя</p>
 </div>
 
-<div class="container">
-    <!-- Меню быстрых ссылок -->
-    <div class="anchor-menu">
-        <a href="#qr-flow" class="anchor-btn" data-i18n="instructions.navQRFlow">📱 Учет по QR-чеку</a>
-        <a href="#common" class="anchor-btn" data-i18n="instructions.navFAQ">❓ Частые вопросы</a>
+<div class="instructions-container">
+    <!-- Секция для страницы "в разработке" (по умолчанию скрыта) -->
+    <div class="in-development-section">
+        <div class="emoji">🚧</div>
+        <h2 data-i18n="common.inDevelopment">В разработке</h2>
+        <p>Скоро здесь появятся полезные инструкции</p>
     </div>
 
-    <!-- Основная инструкция -->
+    <!-- Секция с инструкцией по QR-чекам (только для Парагвая) -->
     <div class="section" id="qr-flow">
         <h2>🛒 <span data-i18n="instructions.qrFlowTitle">Автоматический учет расходов по QR-чеку (Парагвай)</span></h2>
         <p data-i18n="instructions.qrFlowDescription">Следуй этой инструкции, чтобы бот автоматически добавил покупку в нужную категорию расходов.</p>
 
-        <div class="divider"></div>
+        <!-- XML инструкция (будет скрыта для не-Парагвая) -->
+        <div id="xml-instructions" style="display: none;">
+            <div class="divider"></div>
 
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">1</div>
-                <div class="step-title" data-i18n="instructions.step1Title">Найди QR-код на чеке</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step1Content">В нижней части бумажного чека из магазина в Парагвае расположен QR-код.</p>
-                <div class="step-note">
-                    <strong data-i18n="instructions.step1NoteTitle">Доступно в крупных магазинах:</strong>
-                    <div class="store-examples">
-                        <span class="store-tag" data-i18n="instructions.step1Examples">Supermercados Stock, Unión, Shopping del Sol, Gran Vía, и других сетевых магазинах</span>
-                    </div>
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title" data-i18n="instructions.step1Title">Найди QR-код на чеке</div>
                 </div>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">2</div>
-                <div class="step-title" data-i18n="instructions.step2Title">Отсканируй QR-код</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step2Content">Используй камеру телефона. Способ зависит от типа устройства:</p>
-
-                <!-- iPhone -->
-                <div class="platform-section">
-                    <div class="platform-header">
-                        <div class="platform-icon">📱</div>
-                        <div data-i18n="instructions.iphoneHeader">iPhone</div>
-                    </div>
-                    <p><strong data-i18n="instructions.iphoneMethod">Приложение «Камера»</strong></p>
-                    <p data-i18n="instructions.iphoneInstructions">Просто открой приложение Камера и наведи на QR-код. Ссылка появится автоматически.</p>
+                <div class="step-content">
+                    <p data-i18n="instructions.step1Content">В нижней части бумажного чека из магазина в Парагвае расположен QR-код.</p>
                     <div class="step-note">
-                        <small data-i18n="instructions.iphoneNote">Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</small>
+                        <strong data-i18n="instructions.step1NoteTitle">Доступно в крупных магазинах:</strong>
+                        <div class="store-examples">
+                            <span class="store-tag" data-i18n="instructions.step1Examples">Supermercados Stock, Unión, Shopping del Sol, Gran Vía, и других сетевых магазинах</span>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Android -->
-                <div class="platform-section">
-                    <div class="platform-header">
-                        <div class="platform-icon">🤖</div>
-                        <div data-i18n="instructions.androidHeader">Android</div>
+            <div class="divider"></div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title" data-i18n="instructions.step2Title">Отсканируй QR-код</div>
+                </div>
+                <div class="step-content">
+                    <p data-i18n="instructions.step2Content">Используй камеру телефона. Способ зависит от типа устройства:</p>
+
+                    <!-- iPhone -->
+                    <div class="platform-section">
+                        <div class="platform-header">
+                            <div class="platform-icon">📱</div>
+                            <div data-i18n="instructions.iphoneHeader">iPhone</div>
+                        </div>
+                        <p><strong data-i18n="instructions.iphoneMethod">Приложение «Камера»</strong></p>
+                        <p data-i18n="instructions.iphoneInstructions">Просто открой приложение Камера и наведи на QR-код. Ссылка появится автоматически.</p>
+                        <div class="step-note">
+                            <small data-i18n="instructions.iphoneNote">Убедись, что в Настройках → Камера включена функция «Сканировать QR-коды»</small>
+                        </div>
                     </div>
-                    <p><strong data-i18n="instructions.androidMethod">Встроенные приложения</strong></p>
-                    <p data-i18n="instructions.androidInstructions">Используй приложение Камера или Google Объектив.</p>
+
+                    <!-- Android -->
+                    <div class="platform-section">
+                        <div class="platform-header">
+                            <div class="platform-icon">🤖</div>
+                            <div data-i18n="instructions.androidHeader">Android</div>
+                        </div>
+                        <p><strong data-i18n="instructions.androidMethod">Встроенные приложения</strong></p>
+                        <p data-i18n="instructions.androidInstructions">Используй приложение Камера или Google Объектив.</p>
+                        <div class="step-note">
+                            <small data-i18n="instructions.androidNote">Также можно использовать приложение «Сканер QR-кодов» от Google</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title" data-i18n="instructions.step3Title">Перейди по ссылке</div>
+                </div>
+                <div class="step-content">
+                    <p data-i18n="instructions.step3Content">Нажми на уведомление или ссылку после сканирования. Откроется сайт:</p>
+                    <p><strong>https://ekuatia.set.gov.py/consultas/</strong></p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title" data-i18n="instructions.step4Title">Пройди проверку (капчу)</div>
+                </div>
+                <div class="step-content">
+                    <p data-i18n="instructions.step4Content">На сайте поставь галочку в квадрате «Я не робот» (reCAPTCHA).</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title" data-i18n="instructions.step5Title">Нажми зеленую кнопку «Consultar»</div>
+                </div>
+                <div class="step-content">
+                    <p data-i18n="instructions.step5Content">После прохождения капчи нажми зеленую кнопку «Consultar» для загрузки данных чека.</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title" data-i18n="instructions.step6Title">Скачай файл счета (XML)</div>
+                </div>
+                <div class="step-content">
+                    <p data-i18n="instructions.step6Content">В открывшейся фактуре найди и нажми кнопку «Descargar XML».</p>
                     <div class="step-note">
-                        <small data-i18n="instructions.androidNote">Также можно использовать приложение «Сканер QR-кодов» от Google</small>
+                        <span data-i18n="instructions.step6Note">Файл сохранится в телефон с названием из цифр, например:</span>
+                        <span class="file-example">12345678.xml</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="divider"></div>
+            <div class="divider"></div>
 
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">3</div>
-                <div class="step-title" data-i18n="instructions.step3Title">Перейди по ссылке</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step3Content">Нажми на уведомление или ссылку после сканирования. Откроется сайт:</p>
-                <p><strong>https://ekuatia.set.gov.py/consultas/</strong></p>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">4</div>
-                <div class="step-title" data-i18n="instructions.step4Title">Пройди проверку (капчу)</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step4Content">На сайте поставь галочку в квадрате «Я не робот» (reCAPTCHA).</p>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">5</div>
-                <div class="step-title" data-i18n="instructions.step5Title">Нажми зеленую кнопку «Consultar»</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step5Content">После прохождения капчи нажми зеленую кнопку «Consultar» для загрузки данных чека.</p>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">6</div>
-                <div class="step-title" data-i18n="instructions.step6Title">Скачай файл счета (XML)</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step6Content">В открывшейся фактуре найди и нажми кнопку «Descargar XML».</p>
-                <div class="step-note">
-                    <span data-i18n="instructions.step6Note">Файл сохранится в телефон с названием из цифр, например:</span>
-                    <span class="file-example">12345678.xml</span>
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <div class="step-title" data-i18n="instructions.step7Title">Отправь файл боту</div>
+                </div>
+                <div class="step-content">
+                    <p data-i18n="instructions.step7Content">Перейди в чат с ботом @HealthWealthBot и отправь ему скачанный XML-файл как документ.</p>
+                    <div class="step-note" data-i18n="instructions.step7Note">Важно: отправляй именно файл, а не скриншот или текст!</div>
                 </div>
             </div>
-        </div>
 
-        <div class="divider"></div>
+            <div class="divider"></div>
 
-        <div class="step">
-            <div class="step-header">
-                <div class="step-number">7</div>
-                <div class="step-title" data-i18n="instructions.step7Title">Отправь файл боту</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.step7Content">Перейди в чат с ботом @HealthWealthBot и отправь ему скачанный XML-файл как документ.</p>
-                <div class="step-note" data-i18n="instructions.step7Note">Важно: отправляй именно файл, а не скриншот или текст!</div>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="quick-guide">
-            <h3>📋 <span data-i18n="instructions.quickGuideTitle">Короткая инструкция</span></h3>
-            <p><strong data-i18n="instructions.quickGuideSteps">QR → Ссылка → Капча → Consultar → Descargar XML → Отправить файл боту</strong></p>
-            <p style="font-size: 12px; opacity: 0.9;" data-i18n="instructions.quickGuideNote">Бот пришлет уведомление о результате обработки</p>
-        </div>
-    </div>
-
-    <!-- Частые вопросы -->
-    <div class="section" id="common">
-        <h2>❓ <span data-i18n="instructions.faqTitle">Частые вопросы</span></h2>
-
-        <div class="step faq-step">
-            <div class="step-header">
-                <div class="step-number">Q1</div>
-                <div class="step-title" data-i18n="instructions.faq1Question">Что делать, если не сканируется QR-код?</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n-html="instructions.faq1Answer" data-i18n-target="html">
-                    1. Увеличить яркость экрана<br>
-                    2. Поднести камеру ближе/дальше<br>
-                    3. Использовать приложение «QR Code Reader»
-                </p>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step faq-step">
-            <div class="step-header">
-                <div class="step-number">Q2</div>
-                <div class="step-title" data-i18n="instructions.faq2Question">Файл не отправляется боту</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n-html="instructions.faq2Answer" data-i18n-target="html">
-                    • Файл имеет расширение <span class="file-example">.xml</span><br>
-                    • Отправляешь его как <strong>документ</strong> (не как фото)<br>
-                    • Размер файла не превышает 20 МБ
-                </p>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step faq-step">
-            <div class="step-header">
-                <div class="step-number">Q3</div>
-                <div class="step-title" data-i18n="instructions.faq3Question">Не появляется кнопка «Descargar XML»</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.faq3Answer">Обнови страницу и повтори шаги 3-5. Убедись, что интернет-соединение стабильное.</p>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step faq-step">
-            <div class="step-header">
-                <div class="step-number">Q4</div>
-                <div class="step-title" data-i18n="instructions.faq4Question">В магазине нет QR-кода на чеке</div>
-            </div>
-            <div class="step-content">
-                <p data-i18n="instructions.faq4Answer">Не все магазины предоставляют QR-коды. В этом случае добавь расход вручную через команду /add в боте.</p>
+            <div class="quick-guide">
+                <h3>📋 <span data-i18n="instructions.quickGuideTitle">Короткая инструкция</span></h3>
+                <p><strong data-i18n="instructions.quickGuideSteps">QR → Ссылка → Капча → Consultar → Descargar XML → Отправить файл боту</strong></p>
+                <p style="font-size: 14px; opacity: 0.9;" data-i18n="instructions.quickGuideNote">Бот пришлет уведомление о результате обработки</p>
             </div>
         </div>
     </div>
