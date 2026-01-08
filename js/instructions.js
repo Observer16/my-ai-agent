@@ -4,6 +4,26 @@
  * Для всех остальных - страница "в разработке"
  */
 
+// Функция возврата на главную страницу
+function goBack() {
+    console.log('🔙 Возврат на главную страницу');
+
+    // Проверяем, находимся ли мы в WebApp Telegram
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+        // Закрываем WebApp
+        Telegram.WebApp.close();
+    } else {
+        // Если не в Telegram, пробуем вернуться через историю браузера
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            // Если истории нет, перенаправляем на главную страницу
+            // Замените '/index.html' на путь к вашей главной странице
+            window.location.href = '../index.html';
+        }
+    }
+}
+
 // Получаем информацию о пользователе с сервера
 async function getUserInfo() {
     try {
@@ -156,6 +176,7 @@ if (typeof window !== 'undefined') {
     window.initInstructionsPage = initInstructionsPage;
     window.isParaguayUser = isParaguayUser;
     window.showAppropriateContent = showAppropriateContent;
+    window.goBack = goBack; // Экспортируем функцию goBack
 }
 
 console.log('✅ instructions.js загружен');
