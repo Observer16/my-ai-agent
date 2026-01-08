@@ -4,23 +4,41 @@
  * Для всех остальных - страница "в разработке"
  */
 
-// Функция возврата на главную страницу
-function goBack() {
-    console.log('🔙 Возврат на главную страницу');
+// Настройка Telegram WebApp кнопки "Назад"
+function setupTelegramBackButton() {
+    if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
+        console.log('Telegram WebApp не обнаружен');
+        return;
+    }
 
-    // Проверяем, находимся ли мы в WebApp Telegram
-    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-        // Закрываем WebApp
-        Telegram.WebApp.close();
-    } else {
-        // Если не в Telegram, пробуем вернуться через историю браузера
+    console.log('🔙 Настройка кнопки "Назад" Telegram WebApp');
+
+    // Показываем кнопку "Назад"
+    Telegram.WebApp.BackButton.show();
+
+    // Устанавливаем обработчик для кнопки "Назад"
+    Telegram.WebApp.BackButton.onClick(function() {
+        console.log('🔙 Кнопка "Назад" нажата');
+        // Возвращаемся на предыдущую страницу или в историю
         if (window.history.length > 1) {
             window.history.back();
         } else {
-            // Если истории нет, перенаправляем на главную страницу
-            // Замените '/index.html' на путь к вашей главной странице
+            // Если нет истории, перенаправляем на главную
             window.location.href = '../index.html';
         }
+    });
+
+    // Меняем цвет кнопки "Назад" (опционально)
+    Telegram.WebApp.BackButton.setColor('#ffffff');
+}
+
+// Убираем кнопку "Назад" при выходе со страницы
+function cleanupTelegramBackButton() {
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+        // Удаляем обработчики
+        Telegram.WebApp.BackButton.offClick();
+        // Скрываем кнопку (она скроется автоматически при переходе, но на всякий случай)
+        Telegram.WebApp.BackButton.hide();
     }
 }
 
@@ -155,6 +173,9 @@ async function initInstructionsPage() {
     console.log('📋 Инициализация страницы инструкций...');
 
     try {
+        // Настраиваем кнопку "Назад" в Telegram WebApp
+        setupTelegramBackButton();
+
         // Ждем загрузки i18n если он есть
         if (typeof initPageI18n === 'function') {
             await initPageI18n();
@@ -171,12 +192,16 @@ async function initInstructionsPage() {
     }
 }
 
+// Очистка при уходе со страницы
+window.addEventListener('beforeunload', function() {
+    cleanupTelegramBackButton();
+});
+
 // Экспорт функций
 if (typeof window !== 'undefined') {
     window.initInstructionsPage = initInstructionsPage;
     window.isParaguayUser = isParaguayUser;
     window.showAppropriateContent = showAppropriateContent;
-    window.goBack = goBack; // Экспортируем функцию goBack
 }
 
 console.log('✅ instructions.js загружен');
