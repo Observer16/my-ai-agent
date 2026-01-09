@@ -156,7 +156,7 @@ registerTranslations('budget', {
         filter30days: '30 днів',
         filter90days: '90 днів',
         filter180days: '180 днів',
-        filter360days: 'Один рік'
+        filter360days: 'Один рік',
         searchProduct: 'Пошук товару...',
         noTrendsData: 'Немає даних',
         newProduct: 'Новий',
