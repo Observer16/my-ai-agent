@@ -84,6 +84,29 @@ APIClient.prototype.post = async function(endpoint, data = {}) {
     }
 };
 
+/**
+ * Получает детальную информацию о покупке (чеке)
+ * @param {string} purchaseId - UUID покупки
+ * @returns {Promise<Object>} Детали чека с товарами
+ */
+API.getPurchaseDetails = async function(purchaseId) {
+    try {
+        console.log(`📄 Получение деталей чека: ${purchaseId}`);
+
+        const response = await this.request(`/purchases/${purchaseId}/items`, {
+            method: 'GET'
+        });
+
+        console.log(`✅ Детали чека получены:`, response);
+        return response;
+    } catch (error) {
+        console.error('❌ Ошибка получения деталей чека:', error);
+        throw error;
+    }
+};
+
+console.log('✅ API метод getPurchaseDetails добавлен');
+
 // Методы для работы с настройками пользователя
 APIClient.prototype.getUserSettings = async function() {
     return this.get('/users/me/settings');
