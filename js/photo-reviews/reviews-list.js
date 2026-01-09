@@ -21,8 +21,8 @@ const ReviewsList = {
         // Настройка поиска
         this.setupSearch();
         
-        // Загрузка отзывов
-        await this.loadReviews();
+        // Временно показываем пустое состояние вместо загрузки с API
+        this.showEmptyState();
         
         console.log('✅ Список отзывов готов');
     },
@@ -177,11 +177,8 @@ const ReviewsList = {
 
     /**
      * Получить URL фото
-     * ВАЖНО: Telegram WebApp может загружать фото только через Bot API
      */
     getPhotoUrl(fileId) {
-        // Используем заглушку, так как прямой доступ к фото через file_id
-        // требует дополнительного запроса к Bot API через backend
         return `data:image/svg+xml,${encodeURIComponent(`
             <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
                 <rect width="200" height="200" fill="#eee"/>
