@@ -285,7 +285,8 @@ function openModule(moduleName) {
         'health': 'health-module/index.html',
         'activity': 'pages/activity.html',
         'doctor': 'pages/doctor.html',
-        'instructions': 'pages/instructions.html'
+        'instructions': 'pages/instructions.html',
+        'photo-reviews': 'pages/photo-reviews.html'
     };
 
     const page = modulePages[moduleName];
