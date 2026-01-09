@@ -1,0 +1,480 @@
+/* css/photo-reviews.css - Стили модуля фото-отзывов */
+
+/* ===== ОБЩИЕ СТИЛИ ===== */
+.photo-reviews-container {
+    padding: 16px;
+    padding-bottom: 80px;
+}
+
+/* ===== ЗАГОЛОВОК МОДУЛЯ ===== */
+.photo-reviews-header {
+    margin-bottom: 20px;
+}
+
+.photo-reviews-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--tg-theme-text-color);
+}
+
+.photo-reviews-header p {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+    margin: 0;
+}
+
+/* ===== КНОПКА ДОБАВЛЕНИЯ ===== */
+.add-review-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: opacity 0.2s;
+}
+
+.add-review-btn:active {
+    opacity: 0.7;
+}
+
+/* ===== ФИЛЬТРЫ ===== */
+.reviews-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    background: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    border: 1px solid var(--tg-theme-hint-color);
+    border-radius: 20px;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn.active {
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border-color: var(--tg-theme-button-color);
+}
+
+.filter-btn:active {
+    opacity: 0.7;
+}
+
+/* ===== ПОИСК ===== */
+.reviews-search {
+    margin-bottom: 16px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--tg-theme-secondary-bg-color);
+    border: 1px solid var(--tg-theme-hint-color);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--tg-theme-text-color);
+}
+
+.search-input::placeholder {
+    color: var(--tg-theme-hint-color);
+}
+
+/* ===== СПИСОК ОТЗЫВОВ ===== */
+.reviews-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.review-card {
+    background: var(--tg-theme-secondary-bg-color);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.review-card:active {
+    opacity: 0.7;
+}
+
+.review-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--tg-theme-bg-color);
+}
+
+.review-info {
+    padding: 8px;
+}
+
+.review-rating {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.review-date {
+    font-size: 11px;
+    color: var(--tg-theme-hint-color);
+}
+
+.review-comment-preview {
+    font-size: 12px;
+    color: var(--tg-theme-text-color);
+    margin: 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--tg-theme-text-color);
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+    margin: 0;
+}
+
+/* ===== ЗАГРУЗКА ===== */
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--tg-theme-hint-color);
+    border-top-color: var(--tg-theme-button-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ===== */
+.create-review-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--tg-theme-bg-color);
+    z-index: 1000;
+    display: none;
+    overflow-y: auto;
+}
+
+.create-review-modal.active {
+    display: block;
+}
+
+.create-review-content {
+    padding: 16px;
+    padding-bottom: 80px;
+}
+
+/* Шаги создания */
+.create-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.create-step {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    color: var(--tg-theme-hint-color);
+    font-size: 12px;
+    position: relative;
+}
+
+.create-step.active {
+    color: var(--tg-theme-button-color);
+    font-weight: 600;
+}
+
+.create-step.completed {
+    color: var(--tg-theme-text-color);
+}
+
+/* Шаг 1: Фото */
+.photo-upload-area {
+    border: 2px dashed var(--tg-theme-hint-color);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.photo-upload-area.has-photo {
+    border-style: solid;
+    border-color: var(--tg-theme-button-color);
+    padding: 0;
+}
+
+.upload-preview {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.upload-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.upload-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--tg-theme-secondary-bg-color);
+    border: 1px solid var(--tg-theme-hint-color);
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.upload-btn:active {
+    opacity: 0.7;
+}
+
+/* Шаг 2: Оценка */
+.rating-section {
+    margin-bottom: 20px;
+}
+
+.rating-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: var(--tg-theme-text-color);
+}
+
+.rating-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.rating-btn {
+    flex: 1;
+    padding: 20px;
+    background: var(--tg-theme-secondary-bg-color);
+    border: 2px solid var(--tg-theme-hint-color);
+    border-radius: 12px;
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rating-btn.selected {
+    border-color: var(--tg-theme-button-color);
+    background: var(--tg-theme-button-color);
+}
+
+.rating-btn:active {
+    transform: scale(0.95);
+}
+
+/* Шаг 3: Детали */
+.details-section {
+    margin-bottom: 20px;
+}
+
+.details-section label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--tg-theme-text-color);
+}
+
+.details-section textarea,
+.details-section input {
+    width: 100%;
+    padding: 12px;
+    background: var(--tg-theme-secondary-bg-color);
+    border: 1px solid var(--tg-theme-hint-color);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--tg-theme-text-color);
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.details-section textarea::placeholder,
+.details-section input::placeholder {
+    color: var(--tg-theme-hint-color);
+}
+
+.hint-text {
+    font-size: 12px;
+    color: var(--tg-theme-hint-color);
+    margin-top: 4px;
+}
+
+/* Кнопки действий */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.action-btn-cancel {
+    background: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+}
+
+.action-btn-next,
+.action-btn-save {
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-btn:active:not(:disabled) {
+    opacity: 0.7;
+}
+
+/* ===== ПРОСМОТР ОТЗЫВА ===== */
+.view-review-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--tg-theme-bg-color);
+    z-index: 1000;
+    display: none;
+    overflow-y: auto;
+}
+
+.view-review-modal.active {
+    display: block;
+}
+
+.view-review-content {
+    padding: 16px;
+    padding-bottom: 80px;
+}
+
+.view-photo {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.review-detail {
+    margin-bottom: 16px;
+}
+
+.review-detail-label {
+    font-size: 12px;
+    color: var(--tg-theme-hint-color);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.review-detail-value {
+    font-size: 16px;
+    color: var(--tg-theme-text-color);
+}
+
+.review-detail-value.large {
+    font-size: 32px;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.tag {
+    padding: 6px 12px;
+    background: var(--tg-theme-secondary-bg-color);
+    border-radius: 16px;
+    font-size: 12px;
+    color: var(--tg-theme-text-color);
+}
+
+.delete-btn {
+    width: 100%;
+    padding: 16px;
+    background: #ff3b30;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.2s;
+}
+
+.delete-btn:active {
+    opacity: 0.7;
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (min-width: 768px) {
+    .reviews-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
