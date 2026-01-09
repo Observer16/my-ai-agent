@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="photoReviews.title">Фото-отзывы</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/back-button.css">
+    <link rel="stylesheet" href="../css/photo-reviews.css">
+</head>
+<body>
+    <div class="photo-reviews-container">
+        <!-- Заголовок -->
+        <div class="photo-reviews-header">
+            <h1 data-i18n="photoReviews.title">Фото-отзывы</h1>
+            <p data-i18n="photoReviews.subtitle">Личный дневник покупок с фото</p>
+        </div>
+
+        <!-- Кнопка добавления -->
+        <button class="add-review-btn" id="addReviewBtn">
+            📸 <span data-i18n="photoReviews.addNew">Добавить отзыв</span>
+        </button>
+
+        <!-- Фильтры -->
+        <div class="reviews-filters" id="reviewsFilters">
+            <button class="filter-btn active" data-filter="all" data-i18n="photoReviews.list.all">
+                Все отзывы
+            </button>
+            <button class="filter-btn" data-filter="good">
+                👍 <span data-i18n="photoReviews.list.good">Хорошие</span>
+            </button>
+            <button class="filter-btn" data-filter="bad">
+                👎 <span data-i18n="photoReviews.list.bad">Плохие</span>
+            </button>
+        </div>
+
+        <!-- Поиск -->
+        <div class="reviews-search">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput"
+                placeholder="Поиск по комментариям..."
+                data-i18n-placeholder="photoReviews.list.search"
+            >
+        </div>
+
+        <!-- Список отзывов -->
+        <div id="reviewsList">
+            <!-- Загрузка -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания отзыва -->
+    <div class="create-review-modal" id="createModal">
+        <div class="create-review-content">
+            <h2 data-i18n="photoReviews.create.title">Новый отзыв</h2>
+            
+            <!-- Индикатор шагов -->
+            <div class="create-steps">
+                <div class="create-step active" id="step1Indicator">
+                    <span data-i18n="photoReviews.create.step1">Шаг 1: Фото</span>
+                </div>
+                <div class="create-step" id="step2Indicator">
+                    <span data-i18n="photoReviews.create.step2">Шаг 2: Оценка</span>
+                </div>
+                <div class="create-step" id="step3Indicator">
+                    <span data-i18n="photoReviews.create.step3">Шаг 3: Детали</span>
+                </div>
+            </div>
+
+            <!-- Шаг 1: Фото -->
+            <div class="create-step-content" id="photoStep">
+                <div class="photo-upload-area" id="photoUploadArea">
+                    <div class="upload-buttons" id="uploadButtons">
+                        <button class="upload-btn" id="takePhotoBtn">
+                            <span data-i18n="photoReviews.create.takePhoto">📷 Сделать фото</span>
+                        </button>
+                        <button class="upload-btn" id="choosePhotoBtn">
+                            <span data-i18n="photoReviews.create.choosePhoto">🖼️ Выбрать из галереи</span>
+                        </button>
+                    </div>
+                    <img id="photoPreview" class="upload-preview" style="display: none;" alt="Preview">
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn action-btn-cancel" id="cancelPhotoBtn" data-i18n="common.cancel">
+                        Отмена
+                    </button>
+                    <button class="action-btn action-btn-next" id="nextToRatingBtn" disabled>
+                        <span data-i18n="common.next">Далее</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Шаг 2: Оценка -->
+            <div class="create-step-content" id="ratingStep" style="display: none;">
+                <div class="rating-section">
+                    <h3 data-i18n="photoReviews.create.rateProduct">Оцените товар</h3>
+                    <div class="rating-buttons">
+                        <button class="rating-btn" id="goodBtn" data-rating="good">
+                            <div>👍</div>
+                            <div style="font-size: 14px; margin-top: 8px;" data-i18n="photoReviews.create.good">Хорошо</div>
+                        </button>
+                        <button class="rating-btn" id="badBtn" data-rating="bad">
+                            <div>👎</div>
+                            <div style="font-size: 14px; margin-top: 8px;" data-i18n="photoReviews.create.bad">Плохо</div>
+                        </button>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn action-btn-cancel" id="backToPhotoBtn" data-i18n="common.back">
+                        Назад
+                    </button>
+                    <button class="action-btn action-btn-next" id="nextToDetailsBtn" disabled>
+                        <span data-i18n="common.next">Далее</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Шаг 3: Детали -->
+            <div class="create-step-content" id="detailsStep" style="display: none;">
+                <div class="details-section">
+                    <label data-i18n="photoReviews.create.addComment">Комментарий (опционально)</label>
+                    <textarea 
+                        id="commentInput" 
+                        maxlength="500"
+                        placeholder="Что вам понравилось или не понравилось?"
+                        data-i18n-placeholder="photoReviews.create.commentPlaceholder"
+                    ></textarea>
+                    <p class="hint-text"><span id="commentCounter">0</span>/500</p>
+                </div>
+                
+                <div class="details-section">
+                    <label data-i18n="photoReviews.create.addTags">Теги (опционально)</label>
+                    <input 
+                        type="text" 
+                        id="tagsInput"
+                        placeholder="Например: молоко, сыр"
+                        data-i18n-placeholder="photoReviews.create.tagsPlaceholder"
+                    >
+                    <p class="hint-text" data-i18n="photoReviews.create.tagsHint">До 10 тегов через запятую</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn action-btn-cancel" id="backToRatingBtn" data-i18n="common.back">
+                        Назад
+                    </button>
+                    <button class="action-btn action-btn-save" id="saveReviewBtn">
+                        <span data-i18n="photoReviews.create.save">Сохранить отзыв</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра отзыва -->
+    <div class="view-review-modal" id="viewModal">
+        <div class="view-review-content" id="viewContent">
+            <!-- Контент загружается динамически -->
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="../js/config.js"></script>
+    <script src="../js/cache.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/photo-reviews/reviews-api.js"></script>
+    
+    <!-- i18n -->
+    <script src="../js/i18n/core.js"></script>
+    <script src="../js/i18n/common.js"></script>
+    <script src="../js/i18n/photo-reviews.js"></script>
+    <script src="../js/i18n-page-loader.js"></script>
+    
+    <!-- Компоненты -->
+    <script src="../js/components/back-button.js"></script>
+    
+    <!-- Модули фото-отзывов -->
+    <script src="../js/photo-reviews/reviews-list.js"></script>
+    <script src="../js/photo-reviews/reviews-create.js"></script>
+    <script src="../js/photo-reviews/reviews-view.js"></script>
+</body>
+</html>
