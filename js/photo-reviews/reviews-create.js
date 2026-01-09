@@ -16,6 +16,22 @@ const ReviewsCreate = {
     init() {
         console.log('🔧 Инициализация создания отзывов...');
         
+        // Получаем объект Telegram WebApp
+        this.tg = window.Telegram?.WebApp;
+
+        if (!this.tg) {
+            console.warn('⚠️ Telegram WebApp не найден');
+            // Создаем заглушку для отладки вне Telegram
+            this.tg = {
+                HapticFeedback: {
+                    impactOccurred: () => {},
+                    notificationOccurred: () => {}
+                },
+                showAlert: (msg) => console.log('Alert:', msg),
+                showPopup: (params) => console.log('Popup:', params)
+            };
+        }
+
         // Кнопка открытия модального окна
         const addBtn = document.getElementById('addReviewBtn');
         addBtn.addEventListener('click', () => this.open());
@@ -53,7 +69,7 @@ const ReviewsCreate = {
     open() {
         this.reset();
         document.getElementById('createModal').classList.add('active');
-        tg.HapticFeedback.impactOccurred('medium');
+        this.tg.HapticFeedback.impactOccurred('medium');
     },
 
     /**
@@ -62,7 +78,7 @@ const ReviewsCreate = {
     close() {
         document.getElementById('createModal').classList.remove('active');
         this.reset();
-        tg.HapticFeedback.impactOccurred('light');
+        this.tg.HapticFeedback.impactOccurred('light');
     },
 
     /**
@@ -84,7 +100,7 @@ const ReviewsCreate = {
         document.getElementById('commentInput').value = '';
         document.getElementById('commentCounter').textContent = '0';
         document.getElementById('tagsInput').value = '';
-        
+
         document.querySelectorAll('.rating-btn').forEach(btn => {
             btn.classList.remove('selected');
         });
@@ -123,7 +139,7 @@ const ReviewsCreate = {
             document.getElementById('step3Indicator').classList.add('active');
         }
 
-        tg.HapticFeedback.impactOccurred('light');
+        this.tg.HapticFeedback.impactOccurred('light');
     },
 
     /**
@@ -132,8 +148,8 @@ const ReviewsCreate = {
     async takePhoto() {
         try {
             // Проверка поддержки Telegram WebApp API
-            if (!tg.requestContact) {
-                tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
+            if (!this.tg.requestContact) {
+                this.tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
                 return;
             }
 
@@ -141,11 +157,11 @@ const ReviewsCreate = {
             // Используем обходной путь через input file
             this.openPhotoInput();
 
-            tg.HapticFeedback.impactOccurred('medium');
-            
+            this.tg.HapticFeedback.impactOccurred('medium');
+
         } catch (error) {
             console.error('❌ Ошибка при съёмке фото:', error);
-            tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
+            this.tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
         }
     },
 
@@ -154,7 +170,7 @@ const ReviewsCreate = {
      */
     choosePhoto() {
         this.openPhotoInput();
-        tg.HapticFeedback.impactOccurred('light');
+        this.tg.HapticFeedback.impactOccurred('light');
     },
 
     /**
@@ -182,7 +198,7 @@ const ReviewsCreate = {
     async handlePhotoSelected(file) {
         // Проверка размера (макс 20MB)
         if (file.size > 20 * 1024 * 1024) {
-            tg.showAlert('Файл слишком большой. Максимум 20MB');
+            this.tg.showAlert('Файл слишком большой. Максимум 20MB');
             return;
         }
 
@@ -198,14 +214,14 @@ const ReviewsCreate = {
             const preview = document.getElementById('photoPreview');
             preview.src = e.target.result;
             preview.style.display = 'block';
-            
+
             document.getElementById('uploadButtons').style.display = 'none';
             document.getElementById('photoUploadArea').classList.add('has-photo');
             document.getElementById('nextToRatingBtn').disabled = false;
         };
         reader.readAsDataURL(file);
 
-        tg.HapticFeedback.notificationOccurred('success');
+        this.tg.HapticFeedback.notificationOccurred('success');
     },
 
     /**
@@ -224,7 +240,7 @@ const ReviewsCreate = {
 
         document.getElementById('nextToDetailsBtn').disabled = false;
 
-        tg.HapticFeedback.impactOccurred('medium');
+        this.tg.HapticFeedback.impactOccurred('medium');
     },
 
     /**
@@ -232,11 +248,11 @@ const ReviewsCreate = {
      */
     async save() {
         const saveBtn = document.getElementById('saveReviewBtn');
-        
+
         try {
             // Валидация
             if (!this.photoFileId || !this.selectedRating) {
-                tg.showAlert(t('photoReviews.errors.ratingRequired'));
+                this.tg.showAlert(t('photoReviews.errors.ratingRequired'));
                 return;
             }
 
@@ -271,13 +287,13 @@ const ReviewsCreate = {
             this.close();
 
             // Показываем уведомление
-            tg.showPopup({
+            this.tg.showPopup({
                 title: '✅',
                 message: t('photoReviews.create.success'),
                 buttons: [{type: 'ok'}]
             });
 
-            tg.HapticFeedback.notificationOccurred('success');
+            this.tg.HapticFeedback.notificationOccurred('success');
 
             // Обновляем список
             if (window.ReviewsList) {
@@ -286,8 +302,8 @@ const ReviewsCreate = {
 
         } catch (error) {
             console.error('❌ Ошибка сохранения отзыва:', error);
-            tg.showAlert(t('photoReviews.create.error') + ': ' + error.message);
-            tg.HapticFeedback.notificationOccurred('error');
+            this.tg.showAlert(t('photoReviews.create.error') + ': ' + error.message);
+            this.tg.HapticFeedback.notificationOccurred('error');
         } finally {
             saveBtn.disabled = false;
             saveBtn.textContent = t('photoReviews.create.save');
