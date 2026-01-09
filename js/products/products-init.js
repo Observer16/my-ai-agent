@@ -17,8 +17,40 @@ async function init() {
     await initCurrency();
 
     tg.expand();
-    tg.BackButton.show();
-    tg.BackButton.onClick(() => window.location.href = '../index.html');
+
+    // Инициализируем компонент кнопки "Назад"
+    if (window.BackButton && typeof window.BackButton.init === 'function') {
+        // Определяем fallback URL
+        let fallbackUrl = 'finance.html'; // Возвращаем на finance.html
+
+        // Пытаемся определить откуда пришли
+        if (document.referrer) {
+            try {
+                const referrer = new URL(document.referrer);
+                const current = new URL(window.location.href);
+
+                // Если пришли не с той же страницы, используем referrer как fallback
+                if (referrer.pathname !== current.pathname) {
+                    fallbackUrl = document.referrer;
+                }
+            } catch (e) {
+                console.log('🔙 Не удалось разобрать referrer:', e);
+            }
+        }
+
+        window.BackButton.setFallbackUrl(fallbackUrl).init();
+        console.log('🔙 Компонент BackButton инициализирован на странице products');
+    } else {
+        // Fallback: используем стандартную кнопку Telegram если доступна
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'finance.html'; // Возвращаем на finance.html
+            }
+        });
+    }
 
     loadData();
     updateButtonsVisibility();
