@@ -7,7 +7,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/budget.css">
-    <link rel="stylesheet" href="../css/receipt-modal.css">
 </head>
 <body>
 <div class="header">
@@ -49,9 +48,6 @@
 <!-- Компонент баннера и основная логика -->
 <script src="../js/components/monthly-banner.js"></script>
 <script src="../js/finance.js"></script>
-<!-- Компоненты -->
-<script src="../js/components/receipt-modal.js"></script>
-<script src="../js/components/recent-receipts.js"></script>
 
 <script>
 // Инициализация при загрузке страницы
@@ -64,11 +60,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Инициализируем баннер
     if (window.monthlyBanner) {
         await window.monthlyBanner.init();
-    }
-
-    // ✅ НОВОЕ: Инициализируем компонент последних чеков
-    if (window.recentReceipts) {
-        await window.recentReceipts.init();
     }
 
     // Инициализируем основную логику finance.js

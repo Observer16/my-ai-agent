@@ -33,7 +33,16 @@ registerTranslations('budget', {
         loading: 'Загрузка...',
         error: 'Произошла ошибка при загрузке данных',
         accessDenied: 'Недостаточно прав для просмотра',
-        authRequired: 'Требуется авторизация в Telegram'
+        authRequired: 'Требуется авторизация в Telegram',
+        // Переводы для модального окна чека
+        receiptDetails: 'Детали чека',
+        store: 'Магазин',
+        date: 'Дата',
+        paymentMethod: 'Способ оплаты',
+        invoiceNumber: 'Номер чека',
+        items: 'Товары',
+        total: 'Итого',
+        receipt: 'Чек'
     },
     en: {
         title: 'Supermarket Purchases',
@@ -67,7 +76,16 @@ registerTranslations('budget', {
         loading: 'Loading...',
         error: 'An error occurred while loading data',
         accessDenied: 'Insufficient permissions to view',
-        authRequired: 'Telegram authorization required'
+        authRequired: 'Telegram authorization required',
+        // Modal translations
+        receiptDetails: 'Receipt Details',
+        store: 'Store',
+        date: 'Date',
+        paymentMethod: 'Payment Method',
+        invoiceNumber: 'Invoice Number',
+        items: 'Items',
+        total: 'Total',
+        receipt: 'Receipt'
     },
     es: {
         title: 'Compras en Supermercados',
@@ -101,7 +119,16 @@ registerTranslations('budget', {
         loading: 'Cargando...',
         error: 'Ocurrió un error al cargar los datos',
         accessDenied: 'Permisos insuficientes para ver',
-        authRequired: 'Se requiere autorización de Telegram'
+        authRequired: 'Se requiere autorización de Telegram',
+        // Modal translations
+        receiptDetails: 'Detalles del recibo',
+        store: 'Tienda',
+        date: 'Fecha',
+        paymentMethod: 'Método de pago',
+        invoiceNumber: 'Número de factura',
+        items: 'Artículos',
+        total: 'Total',
+        receipt: 'Recibo'
     },
     uk: {
         title: 'Покупки в супермаркетах',
@@ -135,7 +162,16 @@ registerTranslations('budget', {
         loading: 'Завантаження...',
         error: 'Сталася помилка при завантаженні даних',
         accessDenied: 'Недостатньо прав для перегляду',
-        authRequired: 'Потрібна авторизація в Telegram'
+        authRequired: 'Потрібна авторизація в Telegram',
+        // Modal translations
+        receiptDetails: 'Деталі чека',
+        store: 'Магазин',
+        date: 'Дата',
+        paymentMethod: 'Спосіб оплати',
+        invoiceNumber: 'Номер чека',
+        items: 'Товари',
+        total: 'Разом',
+        receipt: 'Чек'
     }
 });
 

@@ -34,7 +34,7 @@ class RecentReceipts {
         return `
             <div class="recent-receipts-container">
                 <h3 class="recent-receipts-title">
-                    <span data-i18n="finance.recentReceipts">Последние чеки</span>
+                    <span data-i18n="budget.recentReceipts">Последние чеки</span>
                 </h3>
                 <div id="recent-receipts-list" class="recent-receipts-list"></div>
             </div>
