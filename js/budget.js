@@ -11,9 +11,12 @@ let compareData = [];
  * Инициализация приложения
  */
 async function init() {
+    console.log('🔧 Инициализация budget.js');
+
     tg.expand();
-    tg.BackButton.show();
-    tg.BackButton.onClick(() => window.location.href = '../index.html');
+
+    // ✅ КНОПКА "НАЗАД" ТЕПЕРЬ УПРАВЛЯЕТСЯ КОМПОНЕНТОМ BackButton
+    // Не нужно показывать/настраивать ее здесь
 
     await initCurrency();
 

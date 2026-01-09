@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/budget.css">
     <link rel="stylesheet" href="../css/receipt-modal.css">
     <link rel="stylesheet" href="../css/recent-receipts.css">
-
+    <link rel="stylesheet" href="../css/back-button.css">
 </head>
 <body>
 <div class="header">
@@ -88,6 +88,7 @@
 <script src="../js/api-extensions.js"></script>
 
 <!-- Компоненты -->
+<script src="../js/components/back-button.js"></script>
 <script src="../js/components/monthly-banner.js"></script>
 <script src="../js/components/receipt-modal.js"></script>
 <script src="../js/components/recent-receipts.js"></script>
@@ -96,13 +97,56 @@
 <script src="../js/budget.js"></script>
 
 <script>
-// ✅ НОВАЯ инициализация с компонентом чеков
+// ✅ Универсальная инициализация с компонентом кнопки "Назад"
 async function initBudgetPage() {
     console.log('💰 Загрузка страницы покупок...');
 
     // Инициализируем валюту
     if (typeof initCurrency === 'function') {
         await initCurrency();
+    }
+
+    // ✅ Инициализируем компонент кнопки "Назад" с правильной логикой
+    if (window.BackButton && typeof window.BackButton.init === 'function') {
+        // Определяем fallback URL в зависимости от текущей страницы
+        let fallbackUrl = '../index.html';
+
+        // Пытаемся определить откуда пришли
+        if (document.referrer) {
+            try {
+                const referrer = new URL(document.referrer);
+                const current = new URL(window.location.href);
+
+                // Если пришли не с той же страницы, используем referrer как fallback
+                if (referrer.pathname !== current.pathname) {
+                    fallbackUrl = document.referrer;
+                }
+            } catch (e) {
+                console.log('🔙 Не удалось разобрать referrer:', e);
+            }
+        }
+
+        // Настраиваем кнопку "Назад" для возврата на предыдущую страницу
+        window.BackButton.setFallbackUrl(fallbackUrl);
+        window.BackButton.init();
+
+        console.log('🔙 Компонент BackButton инициализирован');
+        console.log(`🔙 Fallback URL: ${fallbackUrl}`);
+    } else {
+        console.error('🔙 Компонент BackButton не найден');
+
+        // Fallback: используем стандартную кнопку Telegram если доступна
+        const tg = window.Telegram?.WebApp;
+        if (tg?.BackButton) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '../index.html';
+                }
+            });
+        }
     }
 
     // Инициализируем баннер
@@ -117,14 +161,36 @@ async function initBudgetPage() {
 
     // Инициализируем основную логику budget.js
     if (typeof init === 'function') {
-        // Вызываем init из budget.js, но без повторной загрузки чеков
-        await loadOverview();
-        setupMainButton();
+        try {
+            // Вызываем init из budget.js
+            await init();
+        } catch (error) {
+            console.error('Ошибка при инициализации budget.js:', error);
+        }
+    }
+
+    // Проверяем наличие Telegram Web App
+    if (window.Telegram?.WebApp) {
+        console.log('✅ Telegram Web App доступен');
     }
 }
 
-// Запускаем инициализацию
+// Запускаем инициализацию при загрузке DOM
 document.addEventListener('DOMContentLoaded', initBudgetPage);
+
+// Обработчик ошибок
+window.addEventListener('error', function(e) {
+    console.error('Глобальная ошибка:', e.error);
+});
+
+// Дополнительная обработка для истории браузера
+window.addEventListener('pageshow', function(event) {
+    console.log('🔙 Страница показана (pageshow), persisted:', event.persisted);
+});
+
+window.addEventListener('popstate', function(event) {
+    console.log('🔙 Событие popstate:', event.state);
+});
 </script>
 
 </body>
