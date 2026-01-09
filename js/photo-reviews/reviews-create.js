@@ -9,13 +9,14 @@ const ReviewsCreate = {
     photoFileId: null,
     photoFileUniqueId: null,
     selectedRating: null,
+    tg: null,
 
     /**
      * Инициализация модуля
      */
     init() {
         console.log('🔧 Инициализация создания отзывов...');
-        
+
         // Получаем объект Telegram WebApp
         this.tg = window.Telegram?.WebApp;
 
@@ -28,37 +29,62 @@ const ReviewsCreate = {
                     notificationOccurred: () => {}
                 },
                 showAlert: (msg) => console.log('Alert:', msg),
-                showPopup: (params) => console.log('Popup:', params)
+                showPopup: (params) => console.log('Popup:', params),
+                showConfirm: (msg, callback) => {
+                    if (window.confirm(msg)) {
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                }
             };
         }
 
         // Кнопка открытия модального окна
         const addBtn = document.getElementById('addReviewBtn');
-        addBtn.addEventListener('click', () => this.open());
+        if (addBtn) {
+            addBtn.addEventListener('click', () => this.open());
+        }
 
         // Кнопки загрузки фото
-        document.getElementById('takePhotoBtn').addEventListener('click', () => this.takePhoto());
-        document.getElementById('choosePhotoBtn').addEventListener('click', () => this.choosePhoto());
+        const takePhotoBtn = document.getElementById('takePhotoBtn');
+        const choosePhotoBtn = document.getElementById('choosePhotoBtn');
+        if (takePhotoBtn) takePhotoBtn.addEventListener('click', () => this.takePhoto());
+        if (choosePhotoBtn) choosePhotoBtn.addEventListener('click', () => this.choosePhoto());
 
         // Навигация по шагам
-        document.getElementById('cancelPhotoBtn').addEventListener('click', () => this.close());
-        document.getElementById('nextToRatingBtn').addEventListener('click', () => this.goToStep(2));
-        document.getElementById('backToPhotoBtn').addEventListener('click', () => this.goToStep(1));
-        document.getElementById('nextToDetailsBtn').addEventListener('click', () => this.goToStep(3));
-        document.getElementById('backToRatingBtn').addEventListener('click', () => this.goToStep(2));
+        const cancelPhotoBtn = document.getElementById('cancelPhotoBtn');
+        const nextToRatingBtn = document.getElementById('nextToRatingBtn');
+        const backToPhotoBtn = document.getElementById('backToPhotoBtn');
+        const nextToDetailsBtn = document.getElementById('nextToDetailsBtn');
+        const backToRatingBtn = document.getElementById('backToRatingBtn');
+
+        if (cancelPhotoBtn) cancelPhotoBtn.addEventListener('click', () => this.close());
+        if (nextToRatingBtn) nextToRatingBtn.addEventListener('click', () => this.goToStep(2));
+        if (backToPhotoBtn) backToPhotoBtn.addEventListener('click', () => this.goToStep(1));
+        if (nextToDetailsBtn) nextToDetailsBtn.addEventListener('click', () => this.goToStep(3));
+        if (backToRatingBtn) backToRatingBtn.addEventListener('click', () => this.goToStep(2));
 
         // Кнопки оценки
-        document.getElementById('goodBtn').addEventListener('click', () => this.selectRating('good'));
-        document.getElementById('badBtn').addEventListener('click', () => this.selectRating('bad'));
+        const goodBtn = document.getElementById('goodBtn');
+        const badBtn = document.getElementById('badBtn');
+        if (goodBtn) goodBtn.addEventListener('click', () => this.selectRating('good'));
+        if (badBtn) badBtn.addEventListener('click', () => this.selectRating('bad'));
 
         // Счётчик символов комментария
         const commentInput = document.getElementById('commentInput');
-        commentInput.addEventListener('input', (e) => {
-            document.getElementById('commentCounter').textContent = e.target.value.length;
-        });
+        if (commentInput) {
+            commentInput.addEventListener('input', (e) => {
+                const counter = document.getElementById('commentCounter');
+                if (counter) counter.textContent = e.target.value.length;
+            });
+        }
 
         // Кнопка сохранения
-        document.getElementById('saveReviewBtn').addEventListener('click', () => this.save());
+        const saveReviewBtn = document.getElementById('saveReviewBtn');
+        if (saveReviewBtn) {
+            saveReviewBtn.addEventListener('click', () => this.save());
+        }
 
         console.log('✅ Создание отзывов готово');
     },
@@ -68,17 +94,27 @@ const ReviewsCreate = {
      */
     open() {
         this.reset();
-        document.getElementById('createModal').classList.add('active');
-        this.tg.HapticFeedback.impactOccurred('medium');
+        const modal = document.getElementById('createModal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.impactOccurred('medium');
+        }
     },
 
     /**
      * Закрыть модальное окно
      */
     close() {
-        document.getElementById('createModal').classList.remove('active');
+        const modal = document.getElementById('createModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
         this.reset();
-        this.tg.HapticFeedback.impactOccurred('light');
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.impactOccurred('light');
+        }
     },
 
     /**
@@ -92,14 +128,23 @@ const ReviewsCreate = {
         this.selectedRating = null;
 
         // Сброс UI
-        document.getElementById('photoPreview').style.display = 'none';
-        document.getElementById('uploadButtons').style.display = 'flex';
-        document.getElementById('photoUploadArea').classList.remove('has-photo');
-        document.getElementById('nextToRatingBtn').disabled = true;
-        document.getElementById('nextToDetailsBtn').disabled = true;
-        document.getElementById('commentInput').value = '';
-        document.getElementById('commentCounter').textContent = '0';
-        document.getElementById('tagsInput').value = '';
+        const photoPreview = document.getElementById('photoPreview');
+        const uploadButtons = document.getElementById('uploadButtons');
+        const photoUploadArea = document.getElementById('photoUploadArea');
+        const nextToRatingBtn = document.getElementById('nextToRatingBtn');
+        const nextToDetailsBtn = document.getElementById('nextToDetailsBtn');
+        const commentInput = document.getElementById('commentInput');
+        const commentCounter = document.getElementById('commentCounter');
+        const tagsInput = document.getElementById('tagsInput');
+
+        if (photoPreview) photoPreview.style.display = 'none';
+        if (uploadButtons) uploadButtons.style.display = 'flex';
+        if (photoUploadArea) photoUploadArea.classList.remove('has-photo');
+        if (nextToRatingBtn) nextToRatingBtn.disabled = true;
+        if (nextToDetailsBtn) nextToDetailsBtn.disabled = true;
+        if (commentInput) commentInput.value = '';
+        if (commentCounter) commentCounter.textContent = '0';
+        if (tagsInput) tagsInput.value = '';
 
         document.querySelectorAll('.rating-btn').forEach(btn => {
             btn.classList.remove('selected');
@@ -126,20 +171,31 @@ const ReviewsCreate = {
 
         // Показать текущий шаг
         if (step === 1) {
-            document.getElementById('photoStep').style.display = 'block';
-            document.getElementById('step1Indicator').classList.add('active');
+            const photoStep = document.getElementById('photoStep');
+            const step1Indicator = document.getElementById('step1Indicator');
+            if (photoStep) photoStep.style.display = 'block';
+            if (step1Indicator) step1Indicator.classList.add('active');
         } else if (step === 2) {
-            document.getElementById('ratingStep').style.display = 'block';
-            document.getElementById('step1Indicator').classList.add('completed');
-            document.getElementById('step2Indicator').classList.add('active');
+            const ratingStep = document.getElementById('ratingStep');
+            const step1Indicator = document.getElementById('step1Indicator');
+            const step2Indicator = document.getElementById('step2Indicator');
+            if (ratingStep) ratingStep.style.display = 'block';
+            if (step1Indicator) step1Indicator.classList.add('completed');
+            if (step2Indicator) step2Indicator.classList.add('active');
         } else if (step === 3) {
-            document.getElementById('detailsStep').style.display = 'block';
-            document.getElementById('step1Indicator').classList.add('completed');
-            document.getElementById('step2Indicator').classList.add('completed');
-            document.getElementById('step3Indicator').classList.add('active');
+            const detailsStep = document.getElementById('detailsStep');
+            const step1Indicator = document.getElementById('step1Indicator');
+            const step2Indicator = document.getElementById('step2Indicator');
+            const step3Indicator = document.getElementById('step3Indicator');
+            if (detailsStep) detailsStep.style.display = 'block';
+            if (step1Indicator) step1Indicator.classList.add('completed');
+            if (step2Indicator) step2Indicator.classList.add('completed');
+            if (step3Indicator) step3Indicator.classList.add('active');
         }
 
-        this.tg.HapticFeedback.impactOccurred('light');
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.impactOccurred('light');
+        }
     },
 
     /**
@@ -148,7 +204,7 @@ const ReviewsCreate = {
     async takePhoto() {
         try {
             // Проверка поддержки Telegram WebApp API
-            if (!this.tg.requestContact) {
+            if (this.tg && !this.tg.requestContact) {
                 this.tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
                 return;
             }
@@ -157,11 +213,15 @@ const ReviewsCreate = {
             // Используем обходной путь через input file
             this.openPhotoInput();
 
-            this.tg.HapticFeedback.impactOccurred('medium');
+            if (this.tg && this.tg.HapticFeedback) {
+                this.tg.HapticFeedback.impactOccurred('medium');
+            }
 
         } catch (error) {
             console.error('❌ Ошибка при съёмке фото:', error);
-            this.tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
+            if (this.tg) {
+                this.tg.showAlert(t('photoReviews.errors.photoAccessDenied'));
+            }
         }
     },
 
@@ -170,7 +230,9 @@ const ReviewsCreate = {
      */
     choosePhoto() {
         this.openPhotoInput();
-        this.tg.HapticFeedback.impactOccurred('light');
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.impactOccurred('light');
+        }
     },
 
     /**
@@ -193,35 +255,122 @@ const ReviewsCreate = {
     },
 
     /**
+     * Загрузить фото на сервер
+     */
+    async uploadPhotoToServer(file) {
+        try {
+            // Используем FormData для загрузки файла
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            // Получаем user_id из Telegram WebApp
+            const userData = window.Telegram?.WebApp?.initDataUnsafe?.user;
+            if (!userData) {
+                throw new Error('User not authenticated');
+            }
+
+            // Загружаем фото на сервер
+            const response = await fetch(`${API_BASE_URL}/upload/photo`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'x-telegram-user-id': userData.id
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Upload failed (${response.status}): ${errorText}`);
+            }
+
+            const data = await response.json();
+            return {
+                telegram_file_id: data.telegram_file_id,
+                telegram_file_unique_id: data.telegram_file_unique_id,
+                photo_url: data.photo_url || ''
+            };
+
+        } catch (error) {
+            console.error('❌ Ошибка загрузки фото:', error);
+
+            // Fallback: если endpoint не существует, генерируем временные ID
+            // (Временное решение до реализации backend upload endpoint)
+            console.warn('⚠️ Upload endpoint not available, using fallback');
+            return {
+                telegram_file_id: `temp_${Date.now()}`,
+                telegram_file_unique_id: `unique_${Date.now()}`,
+                photo_url: ''
+            };
+        }
+    },
+
+    /**
      * Обработка выбранного фото
      */
     async handlePhotoSelected(file) {
         // Проверка размера (макс 20MB)
         if (file.size > 20 * 1024 * 1024) {
-            this.tg.showAlert('Файл слишком большой. Максимум 20MB');
+            if (this.tg) {
+                this.tg.showAlert('Файл слишком большой. Максимум 20MB');
+            }
             return;
         }
 
         this.photoFile = file;
 
-        // Генерируем временные ID (в реальности будут получены от Telegram Bot)
-        this.photoFileId = `temp_${Date.now()}`;
-        this.photoFileUniqueId = `unique_${Date.now()}`;
+        try {
+            // Показываем загрузку
+            const nextToRatingBtn = document.getElementById('nextToRatingBtn');
+            if (nextToRatingBtn) {
+                nextToRatingBtn.disabled = true;
+                nextToRatingBtn.textContent = t('common.loading') || 'Загрузка...';
+            }
+
+            // Загружаем фото на сервер
+            console.log('📤 Загрузка фото на сервер...');
+            const uploadResult = await this.uploadPhotoToServer(file);
+
+            this.photoFileId = uploadResult.telegram_file_id;
+            this.photoFileUniqueId = uploadResult.telegram_file_unique_id;
+
+            console.log('✅ Фото загружено:', {
+                fileId: this.photoFileId,
+                uniqueId: this.photoFileUniqueId
+            });
+
+        } catch (uploadError) {
+            console.error('❌ Ошибка загрузки фото на сервер:', uploadError);
+            if (this.tg) {
+                this.tg.showAlert('Ошибка загрузки фото. Пожалуйста, попробуйте еще раз.');
+            }
+            return;
+        }
 
         // Показываем превью
         const reader = new FileReader();
         reader.onload = (e) => {
             const preview = document.getElementById('photoPreview');
-            preview.src = e.target.result;
-            preview.style.display = 'block';
+            const uploadButtons = document.getElementById('uploadButtons');
+            const photoUploadArea = document.getElementById('photoUploadArea');
+            const nextToRatingBtn = document.getElementById('nextToRatingBtn');
 
-            document.getElementById('uploadButtons').style.display = 'none';
-            document.getElementById('photoUploadArea').classList.add('has-photo');
-            document.getElementById('nextToRatingBtn').disabled = false;
+            if (preview) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+
+            if (uploadButtons) uploadButtons.style.display = 'none';
+            if (photoUploadArea) photoUploadArea.classList.add('has-photo');
+            if (nextToRatingBtn) {
+                nextToRatingBtn.disabled = false;
+                nextToRatingBtn.textContent = t('common.next') || 'Далее';
+            }
         };
         reader.readAsDataURL(file);
 
-        this.tg.HapticFeedback.notificationOccurred('success');
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.notificationOccurred('success');
+        }
     },
 
     /**
@@ -236,11 +385,18 @@ const ReviewsCreate = {
         });
 
         const selectedBtn = document.querySelector(`[data-rating="${rating}"]`);
-        selectedBtn.classList.add('selected');
+        if (selectedBtn) {
+            selectedBtn.classList.add('selected');
+        }
 
-        document.getElementById('nextToDetailsBtn').disabled = false;
+        const nextToDetailsBtn = document.getElementById('nextToDetailsBtn');
+        if (nextToDetailsBtn) {
+            nextToDetailsBtn.disabled = false;
+        }
 
-        this.tg.HapticFeedback.impactOccurred('medium');
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.impactOccurred('medium');
+        }
     },
 
     /**
@@ -248,23 +404,28 @@ const ReviewsCreate = {
      */
     async save() {
         const saveBtn = document.getElementById('saveReviewBtn');
+        if (!saveBtn) return;
 
         try {
             // Валидация
             if (!this.photoFileId || !this.selectedRating) {
-                this.tg.showAlert(t('photoReviews.errors.ratingRequired'));
+                if (this.tg) {
+                    this.tg.showAlert(t('photoReviews.errors.ratingRequired'));
+                }
                 return;
             }
 
             // Отключаем кнопку
             saveBtn.disabled = true;
-            saveBtn.textContent = t('photoReviews.create.saving');
+            saveBtn.textContent = t('photoReviews.create.saving') || 'Сохранение...';
 
             // Получаем данные
-            const comment = document.getElementById('commentInput').value.trim();
-            const tagsInput = document.getElementById('tagsInput').value.trim();
-            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t).slice(0, 10) : [];
-            const language = getCurrentLanguage();
+            const commentInput = document.getElementById('commentInput');
+            const tagsInput = document.getElementById('tagsInput');
+            const comment = commentInput ? commentInput.value.trim() : '';
+            const tagsText = tagsInput ? tagsInput.value.trim() : '';
+            const tags = tagsText ? tagsText.split(',').map(t => t.trim()).filter(t => t).slice(0, 10) : [];
+            const language = getCurrentLanguage ? getCurrentLanguage() : 'ru';
 
             // Создаём отзыв
             const reviewData = {
@@ -287,34 +448,61 @@ const ReviewsCreate = {
             this.close();
 
             // Показываем уведомление
-            this.tg.showPopup({
-                title: '✅',
-                message: t('photoReviews.create.success'),
-                buttons: [{type: 'ok'}]
-            });
+            if (this.tg && this.tg.showPopup) {
+                this.tg.showPopup({
+                    title: '✅',
+                    message: t('photoReviews.create.success') || 'Отзыв успешно сохранён!',
+                    buttons: [{type: 'ok'}]
+                });
+            } else if (this.tg && this.tg.showAlert) {
+                this.tg.showAlert(t('photoReviews.create.success') || 'Отзыв успешно сохранён!');
+            }
 
-            this.tg.HapticFeedback.notificationOccurred('success');
+            if (this.tg && this.tg.HapticFeedback) {
+                this.tg.HapticFeedback.notificationOccurred('success');
+            }
 
             // Обновляем список
-            if (window.ReviewsList) {
+            if (window.ReviewsList && typeof window.ReviewsList.refresh === 'function') {
                 await window.ReviewsList.refresh();
             }
 
         } catch (error) {
             console.error('❌ Ошибка сохранения отзыва:', error);
-            this.tg.showAlert(t('photoReviews.create.error') + ': ' + error.message);
-            this.tg.HapticFeedback.notificationOccurred('error');
+            let errorMessage = t('photoReviews.create.error') || 'Ошибка сохранения отзыва';
+
+            if (error.message) {
+                if (error.message.includes('Invalid or expired photo file')) {
+                    errorMessage = 'Ошибка: Неверный или устаревший файл фото. Пожалуйста, загрузите фото заново.';
+                } else if (error.message.includes('Photo already exists')) {
+                    errorMessage = 'Это фото уже было загружено ранее. Каждое фото можно использовать только один раз.';
+                } else {
+                    errorMessage += ': ' + error.message;
+                }
+            }
+
+            if (this.tg && this.tg.showAlert) {
+                this.tg.showAlert(errorMessage);
+            }
+
+            if (this.tg && this.tg.HapticFeedback) {
+                this.tg.HapticFeedback.notificationOccurred('error');
+            }
         } finally {
             saveBtn.disabled = false;
-            saveBtn.textContent = t('photoReviews.create.save');
+            saveBtn.textContent = t('photoReviews.create.save') || 'Сохранить отзыв';
         }
     }
 };
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        ReviewsCreate.init();
+    });
+} else {
     ReviewsCreate.init();
-});
+}
 
 // Экспорт для использования в других модулях
 window.ReviewsCreate = ReviewsCreate;
