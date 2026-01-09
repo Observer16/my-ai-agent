@@ -54,9 +54,8 @@ async function loadOverview() {
     try {
         const stats = await API.getStatistics();
         updateOverviewStats(stats);
-        await loadRecentReceipts();
     } catch (error) {
-        showError('recent-receipts', error.message);
+        console.error('Ошибка загрузки статистики:', error);
     }
 }
 
@@ -68,92 +67,6 @@ function updateOverviewStats(stats) {
     document.getElementById('purchases').textContent = stats.total_purchases;
     document.getElementById('products').textContent = stats.unique_products;
     document.getElementById('stores').textContent = stats.unique_stores;
-}
-
-/**
- * Загрузка последних чеков
- */
-async function loadRecentReceipts() {
-    showLoading('recent-receipts');
-    try {
-        const receipts = await API.getRecentPurchases(7);
-        renderReceipts(receipts);
-    } catch (error) {
-        showError('recent-receipts', error.message);
-    }
-}
-
-/**
- * Отображение чеков
- */
-function renderReceipts(receipts) {
-    const container = document.getElementById('recent-receipts');
-
-    if (!receipts?.length) {
-        container.innerHTML = `<div class="empty">🧾 ${t('budget.noReceipts')}</div>`;
-        return;
-    }
-
-    const html = receipts.map(r => {
-        const date = formatReceiptDate(r.purchase_date);
-        const time = formatReceiptTime(r.purchase_date);
-
-        return `
-            <div class="receipt-card">
-                <div class="receipt-header">
-                    <div>
-                        <div class="receipt-store">🏪 ${r.store_name}</div>
-                        <div class="receipt-store-type">${r.store_type || t('budget.storeType')}</div>
-                    </div>
-                    <div class="receipt-amount">${formatMoney(r.total_amount)}</div>
-                </div>
-                <div class="receipt-info">
-                    <span>📅 ${date}</span>
-                    <span>🕐 ${time}</span>
-                    <span>📦 ${r.items_count} ${t('budget.positions')}</span>
-                    ${r.payment_method ? `<span>💳 ${r.payment_method}</span>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-}
-
-/**
- * Форматирование даты чека
- */
-function formatReceiptDate(dateStr) {
-    if (!dateStr) return '-';
-
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffTime = now - date;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return t('budget.today');
-    if (diffDays === 1) return t('budget.yesterday');
-    if (diffDays < 7) return `${diffDays} ${t('budget.daysAgo')}`;
-
-    const language = getCurrentLanguage();
-    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', {
-        day: 'numeric',
-        month: 'short',
-        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-    });
-}
-
-/**
- * Форматирование времени чека
- */
-function formatReceiptTime(dateStr) {
-    if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    const language = getCurrentLanguage();
-    return date.toLocaleTimeString(language === 'ru' ? 'ru-RU' : 'en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
 }
 
 /**
@@ -426,12 +339,3 @@ function getMonthName(monthIndex) {
 
     return months[language]?.[monthIndex] || months.ru[monthIndex];
 }
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-});

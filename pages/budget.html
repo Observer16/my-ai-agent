@@ -7,6 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="../css/budget.css">
     <link rel="stylesheet" href="../css/receipt-modal.css">
+    <link rel="stylesheet" href="../css/recent-receipts.css">
+
 </head>
 <body>
 <div class="header">
@@ -17,7 +19,7 @@
 <!-- Баннер месячных расходов -->
 <div id="monthly-banner-container"></div>
 
-<!-- Контейнер для последних чеков -->
+<!-- ✅ НОВЫЙ: Контейнер для последних чеков (заменяет старый блок) -->
 <div id="recent-receipts-container"></div>
 
 <div class="tabs">
@@ -47,8 +49,6 @@
         </div>
     </div>
 
-    <div class="section-title">🧾 <span data-i18n="budget.recentReceipts">Последние чеки</span></div>
-    <div id="recent-receipts"></div>
 </div>
 
 <!-- Тренды -->
@@ -97,8 +97,8 @@
 <script src="../js/budget.js"></script>
 
 <script>
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', async () => {
+// ✅ НОВАЯ инициализация с компонентом чеков
+async function initBudgetPage() {
     console.log('💰 Загрузка страницы покупок...');
 
     // Инициализируем валюту
@@ -111,16 +111,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.monthlyBanner.init();
     }
 
-    // ✅ НОВОЕ: Инициализируем компонент последних чеков
+    // ✅ Инициализируем компонент последних чеков
     if (window.recentReceipts) {
         await window.recentReceipts.init();
     }
 
     // Инициализируем основную логику budget.js
-    if (typeof initBudget === 'function') {
-        initBudget();
+    if (typeof init === 'function') {
+        // Вызываем init из budget.js, но без повторной загрузки чеков
+        await loadOverview();
+        setupMainButton();
     }
-});
+}
+
+// Запускаем инициализацию
+document.addEventListener('DOMContentLoaded', initBudgetPage);
 </script>
 
 </body>

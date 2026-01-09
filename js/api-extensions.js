@@ -31,7 +31,7 @@ APIClient.prototype.patch = async function(endpoint, data = {}) {
         }
 
         const result = await response.json();
-        
+
         // Инвалидация кэша после изменений
         if (this.cache) {
             this.invalidateCache(endpoint);
@@ -71,7 +71,7 @@ APIClient.prototype.post = async function(endpoint, data = {}) {
         }
 
         const result = await response.json();
-        
+
         // Инвалидация кэша после изменений
         if (this.cache) {
             this.invalidateCache(endpoint);
@@ -93,9 +93,7 @@ API.getPurchaseDetails = async function(purchaseId) {
     try {
         console.log(`📄 Получение деталей чека: ${purchaseId}`);
 
-        const response = await this.request(`/purchases/${purchaseId}/items`, {
-            method: 'GET'
-        });
+        const response = await this.get(`/purchases/${purchaseId}/items`);
 
         console.log(`✅ Детали чека получены:`, response);
         return response;
@@ -114,23 +112,23 @@ APIClient.prototype.getUserSettings = async function() {
 
 APIClient.prototype.updateUserSettings = async function(settings) {
     const result = await this.patch('/users/me/settings', settings);
-    
+
     // Инвалидируем кэш настроек
     if (this.cache) {
         this.cache.clear('users');
     }
-    
+
     return result;
 };
 
 APIClient.prototype.initialSetup = async function(setupData) {
     const result = await this.post('/users/me/initial-setup', setupData);
-    
+
     // Инвалидируем кэш настроек
     if (this.cache) {
         this.cache.clear('users');
     }
-    
+
     return result;
 };
 
