@@ -398,25 +398,27 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999; /* Очень высокий z-index */
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    overflow-y: auto;
 }
 
 .view-review-modal.active {
-    opacity: 1;
-    pointer-events: auto;
+    display: block;
 }
 
 .view-review-content {
+    background: var(--tg-theme-bg-color); /* ←  фон */
+    min-height: 100vh; /* ← минимальная высота */
     padding: 16px;
     padding-bottom: 80px;
 }
 
 .view-photo {
     width: 100%;
+    max-height: 400px; /* ← ограничение */
+    object-fit: contain;
     border-radius: 12px;
     margin-bottom: 20px;
 }
