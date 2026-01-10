@@ -73,32 +73,44 @@ const ReviewsList = {
      * Загрузка отзывов с сервера
      */
     async loadReviews() {
+        console.log('🔄 loadReviews() вызван');
+
         try {
             console.log('📥 Загрузка отзывов...');
+
+            // Показываем индикатор загрузки
+            this.showLoading();
 
             // ✅ ИСПРАВЛЕНО: используем правильный способ получения языка
             let language = 'ru'; // fallback
             try {
+                console.log('🌐 Получение языка пользователя...');
                 const settings = await API.getUserSettings();
                 language = settings.preferred_language || 'ru';
+                console.log('✅ Язык пользователя:', language);
             } catch (e) {
-                console.warn('Не удалось получить язык из настроек, используем ru');
+                console.warn('⚠️ Не удалось получить язык из настроек, используем ru:', e);
             }
 
+            console.log('📡 Запрос к API.getPhotoReviews...');
             const response = await API.getPhotoReviews({
                 limit: 100,
                 language: language
             });
 
+            console.log('✅ Ответ от API:', response);
+
             this.reviews = response.data || [];
             this.pagination = response.pagination || {};
 
             console.log('✅ Загружено отзывов:', this.reviews.length);
+            console.log('📋 Список отзывов:', this.reviews);
 
             this.applyFilters();
 
         } catch (error) {
             console.error('❌ Ошибка загрузки отзывов:', error);
+            console.error('❌ Детали ошибки:', error.stack);
             this.showError();
         }
     },
