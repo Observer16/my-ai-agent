@@ -13,23 +13,15 @@ const ReviewsList = {
      * Инициализация модуля
      */
     async init() {
-        console.log('🔧 ReviewsList.init() начат');
-        console.log('🔧 Инициализация списка отзывов...');
-
         try {
             // Настройка фильтров
-            console.log('🎛️ Настройка фильтров...');
             this.setupFilters();
 
             // Настройка поиска
-            console.log('🔍 Настройка поиска...');
             this.setupSearch();
 
-            // ✅ ИСПРАВЛЕНО: загружаем отзывы с API
-            console.log('📡 Загрузка отзывов с API...');
+            // Загружаем отзывы с API
             await this.loadReviews();
-
-            console.log('✅ Список отзывов готов');
         } catch (error) {
             console.error('❌ Ошибка инициализации списка отзывов:', error);
         }
@@ -81,44 +73,33 @@ const ReviewsList = {
      * Загрузка отзывов с сервера
      */
     async loadReviews() {
-        console.log('🔄 loadReviews() вызван');
-
         try {
-            console.log('📥 Загрузка отзывов...');
-
             // Показываем индикатор загрузки
             this.showLoading();
 
-            // ✅ ИСПРАВЛЕНО: используем правильный способ получения языка
+            // Получаем язык пользователя
             let language = 'ru'; // fallback
             try {
-                console.log('🌐 Получение языка пользователя...');
                 const settings = await API.getUserSettings();
                 language = settings.preferred_language || 'ru';
-                console.log('✅ Язык пользователя:', language);
             } catch (e) {
-                console.warn('⚠️ Не удалось получить язык из настроек, используем ru:', e);
+                console.warn('Не удалось получить язык из настроек, используем ru');
             }
 
-            console.log('📡 Запрос к API.getPhotoReviews...');
             const response = await API.getPhotoReviews({
                 limit: 100,
                 language: language
             });
 
-            console.log('✅ Ответ от API:', response);
-
             this.reviews = response.data || [];
             this.pagination = response.pagination || {};
 
-            console.log('✅ Загружено отзывов:', this.reviews.length);
-            console.log('📋 Список отзывов:', this.reviews);
+            console.log(`✅ Загружено отзывов: ${this.reviews.length}`);
 
             this.applyFilters();
 
         } catch (error) {
             console.error('❌ Ошибка загрузки отзывов:', error);
-            console.error('❌ Детали ошибки:', error.stack);
             this.showError();
         }
     },
@@ -342,7 +323,53 @@ const ReviewsList = {
     },
 
     /**
-     * Обновить список после добавления/удаления отзыва
+     * Добавить новый отзыв в начало списка (без перезагрузки)
+     * @param {Object} newReview - Объект нового отзыва от API
+     */
+    async addNewReview(newReview) {
+        // Добавляем в начало массива
+        this.reviews.unshift(newReview);
+
+        // Обновляем pagination
+        if (this.pagination.total !== undefined) {
+            this.pagination.total += 1;
+        }
+
+        console.log(`✅ Отзыв добавлен. Всего: ${this.reviews.length}`);
+
+        // Применяем текущие фильтры и отображаем
+        this.applyFilters();
+    },
+
+    /**
+     * Удалить отзыв из списка (без перезагрузки)
+     * @param {string} reviewId - UUID отзыва для удаления
+     */
+    async removeReview(reviewId) {
+        // Находим индекс отзыва
+        const index = this.reviews.findIndex(r => r.id === reviewId);
+
+        if (index !== -1) {
+            // Удаляем из массива
+            this.reviews.splice(index, 1);
+
+            // Обновляем pagination
+            if (this.pagination.total !== undefined) {
+                this.pagination.total -= 1;
+            }
+
+            console.log(`✅ Отзыв удалён. Всего: ${this.reviews.length}`);
+
+            // Применяем текущие фильтры и отображаем
+            this.applyFilters();
+        } else {
+            console.warn('⚠️ Отзыв не найден локально, выполняем полную перезагрузку');
+            await this.refresh();
+        }
+    },
+
+    /**
+     * Обновить список после добавления/удаления отзыва (полная перезагрузка)
      */
     async refresh() {
         await this.loadReviews();

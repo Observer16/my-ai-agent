@@ -154,12 +154,6 @@ const ReviewsView = {
                         await API.deletePhotoReview(reviewId);
                         console.log('✅ Отзыв удалён');
 
-                        // ✅ КРИТИЧНО: Очищаем кэш отзывов
-                        if (window.Cache && typeof window.Cache.clear === 'function') {
-                            window.Cache.clear('photo-reviews');
-                            console.log('🗑️ Кэш фото-отзывов очищен');
-                        }
-
                         // Закрываем модальное окно
                         this.close();
 
@@ -172,8 +166,12 @@ const ReviewsView = {
 
                         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
 
-                        // Обновляем список
-                        if (window.ReviewsList) {
+                        // ✅ ОПТИМИЗАЦИЯ: Удаляем отзыв из локального списка
+                        // Вместо перезагрузки всех отзывов - удаляем из массива
+                        if (window.ReviewsList && typeof window.ReviewsList.removeReview === 'function') {
+                            await window.ReviewsList.removeReview(reviewId);
+                        } else if (window.ReviewsList && typeof window.ReviewsList.refresh === 'function') {
+                            // Fallback: перезагружаем весь список
                             setTimeout(async () => {
                                 await window.ReviewsList.refresh();
                             }, 100);

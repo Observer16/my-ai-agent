@@ -15,11 +15,9 @@ if (typeof API !== 'undefined') {
      * @returns {Promise<Array>} Массив отзывов
      */
     API.getPhotoReviews = async function(params = {}) {
-        console.log('📡 API.getPhotoReviews вызван с параметрами:', params);
-
         const queryParams = new URLSearchParams();
 
-        if (params.limit) queryParams.append('limit', String(params.limit)); // Преобразуем в строку
+        if (params.limit) queryParams.append('limit', String(params.limit));
         if (params.offset) queryParams.append('offset', String(params.offset));
         if (params.rating) queryParams.append('rating', params.rating);
         if (params.language) queryParams.append('language', params.language);
@@ -27,13 +25,7 @@ if (typeof API !== 'undefined') {
         const query = queryParams.toString();
         const endpoint = query ? `/photo-reviews/?${query}` : '/photo-reviews/';
 
-        console.log('🌐 Endpoint для запроса:', endpoint);
-        console.log('🌐 Полный URL:', `${this.baseURL}${endpoint}`);
-
-        const result = await this.get(endpoint);
-        console.log('✅ Ответ от API.getPhotoReviews:', result);
-
-        return result;
+        return this.get(endpoint);
     };
 
     /**
