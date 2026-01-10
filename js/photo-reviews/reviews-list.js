@@ -76,13 +76,20 @@ const ReviewsList = {
         try {
             console.log('📥 Загрузка отзывов...');
 
-            const language = await Utils.getLanguage();
+            // ✅ ИСПРАВЛЕНО: используем правильный способ получения языка
+            let language = 'ru'; // fallback
+            try {
+                const settings = await API.getUserSettings();
+                language = settings.preferred_language || 'ru';
+            } catch (e) {
+                console.warn('Не удалось получить язык из настроек, используем ru');
+            }
+
             const response = await API.getPhotoReviews({
                 limit: 100,
                 language: language
             });
 
-            // ✅ ИСПРАВЛЕНИЕ: API возвращает {data: [], pagination: {}}
             this.reviews = response.data || [];
             this.pagination = response.pagination || {};
 
@@ -92,7 +99,7 @@ const ReviewsList = {
 
         } catch (error) {
             console.error('❌ Ошибка загрузки отзывов:', error);
-            this.showError(await i18n.t('reviews.errors.loadFailed'));
+            this.showError();
         }
     },
 
@@ -284,9 +291,9 @@ const ReviewsList = {
         container.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">❌</div>
-                <h3>${t('photoReviews.errors.loadFailed')}</h3>
+                <h3>Не удалось загрузить отзывы</h3>
                 <button class="add-review-btn" onclick="ReviewsList.loadReviews()">
-                    ${t('common.retry')}
+                    Повторить
                 </button>
             </div>
         `;
