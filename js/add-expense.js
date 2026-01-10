@@ -14,11 +14,9 @@ let currentUnit = 'unidad';
 let searchMode = 'name';
 let selectedProductHasBarcode = true;
 
-// Переменные сканера (Quagga.js)
-let isQuaggaRunning = false;
-let lastScannedCode = '';
-let scannerTarget = 'search';
-let detectionCount = {}; // Счётчик для фильтрации ложных срабатываний
+// Экземпляры компонентов
+let barcodeScanner = null; // Сканер штрих-кодов
+let currentScannerTarget = 'search'; // 'search' или 'newBarcode'
 
 const storeTypeColors = {
     'Супермаркет': { bg: '#10b981', text: 'white' },    // Зелёный
@@ -170,238 +168,52 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ==================== СКАНЕР (ZXing) ====================
+// ==================== СКАНЕР ШТРИХ-КОДОВ ====================
+/**
+ * Инициализирует сканер штрих-кодов (создает экземпляр один раз)
+ */
+function initBarcodeScanner() {
+    if (!barcodeScanner) {
+        barcodeScanner = new BarcodeScanner({
+            onScan: (barcode) => {
+                console.log('🟢 Штрих-код получен:', barcode, 'Target:', currentScannerTarget);
+
+                if (currentScannerTarget === 'search') {
+                    // Применяем к полю поиска
+                    document.getElementById('barcode-search').value = barcode;
+                    searchByBarcode(barcode);
+                } else {
+                    // Применяем к полю нового штрих-кода
+                    document.getElementById('new-barcode').value = barcode;
+                }
+            },
+            onClose: () => {
+                console.log('Сканер закрыт');
+            },
+            onError: (error) => {
+                console.error('Ошибка сканера:', error);
+            }
+        });
+    }
+    return barcodeScanner;
+}
+
+/**
+ * Открывает сканер для поиска товара по штрих-коду
+ */
 function openScanner() {
-    scannerTarget = 'search';
-    showScannerModal();
+    currentScannerTarget = 'search';
+    const scanner = initBarcodeScanner();
+    scanner.open();
 }
 
+/**
+ * Открывает сканер для добавления нового штрих-кода к товару
+ */
 function openScannerForNewBarcode() {
-    scannerTarget = 'newBarcode';
-    showScannerModal();
-}
-
-async function showScannerModal() {
-    const modal = document.getElementById('scanner-modal');
-    modal.classList.add('active');
-    document.getElementById('scanner-result').classList.remove('active');
-    document.getElementById('scanner-buttons-found').style.display = 'none';
-    document.getElementById('scanner-buttons-default').style.display = 'flex';
-    document.getElementById('manual-barcode').value = '';
-    document.getElementById('scanner-status').textContent = 'Запуск камеры...';
-    tg.HapticFeedback.impactOccurred('medium');
-    await startCamera();
-}
-
-async function startCamera() {
-    const status = document.getElementById('scanner-status');
-
-    try {
-        status.textContent = 'Инициализация камеры...';
-        console.log('🔍 Запуск Quagga сканера...');
-
-        // Сбрасываем счётчик обнаружений
-        detectionCount = {};
-
-        // Конфигурация Quagga
-        const config = {
-            inputStream: {
-                name: "Live",
-                type: "LiveStream",
-                target: document.getElementById('scanner-video-container'),
-                constraints: {
-                    facingMode: "environment", // Задняя камера
-                    width: { min: 640, ideal: 1280, max: 1920 },
-                    height: { min: 480, ideal: 720, max: 1080 }
-                },
-                area: { // Область сканирования (% от видео)
-                    top: "30%",
-                    right: "10%",
-                    left: "10%",
-                    bottom: "30%"
-                }
-            },
-            decoder: {
-                readers: [
-                    "ean_reader",       // EAN-13, EAN-8
-                    "ean_8_reader",     // EAN-8 специально
-                    "code_128_reader",  // CODE-128
-                    "code_39_reader",   // CODE-39
-                    "upc_reader",       // UPC-A, UPC-E
-                    "upc_e_reader"      // UPC-E специально
-                ],
-                debug: {
-                    drawBoundingBox: true,
-                    showFrequency: false,
-                    drawScanline: true,
-                    showPattern: false
-                },
-                multiple: false  // Ищем только один код за раз
-            },
-            locate: true,  // Автопоиск штрих-кода в кадре
-            frequency: 10  // Частота сканирования (раз в секунду)
-        };
-
-        // Инициализируем Quagga
-        await new Promise((resolve, reject) => {
-            Quagga.init(config, (err) => {
-                if (err) {
-                    console.error('❌ Quagga init error:', err);
-                    reject(err);
-                    return;
-                }
-                resolve();
-            });
-        });
-
-        // Запускаем сканирование
-        Quagga.start();
-        isQuaggaRunning = true;
-
-        // Обработчик обнаружения
-        Quagga.onDetected((result) => {
-            if (!isQuaggaRunning) return;
-
-            const code = result.codeResult.code;
-
-            // Фильтрация: требуем минимум 3 успешных обнаружения одного кода
-            if (!detectionCount[code]) {
-                detectionCount[code] = 1;
-            } else {
-                detectionCount[code]++;
-            }
-
-            console.log(`📊 Обнаружение ${code}: ${detectionCount[code]} раз`);
-
-            // Подтверждённый код (обнаружен 3+ раз)
-            if (detectionCount[code] >= 3) {
-                console.log('✅ Код подтверждён:', code);
-                onBarcodeDetected(code);
-            }
-        });
-
-        status.textContent = 'Камера готова. Наведите на штрих-код...';
-        console.log('✅ Quagga запущен');
-
-        // Индикация попыток
-        let scanAttempts = 0;
-        const statusInterval = setInterval(() => {
-            if (!isQuaggaRunning) {
-                clearInterval(statusInterval);
-                return;
-            }
-            scanAttempts++;
-            const totalDetections = Object.values(detectionCount).reduce((a, b) => a + b, 0);
-            status.textContent = `Сканирование... (попытка ${scanAttempts}, найдено: ${totalDetections})`;
-        }, 2000);
-
-    } catch (err) {
-        status.textContent = 'Ошибка доступа к камере';
-        console.error('❌ Camera error:', err);
-
-        // Детальные сообщения об ошибках
-        const errMsg = err.toString().toLowerCase();
-        if (errMsg.includes('notallowed') || errMsg.includes('permission')) {
-            tg.showAlert('Разрешите доступ к камере в настройках браузера');
-        } else if (errMsg.includes('notfound') || errMsg.includes('device')) {
-            tg.showAlert('Камера не найдена на устройстве');
-        } else {
-            tg.showAlert('Ошибка камеры. Используйте ручной ввод.');
-        }
-    }
-}
-
-function onBarcodeDetected(code) {
-    if (!code) {
-        console.warn('⚠️ onBarcodeDetected: код пустой');
-        return;
-    }
-
-    if (code === lastScannedCode) {
-        console.log('⚠️ onBarcodeDetected: код уже обработан');
-        return;
-    }
-
-    console.log('✅ Штрих-код подтверждён:', code);
-    lastScannedCode = code;
-    console.log('✅ Сохранён в lastScannedCode:', lastScannedCode);
-
-    // Останавливаем сканирование
-    stopCamera();
-
-    // Вибрация и звук успеха
-    tg.HapticFeedback.notificationOccurred('success');
-
-    // Отображаем результат
-    document.getElementById('scanned-code').textContent = code;
-    document.getElementById('scanner-result').classList.add('active');
-    document.getElementById('scanner-buttons-found').style.display = 'flex';
-    document.getElementById('scanner-buttons-default').style.display = 'none';
-    document.getElementById('scanner-status').textContent = '✅ Код успешно считан!';
-
-    console.log('✅ UI обновлён, lastScannedCode сейчас:', lastScannedCode);
-}
-
-function stopCamera() {
-    if (isQuaggaRunning) {
-        Quagga.stop();
-        isQuaggaRunning = false;
-        console.log('🛑 Quagga остановлен');
-    }
-    // НЕ очищаем lastScannedCode здесь!
-    // Код должен сохраниться для кнопки "Использовать"
-    detectionCount = {};
-}
-
-function closeScanner() {
-    stopCamera();
-    document.getElementById('scanner-modal').classList.remove('active');
-    // Очищаем код только при закрытии модального окна
-    lastScannedCode = '';
-}
-
-function rescanBarcode() {
-    lastScannedCode = '';
-    document.getElementById('scanner-result').classList.remove('active');
-    document.getElementById('scanner-buttons-found').style.display = 'none';
-    document.getElementById('scanner-buttons-default').style.display = 'flex';
-    startCamera();
-}
-
-function useScannedBarcode() {
-    console.log('🔵 Нажата кнопка "Использовать"');
-    console.log('🔵 lastScannedCode:', lastScannedCode);
-    console.log('🔵 scannerTarget:', scannerTarget);
-
-    if (lastScannedCode) {
-        applyBarcode(lastScannedCode);
-    } else {
-        console.error('❌ lastScannedCode пуст!');
-        tg.showAlert('Код не найден. Попробуйте ещё раз.');
-    }
-}
-
-function useManualBarcode() {
-    const code = document.getElementById('manual-barcode').value.trim();
-    if (code) applyBarcode(code);
-    else tg.showAlert('Введите код');
-}
-
-function applyBarcode(code) {
-    console.log('🟢 applyBarcode вызван с кодом:', code);
-    console.log('🟢 scannerTarget:', scannerTarget);
-
-    if (scannerTarget === 'search') {
-        console.log('🟢 Применяю код к полю barcode-search');
-        document.getElementById('barcode-search').value = code;
-        searchByBarcode(code);
-    } else {
-        console.log('🟢 Применяю код к полю new-barcode');
-        document.getElementById('new-barcode').value = code;
-    }
-
-    console.log('🟢 Закрываю сканер');
-    closeScanner();
+    currentScannerTarget = 'newBarcode';
+    const scanner = initBarcodeScanner();
+    scanner.open();
 }
 
 // ==================== МАГАЗИНЫ ====================

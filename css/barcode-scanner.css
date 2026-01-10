@@ -1,0 +1,283 @@
+/**
+ * Barcode Scanner Component Styles
+ * Переиспользуемый компонент для сканирования штрих-кодов
+ */
+
+/* ==================== МОДАЛЬНОЕ ОКНО СКАНЕРА ==================== */
+.barcode-scanner-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    z-index: 9999;
+    flex-direction: column;
+}
+
+.barcode-scanner-modal.active {
+    display: flex;
+}
+
+/* ==================== ШАПКА СКАНЕРА ==================== */
+.barcode-scanner-header {
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #3390ec, #667eea);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.barcode-scanner-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.barcode-scanner-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.barcode-scanner-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.barcode-scanner-close:active {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* ==================== ТЕЛО СКАНЕРА (ВИДЕО) ==================== */
+.barcode-scanner-body {
+    flex: 1;
+    position: relative;
+    background: #000;
+    overflow: hidden;
+    min-height: 0; /* Важно для корректного flex-поведения */
+}
+
+/* Стили для Quagga.js видео контейнера */
+#barcode-scanner-video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#barcode-scanner-video-container video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+#barcode-scanner-video-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Скрываем отладочный canvas если есть */
+#barcode-scanner-video-container canvas.drawingBuffer {
+    display: none;
+}
+
+/* ==================== ВИЗУАЛЬНАЯ ПОДСКАЗКА ==================== */
+.barcode-scanner-guide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.barcode-scanner-frame-guide {
+    width: 280px;
+    height: 120px;
+    border: 3px solid rgba(16, 185, 129, 0.8);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+/* Анимированная линия сканирования */
+.barcode-scanner-frame-guide::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 2px;
+    background: #10b981;
+    animation: scanLineAnim 2s ease-in-out infinite;
+}
+
+@keyframes scanLineAnim {
+    0%, 100% {
+        top: 15%;
+    }
+    50% {
+        top: 85%;
+    }
+}
+
+.barcode-scanner-hint-text {
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+}
+
+/* ==================== НИЗ СКАНЕРА (РЕЗУЛЬТАТ И КНОПКИ) ==================== */
+.barcode-scanner-bottom {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    flex-shrink: 0;
+}
+
+/* Результат сканирования */
+.barcode-scanner-result {
+    background: #10b981;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+    display: none;
+}
+
+.barcode-scanner-result.active {
+    display: block;
+}
+
+.barcode-scanner-result-code {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 5px;
+    font-family: monospace;
+}
+
+/* Кнопки */
+.barcode-scanner-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.barcode-scanner-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.barcode-scanner-btn:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+}
+
+.barcode-scanner-btn.primary {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+}
+
+.barcode-scanner-btn.secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Ручной ввод */
+.barcode-scanner-manual {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.barcode-scanner-manual input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+}
+
+.barcode-scanner-manual input:focus {
+    outline: 2px solid var(--tg-theme-button-color, #3390ec);
+}
+
+.barcode-scanner-manual button {
+    padding: 12px 20px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.barcode-scanner-manual button:active {
+    opacity: 0.8;
+}
+
+/* Статус сканирования */
+.barcode-scanner-status {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+/* ==================== АДАПТИВНОСТЬ ==================== */
+@media (max-width: 480px) {
+    .barcode-scanner-frame-guide {
+        width: 240px;
+        height: 100px;
+    }
+
+    .barcode-scanner-hint-text {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .barcode-scanner-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+/* ==================== ПОДДЕРЖКА ТЕМНОЙ ТЕМЫ TELEGRAM ==================== */
+@media (prefers-color-scheme: dark) {
+    .barcode-scanner-manual input {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+}

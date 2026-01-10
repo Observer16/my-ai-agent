@@ -11,6 +11,8 @@
 
     <!-- Подключаем внешний CSS файл -->
     <link rel="stylesheet" href="../css/add-expense.css">
+    <!-- Barcode Scanner Component -->
+    <link rel="stylesheet" href="../css/barcode-scanner.css">
 </head>
 <body>
 <div class="header">
@@ -131,51 +133,6 @@
     </div>
 </div>
 
-<!-- СКАНЕР -->
-<div class="scanner-modal" id="scanner-modal">
-    <div class="scanner-header">
-        <h3 data-i18n="expense.scanner">Сканер штрих-кода</h3>
-        <button class="scanner-close" onclick="closeScanner()">✕</button>
-    </div>
-
-    <div class="scanner-body">
-        <!-- Контейнер для Quagga.js -->
-        <div id="scanner-video-container"></div>
-
-        <!-- Визуальная подсказка -->
-        <div class="scanner-guide">
-            <div class="scanner-frame-guide"></div>
-            <div class="scanner-hint-text" data-i18n="expense.aimAtBarcode">Наведите на штрих-код</div>
-        </div>
-    </div>
-
-    <div class="scanner-bottom">
-        <div class="scanner-result" id="scanner-result">
-            <div data-i18n="expense.codeFound">Найден код:</div>
-            <div class="scanner-result-code" id="scanned-code">-</div>
-        </div>
-
-        <div class="scanner-buttons" id="scanner-buttons-found" style="display: none;">
-            <button class="scanner-btn secondary" onclick="rescanBarcode()" data-i18n="expense.tryAgain">Ещё раз</button>
-            <button class="scanner-btn primary" onclick="useScannedBarcode()" data-i18n="expense.use">Использовать</button>
-        </div>
-
-        <div class="scanner-buttons" id="scanner-buttons-default">
-            <button class="scanner-btn secondary" onclick="closeScanner()" data-i18n="common.cancel">Отмена</button>
-        </div>
-
-        <div class="scanner-manual">
-            <input type="text" id="manual-barcode" 
-                   data-i18n-target="placeholder" data-i18n="expense.orEnterManually"
-                   placeholder="Или введите вручную..." 
-                   inputmode="numeric">
-            <button onclick="useManualBarcode()">OK</button>
-        </div>
-
-        <div class="scanner-status" id="scanner-status" data-i18n="expense.initializing">Инициализация...</div>
-    </div>
-</div>
-
 <!-- NEW: Модульная система i18n -->
 <script src="../js/i18n/core.js"></script>
 <script src="../js/i18n/common.js"></script>
@@ -187,6 +144,8 @@
 <script src="../js/currency.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/api-extensions.js"></script>
+<!-- Barcode Scanner Component -->
+<script src="../js/components/barcode-scanner.js"></script>
 <script src="../js/add-expense.js"></script>
 
 </body>
