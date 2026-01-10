@@ -535,6 +535,12 @@ const ReviewsCreate = {
 
             console.log('✅ Отзыв сохранён:', result);
 
+            // Очищаем кеш списка отзывов, чтобы загрузить свежие данные
+            if (window.Cache && typeof window.Cache.clear === 'function') {
+                window.Cache.clear('photo-reviews');
+                console.log('🗑️ Кеш фото-отзывов очищен');
+            }
+
             // Закрываем модальное окно
             this.close();
 

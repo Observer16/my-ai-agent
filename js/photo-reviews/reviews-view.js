@@ -155,9 +155,9 @@ const ReviewsView = {
                         console.log('✅ Отзыв удалён');
 
                         // ✅ КРИТИЧНО: Очищаем кэш отзывов
-                        if (API.cache) {
-                            API.cache.clear('photo-reviews');
-                            console.log('🧹 Кэш отзывов очищен');
+                        if (window.Cache && typeof window.Cache.clear === 'function') {
+                            window.Cache.clear('photo-reviews');
+                            console.log('🗑️ Кэш фото-отзывов очищен');
                         }
 
                         // Закрываем модальное окно
