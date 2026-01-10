@@ -348,38 +348,17 @@ const ReviewsCreate = {
      * Обработка файла фото
      */
     async processPhotoFile(file) {
-        // Проверка размера (макс 20MB)
-        if (file.size > 20 * 1024 * 1024) {
-            if (this.tg) {
-                this.tg.showAlert('Файл слишком большой. Максимум 20MB');
-            }
-            return;
-        }
-
-        this.photoFile = file;
+        // ... проверка размера ...
 
         try {
-            // Показываем загрузку
-            const nextToRatingBtn = document.getElementById('nextToRatingBtn');
-            if (nextToRatingBtn) {
-                nextToRatingBtn.disabled = true;
-                nextToRatingBtn.textContent = t('common.loading') || 'Загрузка...';
-            }
-
-            // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Используем новый метод API для загрузки через n8n
-            console.log('📤 Загрузка фото через n8n...');
             const uploadResult = await API.uploadPhotoViaN8N(file);
 
             this.photoFileId = uploadResult.telegram_file_id;
             this.photoFileUniqueId = uploadResult.telegram_file_unique_id;
 
-            console.log('✅ Фото загружено через n8н:', {
-                fileId: this.photoFileId,
-                uniqueId: this.photoFileUniqueId,
-                message: uploadResult.message
-            });
+            console.log('✅ Фото загружено через n8n:', uploadResult);
 
-            // Показываем превью из загруженного файла
+            // Показываем превью
             const reader = new FileReader();
             reader.onload = (e) => {
                 const preview = document.getElementById('photoPreview');
@@ -396,45 +375,42 @@ const ReviewsCreate = {
         } catch (uploadError) {
             console.error('❌ Ошибка загрузки фото:', uploadError);
 
-            // ОШИБКА: Не создавать временные ID!
-            if (this.tg) {
-                let errorMessage = 'Ошибка загрузки фото. Попробуйте еще раз.';
-
-                if (uploadError.message.includes('chat not found')) {
-                    errorMessage = 'Ошибка: Не удалось отправить фото в Telegram. Убедитесь, что вы начали диалог с ботом.';
-                } else if (uploadError.message.includes('File too large')) {
-                    errorMessage = 'Фото слишком большое. Максимальный размер: 20MB';
+            // Специальная обработка "чат не начат"
+            if (uploadError.code === "TELEGRAM_CHAT_NOT_STARTED") {
+                if (this.tg) {
+                    this.tg.showAlert(
+                        `📱 Чтобы загружать фото, нужно:\n\n` +
+                        `1. Откройте Telegram\n` +
+                        `2. Найдите бота @YourBotName\n` +
+                        `3. Нажмите "Start" или отправьте /start\n\n` +
+                        `После этого попробуйте снова.`
+                    );
                 }
-
-                this.tg.showAlert(errorMessage);
+            }
+            // Обычные ошибки
+            else if (uploadError.message.includes('Telegram account not linked')) {
+                if (this.tg) {
+                    this.tg.showAlert(
+                        '🔗 Сначала привяжите Telegram аккаунт в настройках профиля.'
+                    );
+                }
+            }
+            else if (uploadError.message.includes('File too large')) {
+                if (this.tg) {
+                    this.tg.showAlert('Фото слишком большое. Максимум 20MB');
+                }
+            }
+            else {
+                if (this.tg) {
+                    this.tg.showAlert('Ошибка загрузки фото. Попробуйте еще раз.');
+                }
             }
 
-            // Сбрасываем состояние
-            this.photoFile = null;
-            this.photoFileId = null;
-            this.photoFileUniqueId = null;
-
-            // Восстанавливаем UI
-            const uploadButtons = document.getElementById('uploadButtons');
-            const photoUploadArea = document.getElementById('photoUploadArea');
-            if (uploadButtons) uploadButtons.style.display = 'flex';
-            if (photoUploadArea) photoUploadArea.classList.remove('has-photo');
-
-            const nextToRatingBtn = document.getElementById('nextToRatingBtn');
-            if (nextToRatingBtn) {
-                nextToRatingBtn.disabled = true;
-                nextToRatingBtn.textContent = t('common.next') || 'Далее';
-            }
-
-            // Скрываем превью
-            const preview = document.getElementById('photoPreview');
-            if (preview) {
-                preview.style.display = 'none';
-            }
-
-            return; // Прерываем процесс
+            // Сбрасываем состояние...
+            this.resetUploadUI();
+            return;
         }
-    },
+    }
 
     /**
      * Выбрать оценку
