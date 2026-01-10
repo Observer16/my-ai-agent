@@ -187,12 +187,6 @@
 <script>
 // ✅ Универсальная инициализация с компонентом кнопки "Назад"
 async function initBudgetPage() {
-    console.log('💰 Загрузка страницы покупок...');
-
-    // Инициализируем валюту
-    if (typeof initCurrency === 'function') {
-        await initCurrency();
-    }
 
     // ✅ Инициализируем компонент кнопки "Назад" с правильной логикой
     if (window.BackButton && typeof window.BackButton.init === 'function') {
@@ -234,26 +228,6 @@ async function initBudgetPage() {
                     window.location.href = '../index.html';
                 }
             });
-        }
-    }
-
-    // Инициализируем баннер
-    if (window.monthlyBanner) {
-        await window.monthlyBanner.init();
-    }
-
-    // ✅ Инициализируем компонент последних чеков
-    if (window.recentReceipts) {
-        await window.recentReceipts.init();
-    }
-
-    // Инициализируем основную логику budget.js
-    if (typeof init === 'function') {
-        try {
-            // Вызываем init из budget.js
-            await init();
-        } catch (error) {
-            console.error('Ошибка при инициализации budget.js:', error);
         }
     }
 
