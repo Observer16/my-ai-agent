@@ -22,11 +22,20 @@ const ReviewsView = {
             // Показываем модальное окно
             document.getElementById('viewModal').classList.add('active');
 
-            tg.HapticFeedback.impactOccurred('light');
+            // ✅ Настраиваем BackButton для закрытия модального окна
+            if (window.Telegram?.WebApp?.BackButton) {
+                window.Telegram.WebApp.BackButton.onClick(() => this.close());
+            }
+
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
 
         } catch (error) {
             console.error('❌ Ошибка загрузки отзыва:', error);
-            tg.showAlert(t('photoReviews.errors.loadFailed'));
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.showAlert(error.message || 'Ошибка загрузки');
+            }
         }
     },
 
@@ -36,7 +45,10 @@ const ReviewsView = {
     close() {
         document.getElementById('viewModal').classList.remove('active');
         this.currentReview = null;
-        tg.HapticFeedback.impactOccurred('light');
+
+        if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
     },
 
     /**
@@ -117,49 +129,57 @@ const ReviewsView = {
         if (!this.currentReview) return;
 
         // Подтверждение
-        tg.showConfirm(
-            t('photoReviews.view.deleteConfirm'),
-            async (confirmed) => {
-                if (!confirmed) return;
+        if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.showConfirm(
+                'Удалить этот отзыв?',
+                async (confirmed) => {
+                    if (!confirmed) return;
 
-                try {
-                    console.log('🗑️ Удаление отзыва:', this.currentReview.id);
+                    try {
+                        console.log('🗑️ Удаление отзыва:', this.currentReview.id);
+                        await API.deletePhotoReview(this.currentReview.id);
+                        console.log('✅ Отзыв удалён');
 
-                    await API.deletePhotoReview(this.currentReview.id);
+                        this.close();
 
-                    console.log('✅ Отзыв удалён');
+                        // Показываем уведомление
+                        window.Telegram.WebApp.showPopup({
+                            title: '✅',
+                            message: 'Отзыв удалён',
+                            buttons: [{type: 'ok'}]
+                        });
 
-                    // Закрываем просмотр
-                    this.close();
+                        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
 
-                    // Показываем уведомление
-                    tg.showPopup({
-                        title: '✅',
-                        message: t('photoReviews.view.deleteSuccess'),
-                        buttons: [{type: 'ok'}]
-                    });
+                        // Обновляем список
+                        if (window.ReviewsList) {
+                            await window.ReviewsList.refresh();
+                        }
 
-                    tg.HapticFeedback.notificationOccurred('success');
-
-                    // Обновляем список
-                    if (window.ReviewsList) {
-                        await window.ReviewsList.refresh();
+                    } catch (error) {
+                        console.error('❌ Ошибка удаления отзыва:', error);
+                        window.Telegram.WebApp.showAlert('Ошибка удаления: ' + error.message);
+                        window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                     }
-
-                } catch (error) {
-                    console.error('❌ Ошибка удаления отзыва:', error);
-                    tg.showAlert(t('photoReviews.view.deleteError') + ': ' + error.message);
-                    tg.HapticFeedback.notificationOccurred('error');
                 }
-            }
-        );
+            );
+        }
     },
 
     /**
      * Получить URL фото
      */
-    getPhotoUrl(fileId) {
-        // Заглушка для превью (в реальности нужен запрос к Bot API через backend)
+    async getPhotoUrl(fileId) {
+        try {
+            const response = await API.get(`/photo-reviews/photo/${encodeURIComponent(fileId)}`);
+            return response.url || this.getPlaceholderImage();
+        } catch (error) {
+            console.error('Ошибка загрузки фото:', error);
+            return this.getPlaceholderImage();
+        }
+    },
+
+    getPlaceholderImage() {
         return `data:image/svg+xml,${encodeURIComponent(`
             <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
                 <rect width="400" height="400" fill="#eee"/>
