@@ -45,7 +45,9 @@ const ReviewsList = {
                 this.currentFilter = filter;
                 this.applyFilters();
                 
-                tg.HapticFeedback.impactOccurred('light');
+                if (window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
             });
         });
     },
@@ -71,32 +73,29 @@ const ReviewsList = {
      * Загрузка отзывов с сервера
      */
     async loadReviews() {
-        if (this.isLoading) return;
-        
-        this.isLoading = true;
-        this.showLoading();
-
         try {
-            // Получаем язык пользователя
-            const language = getCurrentLanguage();
-            
-            // Загружаем отзывы
-            this.reviews = await API.getPhotoReviews({
+            console.log('📥 Загрузка отзывов...');
+
+            const language = await Utils.getLanguage();
+            const response = await API.getPhotoReviews({
                 limit: 100,
                 language: language
             });
 
-            console.log(`✅ Загружено отзывов: ${this.reviews.length}`);
-            
+            // ✅ ИСПРАВЛЕНИЕ: API возвращает {data: [], pagination: {}}
+            this.reviews = response.data || [];
+            this.pagination = response.pagination || {};
+
+            console.log('✅ Загружено отзывов:', this.reviews.length);
+
             this.applyFilters();
-            
+            this.render();
+
         } catch (error) {
             console.error('❌ Ошибка загрузки отзывов:', error);
-            this.showError();
-        } finally {
-            this.isLoading = false;
+            this.showError(await i18n.t('reviews.errors.loadFailed'));
         }
-    },
+    }
 
     /**
      * Применить фильтры и отобразить отзывы
