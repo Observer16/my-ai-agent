@@ -142,7 +142,9 @@ const ReviewsList = {
             if (card) {
                 card.addEventListener('click', () => {
                     window.ReviewsView.show(review.id);
-                    tg.HapticFeedback.impactOccurred('light');
+                    if (window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                    }
                 });
             }
         });
