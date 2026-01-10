@@ -52,39 +52,23 @@ if (typeof API !== 'undefined') {
         const formData = new FormData();
         formData.append('photo', file);
 
-        // Больше не нужно отправлять telegram_id - backend возьмет его из БД
-        // Просто аутентификация через ваш стандартный механизм
-
+        // Используем стандартный механизм аутентизации
         const response = await fetch(`${this.baseURL}/telegram/upload-photo`, {
             method: 'POST',
             body: formData,
             headers: {
-                // x-telegram-user-id больше не нужен!
+                // УБЕРИТЕ x-telegram-user-id, если он вызывает проблемы
                 ...this.getAuthHeaders ? this.getAuthHeaders() : {}
             }
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-
-            // Пытаемся парсить JSON ошибки
-            try {
-                const errorData = JSON.parse(errorText);
-
-                // Специальная обработка "чат не начат"
-                if (errorData.error === "telegram_chat_not_started") {
-                    const customError = new Error(errorData.message);
-                    customError.code = "TELEGRAM_CHAT_NOT_STARTED";
-                    customError.instruction = errorData.instruction;
-                    customError.telegram_user_id = errorData.telegram_user_id;
-                    throw customError;
-                }
-
-                throw new Error(errorData.message || errorData.detail || `Upload failed (${response.status})`);
-
-            } catch {
-                throw new Error(`Upload failed (${response.status}): ${errorText}`);
+            if (response.status === 401) {
+                throw new Error('Authentication failed. Please log in again.');
             }
+
+            const errorText = await response.text();
+            throw new Error(`Upload failed (${response.status}): ${errorText}`);
         }
 
         return await response.json();
