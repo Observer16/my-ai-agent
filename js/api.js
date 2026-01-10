@@ -258,8 +258,8 @@ class APIClient {
             }
 
             const result = await response.json();
-            
-            // 🆕 Инвалидация кэша после изменений
+
+            // ✅ Инвалидация кэша после удаления
             if (this.cache) {
                 this.invalidateCache(endpoint);
             }
