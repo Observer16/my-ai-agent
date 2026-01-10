@@ -248,12 +248,12 @@ const ReviewsCreate = {
                 },
                 errorCallback: (error) => {
                     console.error('Photo picker error:', error);
-                    this.openPhotoInput();
+                    this.openGalleryInput();
                 }
             });
         } else {
-            // Fallback: обычный input для файлов
-            this.openPhotoInput();
+            // Fallback: обычный input для файлов (БЕЗ камеры)
+            this.openGalleryInput();
         }
 
         if (this.tg && this.tg.HapticFeedback) {
@@ -326,13 +326,32 @@ const ReviewsCreate = {
     },
 
     /**
-     * Открыть input для выбора файла (fallback)
+     * Открыть input для выбора файла с КАМЕРЫ (fallback)
      */
     openPhotoInput() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
         input.capture = 'environment'; // Приоритет камере
+
+        input.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                await this.processPhotoFile(file);
+            }
+        });
+
+        input.click();
+    },
+
+    /**
+     * Открыть input для выбора из ГАЛЕРЕИ (fallback)
+     */
+    openGalleryInput() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        // НЕ указываем capture - это позволит выбирать из галереи
 
         input.addEventListener('change', async (e) => {
             const file = e.target.files[0];

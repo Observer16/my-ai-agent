@@ -3,3 +3,5 @@
 cache/
 tmp/
 .DS_Store
+/CLAUDE.md
+/.claude/settings.local.json
