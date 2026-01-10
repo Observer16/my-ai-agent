@@ -52,25 +52,39 @@ if (typeof API !== 'undefined') {
         const formData = new FormData();
         formData.append('photo', file);
 
-        // Получаем user_id из Telegram WebApp
-        const userData = window.Telegram?.WebApp?.initDataUnsafe?.user;
-        if (!userData) {
-            throw new Error('User not authenticated');
-        }
+        // Больше не нужно отправлять telegram_id - backend возьмет его из БД
+        // Просто аутентификация через ваш стандартный механизм
 
-        // Используем базовый fetch с заголовком аутентификации
         const response = await fetch(`${this.baseURL}/telegram/upload-photo`, {
             method: 'POST',
             body: formData,
             headers: {
-                'x-telegram-user-id': userData.id,
+                // x-telegram-user-id больше не нужен!
                 ...this.getAuthHeaders ? this.getAuthHeaders() : {}
             }
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Upload failed (${response.status}): ${errorText}`);
+
+            // Пытаемся парсить JSON ошибки
+            try {
+                const errorData = JSON.parse(errorText);
+
+                // Специальная обработка "чат не начат"
+                if (errorData.error === "telegram_chat_not_started") {
+                    const customError = new Error(errorData.message);
+                    customError.code = "TELEGRAM_CHAT_NOT_STARTED";
+                    customError.instruction = errorData.instruction;
+                    customError.telegram_user_id = errorData.telegram_user_id;
+                    throw customError;
+                }
+
+                throw new Error(errorData.message || errorData.detail || `Upload failed (${response.status})`);
+
+            } catch {
+                throw new Error(`Upload failed (${response.status}): ${errorText}`);
+            }
         }
 
         return await response.json();
