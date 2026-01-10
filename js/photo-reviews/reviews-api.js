@@ -52,14 +52,10 @@ if (typeof API !== 'undefined') {
         const formData = new FormData();
         formData.append('photo', file);
 
-        // Используем стандартный механизм аутентизации
         const response = await fetch(`${this.baseURL}/telegram/upload-photo`, {
             method: 'POST',
             body: formData,
-            headers: {
-                // УБЕРИТЕ x-telegram-user-id, если он вызывает проблемы
-                ...this.getAuthHeaders ? this.getAuthHeaders() : {}
-            }
+            headers: this.getHeaders(false)
         });
 
         if (!response.ok) {
