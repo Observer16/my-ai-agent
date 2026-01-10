@@ -2,25 +2,25 @@
 
 registerTranslations('home', {
     ru: {
-        title: 'Мой AI Агент',
+        title: 'Мой Агент',
         subtitle: 'Умный помощник для жизни',
         welcome: 'Добро пожаловать!',
         telegramApp: 'Telegram Mini App'
     },
     en: {
-        title: 'My AI Agent',
+        title: 'My Agent',
         subtitle: 'Smart assistant for life',
         welcome: 'Welcome!',
         telegramApp: 'Telegram Mini App'
     },
     es: {
-        title: 'Mi Agente AI',
+        title: 'Mi Agente',
         subtitle: 'Asistente inteligente para la vida',
         welcome: '¡Bienvenido!',
         telegramApp: 'Telegram Mini App'
     },
     uk: {
-        title: 'Мій AI Агент',
+        title: 'Мій Агент',
         subtitle: 'Розумний помічник для життя',
         welcome: 'Ласкаво просимо!',
         telegramApp: 'Telegram Mini App'
