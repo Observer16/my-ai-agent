@@ -16,16 +16,19 @@ const ReviewsView = {
             // Загружаем отзыв
             this.currentReview = await API.getPhotoReview(reviewId);
 
-            // ✅ Отображаем (теперь async)
+            // Отображаем (теперь async)
             await this.render();
 
             // Показываем модальное окно
-            document.getElementById('viewModal').classList.add('active');
+            const modal = document.getElementById('viewModal');
+            modal.classList.add('active');
 
-            // Настраиваем BackButton для закрытия модального окна
-            if (window.Telegram?.WebApp?.BackButton) {
-                window.Telegram.WebApp.BackButton.onClick(() => this.close());
-            }
+            // ✅ Добавляем обработчик закрытия по клику вне модального окна
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.close();
+                }
+            });
 
             if (window.Telegram?.WebApp) {
                 window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
@@ -40,15 +43,20 @@ const ReviewsView = {
     },
 
     /**
-     * Закрыть просмотр
-     */
+    * Закрыть просмотр
+    */
+
     close() {
-        document.getElementById('viewModal').classList.remove('active');
+        const modal = document.getElementById('viewModal');
+        modal.classList.remove('active');
         this.currentReview = null;
 
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
         }
+
+        // ✅ Останавливаем всплытие события, чтобы не сработала навигация назад
+        event?.stopPropagation();
     },
 
     /**
