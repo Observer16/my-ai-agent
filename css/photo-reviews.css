@@ -398,14 +398,16 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--tg-theme-bg-color);
-    z-index: 1000;
-    display: none;
-    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999; /* Очень высокий z-index */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
 .view-review-modal.active {
-    display: block;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .view-review-content {
