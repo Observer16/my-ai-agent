@@ -142,6 +142,10 @@ const ReviewsList = {
             </div>
         `;
 
+        // Загружаем фото
+        const images = container.querySelectorAll('img[data-file-id]');
+        images.forEach(img => this.loadPhoto(img));
+
         // Добавляем обработчики клика
         reviews.forEach(review => {
             const card = container.querySelector(`[data-review-id="${review.id}"]`);
@@ -162,14 +166,15 @@ const ReviewsList = {
     renderReviewCard(review) {
         const ratingEmoji = review.rating === 'good' ? '👍' : '👎';
         const date = this.formatDate(review.created_at);
-        const commentPreview = review.comment ? 
+        const commentPreview = review.comment ?
             `<div class="review-comment-preview">${this.escapeHtml(review.comment)}</div>` : '';
 
         return `
             <div class="review-card" data-review-id="${review.id}">
-                <img 
-                    src="${this.getPhotoUrl(review.telegram_file_id)}" 
-                    alt="Review photo" 
+                <img
+                    src="${this.getPlaceholderImage()}"
+                    data-file-id="${review.telegram_file_id}"
+                    alt="Review photo"
                     class="review-photo"
                     loading="lazy"
                 >
@@ -180,6 +185,23 @@ const ReviewsList = {
                 </div>
             </div>
         `;
+    },
+
+    /**
+     * Загрузить реальное фото
+     */
+    async loadPhoto(img) {
+        const fileId = img.dataset.fileId;
+        if (!fileId) return;
+
+        try {
+            const response = await API.get(`/photo-reviews/photo/${encodeURIComponent(fileId)}`);
+            if (response.url) {
+                img.src = response.url;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки фото:', error);
+        }
     },
 
     /**
