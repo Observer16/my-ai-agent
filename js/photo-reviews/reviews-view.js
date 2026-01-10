@@ -16,13 +16,13 @@ const ReviewsView = {
             // Загружаем отзыв
             this.currentReview = await API.getPhotoReview(reviewId);
 
-            // Отображаем
-            this.render();
+            // ✅ Отображаем (теперь async)
+            await this.render();
 
             // Показываем модальное окно
             document.getElementById('viewModal').classList.add('active');
 
-            // ✅ Настраиваем BackButton для закрытия модального окна
+            // Настраиваем BackButton для закрытия модального окна
             if (window.Telegram?.WebApp?.BackButton) {
                 window.Telegram.WebApp.BackButton.onClick(() => this.close());
             }
@@ -54,43 +54,45 @@ const ReviewsView = {
     /**
      * Отрисовать отзыв
      */
-    render() {
+    async render() {
         if (!this.currentReview) return;
 
         const review = this.currentReview;
         const content = document.getElementById('viewContent');
 
-        const ratingText = review.rating === 'good' 
-            ? `👍 ${t('photoReviews.create.good')}`
-            : `👎 ${t('photoReviews.create.bad')}`;
+        const ratingText = review.rating === 'good'
+            ? `👍 Хорошо`
+            : `👎 Плохо`;
 
         const commentSection = review.comment ? `
             <div class="review-detail">
-                <div class="review-detail-label" data-i18n="photoReviews.view.comment">Комментарий</div>
+                <div class="review-detail-label">Комментарий</div>
                 <div class="review-detail-value">${this.escapeHtml(review.comment)}</div>
             </div>
         ` : '';
 
         const tagsSection = review.tags && review.tags.length > 0 ? `
             <div class="review-detail">
-                <div class="review-detail-label" data-i18n="photoReviews.view.tags">Теги</div>
+                <div class="review-detail-label">Теги</div>
                 <div class="tags-container">
                     ${review.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
                 </div>
             </div>
         ` : '';
 
+        // ✅ Сначала показываем заглушку
         content.innerHTML = `
-            <h2 data-i18n="photoReviews.view.title">Отзыв</h2>
+            <h2>Отзыв</h2>
 
-            <img 
-                src="${this.getPhotoUrl(review.telegram_file_id)}" 
-                alt="Review photo" 
+            <img
+                src="${this.getPlaceholderImage()}"
+                alt="Review photo"
                 class="view-photo"
+                id="viewPhotoImg"
             >
 
             <div class="review-detail">
-                <div class="review-detail-label" data-i18n="photoReviews.view.rating">Оценка</div>
+                <div class="review-detail-label">Оценка</div>
                 <div class="review-detail-value large">${ratingText}</div>
             </div>
 
@@ -99,27 +101,29 @@ const ReviewsView = {
             ${tagsSection}
 
             <div class="review-detail">
-                <div class="review-detail-label" data-i18n="photoReviews.view.created">Создано</div>
+                <div class="review-detail-label">Создано</div>
                 <div class="review-detail-value">${this.formatDateTime(review.created_at)}</div>
             </div>
 
             <button class="delete-btn" id="deleteReviewBtn">
-                🗑️ <span data-i18n="photoReviews.view.delete">Удалить отзыв</span>
+                🗑️ Удалить отзыв
             </button>
 
-            <button class="action-btn action-btn-cancel" id="closeViewBtn" style="margin-top: 12px;" data-i18n="common.close">
+            <button class="action-btn action-btn-cancel" id="closeViewBtn" style="margin-top: 12px;">
                 Закрыть
             </button>
         `;
 
+        // ✅ Загружаем реальное фото асинхронно
+        const photoUrl = await this.getPhotoUrl(review.telegram_file_id);
+        const photoImg = document.getElementById('viewPhotoImg');
+        if (photoImg) {
+            photoImg.src = photoUrl;
+        }
+
         // Обработчики
         document.getElementById('deleteReviewBtn').addEventListener('click', () => this.delete());
         document.getElementById('closeViewBtn').addEventListener('click', () => this.close());
-
-        // Обновляем переводы
-        if (typeof window.i18n?.updatePage === 'function') {
-            window.i18n.updatePage();
-        }
     },
 
     /**
