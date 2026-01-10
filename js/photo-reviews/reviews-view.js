@@ -140,7 +140,6 @@ const ReviewsView = {
     async delete() {
         if (!this.currentReview) return;
 
-        // Подтверждение
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.showConfirm(
                 'Удалить этот отзыв?',
@@ -149,9 +148,14 @@ const ReviewsView = {
 
                     try {
                         console.log('🗑️ Удаление отзыва:', this.currentReview.id);
-                        await API.deletePhotoReview(this.currentReview.id);
+
+                        // ✅ Сохраняем ID для удаления из кэша
+                        const reviewId = this.currentReview.id;
+
+                        await API.deletePhotoReview(reviewId);
                         console.log('✅ Отзыв удалён');
 
+                        // ✅ Закрываем модальное окно ПЕРЕД обновлением списка
                         this.close();
 
                         // Показываем уведомление
@@ -163,9 +167,12 @@ const ReviewsView = {
 
                         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
 
-                        // Обновляем список
+                        // ✅ Обновляем список БЕЗ перезагрузки страницы
                         if (window.ReviewsList) {
-                            await window.ReviewsList.refresh();
+                            // Используем небольшую задержку чтобы модальное окно успело закрыться
+                            setTimeout(async () => {
+                                await window.ReviewsList.refresh();
+                            }, 100);
                         }
 
                     } catch (error) {
