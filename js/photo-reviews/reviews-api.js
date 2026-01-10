@@ -17,17 +17,17 @@ if (typeof API !== 'undefined') {
     API.getPhotoReviews = async function(params = {}) {
         const queryParams = new URLSearchParams();
         
-        if (params.limit) queryParams.append('limit', params.limit);
-        if (params.offset) queryParams.append('offset', params.offset);
+        if (params.limit) queryParams.append('limit', String(params.limit)); // Преобразуем в строку
+        if (params.offset) queryParams.append('offset', String(params.offset));
         if (params.rating) queryParams.append('rating', params.rating);
         if (params.language) queryParams.append('language', params.language);
-        
+
         const query = queryParams.toString();
         const endpoint = query ? `/photo-reviews/?${query}` : '/photo-reviews/';
-        
+
         return this.get(endpoint);
     };
-    
+
     /**
      * Создать новый фото-отзыв
      * @param {Object} reviewData - Данные отзыва
@@ -42,68 +42,13 @@ if (typeof API !== 'undefined') {
     API.createPhotoReview = async function(reviewData) {
         return this.post('/photo-reviews/', reviewData);
     };
-    
-    /**
-     * Получить один отзыв по ID
-     * @param {string} reviewId - UUID отзыва
-     * @returns {Promise<Object>} Отзыв
-     */
-    API.getPhotoReview = async function(reviewId) {
-        return this.get(`/photo-reviews/${reviewId}`);
-    };
-    
-    /**
-     * Удалить отзыв
-     * @param {string} reviewId - UUID отзыва
-     * @returns {Promise<Object>} Результат удаления
-     */
-    API.deletePhotoReview = async function(reviewId) {
-        return this.delete(`/photo-reviews/${reviewId}`);
-    };
-    
-    /**
-     * Получить статистику отзывов пользователя
-     * @returns {Promise<Object>} Статистика
-     */
-    API.getPhotoReviewsStats = async function() {
-        return this.get('/photo-reviews/stats');
-    };
-    
-    /**
-     * Поиск отзывов по комментариям
-     * @param {string} query - Поисковый запрос
-     * @param {Object} params - Дополнительные параметры
-     * @param {string} params.language - Фильтр по языку
-     * @param {number} params.limit - Количество результатов
-     * @returns {Promise<Array>} Массив найденных отзывов
-     */
-    API.searchPhotoReviews = async function(query, params = {}) {
-        const queryParams = new URLSearchParams();
-        queryParams.append('q', query);
-        
-        if (params.language) queryParams.append('language', params.language);
-        if (params.limit) queryParams.append('limit', params.limit);
-        
-        return this.get(`/photo-reviews/search?${queryParams.toString()}`);
-    };
-    
-    /**
-     * Получить URL фото из Telegram
-     * @param {string} fileId - file_id фото из Telegram
-     * @returns {string} URL для отображения фото
-     */
-    API.getTelegramPhotoUrl = function(fileId) {
-        // Telegram Bot API не предоставляет прямые ссылки
-        // Фото загружается через WebApp API или отображается через data URL
-        return `tg://openmessage?file_id=${fileId}`;
-    };
 
-     /**
-     * Загрузить фото в Telegram через backend
+    /**
+     * Загрузить фото через n8n вебхук
      * @param {File} file - Файл фото для загрузки
      * @returns {Promise<Object>} Результат загрузки с telegram_file_id
      */
-    API.uploadPhotoToTelegram = async function(file) {
+    API.uploadPhotoViaN8N = async function(file) {
         const formData = new FormData();
         formData.append('photo', file);
 
@@ -119,7 +64,6 @@ if (typeof API !== 'undefined') {
             body: formData,
             headers: {
                 'x-telegram-user-id': userData.id,
-                // this.getAuthHeaders() может добавлять другие заголовки
                 ...this.getAuthHeaders ? this.getAuthHeaders() : {}
             }
         });
@@ -131,9 +75,27 @@ if (typeof API !== 'undefined') {
 
         return await response.json();
     };
-    
+
+    /**
+     * Получить один отзыв по ID
+     * @param {string} reviewId - UUID отзыва
+     * @returns {Promise<Object>} Отзыв
+     */
+    API.getPhotoReview = async function(reviewId) {
+        return this.get(`/photo-reviews/${reviewId}`);
+    };
+
+    /**
+     * Удалить отзыв
+     * @param {string} reviewId - UUID отзыва
+     * @returns {Promise<Object>} Результат удаления
+     */
+    API.deletePhotoReview = async function(reviewId) {
+        return this.delete(`/photo-reviews/${reviewId}`);
+    };
+
     console.log('✅ Photo Reviews API методы зарегистрированы');
-    
+
 } else {
     console.error('❌ API не найден. Загрузите api.js перед reviews-api.js');
 }
