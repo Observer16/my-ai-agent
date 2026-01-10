@@ -1,4 +1,4 @@
-// js/photo-reviews/reviews-create.js - Создание фото-отзыва
+// js/photo-reviews/reviews-create.js - Создание фото-отзыва с n8n
 
 /**
  * Модуль создания фото-отзывов
@@ -205,12 +205,11 @@ const ReviewsCreate = {
         try {
             // Используем Telegram WebApp для доступа к камере
             if (this.tg && this.tg.showCamera) {
-                // Telegram WebApp API для камеры (если доступно)
                 this.tg.showCamera({
                     type: 'photo',
                     quality: 'high',
                     successCallback: (data) => {
-                        // data содержит file_id и file_unique_id
+                        // data содержит file_id и file_unique_id (если доступно)
                         this.handleTelegramPhoto(data);
                     },
                     errorCallback: (error) => {
@@ -265,15 +264,32 @@ const ReviewsCreate = {
     /**
      * Обработка фото из Telegram WebApp
      */
-    handleTelegramPhoto(data) {
-        // data содержит telegram_file_id и telegram_file_unique_id
-        this.photoFileId = data.file_id;
-        this.photoFileUniqueId = data.file_unique_id;
+    async handleTelegramPhoto(data) {
+        try {
+            // Если у нас есть прямой file_id из Telegram WebApp
+            if (data.file_id) {
+                this.photoFileId = data.file_id;
+                this.photoFileUniqueId = data.file_unique_id || data.file_id;
 
-        // Получаем URL для превью через Telegram Bot API
-        this.showTelegramPhotoPreview(data.file_id);
+                // Показываем успешную загрузку
+                this.showPhotoSuccess();
 
-        // Показываем UI
+            } else {
+                // Если нет file_id, используем файл
+                await this.processPhotoFile(data.file || data);
+            }
+
+        } catch (error) {
+            console.error('❌ Ошибка обработки фото Telegram:', error);
+            this.openPhotoInput();
+        }
+    },
+
+    /**
+     * Показать успешную загрузку фото
+     */
+    showPhotoSuccess() {
+        // Обновляем UI
         const uploadButtons = document.getElementById('uploadButtons');
         const photoUploadArea = document.getElementById('photoUploadArea');
         const nextToRatingBtn = document.getElementById('nextToRatingBtn');
@@ -282,34 +298,11 @@ const ReviewsCreate = {
         if (photoUploadArea) photoUploadArea.classList.add('has-photo');
         if (nextToRatingBtn) nextToRatingBtn.disabled = false;
 
+        // Показываем placeholder (реальное фото будет доступно после сохранения)
+        this.showPhotoPlaceholder();
+
         if (this.tg && this.tg.HapticFeedback) {
             this.tg.HapticFeedback.notificationOccurred('success');
-        }
-    },
-
-    /**
-     * Показать превью фото из Telegram
-     */
-    async showTelegramPhotoPreview(fileId) {
-        try {
-            // Получаем URL фото через backend proxy
-            const response = await fetch(`${API_BASE_URL}/telegram/photo/${fileId}/preview`);
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-
-                const preview = document.getElementById('photoPreview');
-                if (preview) {
-                    preview.src = url;
-                    preview.style.display = 'block';
-                }
-            } else {
-                // Fallback: показываем placeholder
-                this.showPhotoPlaceholder();
-            }
-        } catch (error) {
-            console.error('❌ Ошибка получения превью:', error);
-            this.showPhotoPlaceholder();
         }
     },
 
@@ -325,7 +318,7 @@ const ReviewsCreate = {
                     <circle cx="100" cy="80" r="40" fill="#4CAF50" opacity="0.2"/>
                     <rect x="60" y="130" width="80" height="40" rx="5" fill="#4CAF50" opacity="0.2"/>
                     <text x="100" y="100" text-anchor="middle" dy=".3em" fill="#4CAF50" font-size="20">📷</text>
-                    <text x="100" y="180" text-anchor="middle" fill="#666" font-size="12">Фото из Telegram</text>
+                    <text x="100" y="180" text-anchor="middle" fill="#666" font-size="12">Фото готово к загрузке</text>
                 </svg>
             `);
             preview.style.display = 'block';
@@ -344,7 +337,7 @@ const ReviewsCreate = {
         input.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
-                await this.handleLocalPhotoSelected(file);
+                await this.processPhotoFile(file);
             }
         });
 
@@ -352,9 +345,9 @@ const ReviewsCreate = {
     },
 
     /**
-     * Обработка локального фото (fallback)
+     * Обработка файла фото
      */
-    async handleLocalPhotoSelected(file) {
+    async processPhotoFile(file) {
         // Проверка размера (макс 20MB)
         if (file.size > 20 * 1024 * 1024) {
             if (this.tg) {
@@ -373,26 +366,47 @@ const ReviewsCreate = {
                 nextToRatingBtn.textContent = t('common.loading') || 'Загрузка...';
             }
 
-            // Загружаем фото в Telegram через backend ИСПОЛЬЗУЯ API КЛИЕНТ
-            console.log('📤 Загрузка фото в Telegram...');
-            const uploadResult = await API.uploadPhotoToTelegram(file);
+            // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Используем новый метод API для загрузки через n8n
+            console.log('📤 Загрузка фото через n8n...');
+            const uploadResult = await API.uploadPhotoViaN8N(file);
 
             this.photoFileId = uploadResult.telegram_file_id;
             this.photoFileUniqueId = uploadResult.telegram_file_unique_id;
 
-            console.log('✅ Фото загружено в Telegram:', {
+            console.log('✅ Фото загружено через n8н:', {
                 fileId: this.photoFileId,
                 uniqueId: this.photoFileUniqueId,
                 message: uploadResult.message
             });
 
+            // Показываем превью из загруженного файла
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('photoPreview');
+                if (preview) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // Обновляем UI
+            this.showPhotoSuccess();
+
         } catch (uploadError) {
             console.error('❌ Ошибка загрузки фото:', uploadError);
 
-            // ОШИБКА: НЕ СОЗДАВАТЬ ВРЕМЕННЫЕ ID!
-            // Если не удалось загрузить в Telegram, НЕЛЬЗЯ создавать отзыв
+            // ОШИБКА: Не создавать временные ID!
             if (this.tg) {
-                this.tg.showAlert('Ошибка загрузки фото в Telegram. Попробуйте еще раз.');
+                let errorMessage = 'Ошибка загрузки фото. Попробуйте еще раз.';
+
+                if (uploadError.message.includes('chat not found')) {
+                    errorMessage = 'Ошибка: Не удалось отправить фото в Telegram. Убедитесь, что вы начали диалог с ботом.';
+                } else if (uploadError.message.includes('File too large')) {
+                    errorMessage = 'Фото слишком большое. Максимальный размер: 20MB';
+                }
+
+                this.tg.showAlert(errorMessage);
             }
 
             // Сбрасываем состояние
@@ -420,60 +434,6 @@ const ReviewsCreate = {
 
             return; // Прерываем процесс
         }
-
-        // Если загрузка успешна, показываем превью
-        try {
-            await this.showTelegramPhotoPreview(this.photoFileId);
-        } catch (previewError) {
-            console.warn('⚠️ Не удалось загрузить превью, используем placeholder');
-            this.showPhotoPlaceholder();
-        }
-
-        // Обновляем UI
-        const uploadButtons = document.getElementById('uploadButtons');
-        const photoUploadArea = document.getElementById('photoUploadArea');
-        const nextToRatingBtn = document.getElementById('nextToRatingBtn');
-
-        if (uploadButtons) uploadButtons.style.display = 'none';
-        if (photoUploadArea) photoUploadArea.classList.add('has-photo');
-        if (nextToRatingBtn) {
-            nextToRatingBtn.disabled = false;
-            nextToRatingBtn.textContent = t('common.next') || 'Далее';
-        }
-
-        if (this.tg && this.tg.HapticFeedback) {
-            this.tg.HapticFeedback.notificationOccurred('success');
-        }
-    },
-
-    /**
-     * Загрузить фото в Telegram через backend
-     */
-    async uploadPhotoToTelegram(file) {
-        const formData = new FormData();
-        formData.append('photo', file);
-
-        // Получаем user_id из Telegram WebApp
-        const userData = window.Telegram?.WebApp?.initDataUnsafe?.user;
-        if (!userData) {
-            throw new Error('User not authenticated');
-        }
-
-        // Загружаем фото в Telegram через backend
-        const response = await fetch(`${API_BASE_URL}/telegram/upload-photo`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'x-telegram-user-id': userData.id
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Telegram upload failed (${response.status}): ${errorText}`);
-        }
-
-        return await response.json();
     },
 
     /**
@@ -510,10 +470,19 @@ const ReviewsCreate = {
         if (!saveBtn) return;
 
         try {
-            // Валидация
+            // Валидация - ТОЛЬКО РЕАЛЬНЫЕ telegram_file_id!
             if (!this.photoFileId || !this.selectedRating) {
                 if (this.tg) {
-                    this.tg.showAlert(t('photoReviews.errors.ratingRequired'));
+                    this.tg.showAlert(t('photoReviews.errors.ratingRequired') || 'Выберите фото и оценку');
+                }
+                return;
+            }
+
+            // Проверяем, что file_id выглядит как Telegram file_id
+            // Telegram file_id обычно начинается с определенных префиксов
+            if (this.photoFileId.startsWith('local_') || this.photoFileId.startsWith('temp_')) {
+                if (this.tg) {
+                    this.tg.showAlert('Ошибка: Фото не было загружено. Пожалуйста, загрузите фото заново.');
                 }
                 return;
             }
@@ -530,10 +499,10 @@ const ReviewsCreate = {
             const tags = tagsText ? tagsText.split(',').map(t => t.trim()).filter(t => t).slice(0, 10) : [];
             const language = getCurrentLanguage ? getCurrentLanguage() : 'ru';
 
-            // Создаём отзыв с реальными Telegram file_id
+            // Создаём отзыв с РЕАЛЬНЫМИ Telegram file_id из n8n
             const reviewData = {
                 telegram_file_id: this.photoFileId,
-                telegram_file_unique_id: this.photoFileUniqueId,
+                telegram_file_unique_id: this.photoFileUniqueId || this.photoFileId,
                 rating: this.selectedRating,
                 language: language
             };
@@ -541,11 +510,11 @@ const ReviewsCreate = {
             if (comment) reviewData.comment = comment;
             if (tags.length > 0) reviewData.tags = tags;
 
-            console.log('📝 Сохранение отзыва с Telegram фото:', reviewData);
+            console.log('📝 Сохранение отзыва с фото из n8n:', reviewData);
 
             const result = await API.createPhotoReview(reviewData);
 
-            console.log('✅ Отзыв сохранён в Telegram:', result);
+            console.log('✅ Отзыв сохранён:', result);
 
             // Закрываем модальное окно
             this.close();
@@ -554,11 +523,11 @@ const ReviewsCreate = {
             if (this.tg && this.tg.showPopup) {
                 this.tg.showPopup({
                     title: '✅',
-                    message: t('photoReviews.create.success') || 'Отзыв успешно сохранён в Telegram!',
+                    message: t('photoReviews.create.success') || 'Отзыв успешно сохранён!',
                     buttons: [{type: 'ok'}]
                 });
             } else if (this.tg && this.tg.showAlert) {
-                this.tg.showAlert(t('photoReviews.create.success') || 'Отзыв успешно сохранён в Telegram!');
+                this.tg.showAlert(t('photoReviews.create.success') || 'Отзыв успешно сохранён!');
             }
 
             if (this.tg && this.tg.HapticFeedback) {
@@ -578,11 +547,9 @@ const ReviewsCreate = {
                 if (error.message.includes('Invalid or expired photo file')) {
                     errorMessage = 'Ошибка: Неверный или устаревший файл фото в Telegram. Пожалуйста, загрузите фото заново.';
                 } else if (error.message.includes('Photo already exists')) {
-                    errorMessage = 'Это фото уже было загружено в Telegram ранее. Каждое фото можно использовать только один раз.';
+                    errorMessage = 'Это фото уже было загружено ранее. Каждое фото можно использовать только один раз.';
                 } else if (error.message.includes('File too large')) {
                     errorMessage = 'Фото слишком большое. Максимальный размер: 20MB';
-                } else if (error.message.includes('Not a photo')) {
-                    errorMessage = 'Файл должен быть изображением (JPG, PNG, GIF)';
                 } else {
                     errorMessage += ': ' + error.message;
                 }
