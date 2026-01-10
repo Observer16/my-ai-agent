@@ -14,16 +14,16 @@ const ReviewsList = {
      */
     async init() {
         console.log('🔧 Инициализация списка отзывов...');
-        
+
         // Настройка фильтров
         this.setupFilters();
-        
+
         // Настройка поиска
         this.setupSearch();
-        
-        // Временно показываем пустое состояние вместо загрузки с API
-        this.showEmptyState();
-        
+
+        // ✅ ИСПРАВЛЕНО: загружаем отзывы с API
+        await this.loadReviews();
+
         console.log('✅ Список отзывов готов');
     },
 
