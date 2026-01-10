@@ -373,42 +373,60 @@ const ReviewsCreate = {
                 nextToRatingBtn.textContent = t('common.loading') || 'Загрузка...';
             }
 
-            // Загружаем фото в Telegram через backend
+            // Загружаем фото в Telegram через backend ИСПОЛЬЗУЯ API КЛИЕНТ
             console.log('📤 Загрузка фото в Telegram...');
-            const uploadResult = await this.uploadPhotoToTelegram(file);
+            const uploadResult = await API.uploadPhotoToTelegram(file);
 
             this.photoFileId = uploadResult.telegram_file_id;
             this.photoFileUniqueId = uploadResult.telegram_file_unique_id;
 
             console.log('✅ Фото загружено в Telegram:', {
                 fileId: this.photoFileId,
-                uniqueId: this.photoFileUniqueId
+                uniqueId: this.photoFileUniqueId,
+                message: uploadResult.message
             });
-
-            // Показываем превью
-            await this.showTelegramPhotoPreview(this.photoFileId);
 
         } catch (uploadError) {
             console.error('❌ Ошибка загрузки фото:', uploadError);
 
-            // Fallback: показываем локальное превью
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.getElementById('photoPreview');
-                if (preview) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-            };
-            reader.readAsDataURL(file);
-
-            // Генерируем временные ID (будет валидация на backend)
-            this.photoFileId = `local_${Date.now()}`;
-            this.photoFileUniqueId = `local_unique_${Date.now()}`;
-
+            // ОШИБКА: НЕ СОЗДАВАТЬ ВРЕМЕННЫЕ ID!
+            // Если не удалось загрузить в Telegram, НЕЛЬЗЯ создавать отзыв
             if (this.tg) {
-                this.tg.showAlert('Фото будет загружено при сохранении отзыва');
+                this.tg.showAlert('Ошибка загрузки фото в Telegram. Попробуйте еще раз.');
             }
+
+            // Сбрасываем состояние
+            this.photoFile = null;
+            this.photoFileId = null;
+            this.photoFileUniqueId = null;
+
+            // Восстанавливаем UI
+            const uploadButtons = document.getElementById('uploadButtons');
+            const photoUploadArea = document.getElementById('photoUploadArea');
+            if (uploadButtons) uploadButtons.style.display = 'flex';
+            if (photoUploadArea) photoUploadArea.classList.remove('has-photo');
+
+            const nextToRatingBtn = document.getElementById('nextToRatingBtn');
+            if (nextToRatingBtn) {
+                nextToRatingBtn.disabled = true;
+                nextToRatingBtn.textContent = t('common.next') || 'Далее';
+            }
+
+            // Скрываем превью
+            const preview = document.getElementById('photoPreview');
+            if (preview) {
+                preview.style.display = 'none';
+            }
+
+            return; // Прерываем процесс
+        }
+
+        // Если загрузка успешна, показываем превью
+        try {
+            await this.showTelegramPhotoPreview(this.photoFileId);
+        } catch (previewError) {
+            console.warn('⚠️ Не удалось загрузить превью, используем placeholder');
+            this.showPhotoPlaceholder();
         }
 
         // Обновляем UI

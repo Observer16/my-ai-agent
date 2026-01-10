@@ -97,6 +97,40 @@ if (typeof API !== 'undefined') {
         // Фото загружается через WebApp API или отображается через data URL
         return `tg://openmessage?file_id=${fileId}`;
     };
+
+     /**
+     * Загрузить фото в Telegram через backend
+     * @param {File} file - Файл фото для загрузки
+     * @returns {Promise<Object>} Результат загрузки с telegram_file_id
+     */
+    API.uploadPhotoToTelegram = async function(file) {
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        // Получаем user_id из Telegram WebApp
+        const userData = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        if (!userData) {
+            throw new Error('User not authenticated');
+        }
+
+        // Используем базовый fetch с заголовком аутентификации
+        const response = await fetch(`${this.baseURL}/telegram/upload-photo`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'x-telegram-user-id': userData.id,
+                // this.getAuthHeaders() может добавлять другие заголовки
+                ...this.getAuthHeaders ? this.getAuthHeaders() : {}
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Upload failed (${response.status}): ${errorText}`);
+        }
+
+        return await response.json();
+    };
     
     console.log('✅ Photo Reviews API методы зарегистрированы');
     
