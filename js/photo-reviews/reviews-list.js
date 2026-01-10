@@ -205,9 +205,9 @@ const ReviewsList = {
     },
 
     /**
-     * Получить URL фото
+     * Заглушка изображения
      */
-    getPhotoUrl(fileId) {
+    getPlaceholderImage() {
         return `data:image/svg+xml,${encodeURIComponent(`
             <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
                 <rect width="200" height="200" fill="#eee"/>
