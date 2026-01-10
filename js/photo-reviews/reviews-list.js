@@ -89,7 +89,6 @@ const ReviewsList = {
             console.log('✅ Загружено отзывов:', this.reviews.length);
 
             this.applyFilters();
-            this.render();
 
         } catch (error) {
             console.error('❌ Ошибка загрузки отзывов:', error);
