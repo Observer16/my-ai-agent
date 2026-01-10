@@ -13,18 +13,26 @@ const ReviewsList = {
      * Инициализация модуля
      */
     async init() {
+        console.log('🔧 ReviewsList.init() начат');
         console.log('🔧 Инициализация списка отзывов...');
 
-        // Настройка фильтров
-        this.setupFilters();
+        try {
+            // Настройка фильтров
+            console.log('🎛️ Настройка фильтров...');
+            this.setupFilters();
 
-        // Настройка поиска
-        this.setupSearch();
+            // Настройка поиска
+            console.log('🔍 Настройка поиска...');
+            this.setupSearch();
 
-        // ✅ ИСПРАВЛЕНО: загружаем отзывы с API
-        await this.loadReviews();
+            // ✅ ИСПРАВЛЕНО: загружаем отзывы с API
+            console.log('📡 Загрузка отзывов с API...');
+            await this.loadReviews();
 
-        console.log('✅ Список отзывов готов');
+            console.log('✅ Список отзывов готов');
+        } catch (error) {
+            console.error('❌ Ошибка инициализации списка отзывов:', error);
+        }
     },
 
     /**
