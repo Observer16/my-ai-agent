@@ -2,7 +2,7 @@
 
 const photoReviewsTranslations = {
     ru: {
-        title: 'Фото-отзывы',
+        title: 'Мои предпочтения',
         subtitle: 'Личный дневник покупок с фото',
         addNew: 'Добавить отзыв',
         noReviews: 'У вас пока нет отзывов',
@@ -217,7 +217,7 @@ const photoReviewsTranslations = {
     },
 
     uk: {
-        title: 'Фото-відгуки',
+        title: 'Мої уподобання',
         subtitle: 'Особистий щоденник покупок з фото',
         addNew: 'Додати відгук',
         noReviews: 'У вас поки немає відгуків',

@@ -30,7 +30,7 @@ class CacheManager {
             'family/members': 3600,    // 1 час
             'family/info': 3600,       // 1 час
 
-            // ✅ ДОБАВЬ ЭТО - Фото-отзывы
+            // Фото-отзывы
             'photo-reviews': 21600,           // 6 часов - список отзывов
             'photo-reviews/photo': 86400     // 24 часа - фото (меняются редко)
         };
