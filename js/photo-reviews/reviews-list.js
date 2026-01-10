@@ -95,7 +95,7 @@ const ReviewsList = {
             console.error('❌ Ошибка загрузки отзывов:', error);
             this.showError(await i18n.t('reviews.errors.loadFailed'));
         }
-    }
+    },
 
     /**
      * Применить фильтры и отобразить отзывы
