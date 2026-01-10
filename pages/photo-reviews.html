@@ -185,73 +185,14 @@
     <script src="../js/photo-reviews/reviews-view.js"></script>
 
 <script>
-// ✅ Универсальная инициализация с компонентом кнопки "Назад"
-async function initBudgetPage() {
-
-    // ✅ Инициализируем компонент кнопки "Назад" с правильной логикой
+// Инициализация страницы фото-отзывов
+document.addEventListener('DOMContentLoaded', async () => {
+    // Инициализация кнопки "Назад"
     if (window.BackButton && typeof window.BackButton.init === 'function') {
-        // Определяем fallback URL в зависимости от текущей страницы
-        let fallbackUrl = '../index.html';
-
-        // Пытаемся определить откуда пришли
-        if (document.referrer) {
-            try {
-                const referrer = new URL(document.referrer);
-                const current = new URL(window.location.href);
-
-                // Если пришли не с той же страницы, используем referrer как fallback
-                if (referrer.pathname !== current.pathname) {
-                    fallbackUrl = document.referrer;
-                }
-            } catch (e) {
-                console.log('🔙 Не удалось разобрать referrer:', e);
-            }
-        }
-
-        // Настраиваем кнопку "Назад" для возврата на предыдущую страницу
+        const fallbackUrl = document.referrer || '../index.html';
         window.BackButton.setFallbackUrl(fallbackUrl);
         window.BackButton.init();
-
-        console.log('🔙 Компонент BackButton инициализирован');
-        console.log(`🔙 Fallback URL: ${fallbackUrl}`);
-    } else {
-        console.error('🔙 Компонент BackButton не найден');
-
-        // Fallback: используем стандартную кнопку Telegram если доступна
-        const tg = window.Telegram?.WebApp;
-        if (tg?.BackButton) {
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                if (window.history.length > 1) {
-                    window.history.back();
-                } else {
-                    window.location.href = '../index.html';
-                }
-            });
-        }
     }
-
-    // Проверяем наличие Telegram Web App
-    if (window.Telegram?.WebApp) {
-        console.log('✅ Telegram Web App доступен');
-    }
-}
-
-// Запускаем инициализацию при загрузке DOM
-document.addEventListener('DOMContentLoaded', initBudgetPage);
-
-// Обработчик ошибок
-window.addEventListener('error', function(e) {
-    console.error('Глобальная ошибка:', e.error);
-});
-
-// Дополнительная обработка для истории браузера
-window.addEventListener('pageshow', function(event) {
-    console.log('🔙 Страница показана (pageshow), persisted:', event.persisted);
-});
-
-window.addEventListener('popstate', function(event) {
-    console.log('🔙 Событие popstate:', event.state);
 });
 </script>
 
