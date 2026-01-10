@@ -47,7 +47,11 @@ registerTranslations('common', {
         filter: 'Фильтр',
         all: 'Все',
         yes: 'Да',
-        no: 'Нет'
+        no: 'Нет',
+        today: 'Сегодня',
+        yesterday: 'Вчера',
+        next: 'Далее',
+        retry: 'Повторить'
     },
     en: {
         loading: 'Loading...',
@@ -68,7 +72,11 @@ registerTranslations('common', {
         filter: 'Filter',
         all: 'All',
         yes: 'Yes',
-        no: 'No'
+        no: 'No',
+        today: 'Today',
+        yesterday: 'Yesterday',
+        next: 'Next',
+        retry: 'Retry'
     },
     es: {
         loading: 'Cargando...',
@@ -89,7 +97,11 @@ registerTranslations('common', {
         filter: 'Filtrar',
         all: 'Todos',
         yes: 'Sí',
-        no: 'No'
+        no: 'No',
+        today: 'Hoy',
+        yesterday: 'Ayer',
+        next: 'Siguiente',
+        retry: 'Reintentar'
     },
     uk: {
         loading: 'Завантаження...',
@@ -110,7 +122,11 @@ registerTranslations('common', {
         filter: 'Фільтр',
         all: 'Всі',
         yes: 'Так',
-        no: 'Ні'
+        no: 'Ні',
+        today: 'Сьогодні',
+        yesterday: 'Вчора',
+        next: 'Далі',
+        retry: 'Повторити'
     }
 });
 
