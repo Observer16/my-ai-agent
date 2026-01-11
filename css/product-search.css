@@ -141,6 +141,10 @@ body {
     display: none;
 }
 
+.detail-content {
+    min-height: 100%;
+}
+
 .detail-header {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
@@ -164,10 +168,18 @@ body {
     align-items: center;
     justify-content: center;
     transition: background 0.2s;
+    z-index: 10;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.close-detail-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .close-detail-btn:active {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0.95);
 }
 
 .detail-title {

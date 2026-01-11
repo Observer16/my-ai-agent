@@ -3,7 +3,18 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.BackButton.show();
-tg.BackButton.onClick(() => window.history.back());
+
+// Обработчик кнопки "Назад"
+tg.BackButton.onClick(() => {
+    // Если открыто модальное окно - закрываем его
+    const card = document.getElementById('product-detail-card');
+    if (card && card.style.display !== 'none') {
+        closeDetailCard();
+    } else {
+        // Иначе возвращаемся на предыдущую страницу
+        window.history.back();
+    }
+});
 
 // Глобальные переменные
 let barcodeScanner = null;
@@ -141,30 +152,43 @@ function renderProductDetailCard(details) {
     const card = document.getElementById('product-detail-card');
 
     card.innerHTML = `
-        <div class="detail-header">
-            <button class="close-detail-btn" id="close-detail-btn">✕</button>
-            <h2 class="detail-title">${escapeHtml(product.name)}</h2>
-            ${product.category_name ? `<div class="detail-category">${escapeHtml(product.category_name)}</div>` : ''}
-        </div>
+        <div class="detail-content">
+            <div class="detail-header">
+                <button class="close-detail-btn" id="close-detail-btn">✕</button>
+                <h2 class="detail-title">${escapeHtml(product.name)}</h2>
+                ${product.category_name ? `<div class="detail-category">${escapeHtml(product.category_name)}</div>` : ''}
+            </div>
 
-        <div class="detail-section">
-            <div class="detail-label" data-i18n="productSearch.basicInfo">Основная информация</div>
-            ${product.brand ? `<div class="detail-row"><span data-i18n="productSearch.brand">Бренд:</span> <strong>${escapeHtml(product.brand)}</strong></div>` : ''}
-            ${product.barcode ? `<div class="detail-row"><span data-i18n="productSearch.barcode">Штрих-код:</span> <strong>${escapeHtml(product.barcode)}</strong></div>` : ''}
-            <div class="detail-row"><span data-i18n="productSearch.unit">Единица:</span> <strong>${getUnitName(product.unit)}</strong></div>
-        </div>
+            <div class="detail-section">
+                <div class="detail-label" data-i18n="productSearch.basicInfo">Основная информация</div>
+                ${product.brand ? `<div class="detail-row"><span data-i18n="productSearch.brand">Бренд:</span> <strong>${escapeHtml(product.brand)}</strong></div>` : ''}
+                ${product.barcode ? `<div class="detail-row"><span data-i18n="productSearch.barcode">Штрих-код:</span> <strong>${escapeHtml(product.barcode)}</strong></div>` : ''}
+                <div class="detail-row"><span data-i18n="productSearch.unit">Единица:</span> <strong>${getUnitName(product.unit)}</strong></div>
+            </div>
 
-        ${renderPriceStats(price_stats)}
-        ${renderPurchaseHistory(purchase_history)}
+            ${renderPriceStats(price_stats)}
+            ${renderPurchaseHistory(purchase_history)}
+        </div>
     `;
 
     card.style.display = 'block';
 
     // Добавляем обработчик для кнопки закрытия
-    const closeBtn = document.getElementById('close-detail-btn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeDetailCard);
-    }
+    // Используем небольшую задержку, чтобы DOM успел обновиться
+    setTimeout(() => {
+        const closeBtn = document.getElementById('close-detail-btn');
+        if (closeBtn) {
+            console.log('✅ Кнопка закрытия найдена, привязываем обработчик');
+            closeBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔘 Клик по кнопке закрытия');
+                closeDetailCard();
+            };
+        } else {
+            console.error('❌ Кнопка закрытия не найдена!');
+        }
+    }, 0);
 }
 
 function renderPriceStats(stats) {
@@ -236,9 +260,16 @@ function renderPurchaseHistory(history) {
 }
 
 function closeDetailCard() {
-    document.getElementById('product-detail-card').style.display = 'none';
-    currentProductId = null;
-    tg.HapticFeedback.impactOccurred('light');
+    console.log('🚪 Закрытие модального окна');
+    const card = document.getElementById('product-detail-card');
+    if (card) {
+        card.style.display = 'none';
+        currentProductId = null;
+        tg.HapticFeedback.impactOccurred('light');
+        console.log('✅ Модальное окно закрыто');
+    } else {
+        console.error('❌ Элемент product-detail-card не найден!');
+    }
 }
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
