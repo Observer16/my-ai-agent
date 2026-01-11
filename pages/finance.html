@@ -27,6 +27,9 @@
     <div class="finance-action-btn" onclick="openModule('budget')">
         📊 <span data-i18n="actions.priceAnalysis">Анализ цен</span>
     </div>
+    <div class="finance-action-btn" onclick="openModule('product-search')">
+        🔍 <span data-i18n="actions.productSearch">Поиск товара</span>
+    </div>
 </div>
 
 <!-- Модульная система i18n -->
@@ -86,6 +89,9 @@ function openModule(moduleName) {
             break;
         case 'budget':
             window.location.href = 'budget.html';
+            break;
+        case 'product-search':
+            window.location.href = 'product-search.html';
             break;
     }
 }

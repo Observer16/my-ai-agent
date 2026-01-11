@@ -1,0 +1,314 @@
+/* product-search.css - Стили для страницы поиска товара */
+
+/* Базовые стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #000);
+    padding-bottom: 20px;
+}
+
+/* Заголовок */
+.header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.header p {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* Панель поиска */
+.search-panel {
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+}
+
+#search-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid var(--tg-theme-hint-color, #ccc);
+    border-radius: 10px;
+    font-size: 14px;
+    background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #000);
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--tg-theme-button-color, #3390ec);
+}
+
+.scan-btn {
+    padding: 12px 20px;
+    background: var(--tg-theme-button-color, #3390ec);
+    color: var(--tg-theme-button-text-color, #fff);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+
+.scan-btn:active {
+    opacity: 0.8;
+}
+
+/* Результаты поиска */
+.search-results {
+    padding: 0 15px;
+}
+
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-left: 4px solid var(--tg-theme-button-color, #3390ec);
+}
+
+.search-result-item:active {
+    background: var(--tg-theme-hint-color, #e0e0e0);
+}
+
+.product-info {
+    flex: 1;
+}
+
+.product-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--tg-theme-text-color, #000);
+}
+
+.product-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.product-category {
+    display: inline-block;
+}
+
+.product-barcode {
+    display: inline-block;
+}
+
+.product-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tg-theme-button-color, #3390ec);
+    margin-left: 10px;
+}
+
+/* Детальная карточка товара */
+.product-detail-card {
+    margin: 15px;
+    background: var(--tg-theme-bg-color, #fff);
+    border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.detail-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    position: relative;
+}
+
+.close-detail-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.close-detail-btn:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.detail-title {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.detail-category {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.detail-section {
+    padding: 20px;
+    border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--tg-theme-text-color, #000);
+    opacity: 0.8;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+/* Статистика цен */
+.price-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.price-stat-card {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.price-stat-card.highlight {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.price-stat-label {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 5px;
+}
+
+.price-stat-card.highlight .price-stat-label {
+    opacity: 0.9;
+}
+
+.price-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* История покупок */
+.purchase-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.purchase-history-item {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.purchase-store {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.purchase-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+}
+
+.purchase-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--tg-theme-button-color, #3390ec);
+}
+
+.purchase-date {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* Состояния */
+.loading, .error, .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading {
+    opacity: 0.5;
+}
+
+.error {
+    background: #fee;
+    color: #c00;
+    border-radius: 10px;
+    margin: 15px;
+}
+
+.empty-state {
+    opacity: 0.6;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.empty-text {
+    font-size: 14px;
+}
+
+.no-data {
+    text-align: center;
+    opacity: 0.6;
+    font-size: 13px;
+    padding: 10px;
+}

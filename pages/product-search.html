@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="productSearch.title">Поиск товара</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/product-search.css">
+    <link rel="stylesheet" href="../css/barcode-scanner.css">
+    <link rel="stylesheet" href="../css/back-button.css">
+</head>
+<body>
+<!-- Заголовок страницы -->
+<div class="header">
+    <h1>🔍 <span data-i18n="productSearch.title">Поиск товара</span></h1>
+    <p data-i18n="productSearch.subtitle">Найти информацию о товаре</p>
+</div>
+
+<!-- Панель поиска -->
+<div class="search-panel">
+    <!-- Поле ввода для поиска по названию или штрих-коду -->
+    <input type="text"
+           id="search-input"
+           data-i18n-target="placeholder"
+           data-i18n="productSearch.searchPlaceholder"
+           placeholder="Название или штрих-код...">
+
+    <!-- Кнопка сканера штрих-кода -->
+    <button id="scan-barcode-btn" class="scan-btn">
+        📷 <span data-i18n="productSearch.scanBarcode">Сканировать</span>
+    </button>
+</div>
+
+<!-- Результаты поиска (список товаров) -->
+<div id="search-results" class="search-results"></div>
+
+<!-- Детальная карточка товара (изначально скрыта) -->
+<div id="product-detail-card" class="product-detail-card" style="display: none;"></div>
+
+<!-- Загрузка библиотек и скриптов -->
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+
+<!-- i18n система -->
+<script src="../js/i18n/core.js"></script>
+<script src="../js/i18n/common.js"></script>
+<script src="../js/i18n/product-search.js"></script>
+<script src="../js/i18n-page-loader.js"></script>
+
+<!-- Общие утилиты (ВАЖНО: config.js первым!) -->
+<script src="../js/config.js"></script>
+<script src="../js/cache.js"></script>
+<script src="../js/currency.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/api-extensions.js"></script>
+
+<!-- Компоненты -->
+<script src="../js/components/barcode-scanner.js"></script>
+<script src="../js/components/back-button.js"></script>
+
+<!-- Логика страницы поиска -->
+<script src="../js/product-search.js"></script>
+</body>
+</html>

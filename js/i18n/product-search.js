@@ -1,0 +1,82 @@
+// js/i18n/product-search.js - Переводы страницы поиска товара
+
+registerTranslations('productSearch', {
+    ru: {
+        title: 'Поиск товара',
+        subtitle: 'Найти информацию о товаре',
+        searchPlaceholder: 'Название или штрих-код...',
+        scanBarcode: 'Сканировать',
+        notFound: 'Товары не найдены',
+        basicInfo: 'Основная информация',
+        brand: 'Бренд',
+        barcode: 'Штрих-код',
+        unit: 'Единица измерения',
+        priceInfo: 'Информация о ценах',
+        noPriceData: 'Нет данных о ценах',
+        minPrice: 'Мин. цена',
+        maxPrice: 'Макс. цена',
+        lastPrice: 'Последняя цена',
+        lastPurchase: 'Последняя покупка',
+        purchasesCount: 'Количество покупок',
+        purchaseHistory: 'История покупок'
+    },
+    en: {
+        title: 'Product Search',
+        subtitle: 'Find product information',
+        searchPlaceholder: 'Name or barcode...',
+        scanBarcode: 'Scan',
+        notFound: 'No products found',
+        basicInfo: 'Basic Information',
+        brand: 'Brand',
+        barcode: 'Barcode',
+        unit: 'Unit',
+        priceInfo: 'Price Information',
+        noPriceData: 'No price data available',
+        minPrice: 'Min. Price',
+        maxPrice: 'Max. Price',
+        lastPrice: 'Last Price',
+        lastPurchase: 'Last Purchase',
+        purchasesCount: 'Number of Purchases',
+        purchaseHistory: 'Purchase History'
+    },
+    es: {
+        title: 'Búsqueda de productos',
+        subtitle: 'Encontrar información del producto',
+        searchPlaceholder: 'Nombre o código de barras...',
+        scanBarcode: 'Escanear',
+        notFound: 'No se encontraron productos',
+        basicInfo: 'Información básica',
+        brand: 'Marca',
+        barcode: 'Código de barras',
+        unit: 'Unidad',
+        priceInfo: 'Información de precios',
+        noPriceData: 'No hay datos de precios',
+        minPrice: 'Precio mín.',
+        maxPrice: 'Precio máx.',
+        lastPrice: 'Último precio',
+        lastPurchase: 'Última compra',
+        purchasesCount: 'Cantidad de compras',
+        purchaseHistory: 'Historial de compras'
+    },
+    uk: {
+        title: 'Пошук товару',
+        subtitle: 'Знайти інформацію про товар',
+        searchPlaceholder: 'Назва або штрих-код...',
+        scanBarcode: 'Сканувати',
+        notFound: 'Товари не знайдено',
+        basicInfo: 'Основна інформація',
+        brand: 'Бренд',
+        barcode: 'Штрих-код',
+        unit: 'Одиниця виміру',
+        priceInfo: 'Інформація про ціни',
+        noPriceData: 'Немає даних про ціни',
+        minPrice: 'Мін. ціна',
+        maxPrice: 'Макс. ціна',
+        lastPrice: 'Остання ціна',
+        lastPurchase: 'Остання покупка',
+        purchasesCount: 'Кількість покупок',
+        purchaseHistory: 'Історія покупок'
+    }
+});
+
+console.log('✅ i18n/product-search.js загружен');

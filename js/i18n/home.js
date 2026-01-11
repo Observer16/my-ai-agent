@@ -115,6 +115,7 @@ registerTranslations('actions', {
         addExpense: 'Добавить расход',
         management: 'Управление',
         priceAnalysis: 'Анализ цен',
+        productSearch: 'Поиск товара',
         settings: 'Настройки',
         instructions: 'Инструкции'
     },
@@ -123,6 +124,7 @@ registerTranslations('actions', {
         addExpense: 'Add Expense',
         management: 'Management',
         priceAnalysis: 'Price Analysis',
+        productSearch: 'Product Search',
         settings: 'Settings',
         instructions: 'Instructions'
     },
@@ -131,6 +133,7 @@ registerTranslations('actions', {
         addExpense: 'Agregar Gasto',
         management: 'Gestión',
         priceAnalysis: 'Análisis de Precios',
+        productSearch: 'Búsqueda de Productos',
         settings: 'Configuración',
         instructions: 'Instrucciones'
     },
@@ -139,6 +142,7 @@ registerTranslations('actions', {
         addExpense: 'Додати витрату',
         management: 'Управління',
         priceAnalysis: 'Аналіз цін',
+        productSearch: 'Пошук товару',
         settings: 'Налаштування',
         instructions: 'Інструкції'
     }
