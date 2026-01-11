@@ -404,7 +404,7 @@ class APIClient {
      * Поиск продукта
      */
     async searchProduct(query) {
-        return this.get(`/products/search?name=${encodeURIComponent(query)}`);
+        return this.get(`/products?search=${encodeURIComponent(query)}&limit=20`);
     }
 
     /**
