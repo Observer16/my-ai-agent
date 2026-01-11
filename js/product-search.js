@@ -142,7 +142,7 @@ function renderProductDetailCard(details) {
 
     card.innerHTML = `
         <div class="detail-header">
-            <button class="close-detail-btn" onclick="closeDetailCard()">✕</button>
+            <button class="close-detail-btn" id="close-detail-btn">✕</button>
             <h2 class="detail-title">${escapeHtml(product.name)}</h2>
             ${product.category_name ? `<div class="detail-category">${escapeHtml(product.category_name)}</div>` : ''}
         </div>
@@ -159,7 +159,12 @@ function renderProductDetailCard(details) {
     `;
 
     card.style.display = 'block';
-    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Добавляем обработчик для кнопки закрытия
+    const closeBtn = document.getElementById('close-detail-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeDetailCard);
+    }
 }
 
 function renderPriceStats(stats) {
@@ -233,6 +238,7 @@ function renderPurchaseHistory(history) {
 function closeDetailCard() {
     document.getElementById('product-detail-card').style.display = 'none';
     currentProductId = null;
+    tg.HapticFeedback.impactOccurred('light');
 }
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
