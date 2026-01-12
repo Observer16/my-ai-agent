@@ -129,36 +129,6 @@ budget: {
 <h3 data-i18n="budget.filters">Фильтры</h3>
 ```
 
-## 🎯 Примеры для копирования
-
-### Базовая страница с переводами:
-
-```html
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title data-i18n="budget.title">Бюджет</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
-    <div class="header">
-        <h1 data-i18n="budget.title">Бюджет</h1>
-    </div>
-    
-    <div class="module-card">
-        <div class="module-title" data-i18n="budget.total">Всего расходов</div>
-        <div class="amount" id="total-amount">0</div>
-    </div>
-
-    <script src="../js/config.js"></script>
-    <script src="../js/translations.js"></script>
-    <script src="../js/i18n-page-loader.js"></script>
-    <script src="../js/your-page-logic.js"></script>
-</body>
-</html>
-```
-
 ## ⚙️ Автоматическая работа
 
 Файл `i18n-page-loader.js` автоматически:
@@ -183,36 +153,3 @@ budget: {
 1. Проверь порядок загрузки скриптов
 2. Проверь правильность ключей в `data-i18n`
 3. Убедись что ключ есть в обеих языковых секциях
-
-## 📚 Полный пример обновления страницы
-
-**Было (budget.html):**
-```html
-<div class="header">
-    <h1>📊 Анализ цен</h1>
-</div>
-```
-
-**Стало:**
-```html
-<!-- В HEAD добавляем скрипты -->
-<script src="../js/translations.js"></script>
-<script src="../js/i18n-page-loader.js"></script>
-
-<!-- В BODY обновляем элементы -->
-<div class="header">
-    <h1>📊 <span data-i18n="actions.priceAnalysis">Анализ цен</span></h1>
-</div>
-```
-
-**Добавляем в translations.js (если ключа нет):**
-```javascript
-actions: {
-    priceAnalysis: 'Анализ цен',  // ru
-    priceAnalysis: 'Price Analysis', // en
-}
-```
-
-## ✅ Готово!
-
-После этого страница автоматически будет переключать язык при изменении настроек пользователя.
