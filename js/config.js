@@ -161,13 +161,13 @@ const CONFIG = {
     // Настройки анализа
     ANALYSIS: {
         // Период для трендов цен (дни)
-        DEFAULT_TREND_DAYS: 30,
+        DEFAULT_TREND_DAYS: 360,
         
         // Порог для "значительного изменения" цены (%)
         SIGNIFICANT_CHANGE_THRESHOLD: 10,
         
         // Количество топ продуктов/магазинов в отчётах
-        TOP_ITEMS_COUNT: 10
+        TOP_ITEMS_COUNT: 15
     },
     
     // Режим разработки
