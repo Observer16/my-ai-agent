@@ -27,11 +27,11 @@ class CacheManager {
             'purchases/recent': 1800,  // 30 минут
 
             // Семья (средняя частота изменений)
-            'family/members': 3600,    // 1 час
-            'family/info': 3600,       // 1 час
+            'family/members': 86400,    // 24 часа
+            'family/info': 86400,       // 24 часа
 
             // Фото-отзывы
-            'photo-reviews': 21600,           // 6 часов - список отзывов
+            'photo-reviews': 86400,           // 24 часа - список отзывов
             'photo-reviews/photo': 86400     // 24 часа - фото (меняются редко)
         };
         
