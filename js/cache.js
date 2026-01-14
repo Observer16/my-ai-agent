@@ -31,8 +31,8 @@ class CacheManager {
             'family/info': 86400,       // 24 часа
 
             // Фото-отзывы
-            'photo-reviews': 300,           // 24 часа - список отзывов
-            'photo-reviews/photo': 300     // 24 часа - фото (меняются редко)
+            'photo-reviews': 86400,           // 24 часа - список отзывов
+            'photo-reviews/photo': 86400     // 24 часа - фото (меняются редко)
         };
         
         // Не кэшировать эти endpoints
