@@ -37,7 +37,7 @@ const CacheRefreshButton = {
         try {
             // Блокируем кнопку во время обновления
             refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '⏳';
+            refreshBtn.classList.add('rotating');
 
             if (tg && tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('light');
@@ -45,11 +45,76 @@ const CacheRefreshButton = {
 
             console.log('🔄 Начало обновления кэша фото...');
 
-            // 1. Получаем все отзывы пользователя
-            const reviews = await API.getPhotoReviews({ limit: 1000 });
-            const photoReviews = Array.isArray(reviews) ? reviews : [];
+            // 1. Получаем все отзывы пользователя по частям (пагинация)
+            const allReviews = [];
+            let offset = 0;
+            const limit = 50; // Используем значение меньше MAX_PAGE_SIZE (100)
+            let totalReviews = 0;
+            let hasMore = true;
 
-            console.log(`📊 Найдено ${photoReviews.length} отзывов для обновления кэша`);
+            try {
+                // Сначала получим первую страницу, чтобы узнать общее количество
+                const firstPage = await API.getPhotoReviews({
+                    limit: limit,
+                    offset: 0
+                });
+
+                if (firstPage && firstPage.data && Array.isArray(firstPage.data)) {
+                    allReviews.push(...firstPage.data);
+                    totalReviews = firstPage.pagination?.total || 0;
+
+                    console.log(`📊 Всего отзывов: ${totalReviews}, загружено: ${firstPage.data.length}`);
+
+                    // Если отзывов больше, чем на первой странице, загружаем остальные
+                    if (totalReviews > firstPage.data.length) {
+                        // Вычисляем сколько еще страниц нужно загрузить
+                        const totalPages = Math.ceil(totalReviews / limit);
+
+                        // Загружаем остальные страницы (начиная со 2й)
+                        for (let page = 2; page <= totalPages; page++) {
+                            offset = (page - 1) * limit;
+
+                            const pageResult = await API.getPhotoReviews({
+                                limit: limit,
+                                offset: offset
+                            });
+
+                            if (pageResult && pageResult.data && Array.isArray(pageResult.data)) {
+                                allReviews.push(...pageResult.data);
+                                console.log(`📄 Страница ${page}/${totalPages}: загружено ${pageResult.data.length} отзывов`);
+                            }
+
+                            // Небольшая задержка между запросами
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    }
+                } else {
+                    console.warn('❌ Неожиданный формат ответа от API');
+                    if (tg && tg.showAlert) {
+                        tg.showAlert('Ошибка получения отзывов');
+                    }
+                    return;
+                }
+
+            } catch (error) {
+                console.error('❌ Ошибка при загрузке отзывов:', error);
+                if (tg && tg.showAlert) {
+                    tg.showAlert('Ошибка при загрузке отзывов');
+                }
+                throw error;
+            }
+
+            const photoReviews = allReviews;
+            console.log(`📊 Всего загружено ${photoReviews.length} отзывов для обновления кэша`);
+
+            if (photoReviews.length === 0) {
+                if (tg && tg.showAlert) {
+                    tg.showAlert('Нет фото для обновления кэша');
+                }
+                refreshBtn.classList.remove('rotating');
+                refreshBtn.disabled = false;
+                return;
+            }
 
             // 2. Извлекаем все уникальные file_id
             const fileIds = [];
@@ -63,15 +128,6 @@ const CacheRefreshButton = {
             });
 
             console.log(`🖼️ Уникальных фото для обновления: ${fileIds.length}`);
-
-            if (fileIds.length === 0) {
-                if (tg && tg.showAlert) {
-                    tg.showAlert('Нет фото для обновления кэша');
-                }
-                refreshBtn.innerHTML = '🔄';
-                refreshBtn.disabled = false;
-                return;
-            }
 
             // 3. Очищаем кэш для этих file_id
             let clearedCount = 0;
@@ -104,8 +160,15 @@ const CacheRefreshButton = {
         } catch (error) {
             console.error('❌ Ошибка при обновлении кэша:', error);
 
+            let errorMessage = 'Ошибка при обновлении кэша';
+            if (error.message && error.message.includes('422')) {
+                errorMessage = 'Ошибка API: некорректные параметры запроса';
+            } else if (error.message && error.message.includes('limit')) {
+                errorMessage = 'Ошибка API: превышен лимит запроса';
+            }
+
             if (tg && tg.showAlert) {
-                tg.showAlert('Ошибка при обновлении кэша');
+                tg.showAlert(errorMessage);
             }
 
             if (tg && tg.HapticFeedback) {
@@ -113,7 +176,7 @@ const CacheRefreshButton = {
             }
         } finally {
             // Восстанавливаем кнопку
-            refreshBtn.innerHTML = '🔄';
+            refreshBtn.classList.remove('rotating');
             refreshBtn.disabled = false;
         }
     }
