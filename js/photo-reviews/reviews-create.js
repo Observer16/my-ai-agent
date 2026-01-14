@@ -1,4 +1,4 @@
-// js/photo-reviews/reviews-create.js - Создание фото-отзыва с n8n
+// js/photo-reviews/reviews-create.js - Создание фото-отзыва
 
 /**
  * Модуль создания фото-отзывов
@@ -385,17 +385,18 @@ const ReviewsCreate = {
                 nextToRatingBtn.textContent = t('common.loading') || 'Загрузка...';
             }
 
-            // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Используем новый метод API для загрузки через n8n
-            console.log('📤 Загрузка фото через n8n...');
-            const uploadResult = await API.uploadPhotoViaN8N(file);
+            // 🔄 ОСНОВНОЕ ИЗМЕНЕНИЕ: Используем новый метод API для прямой загрузки в Telegram
+            console.log('📤 Загрузка фото напрямую в Telegram...');
+            const uploadResult = await API.uploadPhoto(file); // ✅ Изменено с uploadPhotoViaN8N на uploadPhoto
 
             this.photoFileId = uploadResult.telegram_file_id;
             this.photoFileUniqueId = uploadResult.telegram_file_unique_id;
 
-            console.log('✅ Фото загружено через n8н:', {
-                fileId: this.photoFileId,
-                uniqueId: this.photoFileUniqueId,
-                message: uploadResult.message
+            console.log('✅ Фото загружено в Telegram:', {
+                fileId: this.photoFileId?.substring(0, 30) + '...',
+                uniqueId: this.photoFileUniqueId?.substring(0, 30) + '...',
+                message: uploadResult.message,
+                telegramUserId: uploadResult.telegram_user_id
             });
 
             // Показываем превью из загруженного файла
@@ -415,14 +416,21 @@ const ReviewsCreate = {
         } catch (uploadError) {
             console.error('❌ Ошибка загрузки фото:', uploadError);
 
-            // ОШИБКА: Не создавать временные ID!
+            // Обработка различных ошибок
             if (this.tg) {
                 let errorMessage = 'Ошибка загрузки фото. Попробуйте еще раз.';
 
-                if (uploadError.message.includes('chat not found')) {
+                // Специальная обработка ошибок Telegram
+                if (uploadError.message.includes('Telegram chat not started')) {
                     errorMessage = 'Ошибка: Не удалось отправить фото в Telegram. Убедитесь, что вы начали диалог с ботом.';
                 } else if (uploadError.message.includes('File too large')) {
                     errorMessage = 'Фото слишком большое. Максимальный размер: 20MB';
+                } else if (uploadError.message.includes('Too many requests')) {
+                    errorMessage = 'Слишком много запросов к Telegram. Пожалуйста, подождите немного и попробуйте снова.';
+                } else if (uploadError.message.includes('Authentication failed')) {
+                    errorMessage = 'Ошибка аутентификации. Пожалуйста, войдите заново.';
+                } else if (uploadError.message.includes('Unsupported file type')) {
+                    errorMessage = 'Неподдерживаемый формат файла. Используйте JPG, PNG, GIF или WebP.';
                 }
 
                 this.tg.showAlert(errorMessage);
@@ -518,7 +526,7 @@ const ReviewsCreate = {
             const tags = tagsText ? tagsText.split(',').map(t => t.trim()).filter(t => t).slice(0, 10) : [];
             const language = getCurrentLanguage ? getCurrentLanguage() : 'ru';
 
-            // Создаём отзыв с РЕАЛЬНЫМИ Telegram file_id из n8n
+            // Создаём отзыв с РЕАЛЬНЫМИ Telegram file_id
             const reviewData = {
                 telegram_file_id: this.photoFileId,
                 telegram_file_unique_id: this.photoFileUniqueId || this.photoFileId,
@@ -529,11 +537,21 @@ const ReviewsCreate = {
             if (comment) reviewData.comment = comment;
             if (tags.length > 0) reviewData.tags = tags;
 
-            console.log('📝 Сохранение отзыва с фото из n8n:', reviewData);
+            console.log('📝 Сохранение отзыва с фото из Telegram:', {
+                fileId: this.photoFileId?.substring(0, 30) + '...',
+                rating: this.selectedRating,
+                language: language,
+                hasComment: !!comment,
+                tagsCount: tags.length
+            });
 
             const result = await API.createPhotoReview(reviewData);
 
-            console.log('✅ Отзыв сохранён:', result);
+            console.log('✅ Отзыв сохранён:', {
+                id: result.id,
+                fileId: result.telegram_file_id?.substring(0, 30) + '...',
+                createdAt: result.created_at
+            });
 
             // Закрываем модальное окно
             this.close();
@@ -604,4 +622,4 @@ if (document.readyState === 'loading') {
 // Экспорт для использования в других модулях
 window.ReviewsCreate = ReviewsCreate;
 
-console.log('✅ reviews-create.js загружен');
+console.log('✅ reviews-create.js загружен (с прямой загрузкой в Telegram)');

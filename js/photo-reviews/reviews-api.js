@@ -4,7 +4,7 @@
  * Расширение API клиента для работы с фото-отзывами
  */
 if (typeof API !== 'undefined') {
-    
+
     /**
      * Получить список фото-отзывов пользователя
      * @param {Object} params - Параметры запроса
@@ -44,11 +44,11 @@ if (typeof API !== 'undefined') {
     };
 
     /**
-     * Загрузить фото через n8n вебхук
+     * Загрузить фото напрямую в Telegram через Bot API
      * @param {File} file - Файл фото для загрузки
      * @returns {Promise<Object>} Результат загрузки с telegram_file_id
      */
-    API.uploadPhotoViaN8N = async function(file) {
+    API.uploadPhoto = async function(file) {
         const formData = new FormData();
         formData.append('photo', file);
 
@@ -63,11 +63,41 @@ if (typeof API !== 'undefined') {
                 throw new Error('Authentication failed. Please log in again.');
             }
 
+            // Проверяем специальные ошибки Telegram
+            if (response.status === 400) {
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error === 'telegram_chat_not_started') {
+                        throw new Error(`Telegram chat not started: ${errorData.message}`);
+                    }
+                    if (errorData.detail && errorData.detail.includes('File too large')) {
+                        throw new Error('File too large for Telegram API');
+                    }
+                } catch (jsonError) {
+                    // Если не удалось распарсить JSON, используем текст ошибки
+                }
+            }
+
+            if (response.status === 429) {
+                throw new Error('Too many requests to Telegram API. Please try again later.');
+            }
+
             const errorText = await response.text();
             throw new Error(`Upload failed (${response.status}): ${errorText}`);
         }
 
         return await response.json();
+    };
+
+    /**
+     * Alias для обратной совместимости (можно удалить после миграции)
+     * @deprecated Используйте uploadPhoto вместо uploadPhotoViaN8N
+     * @param {File} file - Файл фото для загрузки
+     * @returns {Promise<Object>} Результат загрузки с telegram_file_id
+     */
+    API.uploadPhotoViaN8N = async function(file) {
+        console.log('⚠️ uploadPhotoViaN8N is deprecated, use uploadPhoto instead');
+        return this.uploadPhoto(file);
     };
 
     /**
