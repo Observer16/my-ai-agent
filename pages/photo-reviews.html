@@ -249,6 +249,14 @@
     <script>
     // Инициализация после загрузки ВСЕХ скриптов
     window.addEventListener('load', () => {
+        // Инициализация кнопки "Назад"
+        if (window.BackButton && typeof window.BackButton.init === 'function') {
+            const fallbackUrl = document.referrer || '../index.html';
+            window.BackButton.setFallbackUrl(fallbackUrl);
+            window.BackButton.init();
+        }
+
+        // Инициализация кнопки обновления кэша
         if (window.CacheRefreshButton && window.CacheRefreshButton.init) {
             window.CacheRefreshButton.init('refreshCacheBtn', 'ReviewsList');
         }
