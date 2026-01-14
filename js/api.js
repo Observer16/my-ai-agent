@@ -1,6 +1,18 @@
+// js/api.js
+
 /**
  * API клиент для системы семейного бюджета
- * Версия: - С кэшированием
+ * Версия: 2.0 - Безопасная аутентификация через Telegram initData
+ *
+ * ## 🔐 Безопасная аутентификация:
+ * - Использует подписанные данные Telegram initData вместо простого user_id
+ * - HMAC-SHA256 валидация на сервере
+ * - Срок действия сессии: 7 дней
+ * - Автоматическая обработка истечения сессии
+ *
+ * ## ⚠️ Важно для пользователей:
+ * После обновления все пользователи должны перезапустить приложение в Telegram
+ * Старые сессии (отправка только user_id) будут отклоняться сервером
  */
 
 class APIClient {
@@ -19,41 +31,63 @@ class APIClient {
         this.baseURL = window.CONFIG.API_URL;
         console.log('✅ API URL из config.js:', this.baseURL);
 
-        // Telegram User ID из Telegram Web App
+        // Telegram User ID из Telegram Web App (только для UI)
         this.telegramUserId = null;
+
+        // 🆕 Telegram initData (подписанные данные для аутентификации)
+        this.telegramInitData = null;
 
         // Инициализация Telegram Web App
         this.initTelegram();
-        
+
         // 🆕 Инициализация кэша (если доступен)
         this.cache = window.Cache || null;
         if (this.cache) {
             console.log('✅ Кэширование активировано');
         }
+
+        // 🆕 Флаг для отслеживания ошибок аутентификации
+        this.authErrorShown = false;
     }
 
     /**
-     * Инициализация Telegram Web App
+     * Инициализация Telegram Web App с безопасной аутентификацией
      */
     initTelegram() {
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.ready();
 
-            // Получаем данные пользователя
+            // 🆕 БЕЗОПАСНОСТЬ: Сохраняем ПОДПИСАННЫЙ initData для аутентификации
+            this.telegramInitData = tg.initData;
+
+            // user_id только для UI (не для аутентификации!)
             if (tg.initDataUnsafe?.user) {
                 this.telegramUserId = tg.initDataUnsafe.user.id;
-                console.log('✅ Telegram User ID:', this.telegramUserId);
-            } else {
-                console.warn('⚠️ Telegram User ID не найден');
+                console.log('✅ Telegram User ID (для UI):', this.telegramUserId);
             }
+
+            if (this.telegramInitData) {
+                console.log('✅ Telegram initData получен (длина:', this.telegramInitData.length, 'символов)');
+
+                // 🆕 Логируем первые 100 символов для отладки (безопасно)
+                console.debug('initData начало:', this.telegramInitData.substring(0, 100) + '...');
+            } else {
+                console.error('❌ initData пуст - аутентификация невозможна!');
+                this.showAuthError('initData не получен. Пожалуйста, перезапустите приложение в Telegram.');
+            }
+
+            // 🆕 Отображаем версию WebApp для отладки
+            console.log('Telegram WebApp версия:', tg.version);
+
         } else {
-            console.warn('⚠️ Telegram WebApp не обнаружен');
+            console.warn('⚠️ Telegram WebApp не обнаружен - работа в режиме без аутентификации');
+            this.showAuthError('Telegram WebApp не обнаружен. Откройте приложение через Telegram.');
         }
     }
 
     /**
-     * Получение заголовков для запросов
+     * Получение заголовков для запросов с безопасной аутентификацией
      */
     getHeaders(includeContentType = true) {
         const headers = {};
@@ -62,9 +96,18 @@ class APIClient {
             headers['Content-Type'] = 'application/json';
         }
 
-        // Добавляем Telegram User ID если есть
-        if (this.telegramUserId) {
-            headers['X-Telegram-User-Id'] = this.telegramUserId;
+        // 🆕 БЕЗОПАСНОСТЬ: Отправляем ПОДПИСАННЫЙ initData вместо простого user_id
+        if (this.telegramInitData) {
+            headers['X-Telegram-Init-Data'] = this.telegramInitData;
+            console.debug('✅ Заголовок X-Telegram-Init-Data добавлен');
+        } else {
+            console.warn('⚠️ initData отсутствует - запрос будет отклонён сервером');
+
+            // 🆕 Показываем ошибку только один раз
+            if (!this.authErrorShown) {
+                this.showAuthError('Отсутствуют данные для аутентификации. Перезапустите приложение.');
+                this.authErrorShown = true;
+            }
         }
 
         // ✅ NGROK FIX: пропускаем warning страницу
@@ -72,20 +115,20 @@ class APIClient {
 
         return headers;
     }
-    
+
     /**
      * Извлечь параметры из endpoint
      */
     extractParams(endpoint) {
         const [path, query] = endpoint.split('?');
         if (!query) return { path, params: null };
-        
+
         const params = {};
         query.split('&').forEach(pair => {
             const [key, value] = pair.split('=');
             params[key] = value;
         });
-        
+
         return { path, params };
     }
 
@@ -98,12 +141,12 @@ class APIClient {
             if (this.cache) {
                 const { path, params } = this.extractParams(endpoint);
                 const cached = this.cache.get(path, params);
-                
+
                 if (cached !== null) {
                     return cached;
                 }
             }
-            
+
             // Запрос к API
             const headers = includeAuth ? this.getHeaders(false) : {
                 'ngrok-skip-browser-warning': 'true'
@@ -116,6 +159,14 @@ class APIClient {
                 method: 'GET',
                 headers: headers
             });
+
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'GET', endpoint);
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -132,7 +183,7 @@ class APIClient {
             }
 
             const data = await response.json();
-            
+
             // 🆕 Сохраняем в кэш
             if (this.cache) {
                 const { path, params } = this.extractParams(endpoint);
@@ -142,6 +193,11 @@ class APIClient {
             return data;
         } catch (error) {
             console.error(`GET ${endpoint} error:`, error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
@@ -160,6 +216,14 @@ class APIClient {
                 body: JSON.stringify(data)
             });
 
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'POST', endpoint);
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
+
             if (!response.ok) {
                 const errorText = await response.text();
                 let errorDetail = 'Ошибка запроса';
@@ -175,7 +239,7 @@ class APIClient {
             }
 
             const result = await response.json();
-            
+
             // 🆕 Инвалидация кэша после изменений
             if (this.cache) {
                 this.invalidateCache(endpoint);
@@ -184,6 +248,11 @@ class APIClient {
             return result;
         } catch (error) {
             console.error(`POST ${endpoint} error:`, error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
@@ -202,6 +271,14 @@ class APIClient {
                 body: JSON.stringify(data)
             });
 
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'PUT', endpoint);
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
+
             if (!response.ok) {
                 const errorText = await response.text();
                 let errorDetail = 'Ошибка запроса';
@@ -217,7 +294,7 @@ class APIClient {
             }
 
             const result = await response.json();
-            
+
             // 🆕 Инвалидация кэша после изменений
             if (this.cache) {
                 this.invalidateCache(endpoint);
@@ -226,6 +303,11 @@ class APIClient {
             return result;
         } catch (error) {
             console.error(`PUT ${endpoint} error:`, error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
@@ -242,6 +324,14 @@ class APIClient {
                 method: 'DELETE',
                 headers: this.getHeaders(false)
             });
+
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'DELETE', endpoint);
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -267,16 +357,21 @@ class APIClient {
             return result;
         } catch (error) {
             console.error(`DELETE ${endpoint} error:`, error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
-    
+
     /**
      * 🆕 Инвалидация кэша при изменениях
      */
     invalidateCache(endpoint) {
         if (!this.cache) return;
-        
+
         // Определяем что очистить
         if (endpoint.includes('/products')) {
             this.cache.clear('products');
@@ -290,6 +385,51 @@ class APIClient {
             this.cache.clear('statistics');
             this.cache.clear('purchases');
             this.cache.clear('prices');
+        }
+    }
+
+    /**
+     * 🆕 Обработка ошибок аутентификации (401)
+     * Возвращает true если ошибка обработана
+     */
+    async handleAuthError(response, method, endpoint) {
+        try {
+            const errorData = await response.json();
+            const errorDetail = errorData.detail || 'Ошибка авторизации';
+
+            console.warn(`🔐 Ошибка аутентификации ${method} ${endpoint}:`, errorDetail);
+
+            // Проверяем тип ошибки
+            if (errorDetail.includes('истёк') ||
+                errorDetail.includes('невалид') ||
+                errorDetail.includes('Перезапустите')) {
+
+                // Показываем сообщение пользователю через Telegram WebApp
+                this.showAuthError('Сессия истекла. Пожалуйста, перезапустите приложение в Telegram.');
+                return true;
+            }
+        } catch (e) {
+            console.error('Ошибка при разборе ответа аутентификации:', e);
+        }
+
+        return false;
+    }
+
+    /**
+     * 🆕 Показать ошибку аутентификации через Telegram WebApp
+     */
+    showAuthError(message) {
+        if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.showAlert(
+                message,
+                () => {
+                    // Закрываем приложение после нажатия OK
+                    window.Telegram.WebApp.close();
+                }
+            );
+        } else {
+            // Fallback для браузера
+            alert(message);
         }
     }
 
@@ -581,10 +721,19 @@ class APIClient {
             const response = await fetch(`${this.baseURL}/upload/xml`, {
                 method: 'POST',
                 headers: {
-                    'X-Telegram-User-Id': this.telegramUserId
+                    'X-Telegram-Init-Data': this.telegramInitData || '',
+                    'ngrok-skip-browser-warning': 'true'
                 },
                 body: formData
             });
+
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'UPLOAD', '/upload/xml');
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -601,7 +750,7 @@ class APIClient {
             }
 
             const result = await response.json();
-            
+
             // Очищаем кэш после загрузки
             if (this.cache) {
                 this.cache.clear();
@@ -610,6 +759,11 @@ class APIClient {
             return result;
         } catch (error) {
             console.error('Upload XML error:', error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
@@ -628,10 +782,19 @@ class APIClient {
             const response = await fetch(`${this.baseURL}/upload/xml/batch`, {
                 method: 'POST',
                 headers: {
-                    'X-Telegram-User-Id': this.telegramUserId
+                    'X-Telegram-Init-Data': this.telegramInitData || '',
+                    'ngrok-skip-browser-warning': 'true'
                 },
                 body: formData
             });
+
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'UPLOAD', '/upload/xml/batch');
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -648,7 +811,7 @@ class APIClient {
             }
 
             const result = await response.json();
-            
+
             // Очищаем кэш после загрузки
             if (this.cache) {
                 this.cache.clear();
@@ -657,6 +820,11 @@ class APIClient {
             return result;
         } catch (error) {
             console.error('Upload multiple XML error:', error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
@@ -773,26 +941,33 @@ class APIClient {
     }
 
     /**
-     * Получить Telegram User ID
+     * Получить Telegram User ID (только для UI)
      */
     getTelegramUserId() {
         return this.telegramUserId;
     }
 
     /**
+     * 🆕 Получить Telegram InitData (для отладки)
+     */
+    getTelegramInitData() {
+        return this.telegramInitData;
+    }
+
+    /**
      * Проверка авторизации
      */
     isAuthenticated() {
-        return this.telegramUserId !== null;
+        return this.telegramInitData !== null;
     }
-    
+
     /**
      * 🆕 Получить статистику кэша
      */
     getCacheStats() {
         return this.cache ? this.cache.getStats() : null;
     }
-    
+
     /**
      * 🆕 Очистить весь кэш
      */
@@ -816,6 +991,14 @@ class APIClient {
                 headers: this.getHeaders(),
                 body: JSON.stringify(data)
             });
+
+            // 🆕 Обработка ошибок аутентификации
+            if (response.status === 401) {
+                const handled = await this.handleAuthError(response, 'PATCH', endpoint);
+                if (handled) {
+                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
+                }
+            }
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -841,6 +1024,11 @@ class APIClient {
             return result;
         } catch (error) {
             console.error(`PATCH ${endpoint} error:`, error);
+
+            // 🆕 Не показываем повторно ошибки аутентификации
+            if (!error.message.includes('Сессия истекла')) {
+                throw error;
+            }
             throw error;
         }
     }
@@ -921,8 +1109,22 @@ if (typeof module !== 'undefined' && module.exports) {
 // Делаем API глобально доступным
 window.API = API;
 
-console.log('✅ API клиент инициализирован', {
+console.log('✅ API клиент инициализирован с безопасной аутентификацией', {
     baseURL: API.baseURL,
     telegramUserId: API.telegramUserId,
+    telegramInitData: API.telegramInitData ? 'present' : 'missing',
+    initDataLength: API.telegramInitData ? API.telegramInitData.length : 0,
     cacheEnabled: API.cache !== null
 });
+
+// 🆕 Глобальная функция для проверки аутентификации
+window.checkTelegramAuth = function() {
+    if (!API.telegramInitData) {
+        console.error('❌ Telegram initData отсутствует!');
+        console.error('   Перезапустите приложение в Telegram WebApp');
+        return false;
+    }
+
+    console.log('✅ Telegram initData присутствует, длина:', API.telegramInitData.length);
+    return true;
+};
