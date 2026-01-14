@@ -8,12 +8,71 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/back-button.css">
     <link rel="stylesheet" href="../css/photo-reviews.css">
+    <style>
+        /* Стили для заголовка с кнопкой обновления */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .header-top h1 {
+            margin: 0;
+            flex: 1;
+        }
+
+        .refresh-cache-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s, transform 0.2s;
+            color: #666;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .refresh-cache-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .refresh-cache-btn:active {
+            background-color: rgba(0, 0, 0, 0.1);
+            transform: scale(0.95);
+        }
+
+        .refresh-cache-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .refresh-cache-btn.rotating {
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div class="photo-reviews-container">
-        <!-- Заголовок -->
+        <!-- Заголовок и кнопка обновления -->
         <div class="photo-reviews-header">
-            <h1 data-i18n="photoReviews.title">Мои предпочтения</h1>
+            <div class="header-top">
+                <h1 data-i18n="photoReviews.title">Мои предпочтения</h1>
+                <button class="refresh-cache-btn" id="refreshCacheBtn" title="Обновить кэш фото">
+                    🔄
+                </button>
+            </div>
             <p data-i18n="photoReviews.subtitle">Личный дневник покупок с фото</p>
         </div>
 
@@ -37,9 +96,9 @@
 
         <!-- Поиск -->
         <div class="reviews-search">
-            <input 
-                type="text" 
-                class="search-input" 
+            <input
+                type="text"
+                class="search-input"
                 id="searchInput"
                 placeholder="Поиск по комментариям..."
                 data-i18n-placeholder="photoReviews.list.search"
@@ -59,7 +118,7 @@
     <div class="create-review-modal" id="createModal">
         <div class="create-review-content">
             <h2 data-i18n="photoReviews.create.title">Новый отзыв</h2>
-            
+
             <!-- Индикатор шагов -->
             <div class="create-steps">
                 <div class="create-step active" id="step1Indicator">
@@ -125,19 +184,19 @@
             <div class="create-step-content" id="detailsStep" style="display: none;">
                 <div class="details-section">
                     <label data-i18n="photoReviews.create.addComment">Комментарий (опционально)</label>
-                    <textarea 
-                        id="commentInput" 
+                    <textarea
+                        id="commentInput"
                         maxlength="500"
                         placeholder="Что вам понравилось или не понравилось?"
                         data-i18n-placeholder="photoReviews.create.commentPlaceholder"
                     ></textarea>
                     <p class="hint-text"><span id="commentCounter">0</span>/500</p>
                 </div>
-                
+
                 <div class="details-section">
                     <label data-i18n="photoReviews.create.addTags">Теги (опционально)</label>
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         id="tagsInput"
                         placeholder="Например: молоко, сыр"
                         data-i18n-placeholder="photoReviews.create.tagsPlaceholder"
@@ -169,16 +228,17 @@
     <script src="../js/cache.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/photo-reviews/reviews-api.js"></script>
-    
+
     <!-- i18n -->
     <script src="../js/i18n/core.js"></script>
     <script src="../js/i18n/common.js"></script>
     <script src="../js/i18n/photo-reviews.js"></script>
     <script src="../js/i18n-page-loader.js"></script>
-    
+
     <!-- Компоненты -->
     <script src="../js/components/back-button.js"></script>
-    
+    <script src="../js/components/cache-refresh.js"></script>
+
     <!-- Модули фото-отзывов -->
     <script src="../js/photo-reviews/reviews-list.js"></script>
     <script src="../js/photo-reviews/reviews-create.js"></script>
@@ -192,6 +252,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fallbackUrl = document.referrer || '../index.html';
         window.BackButton.setFallbackUrl(fallbackUrl);
         window.BackButton.init();
+    }
+
+    // Инициализация кнопки обновления кэша
+    if (window.CacheRefreshButton && typeof window.CacheRefreshButton.init === 'function') {
+        window.CacheRefreshButton.init('refreshCacheBtn', 'ReviewsList');
     }
 });
 </script>
