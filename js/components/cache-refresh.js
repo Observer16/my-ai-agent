@@ -108,9 +108,7 @@ const CacheRefreshButton = {
             console.log(`📊 Всего загружено ${photoReviews.length} отзывов для обновления кэша`);
 
             if (photoReviews.length === 0) {
-                if (tg && tg.showAlert) {
-                    tg.showAlert('Нет фото для обновления кэша');
-                }
+                // Просто выходим без сообщения
                 refreshBtn.classList.remove('rotating');
                 refreshBtn.disabled = false;
                 return;
@@ -141,12 +139,7 @@ const CacheRefreshButton = {
 
             console.log(`🧹 Очищено ${clearedCount} записей из кэша`);
 
-            // 4. Показываем алерт через Telegram
-            if (tg && tg.showAlert) {
-                tg.showAlert(`Кэш обновлен: ${clearedCount} фото`);
-            }
-
-            // 5. Принудительно перезагружаем список отзывов
+            // 4. Принудительно перезагружаем список отзывов
             const reviewsList = window[reviewsListModule];
             if (reviewsList && typeof reviewsList.refresh === 'function') {
                 console.log('🔄 Принудительная перезагрузка списка отзывов');
