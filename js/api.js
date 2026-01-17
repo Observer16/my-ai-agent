@@ -452,13 +452,6 @@ class APIClient {
     // ============================================================================
 
     /**
-     * Проверка здоровья API
-     */
-    async health() {
-        return this.get('/health', false);
-    }
-
-    /**
      * Получить общую статистику
      */
     async getStatistics() {
@@ -545,16 +538,6 @@ class APIClient {
      */
     async searchProduct(query) {
         return this.get(`/products?search=${encodeURIComponent(query)}&limit=20`);
-    }
-
-    /**
-     * Обновить категорию продукта
-     */
-    async updateProductCategory(productId, categoryId) {
-        return this.put('/products/category', {
-            product_id: productId,
-            category_id: categoryId
-        });
     }
 
     /**
@@ -673,13 +656,6 @@ class APIClient {
         });
     }
 
-    /**
-     * Создать покупку вручную (старое название для обратной совместимости)
-     */
-    async createManualExpense(expenseData) {
-        return this.post('/expenses/manual', expenseData);
-    }
-
     // ============================================================================
     // АНАЛИЗ ЦЕН
     // ============================================================================
@@ -704,129 +680,6 @@ class APIClient {
             endpoint += `&search=${encodeURIComponent(productName)}`;
         }
         return this.get(endpoint);
-    }
-
-    // ============================================================================
-    // ЗАГРУЗКА ФАЙЛОВ
-    // ============================================================================
-
-    /**
-     * Загрузить XML файл
-     */
-    async uploadXML(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch(`${this.baseURL}/upload/xml`, {
-                method: 'POST',
-                headers: {
-                    'X-Telegram-Init-Data': this.telegramInitData || '',
-                    'ngrok-skip-browser-warning': 'true'
-                },
-                body: formData
-            });
-
-            // 🆕 Обработка ошибок аутентификации
-            if (response.status === 401) {
-                const handled = await this.handleAuthError(response, 'UPLOAD', '/upload/xml');
-                if (handled) {
-                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
-                }
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка загрузки';
-
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-
-                throw new Error(errorDetail);
-            }
-
-            const result = await response.json();
-
-            // Очищаем кэш после загрузки
-            if (this.cache) {
-                this.cache.clear();
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Upload XML error:', error);
-
-            // 🆕 Не показываем повторно ошибки аутентификации
-            if (!error.message.includes('Сессия истекла')) {
-                throw error;
-            }
-            throw error;
-        }
-    }
-
-    /**
-     * Загрузить несколько XML файлов
-     */
-    async uploadMultipleXML(files) {
-        const formData = new FormData();
-
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
-
-        try {
-            const response = await fetch(`${this.baseURL}/upload/xml/batch`, {
-                method: 'POST',
-                headers: {
-                    'X-Telegram-Init-Data': this.telegramInitData || '',
-                    'ngrok-skip-browser-warning': 'true'
-                },
-                body: formData
-            });
-
-            // 🆕 Обработка ошибок аутентификации
-            if (response.status === 401) {
-                const handled = await this.handleAuthError(response, 'UPLOAD', '/upload/xml/batch');
-                if (handled) {
-                    throw new Error('Сессия истекла. Пожалуйста, перезапустите приложение.');
-                }
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorDetail = 'Ошибка загрузки';
-
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    errorDetail = errorJson.detail || errorDetail;
-                } catch (e) {
-                    errorDetail = errorText || `HTTP ${response.status}`;
-                }
-
-                throw new Error(errorDetail);
-            }
-
-            const result = await response.json();
-
-            // Очищаем кэш после загрузки
-            if (this.cache) {
-                this.cache.clear();
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Upload multiple XML error:', error);
-
-            // 🆕 Не показываем повторно ошибки аутентификации
-            if (!error.message.includes('Сессия истекла')) {
-                throw error;
-            }
-            throw error;
-        }
     }
 
     // ============================================================================
@@ -1079,23 +932,6 @@ class APIClient {
         return this.get('/users/languages');
     }
 
-    /**
-     * Получить список расходов (для проверки наличия данных)
-     */
-    async getExpenses(params = {}) {
-        let endpoint = '/expenses/manual/recent';
-        const queryParams = new URLSearchParams();
-
-        if (params.limit) queryParams.append('limit', params.limit);
-        if (params.offset) queryParams.append('offset', params.offset);
-        if (params.start_date) queryParams.append('start_date', params.start_date);
-        if (params.end_date) queryParams.append('end_date', params.end_date);
-
-        const query = queryParams.toString();
-        if (query) endpoint += `?${query}`;
-
-        return this.get(endpoint);
-    }
 }
 
 // Создаём глобальный экземпляр API
