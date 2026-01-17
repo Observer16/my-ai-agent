@@ -18,6 +18,11 @@ async function init() {
     // ✅ КНОПКА "НАЗАД" ТЕПЕРЬ УПРАВЛЯЕТСЯ КОМПОНЕНТОМ BackButton
     // Не нужно показывать/настраивать ее здесь
 
+    // Очищаем кэш расходов при загрузке страницы для получения свежих данных
+    if (typeof window.CacheInvalidator !== 'undefined') {
+        window.CacheInvalidator.invalidateExpenses();
+    }
+
     await initCurrency();
 
     // Инициализируем баннер, если он доступен
@@ -42,7 +47,10 @@ function setupMainButton() {
     tg.MainButton.setText('🔄 ' + t('budget.refresh'));
     tg.MainButton.show();
     tg.MainButton.onClick(() => {
-        if (typeof API !== 'undefined' && API.clearCache) {
+        // Очищаем кэш расходов перед обновлением
+        if (typeof window.CacheInvalidator !== 'undefined') {
+            window.CacheInvalidator.invalidateExpenses();
+        } else if (typeof API !== 'undefined' && API.clearCache) {
             API.clearCache();
         }
         init();
