@@ -403,6 +403,14 @@ registerTranslations('health', {
                 error_save_generic: 'Error de guardado',
                 error_save: '❌ No se pudo guardar: ',
 
+                // Dosis parcial (nuevo)
+                partial_dose_label: '🔹 Dosis parcial',
+                fraction_label: 'Elegir dosis',
+                fraction_half: 'Mitad (1/2)',
+                fraction_third: 'Tercio (1/3)',
+                fraction_quarter: 'Cuarto (1/4)',
+                stock_days_remaining: '📊 Durará ~{days} días',
+
                 // Success & Status
                 success_created: '✅ Medicamento agregado',
                 success_updated: '✅ Medicamento actualizado',

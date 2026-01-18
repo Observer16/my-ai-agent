@@ -533,6 +533,33 @@ const MedicationFormModal = (function() {
                                     </button>
                                 </div>
                             </div>
+
+                            <!-- Частичный приём лекарства -->
+                            <div class="form-group partial-dose-container">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input
+                                        type="checkbox"
+                                        id="schedule-partial-dose-checkbox"
+                                        onchange="MedicationFormModal.togglePartialDose()"
+                                        style="width: 18px; height: 18px; cursor: pointer;"
+                                    >
+                                    <span>${t('health.modals.medication.partial_dose_label')}</span>
+                                </label>
+                            </div>
+
+                            <!-- Выпадающее меню с вариантами фракций (скрыто по умолчанию) -->
+                            <div id="fraction-selector-container" class="fraction-selector" style="display: none;">
+                                <label for="schedule-fraction">${t('health.modals.medication.fraction_label')}</label>
+                                <select
+                                    id="schedule-fraction"
+                                    class="modal-input"
+                                    onchange="MedicationFormModal.changeFraction(this.value)"
+                                >
+                                    <option value="0">${t('health.modals.medication.fraction_half')}</option>
+                                    <option value="0.33">${t('health.modals.medication.fraction_third')}</option>
+                                    <option value="0.25">${t('health.modals.medication.fraction_quarter')}</option>
+                                </select>
+                            </div>
                         </div>
 
                         <button
@@ -566,6 +593,18 @@ const MedicationFormModal = (function() {
         const unitInfo = QUANTITY_UNITS.find(u => u.value === formData.quantity_unit) || QUANTITY_UNITS[0];
         const reminderText = schedule.reminder_minutes === 0 ? 'без напоминания' : `за ${schedule.reminder_minutes} мин`;
 
+        // Рассчитываем фактическую дозу
+        const actualDose = schedule.dosage_amount + (schedule.dosage_fraction || 0.0);
+        const dosageDisplay = actualDose === parseInt(actualDose)
+            ? actualDose.toFixed(0)
+            : actualDose.toFixed(2);
+
+        // Формируем информацию о фракции если она есть
+        const fractionInfo = schedule.dosage_fraction ?
+            `<div class="schedule-fraction" style="font-size: 12px; color: var(--health-text-light);">
+                🔹 ${schedule.dosage_amount} + ${(schedule.dosage_fraction * 100).toFixed(0)}% = ${dosageDisplay} ${unitInfo.label.toLowerCase()}
+            </div>` : '';
+
         return `
             <div class="schedule-item">
                 <div class="schedule-item-content">
@@ -577,6 +616,7 @@ const MedicationFormModal = (function() {
                     <div class="schedule-dosage">
                         ${schedule.dosage_amount} ${unitInfo.label.toLowerCase()}
                     </div>
+                    ${fractionInfo}
                     <div class="schedule-reminder" style="font-size: 12px; color: var(--health-text-light);">
                         🔔 ${reminderText}
                     </div>
@@ -604,8 +644,34 @@ const MedicationFormModal = (function() {
     }
 
     function renderStockPreview() {
-        const { quantity_available, quantity_threshold } = formData;
+        const { quantity_available, quantity_threshold, intake_type } = formData;
         const diff = quantity_available - quantity_threshold;
+
+        // ==================== РАСЧЕТ ДНЕЙ REMAINING ====================
+        let daysRemainingText = '';
+
+        if (formData.schedules && formData.schedules.length > 0 && intake_type === 'постоянно') {
+            // Суммируем среднедневное потребление по всем расписаниям
+            const dailyConsumption = formData.schedules.reduce((sum, schedule) => {
+                if (schedule.is_active !== false) {
+                    const daysPerWeek = schedule.days_of_week.length;
+                    const dosePerIntake = (schedule.dosage_amount || 1.0) + (schedule.dosage_fraction || 0.0);
+                    return sum + (dosePerIntake * daysPerWeek / 7);
+                }
+                return sum;
+            }, 0);
+
+            if (dailyConsumption > 0) {
+                const daysRemaining = Math.floor(quantity_available / dailyConsumption);
+                if (daysRemaining > 0) {
+                    daysRemainingText = `<div class="stock-days-remaining" style="font-size: 12px; color: var(--health-text-light); margin-top: 6px;">
+                        📊 ${t('health.modals.medication.stock_days_remaining', { days: daysRemaining })}
+                    </div>`;
+                }
+            }
+        }
+
+        // ==================== КОНЕЦ РАСЧЕТА ====================
 
         if (diff > 0) {
             return `
@@ -614,6 +680,7 @@ const MedicationFormModal = (function() {
                     <div class="stock-text">
                         <div class="stock-main">Запас в норме</div>
                         <div class="stock-detail">Осталось ${diff} до уведомления</div>
+                        ${daysRemainingText}
                     </div>
                 </div>
             `;
@@ -624,6 +691,7 @@ const MedicationFormModal = (function() {
                     <div class="stock-text">
                         <div class="stock-main">Пора пополнить</div>
                         <div class="stock-detail">Достигнут порог уведомления</div>
+                        ${daysRemainingText}
                     </div>
                 </div>
             `;
@@ -634,6 +702,7 @@ const MedicationFormModal = (function() {
                     <div class="stock-text">
                         <div class="stock-main">Низкий остаток!</div>
                         <div class="stock-detail">Ниже порога на ${Math.abs(diff)}</div>
+                        ${daysRemainingText}
                     </div>
                 </div>
             `;
@@ -782,6 +851,7 @@ const MedicationFormModal = (function() {
         days_of_week: [],
         time_of_day: '08:00',
         dosage_amount: 1.0,
+        dosage_fraction: 0.0,
         reminder_minutes: 10
     };
 
@@ -796,6 +866,7 @@ const MedicationFormModal = (function() {
             days_of_week: [...schedule.days_of_week],
             time_of_day: schedule.time_of_day,
             dosage_amount: schedule.dosage_amount,
+            dosage_fraction: schedule.dosage_fraction || 0.0,
             reminder_minutes: schedule.reminder_minutes || 10
         };
 
@@ -816,6 +887,24 @@ const MedicationFormModal = (function() {
             // Заполняем поля
             document.getElementById('schedule-dosage').value = schedule.dosage_amount;
             document.getElementById('schedule-reminder').value = schedule.reminder_minutes || 10;
+
+            // Устанавливаем частичный приём если есть фракция
+            const partialCheckbox = document.getElementById('schedule-partial-dose-checkbox');
+            const fractionSelect = document.getElementById('schedule-fraction');
+            if (schedule.dosage_fraction && schedule.dosage_fraction > 0) {
+                partialCheckbox.checked = true;
+                document.getElementById('schedule-dosage').step = '1';
+                document.getElementById('schedule-dosage').min = '0';
+                if (fractionSelect) {
+                    fractionSelect.value = schedule.dosage_fraction.toString();
+                    document.getElementById('fraction-selector-container').style.display = 'block';
+                }
+            } else {
+                partialCheckbox.checked = false;
+                document.getElementById('schedule-dosage').step = '0.5';
+                document.getElementById('schedule-dosage').min = '0.5';
+                document.getElementById('fraction-selector-container').style.display = 'none';
+            }
 
             // Инициализируем TimePicker с существующим временем
             const pickerContainer = document.getElementById('schedule-time-picker-container');
@@ -858,7 +947,8 @@ const MedicationFormModal = (function() {
         tempSchedule = {
             days_of_week: [],
             time_of_day: '08:00',
-            dosage_amount: 1.0
+            dosage_amount: 1.0,
+            dosage_fraction: 0.0
         };
 
         const form = document.getElementById('schedule-form');
@@ -1002,6 +1092,7 @@ const MedicationFormModal = (function() {
                 days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
                 time_of_day: tempSchedule.time_of_day,
                 dosage_amount: dosage,
+                dosage_fraction: tempSchedule.dosage_fraction || 0.0,
                 reminder_minutes: reminderMinutes,
                 is_active: true
             };
@@ -1014,6 +1105,7 @@ const MedicationFormModal = (function() {
                 days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
                 time_of_day: tempSchedule.time_of_day,
                 dosage_amount: dosage,
+                dosage_fraction: tempSchedule.dosage_fraction || 0.0,
                 reminder_minutes: reminderMinutes,
                 is_active: true
             });
@@ -1057,6 +1149,7 @@ const MedicationFormModal = (function() {
                     days_of_week: s.days_of_week,
                     time_of_day: s.time_of_day,
                     dosage_amount: s.dosage_amount,
+                    dosage_fraction: s.dosage_fraction || 0.0,
                     reminder_minutes: s.reminder_minutes,
                     is_active: s.is_active !== false
                 }))
@@ -1087,6 +1180,7 @@ const MedicationFormModal = (function() {
                                 time_of_day: schedule.time_of_day,
                                 days_of_week: schedule.days_of_week,
                                 dosage_amount: schedule.dosage_amount,
+                                dosage_fraction: schedule.dosage_fraction || 0.0,
                                 reminder_minutes: schedule.reminder_minutes,
                                 is_active: schedule.is_active !== false
                             }
@@ -1136,7 +1230,41 @@ const MedicationFormModal = (function() {
         resetFormData();
         currentStep = 1;
         medicationId = null;
-        tempSchedule = { days_of_week: [], time_of_day: '08:00', dosage_amount: 1.0 };
+        tempSchedule = { days_of_week: [], time_of_day: '08:00', dosage_amount: 1.0, dosage_fraction: 0.0 };
+    }
+
+    // ==================== ЧАСТИЧНЫЙ ПРИЁМ (НОВОЕ) ====================
+
+    function togglePartialDose() {
+        const checkbox = document.getElementById('schedule-partial-dose-checkbox');
+        const fractionContainer = document.getElementById('fraction-selector-container');
+        const dosageInput = document.getElementById('schedule-dosage');
+
+        if (checkbox.checked) {
+            // Включаем частичный приём
+            fractionContainer.style.display = 'block';
+            // Меняем шаг на 1 (только целые числа)
+            dosageInput.step = '1';
+            dosageInput.min = '0';
+            dosageInput.value = Math.max(0, parseInt(dosageInput.value));
+            tempSchedule.dosage_fraction = 0.5;  // По умолчанию половина
+        } else {
+            // Отключаем частичный приём
+            fractionContainer.style.display = 'none';
+            // Меняем шаг обратно на 0.5 (дробные значения)
+            dosageInput.step = '0.5';
+            dosageInput.min = '0.5';
+            tempSchedule.dosage_fraction = 0.0;
+            // Если значение меньше 0.5, устанавливаем 0.5
+            if (parseFloat(dosageInput.value) < 0.5) {
+                dosageInput.value = 0.5;
+            }
+        }
+    }
+
+    function changeFraction(value) {
+        tempSchedule.dosage_fraction = parseFloat(value);
+        console.log('✅ Фракция изменена:', tempSchedule.dosage_fraction);
     }
 
     // Публичный API
@@ -1156,6 +1284,8 @@ const MedicationFormModal = (function() {
         selectWeekends,
         clearDays,
         changeScheduleDosage,
+        togglePartialDose,
+        changeFraction,
         addSchedule,
         editSchedule,
         removeSchedule,

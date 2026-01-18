@@ -403,6 +403,14 @@ registerTranslations('health', {
                 error_save_generic: 'Save error',
                 error_save: '❌ Failed to save: ',
 
+                // Partial Dose (new)
+                partial_dose_label: '🔹 Partial intake',
+                fraction_label: 'Choose dose',
+                fraction_half: 'Half (1/2)',
+                fraction_third: 'Third (1/3)',
+                fraction_quarter: 'Quarter (1/4)',
+                stock_days_remaining: '📊 Will last ~{days} days',
+
                 // Success & Status
                 success_created: '✅ Medication added',
                 success_updated: '✅ Medication updated',

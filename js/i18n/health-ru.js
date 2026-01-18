@@ -418,6 +418,14 @@ registerTranslations('health', {
                 error_unknown_step: 'Неизвестный шаг',
                 error_save: '❌ Не удалось сохранить: ',
 
+                // Частичный приём (новое)
+                partial_dose_label: '🔹 Частичный приём',
+                fraction_label: 'Выберите дозу',
+                fraction_half: 'Половина (1/2)',
+                fraction_third: 'Треть (1/3)',
+                fraction_quarter: 'Четверть (1/4)',
+                stock_days_remaining: '📊 Хватит на ~{days} дней',
+
                 // Успех
                 success_schedule_updated: '✅ Расписание обновлено',
                 success_schedule_added: '✅ Время приёма добавлено',

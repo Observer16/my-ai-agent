@@ -403,6 +403,14 @@ registerTranslations('health', {
                 error_save_generic: 'Помилка збереження',
                 error_save: '❌ Не вдалося зберегти: ',
 
+                // Часткова доза (нове)
+                partial_dose_label: '🔹 Часткова дозa',
+                fraction_label: 'Виберіть дозу',
+                fraction_half: 'Половина (1/2)',
+                fraction_third: 'Третина (1/3)',
+                fraction_quarter: 'Чверть (1/4)',
+                stock_days_remaining: '📊 Вистачить на ~{days} днів',
+
                 // Success & Status
                 success_created: '✅ Ліки додано',
                 success_updated: '✅ Ліки оновлено',
