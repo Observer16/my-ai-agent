@@ -72,8 +72,19 @@ const SimpleModalManager = (function() {
         html += '<div class="modal-body">';
 
         for (const [category, symptoms] of Object.entries(symptomCategories)) {
+            // Локализовать название категории
+            const categoryKeyMap = {
+                'общее': 'health.modals.simple.symptom_category_general',
+                'голова': 'health.modals.simple.symptom_category_head',
+                'живот': 'health.modals.simple.symptom_category_belly',
+                'прочее': 'health.modals.simple.symptom_category_other',
+                'гинекология': 'health.modals.simple.symptom_category_gynecology',
+                'урология': 'health.modals.simple.symptom_category_urology'
+            };
+            const categoryLabel = t(categoryKeyMap[category]) || category.charAt(0).toUpperCase() + category.slice(1);
+
             html += `<div class="symptom-category">`;
-            html += `<h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>`;
+            html += `<h4>${categoryLabel}</h4>`;
             html += `<div class="symptom-buttons">`;
 
             symptoms.forEach(symptom => {

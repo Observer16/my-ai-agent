@@ -13,11 +13,11 @@
     <div id="health-summary" class="health-card">
         <div class="health-card-header">
             <div class="health-card-icon">📈</div>
-            <h3 class="health-card-title">Сводка за неделю</h3>
+            <h3 class="health-card-title" data-i18n="health.dashboard.weekly_summary">Сводка за неделю</h3>
         </div>
         <div id="health-summary-content">
             <div class="loading-spinner-small" style="margin: 20px auto;"></div>
-            <p style="text-align: center; color: var(--health-text-light);">Загрузка статистики...</p>
+            <p style="text-align: center; color: var(--health-text-light);" data-i18n="health.dashboard.loading_stats">Загрузка статистики...</p>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
     <div class="health-card">
         <div class="health-card-header">
             <div class="health-card-icon">⚡️</div>
-            <h3 class="health-card-title">Как самочувствие?</h3>
+            <h3 class="health-card-title" data-i18n="health.dashboard.wellness_check">Как самочувствие?</h3>
         </div>
         <div id="wellness-grid">
             <!-- Заполняется динамически -->
@@ -40,7 +40,7 @@
         </div>
 
         <div id="medication-tracker">
-            <h3 style="margin-bottom: 16px; color: var(--health-text);">Лекарства на сегодня</h3>
+            <h3 style="margin-bottom: 16px; color: var(--health-text);" data-i18n="health.dashboard.todays_medications">Лекарства на сегодня</h3>
 
             <div id="today-medications">
                 <!-- Лекарства загружаются динамически -->
@@ -48,9 +48,9 @@
 
             <div id="no-medications" class="no-medications" style="display: none;">
                 <div class="no-meds-icon">💊</div>
-                <h3>На сегодня лекарств нет</h3>
-                <p>Добавьте лекарства в разделе "Аптечка"</p>
-                <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
+                <h3 data-i18n="health.dashboard.no_medications_today">На сегодня лекарств нет</h3>
+                <p data-i18n="health.medications.add_medications_prompt">Добавьте лекарства в разделе "Аптечка"</p>
+                <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')" data-i18n="health.medications.go_to_medications">
                     Перейти в аптечку
                 </button>
             </div>
