@@ -305,7 +305,10 @@ const Diary = (function() {
 
     async function removeSymptom(symptomId, date) {
         console.log('🗑️ Удаление симптома:', symptomId, 'для даты:', date);
-        showToast('⚠️ Функция в разработке', 'info');
+        const devMsg = typeof t === 'function'
+            ? t('health.common.feature_in_development')
+            : '⚠️ Функция в разработке';
+        showToast(devMsg, 'info');
     }
 
     async function addSymptom(symptomData) {

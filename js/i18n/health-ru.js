@@ -94,7 +94,8 @@ registerTranslations('health', {
             take_medication: '✅ Принять',
             skip_medication: '⏭ Пропустить',
             medication_taken: '✅ Принято',
-            reminder_at: '🔔 Напоминание появится в'
+            reminder_at: '🔔 Напоминание появится в',
+            error_medication_not_specified: '❌ Ошибка: не указано лекарство'
         },
 
         // Medications компонент

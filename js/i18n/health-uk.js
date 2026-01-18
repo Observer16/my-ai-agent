@@ -94,7 +94,8 @@ registerTranslations('health', {
             take_medication: '✅ Прийняти',
             skip_medication: '⏭ Пропустити',
             medication_taken: '✅ Прийнято',
-            reminder_at: '🔔 Нагадування через'
+            reminder_at: '🔔 Нагадування через',
+            error_medication_not_specified: '❌ Помилка: ліки не вказані'
         },
 
         // Компонент Ліки

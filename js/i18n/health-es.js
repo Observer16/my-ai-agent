@@ -94,7 +94,8 @@ registerTranslations('health', {
             take_medication: '✅ Tomar',
             skip_medication: '⏭ Omitir',
             medication_taken: '✅ Tomado',
-            reminder_at: '🔔 Recordatorio en'
+            reminder_at: '🔔 Recordatorio en',
+            error_medication_not_specified: '❌ Error: medicamento no especificado'
         },
 
         // Componente Medicamentos

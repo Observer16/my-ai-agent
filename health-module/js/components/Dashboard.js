@@ -182,7 +182,10 @@ const Dashboard = (function() {
             }
 
             console.error('❌ Не найден medicationId в data-атрибутах');
-            showToast('❌ Ошибка: не указано лекарство', 'error');
+            const errorMsg = typeof t === 'function'
+                ? t('health.dashboard.error_medication_not_specified')
+                : '❌ Ошибка: не указано лекарство';
+            showToast(errorMsg, 'error');
             return;
         }
 
@@ -350,7 +353,10 @@ const Dashboard = (function() {
         // Валидация
         if (!medicationId || medicationId.trim() === '') {
             console.error('❌ Ошибка: medicationId пустой!', medicationId);
-            showToast('❌ Ошибка: не указано лекарство', 'error');
+            const errorMsg = typeof t === 'function'
+                ? t('health.dashboard.error_medication_not_specified')
+                : '❌ Ошибка: не указано лекарство';
+            showToast(errorMsg, 'error');
             return;
         }
 
@@ -403,7 +409,10 @@ const Dashboard = (function() {
         // Валидация
         if (!medicationId || medicationId === 'undefined' || medicationId.trim() === '') {
             console.error('❌ Ошибка: medicationId невалидный:', medicationId);
-            showToast('❌ Ошибка: не указано лекарство', 'error');
+            const errorMsg = typeof t === 'function'
+                ? t('health.dashboard.error_medication_not_specified')
+                : '❌ Ошибка: не указано лекарство';
+            showToast(errorMsg, 'error');
             return;
         }
 

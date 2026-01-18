@@ -94,7 +94,8 @@ registerTranslations('health', {
             take_medication: '✅ Take',
             skip_medication: '⏭ Skip',
             medication_taken: '✅ Taken',
-            reminder_at: '🔔 Reminder in'
+            reminder_at: '🔔 Reminder in',
+            error_medication_not_specified: '❌ Error: medication not specified'
         },
 
         // Medications component
