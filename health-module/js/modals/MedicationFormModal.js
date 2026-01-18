@@ -339,25 +339,13 @@ const MedicationFormModal = (function() {
                 ${renderStepIndicator(3)}
                 <div class="form-content">
                     <div class="form-group">
-                        <label>
-                            ${t('health.modals.medication.field_quantity_unit_label')}
-                        </label>
-                        <div class="quantity-unit-display" style="
-                            padding: 14px;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            border-radius: 8px;
-                            color: white;
-                            font-weight: 600;
-                            display: flex;
-                            align-items: center;
-                            gap: 10px;
-                        ">
-                            <span style="font-size: 20px;">${unitInfo.icon}</span>
-                            <span>${unitInfo.label}</span>
-                            <span style="margin-left: auto; font-size: 12px; opacity: 0.9;">автоматически</span>
-                        </div>
-                        <div class="form-hint" style="margin-top: 8px;">
-                            ℹ️ Единица измерения выбирается автоматически в соответствии с формой выпуска: <strong>${formData.form}</strong>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <span class="quantity-unit-label" style="font-weight: 600; color: var(--health-text);">
+                                ${unitInfo.label}
+                            </span>
+                            <div class="form-hint" style="margin: 0; text-align: right; flex: 1;">
+                                ${t('health.modals.medication.field_quantity_available_hint')}
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -389,7 +377,6 @@ const MedicationFormModal = (function() {
                             </button>
                             <span class="quantity-unit-label">${unitInfo.label}</span>
                         </div>
-                        <div class="form-hint">${t('health.modals.medication.field_quantity_available_hint')}</div>
                     </div>
                     <div class="form-group">
                         <label for="medication-quantity-threshold">
