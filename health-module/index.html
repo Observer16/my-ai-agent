@@ -168,6 +168,9 @@
         // 2. Применение переводов к статическим элементам
         applyDataI18n();
 
+        // 3. Показать страницу после применения переводов
+        document.body.classList.add('i18n-ready');
+
         // Проверяем загрузку всех зависимостей
         const dependencies = {
             CONFIG: typeof CONFIG !== 'undefined',
