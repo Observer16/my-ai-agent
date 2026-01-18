@@ -23,6 +23,7 @@ const MedicationFormModal = (function() {
         schedules: []
     };
     let editingScheduleIndex = null;
+    let scheduleTimePicker = null;  // TimePicker для выбора времени приёма
 
     // Константы
     const TOTAL_STEPS = 4;
@@ -495,14 +496,8 @@ const MedicationFormModal = (function() {
 
                         <div class="schedule-time-dosage">
                             <div class="form-group">
-                                <label for="schedule-time">${t('health.modals.medication.schedule_time_label')} <span style="color: var(--health-danger);">*</span></label>
-                                <input
-                                    type="time"
-                                    id="schedule-time"
-                                    class="modal-input"
-                                    value="08:00"
-                                    required
-                                >
+                                <label>${t('health.modals.medication.schedule_time_label')} <span style="color: var(--health-danger);">*</span></label>
+                                <div id="schedule-time-picker-container"></div>
                             </div>
                             <div class="form-group">
                                 <label for="schedule-dosage">${t('health.modals.medication.schedule_dosage_label')}</label>
@@ -812,14 +807,40 @@ const MedicationFormModal = (function() {
             });
 
             // Заполняем поля
-            document.getElementById('schedule-time').value = schedule.time_of_day;
             document.getElementById('schedule-dosage').value = schedule.dosage_amount;
             document.getElementById('schedule-reminder').value = schedule.reminder_minutes || 10;
+
+            // Инициализируем TimePicker с существующим временем
+            const pickerContainer = document.getElementById('schedule-time-picker-container');
+            if (pickerContainer && typeof TimePicker !== 'undefined') {
+                // Парсим время из schedule.time_of_day (формат "HH:MM")
+                const timeParts = schedule.time_of_day.split(':');
+                const hours = parseInt(timeParts[0]) || 8;
+                const minutes = parseInt(timeParts[1]) || 0;
+
+                // Удаляем старый пикер если существует
+                if (scheduleTimePicker) {
+                    scheduleTimePicker.destroy();
+                }
+
+                // Создаём новый TimePicker с существующим временем
+                scheduleTimePicker = new TimePicker(pickerContainer, {
+                    initialHours: hours,
+                    initialMinutes: minutes,
+                    hoursLabel: 'ч',
+                    minutesLabel: 'мин',
+                    format24h: true,
+                    minuteStep: 1,
+                    onTimeSelect: (h, m) => {
+                        tempSchedule.time_of_day = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                    }
+                });
+            }
 
             // Меняем текст кнопки
             const addButton = form.querySelector('.health-btn.btn-primary');
             if (addButton) {
-                addButton.textContent = '✓ Сохранить изменения';
+                addButton.textContent = '✓ ' + t('health.modals.medication.button_save_changes');
             }
         }
     }
@@ -843,8 +864,36 @@ const MedicationFormModal = (function() {
             });
 
             // Сбрасываем поля
-            document.getElementById('schedule-time').value = '08:00';
             document.getElementById('schedule-dosage').value = '1';
+
+            // Инициализируем TimePicker
+            const pickerContainer = document.getElementById('schedule-time-picker-container');
+            if (pickerContainer && typeof TimePicker !== 'undefined') {
+                // Удаляем старый пикер если существует
+                if (scheduleTimePicker) {
+                    scheduleTimePicker.destroy();
+                }
+
+                // Создаём новый TimePicker
+                scheduleTimePicker = new TimePicker(pickerContainer, {
+                    initialHours: 8,
+                    initialMinutes: 0,
+                    hoursLabel: 'ч',
+                    minutesLabel: 'мин',
+                    format24h: true,
+                    minuteStep: 1,
+                    onTimeSelect: (hours, minutes) => {
+                        tempSchedule.time_of_day = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                        console.log('⏰ Время выбрано:', tempSchedule.time_of_day);
+                    }
+                });
+            }
+
+            // Меняем текст кнопки на "Добавить время"
+            const addButton = form.querySelector('.health-btn.btn-primary');
+            if (addButton) {
+                addButton.textContent = '➕ ' + t('health.modals.medication.btn_add_time_label');
+            }
         }
     }
 
@@ -922,8 +971,8 @@ const MedicationFormModal = (function() {
             return;
         }
 
-        const timeInput = document.getElementById('schedule-time');
-        if (!timeInput || !timeInput.value) {
+        // Проверяем что время установлено
+        if (!tempSchedule.time_of_day || tempSchedule.time_of_day === '') {
             showToast(t('health.modals.medication.error_time_required'), 'warning');
             return;
         }
@@ -944,7 +993,7 @@ const MedicationFormModal = (function() {
             formData.schedules[editingScheduleIndex] = {
                 ...formData.schedules[editingScheduleIndex], // Сохраняем id если есть
                 days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
-                time_of_day: timeInput.value,
+                time_of_day: tempSchedule.time_of_day,
                 dosage_amount: dosage,
                 reminder_minutes: reminderMinutes,
                 is_active: true
@@ -956,12 +1005,12 @@ const MedicationFormModal = (function() {
             // ДОБАВЛЕНИЕ нового расписания
             formData.schedules.push({
                 days_of_week: [...tempSchedule.days_of_week].sort((a, b) => a - b),
-                time_of_day: timeInput.value,
+                time_of_day: tempSchedule.time_of_day,
                 dosage_amount: dosage,
                 reminder_minutes: reminderMinutes,
                 is_active: true
             });
-            console.log(' Расписание добавлено:', formData.schedules);
+            console.log('➕ Расписание добавлено:', formData.schedules);
             showToast(t('health.modals.medication.success_schedule_added'), 'success');
         }
 
