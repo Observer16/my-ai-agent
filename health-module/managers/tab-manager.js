@@ -4,14 +4,21 @@ const TabManager = (function() {
     let currentTab = 'dashboard';
     const tabHandlers = new Map();
 
-    // Названия вкладок
-    const TAB_TITLES = {
-        dashboard: 'Сегодня',
-        medications: 'Аптечка',
-        diary: 'Дневник',
-        stats: 'Статистика',
-        settings: 'Настройки'
-    };
+    // Функция для получения названий вкладок с поддержкой переводов
+    function getTabTitles() {
+        const isFunctionAvailable = typeof t === 'function';
+
+        return {
+            dashboard: isFunctionAvailable ? t('health.tabs.dashboard') : 'Сегодня',
+            medications: isFunctionAvailable ? t('health.tabs.medications') : 'Аптечка',
+            diary: isFunctionAvailable ? t('health.tabs.diary') : 'Дневник',
+            stats: isFunctionAvailable ? t('health.tabs.stats') : 'Статистика',
+            settings: isFunctionAvailable ? t('health.tabs.settings') : 'Настройки'
+        };
+    }
+
+    // Кеш для названий вкладок
+    let TAB_TITLES = getTabTitles();
 
     // Инициализация вкладок
     function init() {
@@ -113,8 +120,12 @@ const TabManager = (function() {
 
     // Обновление заголовка документа
     function updateDocumentTitle(tabName) {
+        // Обновляем кеш названий вкладок в случае если изменился язык
+        TAB_TITLES = getTabTitles();
+
         const title = TAB_TITLES[tabName] || 'Здоровье';
-        document.title = `Здоровье - ${title}`;
+        const moduleTitle = typeof t === 'function' ? t('health.common.module_title') : 'Здоровье';
+        document.title = `${moduleTitle} - ${title}`;
     }
 
     // Загрузка текущей вкладки

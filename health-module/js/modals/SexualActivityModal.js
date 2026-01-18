@@ -16,54 +16,61 @@ const SexualActivityModal = (function() {
         };
     }
 
-    // Карта иконок и описаний
-    const OPTION_MAP = {
-        'нет': {
-            label: 'Не было',
-            icon: '⭕',
-            description: 'Нет активности'
-        },
-        'защищенный секс': {
-            label: 'Защищенный секс',
-            icon: '🛡️',
-            description: 'С использованием контрацепции'
-        },
-        'незащищенный секс': {
-            label: 'Незащищенный секс',
-            icon: '⚠️',
-            description: 'Без контрацепции'
-        },
-        'самостоятельно': {
-            label: 'Самостоятельно',
-            icon: '💭',
-            description: ''
-        },
-        'с игрушкой': {
-            label: 'С игрушкой',
-            icon: '🎮',
-            description: ''
-        },
-        'активная роль': {
-            label: 'Активная роль',
-            icon: '🎭',
-            description: ''
-        },
-        'пассивная роль': {
-            label: 'Пассивная роль',
-            icon: '🎭',
-            description: ''
-        },
-        'период овуляции': {
-            label: 'В период овуляции',
-            icon: '🌸',
-            description: 'Повышенная фертильность'
-        },
-        'во время месячных': {
-            label: 'Во время месячных',
-            icon: '🩸',
-            description: ''
-        }
-    };
+    // Функция для получения карты опций с поддержкой переводов
+    function getOptionMap() {
+        const isFunctionAvailable = typeof t === 'function';
+
+        return {
+            'нет': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.no') : 'Не было',
+                icon: '⭕',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.no_desc') : 'Нет активности'
+            },
+            'защищенный секс': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.protected_sex') : 'Защищенный секс',
+                icon: '🛡️',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.protected_sex_desc') : 'С использованием контрацепции'
+            },
+            'незащищенный секс': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.unprotected_sex') : 'Незащищенный секс',
+                icon: '⚠️',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.unprotected_sex_desc') : 'Без контрацепции'
+            },
+            'самостоятельно': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.solo') : 'Самостоятельно',
+                icon: '💭',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.solo_desc') : ''
+            },
+            'с игрушкой': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.with_toy') : 'С игрушкой',
+                icon: '🎮',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.with_toy_desc') : ''
+            },
+            'активная роль': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.active_role') : 'Активная роль',
+                icon: '🎭',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.active_role_desc') : ''
+            },
+            'пассивная роль': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.passive_role') : 'Пассивная роль',
+                icon: '🎭',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.passive_role_desc') : ''
+            },
+            'период овуляции': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.ovulation') : 'В период овуляции',
+                icon: '🌸',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.ovulation_desc') : 'Повышенная фертильность'
+            },
+            'во время месячных': {
+                label: isFunctionAvailable ? t('health.modals.sexual.options.during_period') : 'Во время месячных',
+                icon: '🩸',
+                description: isFunctionAvailable ? t('health.modals.sexual.options.during_period_desc') : ''
+            }
+        };
+    }
+
+    // Кеш для OPTION_MAP
+    let OPTION_MAP = getOptionMap();
 
     async function show() {
         const state = HealthModule.getState();

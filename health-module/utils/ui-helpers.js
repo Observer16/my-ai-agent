@@ -107,9 +107,11 @@ const UIHelpers = (function() {
             `;
         }
 
+        const emptyTitle = message.title || (typeof t === 'function' ? t('health.common.no_data') : 'Нет данных');
+
         emptyState.innerHTML = `
             <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">${icon}</div>
-            <h3 style="margin-bottom: 10px; color: #444;">${message.title || 'Нет данных'}</h3>
+            <h3 style="margin-bottom: 10px; color: #444;">${emptyTitle}</h3>
             <p style="color: #999; max-width: 400px; margin: 0 auto;">${message.description || ''}</p>
             ${buttonHTML}
         `;
@@ -242,10 +244,24 @@ const UIHelpers = (function() {
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
 
-        if (minutes < 1) return 'только что';
-        if (minutes < 60) return `${minutes} мин. назад`;
-        if (hours < 24) return `${hours} ч. назад`;
-        if (days < 7) return `${days} дн. назад`;
+        if (minutes < 1) {
+            return typeof t === 'function' ? t('health.common.just_now') : 'только что';
+        }
+        if (minutes < 60) {
+            return typeof t === 'function'
+                ? t('health.common.minutes_ago', { count: minutes })
+                : `${minutes} мин. назад`;
+        }
+        if (hours < 24) {
+            return typeof t === 'function'
+                ? t('health.common.hours_ago', { count: hours })
+                : `${hours} ч. назад`;
+        }
+        if (days < 7) {
+            return typeof t === 'function'
+                ? t('health.common.days_ago', { count: days })
+                : `${days} дн. назад`;
+        }
 
         return formatDate(date, 'short');
     }

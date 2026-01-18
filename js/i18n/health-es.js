@@ -56,13 +56,21 @@ registerTranslations('health', {
             edit: 'Editar',
             loading: 'Cargando...',
             loading_module: 'Cargando módulo de salud...',
+            module_title: 'Salud',
             today: 'Hoy',
             yesterday: 'Ayer',
+            tomorrow: 'Mañana',
+            just_now: 'hace poco',
+            minutes_ago: 'hace {count} min',
+            hours_ago: 'hace {count} h',
             days_ago: 'hace {count} días',
             error: 'Error',
+            warning: 'Advertencia',
             success: 'Éxito',
+            info: 'Información',
             reload: 'Recargar',
             module_load_error: 'Error al cargar el módulo',
+            feature_in_development: 'Esta función está en desarrollo',
             no_data: 'Sin datos',
             not_specified: 'No especificado'
         },
@@ -107,7 +115,10 @@ registerTranslations('health', {
             no_medications_today: 'Sin medicamentos para hoy',
             add_medications_prompt: 'Añada medicamentos en la sección "Botiquín"',
             go_to_medications: 'Ir al botiquín',
-            how_it_works: '💡 ¿Cómo funciona?'
+            how_it_works: '💡 ¿Cómo funciona?',
+            show_active: 'Mostrar activos',
+            show_archive: 'Mostrar archivados',
+            confirm_delete_medication: '¿Estás seguro de que quieres eliminar este medicamento?'
         },
 
         // Componente Diario
@@ -237,14 +248,23 @@ registerTranslations('health', {
                 confirm_delete: '¿Eliminar registro de actividad íntima para hoy?',
                 options: {
                     no: 'Sin actividad',
+                    no_desc: 'Sin actividad sexual',
                     protected_sex: 'Sexo protegido',
+                    protected_sex_desc: 'Usando anticonceptivo',
                     unprotected_sex: 'Sexo sin protección',
+                    unprotected_sex_desc: 'Sin protección anticonceptiva',
                     solo: 'Solo',
+                    solo_desc: 'Masturbación',
                     with_toy: 'Con juguete',
+                    with_toy_desc: 'Usando juguetes',
                     active_role: 'Rol activo',
+                    active_role_desc: 'Rol activo con pareja',
                     passive_role: 'Rol pasivo',
+                    passive_role_desc: 'Rol pasivo con pareja',
                     ovulation: 'Durante la ovulación',
-                    during_period: 'Durante el período'
+                    ovulation_desc: 'Durante período fértil',
+                    during_period: 'Durante el período',
+                    during_period_desc: 'Durante la menstruación'
                 }
             },
 

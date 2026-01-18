@@ -117,7 +117,7 @@ const Medications = (function() {
             }
         }
 
-        return 'Завтра'; // TODO: translate "Tomorrow" when needed
+        return typeof t === 'function' ? t('health.common.tomorrow') : 'Завтра';
     }
 
     function initAddButton() {
@@ -144,8 +144,13 @@ const Medications = (function() {
 
         const toggleBtn = document.getElementById('toggle-archive');
         if (toggleBtn) {
-            // TODO: add translation keys for "Show active" and "Show archived"
-            toggleBtn.textContent = showArchived ? 'Показать активные' : 'Показать архивные';
+            if (typeof t === 'function') {
+                toggleBtn.textContent = showArchived
+                    ? t('health.medications.show_active')
+                    : t('health.medications.show_archive');
+            } else {
+                toggleBtn.textContent = showArchived ? 'Показать активные' : 'Показать архивные';
+            }
         }
     }
 
@@ -154,12 +159,19 @@ const Medications = (function() {
         if (window.SimpleModalManager) {
             SimpleModalManager.show('medication-form', { medicationId: id });
         } else {
-            alert('Функция редактирования в разработке');
+            const errorMsg = typeof t === 'function'
+                ? t('health.common.feature_in_development')
+                : 'Функция редактирования в разработке';
+            alert(errorMsg);
         }
     }
 
     async function deleteMedication(id) {
-        if (!confirm('Вы уверены, что хотите удалить это лекарство?')) {
+        const confirmMsg = typeof t === 'function'
+            ? t('health.medications.confirm_delete_medication')
+            : 'Вы уверены, что хотите удалить это лекарство?';
+
+        if (!confirm(confirmMsg)) {
             return;
         }
 

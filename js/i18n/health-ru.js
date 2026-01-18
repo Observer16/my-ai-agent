@@ -56,13 +56,21 @@ registerTranslations('health', {
             edit: 'Редактировать',
             loading: 'Загрузка...',
             loading_module: 'Загрузка модуля здоровья...',
+            module_title: 'Здоровье',
             today: 'Сегодня',
             yesterday: 'Вчера',
+            tomorrow: 'Завтра',
+            just_now: 'только что',
+            minutes_ago: '{count} мин. назад',
+            hours_ago: '{count} ч. назад',
             days_ago: '{count} дн. назад',
             error: 'Ошибка',
+            warning: 'Предупреждение',
             success: 'Успешно',
+            info: 'Информация',
             reload: 'Перезагрузить',
             module_load_error: 'Ошибка загрузки модуля',
+            feature_in_development: 'Функция редактирования в разработке',
             no_data: 'Нет данных',
             not_specified: 'Не указано'
         },
@@ -107,7 +115,10 @@ registerTranslations('health', {
             no_medications_today: 'На сегодня лекарств нет',
             add_medications_prompt: 'Добавьте лекарства в разделе "Аптечка"',
             go_to_medications: 'Перейти в аптечку',
-            how_it_works: '💡 Как это работает?'
+            how_it_works: '💡 Как это работает?',
+            show_active: 'Показать активные',
+            show_archive: 'Показать архивные',
+            confirm_delete_medication: 'Вы уверены, что хотите удалить это лекарство?'
         },
 
         // Diary компонент
@@ -241,14 +252,23 @@ registerTranslations('health', {
                 confirm_delete: 'Удалить запись об интимной активности за сегодня?',
                 options: {
                     no: 'Не было',
+                    no_desc: 'Нет активности',
                     protected_sex: 'Защищенный секс',
+                    protected_sex_desc: 'С использованием контрацепции',
                     unprotected_sex: 'Незащищенный секс',
+                    unprotected_sex_desc: 'Без контрацепции',
                     solo: 'Самостоятельно',
+                    solo_desc: 'Мастурбация',
                     with_toy: 'С игрушкой',
+                    with_toy_desc: 'С использованием игрушек',
                     active_role: 'Активная роль',
+                    active_role_desc: 'В роли партнера, инициирующего действие',
                     passive_role: 'Пассивная роль',
+                    passive_role_desc: 'В роли партнера, принимающего действие',
                     ovulation: 'В период овуляции',
-                    during_period: 'Во время месячных'
+                    ovulation_desc: 'Во время овуляции (фертильный период)',
+                    during_period: 'Во время месячных',
+                    during_period_desc: 'Во время менструации'
                 }
             },
 

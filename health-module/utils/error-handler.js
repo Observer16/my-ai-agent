@@ -111,13 +111,14 @@ const ErrorHandler = (function() {
 
     // Заголовок по типу
     function getTitle(type) {
-        const titles = {
-            error: 'Ошибка',
-            warning: 'Предупреждение',
-            success: 'Успешно',
-            info: 'Информация'
-        };
+        const getTitles = () => ({
+            error: typeof t === 'function' ? t('health.common.error') : 'Ошибка',
+            warning: typeof t === 'function' ? t('health.common.warning') : 'Предупреждение',
+            success: typeof t === 'function' ? t('health.common.success') : 'Успешно',
+            info: typeof t === 'function' ? t('health.common.info') : 'Информация'
+        });
 
+        const titles = getTitles();
         return titles[type] || titles.error;
     }
 

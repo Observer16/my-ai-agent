@@ -39,7 +39,6 @@ const SettingsComponent = {
                 <div id="settings-success" class="settings-success" style="display: none;"></div>
 
                 <div class="settings-content">
-                    ${this.renderLanguageSection()}
                     ${this.renderProfileSection()}
                 </div>
             </div>

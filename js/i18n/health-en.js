@@ -56,13 +56,21 @@ registerTranslations('health', {
             edit: 'Edit',
             loading: 'Loading...',
             loading_module: 'Loading health module...',
+            module_title: 'Health',
             today: 'Today',
             yesterday: 'Yesterday',
+            tomorrow: 'Tomorrow',
+            just_now: 'just now',
+            minutes_ago: '{count} min ago',
+            hours_ago: '{count} h ago',
             days_ago: '{count} days ago',
             error: 'Error',
+            warning: 'Warning',
             success: 'Success',
+            info: 'Information',
             reload: 'Reload',
             module_load_error: 'Module loading error',
+            feature_in_development: 'This feature is under development',
             no_data: 'No data',
             not_specified: 'Not specified'
         },
@@ -107,7 +115,10 @@ registerTranslations('health', {
             no_medications_today: 'No medications for today',
             add_medications_prompt: 'Add medications in the "Medicine Cabinet" section',
             go_to_medications: 'Go to medicine cabinet',
-            how_it_works: '💡 How it works?'
+            how_it_works: '💡 How it works?',
+            show_active: 'Show active',
+            show_archive: 'Show archived',
+            confirm_delete_medication: 'Are you sure you want to delete this medication?'
         },
 
         // Diary component
@@ -237,14 +248,23 @@ registerTranslations('health', {
                 confirm_delete: 'Delete intimate activity record for today?',
                 options: {
                     no: 'No activity',
+                    no_desc: 'No sexual activity',
                     protected_sex: 'Protected sex',
+                    protected_sex_desc: 'Using contraception',
                     unprotected_sex: 'Unprotected sex',
+                    unprotected_sex_desc: 'Without contraception',
                     solo: 'Solo',
+                    solo_desc: 'Masturbation',
                     with_toy: 'With toy',
+                    with_toy_desc: 'Using toys',
                     active_role: 'Active role',
+                    active_role_desc: 'Active partner role',
                     passive_role: 'Passive role',
+                    passive_role_desc: 'Passive partner role',
                     ovulation: 'During ovulation',
-                    during_period: 'During period'
+                    ovulation_desc: 'During fertile window',
+                    during_period: 'During period',
+                    during_period_desc: 'During menstruation'
                 }
             },
 

@@ -56,13 +56,21 @@ registerTranslations('health', {
             edit: 'Редагувати',
             loading: 'Завантаження...',
             loading_module: 'Завантаження модуля здоров\'я...',
+            module_title: 'Здоров\'я',
             today: 'Сьогодні',
             yesterday: 'Вчора',
+            tomorrow: 'Завтра',
+            just_now: 'щойно',
+            minutes_ago: '{count} хв тому',
+            hours_ago: '{count} г тому',
             days_ago: '{count} днів тому',
             error: 'Помилка',
+            warning: 'Попередження',
             success: 'Успішно',
+            info: 'Інформація',
             reload: 'Перезавантажити',
             module_load_error: 'Помилка завантаження модуля',
+            feature_in_development: 'Ця функція в розробці',
             no_data: 'Немає даних',
             not_specified: 'Не вказано'
         },
@@ -107,7 +115,10 @@ registerTranslations('health', {
             no_medications_today: 'На сьогодні ліків немає',
             add_medications_prompt: 'Додайте ліки в розділі "Аптечка"',
             go_to_medications: 'Перейти в аптечку',
-            how_it_works: '💡 Як це працює?'
+            how_it_works: '💡 Як це працює?',
+            show_active: 'Показати активні',
+            show_archive: 'Показати архівовані',
+            confirm_delete_medication: 'Ви впевнені, що хочете видалити цей ліки?'
         },
 
         // Компонент Щоденник
@@ -237,14 +248,23 @@ registerTranslations('health', {
                 confirm_delete: 'Видалити запис про інтимну активність на сьогодні?',
                 options: {
                     no: 'Активності не було',
+                    no_desc: 'Немає сексуальної активності',
                     protected_sex: 'Захищений секс',
+                    protected_sex_desc: 'Використання контрацепції',
                     unprotected_sex: 'Незахищений секс',
+                    unprotected_sex_desc: 'Без контрацепції',
                     solo: 'Самостійно',
+                    solo_desc: 'Мастурбація',
                     with_toy: 'З іграшкою',
+                    with_toy_desc: 'Використання іграшок',
                     active_role: 'Активна роль',
+                    active_role_desc: 'Активна роль партнера',
                     passive_role: 'Пасивна роль',
+                    passive_role_desc: 'Пасивна роль партнера',
                     ovulation: 'Під час овуляції',
-                    during_period: 'Під час менструації'
+                    ovulation_desc: 'Період фертильності',
+                    during_period: 'Під час менструації',
+                    during_period_desc: 'Під час менструального циклу'
                 }
             },
 
