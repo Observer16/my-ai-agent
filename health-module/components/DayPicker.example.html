@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DayPicker - iOS-Style Wheel Picker для выбора даты</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 28px;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+        }
+
+        .demo-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        #day-picker-demo {
+            margin-bottom: 20px;
+        }
+
+        .date-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 15px;
+            letter-spacing: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .code-example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .number { color: #bd93f9; }
+        .function { color: #8be9fd; }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .date-display {
+                font-size: 24px;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏰ DayPicker</h1>
+        <p class="description">iOS-Style Wheel Picker для выбора дня/месяца/года</p>
+
+        <!-- Demo 1: Basic -->
+        <div class="demo-section">
+            <div class="demo-title">📱 Базовый пример</div>
+            <div id="day-picker-demo"></div>
+            <div class="date-display" id="date-display">18.01.2026</div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="setCustomDate()">Установить 15.02.2026</button>
+                <button class="btn-secondary" onclick="resetDate()">Сброс</button>
+            </div>
+
+            <div class="info-box">
+                ✨ <strong>Попробуй:</strong> Прокрути колесики пальцем или мышью. Используй инерцию для быстрого выбора. На ПК поддерживается прокрутка колеса мыши.
+            </div>
+        </div>
+
+        <!-- Usage Example -->
+        <div class="demo-section">
+            <div class="demo-title">💻 Как использовать</div>
+            <div class="code-example"><code>
+<span class="keyword">const</span> picker = <span class="keyword">new</span> <span class="function">DayPicker</span>(containerEl, {
+  initialDate: <span class="string">'2026-01-18'</span>,
+  onDateSelect: (dateString) => {
+    console.log(<span class="string">`Дата: </span>${dateString}<span class="string">`</span>);
+  }
+});
+
+<span class="comment">// Методы:</span>
+picker.setDate(<span class="string">'2026-02-15'</span>);  <span class="comment">// Установить дату</span>
+picker.getDate();            <span class="comment">// "2026-02-15"</span>
+picker.destroy();            <span class="comment">// Уничтожить</span>
+            </code></div>
+        </div>
+
+        <!-- Features -->
+        <div class="demo-section">
+            <div class="demo-title">✨ Особенности</div>
+            <div class="info-box">
+                <strong>✓</strong> iOS-style wheel picker с инерцией<br>
+                <strong>✓</strong> Три независимых колеса: День, Месяц, Год<br>
+                <strong>✓</strong> Momentum scrolling с плавной инерцией<br>
+                <strong>✓</strong> Поддержка touch и mouse<br>
+                <strong>✓</strong> Прокрутка колеса мыши (wheel event)<br>
+                <strong>✓</strong> Автокоррекция дней при смене месяца<br>
+                <strong>✓</strong> 60 FPS производительность<br>
+                <strong>✓</strong> Адаптивен для мобильных и ПК<br>
+                <strong>✓</strong> Без зависимостей
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="demo-section">
+            <div class="demo-title">⚙️ Опции</div>
+            <div class="info-box">
+                <strong>initialDate</strong> (string): Начальная дата YYYY-MM-DD (по умолчанию: сегодня)<br>
+                <strong>onDateSelect</strong> (function): Колбэк при выборе даты<br>
+                <strong>minDate</strong> (string): Минимальная дата YYYY-MM-DD (опционально)<br>
+                <strong>maxDate</strong> (string): Максимальная дата YYYY-MM-DD (опционально)<br>
+                <strong>format</strong> (string): Формат даты (по умолчанию: DD.MM.YYYY)
+            </div>
+        </div>
+
+        <!-- Difference from DatePicker -->
+        <div class="demo-section">
+            <div class="demo-title">📊 Сравнение с DatePicker</div>
+            <div class="info-box">
+                <strong>DayPicker (колесики):</strong><br>
+                • Компактный размер<br>
+                • Быстрый выбор через инерцию<br>
+                • Идеален для мобильных<br>
+                • Плавный скролл<br><br>
+                <strong>DatePicker (календарь):</strong><br>
+                • Знакомый интерфейс<br>
+                • Навигация по месяцам<br>
+                • Может просмотреть весь месяц<br>
+                • Ограничение дат (minDate/maxDate)
+            </div>
+        </div>
+    </div>
+
+    <script src="DayPicker.js"></script>
+    <script>
+        let picker;
+
+        // Инициализация пикера
+        window.addEventListener('DOMContentLoaded', () => {
+            picker = new DayPicker(document.getElementById('day-picker-demo'), {
+                initialDate: '2026-01-18',
+                onDateSelect: (dateString) => {
+                    const date = new Date(dateString);
+                    const formatted = date.toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    document.getElementById('date-display').textContent = formatted;
+                    console.log(`📅 Дата выбрана: ${formatted}`);
+                }
+            });
+
+            // Установить начальное отображение
+            const date = new Date(picker.getDate());
+            const formatted = date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            document.getElementById('date-display').textContent = formatted;
+        });
+
+        function setCustomDate() {
+            picker.setDate('2026-02-15');
+            console.log('✅ Дата установлена на 15.02.2026');
+        }
+
+        function resetDate() {
+            picker.setDate('2026-01-18');
+            console.log('🔄 Пикер сброшен на начальную дату');
+        }
+    </script>
+</body>
+</html>
