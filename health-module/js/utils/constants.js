@@ -76,13 +76,26 @@ const HealthConstants = (function() {
         }));
     }
 
+    /**
+     * Получить настроения с эмодзи и локализованными ярлыками
+     * @returns {array} - Массив объектов {value, emoji, label}
+     */
+    function getMoodsWithEmojis() {
+        return Object.entries(MOOD_EMOJIS).map(([value, emoji]) => ({
+            value,
+            emoji,
+            label: getMoodLabel(value)
+        }));
+    }
+
     return {
         MOOD_EMOJIS,
         INTENSITY_COLORS,
         GENDER_OPTIONS,
         getMoodLabel,           // NEW
         getGenderOptions,       // NEW
-        getMedicationForms      // NEW
+        getMedicationForms,     // NEW
+        getMoodsWithEmojis      // NEW
     };
 })();
 
