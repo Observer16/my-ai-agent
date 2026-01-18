@@ -119,7 +119,20 @@ registerTranslations('health', {
             how_it_works: '💡 How it works?',
             show_active: 'Show active',
             show_archive: 'Show archived',
-            confirm_delete_medication: 'Are you sure you want to delete this medication?'
+            confirm_delete_medication: 'Are you sure you want to delete this medication?',
+            // Dosage forms (used in modal window)
+            forms: {
+                таблетки: 'Tablets',
+                капсулы: 'Capsules',
+                сироп: 'Syrup',
+                раствор: 'Solution',
+                мазь: 'Ointment',
+                крем: 'Cream',
+                капли: 'Drops',
+                спрей: 'Spray',
+                порошок: 'Powder',
+                другое: 'Other'
+            }
         },
 
         // Diary component

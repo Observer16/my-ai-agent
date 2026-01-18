@@ -119,7 +119,20 @@ registerTranslations('health', {
             how_it_works: '💡 ¿Cómo funciona?',
             show_active: 'Mostrar activos',
             show_archive: 'Mostrar archivados',
-            confirm_delete_medication: '¿Estás seguro de que quieres eliminar este medicamento?'
+            confirm_delete_medication: '¿Estás seguro de que quieres eliminar este medicamento?',
+            // Formas de medicamentos (usadas en ventana modal)
+            forms: {
+                таблетки: 'Tabletas',
+                капсулы: 'Cápsulas',
+                сироп: 'Jarabe',
+                раствор: 'Solución',
+                мазь: 'Pomada',
+                крем: 'Crema',
+                капли: 'Gotas',
+                спрей: 'Aerosol',
+                порошок: 'Polvo',
+                другое: 'Otro'
+            }
         },
 
         // Componente Diario
