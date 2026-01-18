@@ -627,22 +627,22 @@ async function createStore(name, type) {
             store_type: type
         };
 
-        console.log('🏪 Создаём магазин:', storeData);
+        console.log('🏪 Создаём получателя:', storeData);
 
         const r = await API.createStore(storeData);
 
-        // Обновляем список магазинов
+        // Обновляем список получателей
         stores = await API.getStores();
         renderStoreList();
 
-        // Автоматически выбираем созданный магазин
+        // Автоматически выбираем созданного получателя
         selectStore(r.store_id, name, type);
 
-        tg.showAlert(`✅ Магазин "${name}" создан`);
+        tg.showAlert(`✅ Получатель "${name}" создан`);
 
         tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
-        console.error('❌ Ошибка создания магазина:', e);
+        console.error('❌ Ошибка создания получателя:', e);
         tg.showAlert('Ошибка: ' + e.message);
     }
 }

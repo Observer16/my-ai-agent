@@ -80,7 +80,7 @@ async function handlePaymentSaved(paymentData) {
     // Очищаем кэш расходов для обновления статистики
     invalidateExpensesCache();
 
-    // Если создан новый магазин - очищаем кэш магазинов
+    // Если создан новый получатель - очищаем кэш получателей
     if (paymentData.newStoreCreated) {
         invalidateStoresCache();
     }
