@@ -249,56 +249,166 @@ registerTranslations('health', {
             },
 
             medication: {
+                // Titles (new keys)
+                add_title: '💊 Add Medication',
+                edit_title: '✏️ Edit Medication',
+                // Step titles
+                step1_title: 'Basic Info',
+                step2_title: 'Intake Type',
+                step3_title: 'Stock Levels',
+                step4_title: 'Schedule',
+                // Legacy keys (for backward compatibility)
                 title_add: '💊 Add medication',
                 title_edit: '✏️ Edit medication',
                 step_basic: 'Basic',
                 step_intake_type: 'Intake type',
                 step_stocks: 'Stock levels',
                 step_schedule: 'Schedule',
-                field_name: 'Medication name',
+
+                // Step 1: Basic Info
+                field_name_label: 'Medication Name',
                 field_name_placeholder: 'For example: Aspirin',
+                field_dosage_label: 'Dosage',
+                field_dosage_hint: 'Specify the dosage of one unit',
+                field_form_label: 'Dosage Form',
+                field_instructions_label: 'Instructions',
+                field_instructions_hint: 'How to take this medication correctly',
+                // Legacy
+                field_name: 'Medication name',
                 field_dosage: 'Dosage',
-                field_dosage_hint: 'Specify dosage of one unit',
                 field_form: 'Dosage form',
                 field_instructions: 'Instructions for use',
-                field_instructions_hint: 'How to take this medication correctly',
+
+                // Step 2: Intake Type
+                field_intake_type_label: 'Intake Type',
+                intake_type_continuous: 'Continuous',
+                intake_type_course: 'Course',
+                field_start_date_label: 'Start Date',
+                field_end_date_label: 'End Date',
+                // Legacy
                 field_intake_type: 'Intake type',
                 intake_continuous: 'Continuous',
                 intake_course: 'Course',
                 field_start_date: 'Start date',
                 field_end_date: 'End date',
+
+                // Step 3: Stock Levels
+                field_quantity_unit_label: 'Unit of Measurement',
+                field_quantity_available_label: 'Quantity Available',
+                field_quantity_available_hint: 'How much you have now',
+                field_quantity_threshold_label: 'Notify me to refill when remaining',
+                info_threshold_continuous: '💡 You will receive a notification when stock is ≤ this value',
+                info_threshold_course_only: '⚠️ Notifications only work for continuous medications',
+                stock_preview_title: 'Forecast',
+                // Legacy
                 field_quantity_unit: 'Unit of measurement',
                 field_quantity_available: 'Quantity available',
-                field_quantity_available_hint: 'How much you have now',
                 field_quantity_threshold: 'Notify me to buy when remaining',
-                field_schedule: 'Intake schedule',
-                btn_cancel: 'Cancel',
-                btn_next: 'Next →',
-                btn_back: '← Back',
-                btn_save: '💾 Save',
-                btn_add_time: '➕ Add intake time',
+
+                // Step 4: Schedule
+                field_schedule_label: 'Intake Schedule',
+                field_schedule_hint: 'Add times and days for medication intake',
+                btn_add_time_label: '➕ Add Intake Time',
+                btn_quick_all_days: 'All Days',
+                btn_quick_weekdays: 'Weekdays',
+                btn_quick_weekends: 'Weekends',
+                btn_quick_clear: 'Clear',
+                empty_schedules_text: 'No schedule added',
+                empty_schedules_hint: 'You can save without a schedule and add it later',
+                schedule_form_header: '➕ New Intake Time',
+                schedule_days_label: 'Days of Week',
+                schedule_time_label: 'Time',
+                schedule_dosage_label: 'Quantity',
                 btn_add_schedule: '✓ Add',
+                // Legacy
+                field_schedule: 'Intake schedule',
+                btn_add_time: '➕ Add intake time',
+
+                // Units
+                unit_tablets: 'Tablets',
+                unit_capsules: 'Capsules',
+                unit_milliliters: 'ml',
+                unit_drops: 'Drops',
+                unit_doses: 'Doses',
+                unit_pieces: 'Pieces',
+
+                // Days (short)
+                day_mon_short: 'Mon',
+                day_tue_short: 'Tue',
+                day_wed_short: 'Wed',
+                day_thu_short: 'Thu',
+                day_fri_short: 'Fri',
+                day_sat_short: 'Sat',
+                day_sun_short: 'Sun',
+
+                // Days (full)
+                day_monday: 'Monday',
+                day_tuesday: 'Tuesday',
+                day_wednesday: 'Wednesday',
+                day_thursday: 'Thursday',
+                day_friday: 'Friday',
+                day_saturday: 'Saturday',
+                day_sunday: 'Sunday',
+
+                // Errors
                 error_name_required: '⚠️ Enter medication name',
+                error_name_too_long: '⚠️ Medication name is too long',
+                error_dosage_required: '⚠️ Enter dosage',
+                error_form_required: '⚠️ Select dosage form',
+                error_start_date_required: '⚠️ Specify start date',
                 error_end_date_required: '⚠️ Specify course end date',
                 error_end_date_after_start: '⚠️ End date must be after start date',
+                error_quantity_invalid: '⚠️ Invalid quantity',
                 error_quantity_negative: '⚠️ Quantity cannot be negative',
                 error_schedule_required: '⚠️ Add at least one intake time',
-                stock_ok: 'Stock is normal',
+                error_schedule_overlap: '⚠️ Intake times overlap',
+                error_invalid_time: '⚠️ Invalid time format',
+                error_days_required: '⚠️ Select at least one day of week',
+                error_time_required: '⚠️ Specify intake time',
+                error_quantity_zero: '⚠️ Quantity must be greater than zero',
+                error_save_generic: 'Save error',
+                error_save: '❌ Failed to save: ',
+
+                // Success & Status
+                success_created: '✅ Medication added',
+                success_updated: '✅ Medication updated',
+                success_deleted: '✅ Medication deleted',
+                success_schedule_updated: '✅ Schedule updated',
+                success_schedule_added: '✅ Intake time added',
+                success_schedule_deleted: '✅ Schedule removed',
+                success_update_with_warnings: '✅ Medication updated but there are schedule issues',
+
+                // Stock Status
+                stock_ok: 'Stock normal',
                 stock_ok_detail: '{diff} remaining until notification',
                 stock_warning: 'Time to refill',
                 stock_warning_detail: 'Notification threshold reached',
                 stock_low: 'Low stock!',
                 stock_low_detail: '{diff} below threshold',
+
+                // Toast Messages
                 toast_loaded: '✅ Medication data loaded',
                 toast_error_load: '❌ Error loading medication',
                 toast_error_load_detail: '❌ Failed to load data: ',
                 toast_schedule_updated: '✅ Schedule updated',
                 toast_schedule_added: '✅ Intake time added',
-                toast_schedule_deleted: '🗑️ Schedule deleted',
+                toast_schedule_deleted: '✅ Schedule deleted',
                 toast_success_add: '✅ Medication added',
                 toast_success_update: '✅ Medication updated',
+                toast_success_delete: '✅ Medication deleted',
                 toast_warning_schedules: '⚠️ Medication updated but there are schedule issues',
-                toast_error_save: '❌ Failed to save: '
+                toast_error_save: '❌ Failed to save: ',
+
+                // Button keys
+                btn_next: 'Next →',
+                btn_back: '← Back',
+                btn_cancel: 'Cancel',
+                btn_save: '💾 Save',
+                btn_add_schedule: '✓ Add',
+                error_unknown_step: 'Unknown step',
+
+                // Legacy keys
+                btn_cancel: 'Cancel'
             },
 
             simple: {

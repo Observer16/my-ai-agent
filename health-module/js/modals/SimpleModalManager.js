@@ -23,7 +23,7 @@ const SimpleModalManager = (function() {
                 break;
             default:
                 console.warn('⚠️ Неизвестный тип модального окна:', modalType);
-                showToast('⚠️ Функция в разработке', 'info');
+                showToast(t('health.modals.simple.toast_unknown_modal'), 'info');
         }
     }
 
@@ -66,7 +66,7 @@ const SimpleModalManager = (function() {
         html += '<div class="modal-overlay" onclick="SimpleModalManager.close()"></div>';
         html += '<div class="modal-content modal-large">';
         html += '<div class="modal-header">';
-        html += '<h3>🤕 Добавить симптом</h3>';
+        html += `<h3>🤕 ${t('health.modals.simple.symptom_title')}</h3>`;
         html += '<button class="modal-close" onclick="SimpleModalManager.close()">×</button>';
         html += '</div>';
         html += '<div class="modal-body">';
@@ -103,7 +103,7 @@ const SimpleModalManager = (function() {
         // Запрашиваем интенсивность
         const intensity = prompt('Оцените интенсивность от 1 до 5:', '3');
         if (!intensity || intensity < 1 || intensity > 5) {
-            showToast('❌ Некорректная интенсивность', 'error');
+            showToast(t('health.modals.simple.error_intensity'), 'error');
             return;
         }
 
@@ -115,7 +115,7 @@ const SimpleModalManager = (function() {
             });
 
             if (result.success) {
-                showToast('✅ Симптом добавлен', 'success');
+                showToast(t('health.modals.simple.toast_symptom_added'), 'success');
                 close();
 
                 // Обновляем данные и перезагружаем форму дневника
@@ -124,11 +124,11 @@ const SimpleModalManager = (function() {
                     Diary.loadDate(date);
                 }
             } else {
-                showToast('❌ Ошибка добавления симптома', 'error');
+                showToast(t('health.modals.simple.error_symptom_add'), 'error');
             }
         } catch (error) {
             console.error('❌ Ошибка добавления симптома:', error);
-            showToast('❌ Ошибка добавления симптома', 'error');
+            showToast(t('health.modals.simple.error_symptom_add'), 'error');
         }
     }
 
@@ -137,7 +137,7 @@ const SimpleModalManager = (function() {
         if (window.MedicationFormModal) {
             MedicationFormModal.show(data);
         } else {
-            showToast('⚠️ Форма не загружена', 'error');
+            showToast(t('health.modals.simple.toast_form_not_loaded'), 'error');
         }
     }
 

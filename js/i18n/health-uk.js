@@ -249,56 +249,166 @@ registerTranslations('health', {
             },
 
             medication: {
+                // Titles (new keys)
+                add_title: '💊 Додати Ліки',
+                edit_title: '✏️ Редагувати Ліки',
+                // Step titles
+                step1_title: 'Основна Інформація',
+                step2_title: 'Тип Прийому',
+                step3_title: 'Рівні Запасів',
+                step4_title: 'Розклад',
+                // Legacy keys (for backward compatibility)
                 title_add: '💊 Додати ліки',
                 title_edit: '✏️ Редагувати ліки',
                 step_basic: 'Основне',
                 step_intake_type: 'Тип прийому',
                 step_stocks: 'Залишки',
                 step_schedule: 'Розклад',
-                field_name: 'Назва ліків',
+
+                // Step 1: Basic Info
+                field_name_label: 'Назва Ліків',
                 field_name_placeholder: 'Наприклад: Аспірин',
-                field_dosage: 'Дозування',
+                field_dosage_label: 'Дозування',
                 field_dosage_hint: 'Вкажіть дозування однієї одиниці',
+                field_form_label: 'Форма Випуску',
+                field_instructions_label: 'Інструкція',
+                field_instructions_hint: 'Як правильно приймати ці ліки',
+                // Legacy
+                field_name: 'Назва ліків',
+                field_dosage: 'Дозування',
                 field_form: 'Форма випуску',
                 field_instructions: 'Інструкція з застосування',
-                field_instructions_hint: 'Як правильно приймати ці ліки',
+
+                // Step 2: Intake Type
+                field_intake_type_label: 'Тип Прийому',
+                intake_type_continuous: 'Постійно',
+                intake_type_course: 'Курсом',
+                field_start_date_label: 'Дата Початку',
+                field_end_date_label: 'Дата Завершення',
+                // Legacy
                 field_intake_type: 'Тип прийому',
                 intake_continuous: 'Постійно',
                 intake_course: 'Курсом',
                 field_start_date: 'Дата початку',
                 field_end_date: 'Дата завершення',
+
+                // Step 3: Stock Levels
+                field_quantity_unit_label: 'Одиниця Виміру',
+                field_quantity_available_label: 'Доступна Кількість',
+                field_quantity_available_hint: 'Скільки у вас є зараз',
+                field_quantity_threshold_label: 'Повідомити про покупку коли залишиться',
+                info_threshold_continuous: '💡 Ви отримаєте сповіщення коли запас буде ≤ цього значення',
+                info_threshold_course_only: '⚠️ Сповіщення працюють лише для постійних ліків',
+                stock_preview_title: 'Прогноз',
+                // Legacy
                 field_quantity_unit: 'Одиниця виміру',
                 field_quantity_available: 'Доступна кількість',
-                field_quantity_available_hint: 'Скільки у вас є зараз',
                 field_quantity_threshold: 'Повідомити про покупку коли залишиться',
-                field_schedule: 'Розклад прийому',
-                btn_cancel: 'Скасувати',
-                btn_next: 'Далі →',
-                btn_back: '← Назад',
-                btn_save: '💾 Зберегти',
-                btn_add_time: '➕ Додати час прийому',
+
+                // Step 4: Schedule
+                field_schedule_label: 'Розклад Прийому',
+                field_schedule_hint: 'Додайте часи та дні для прийому ліків',
+                btn_add_time_label: '➕ Додати Час Прийому',
+                btn_quick_all_days: 'Кожен День',
+                btn_quick_weekdays: 'У Робочі Дні',
+                btn_quick_weekends: 'На Вихідні',
+                btn_quick_clear: 'Очистити',
+                empty_schedules_text: 'Розклад не додано',
+                empty_schedules_hint: 'Ви можете зберегти без розкладу і додати його пізніше',
+                schedule_form_header: '➕ Новий Час Прийому',
+                schedule_days_label: 'Дні Тижня',
+                schedule_time_label: 'Час',
+                schedule_dosage_label: 'Кількість',
                 btn_add_schedule: '✓ Додати',
+                // Legacy
+                field_schedule: 'Розклад прийому',
+                btn_add_time: '➕ Додати час прийому',
+
+                // Units
+                unit_tablets: 'Таблетки',
+                unit_capsules: 'Капсули',
+                unit_milliliters: 'мл',
+                unit_drops: 'Краплі',
+                unit_doses: 'Дози',
+                unit_pieces: 'Штуки',
+
+                // Days (short)
+                day_mon_short: 'Пн',
+                day_tue_short: 'Вт',
+                day_wed_short: 'Ср',
+                day_thu_short: 'Чт',
+                day_fri_short: 'Пт',
+                day_sat_short: 'Сб',
+                day_sun_short: 'Нд',
+
+                // Days (full)
+                day_monday: 'Понеділок',
+                day_tuesday: 'Вівторок',
+                day_wednesday: 'Середа',
+                day_thursday: 'Четвер',
+                day_friday: 'Пʼятниця',
+                day_saturday: 'Субота',
+                day_sunday: 'Неділя',
+
+                // Errors
                 error_name_required: '⚠️ Вкажіть назву ліків',
+                error_name_too_long: '⚠️ Назва ліків занадто довга',
+                error_dosage_required: '⚠️ Введіть дозування',
+                error_form_required: '⚠️ Виберіть форму випуску',
+                error_start_date_required: '⚠️ Вкажіть дату початку',
                 error_end_date_required: '⚠️ Вкажіть дату завершення курсу',
                 error_end_date_after_start: '⚠️ Дата завершення повинна бути пізнішою за дату початку',
+                error_quantity_invalid: '⚠️ Неправильна кількість',
                 error_quantity_negative: '⚠️ Кількість не може бути від\'ємною',
                 error_schedule_required: '⚠️ Додайте хоча б один час прийому',
+                error_schedule_overlap: '⚠️ Часи прийому накладаються',
+                error_invalid_time: '⚠️ Неправильний формат часу',
+                error_days_required: '⚠️ Виберіть хоча б один день тижня',
+                error_time_required: '⚠️ Вкажіть час прийому',
+                error_quantity_zero: '⚠️ Кількість повинна бути більше нуля',
+                error_save_generic: 'Помилка збереження',
+                error_save: '❌ Не вдалося зберегти: ',
+
+                // Success & Status
+                success_created: '✅ Ліки додано',
+                success_updated: '✅ Ліки оновлено',
+                success_deleted: '✅ Ліки видалено',
+                success_schedule_updated: '✅ Розклад оновлено',
+                success_schedule_added: '✅ Час прийому додано',
+                success_schedule_deleted: '✅ Розклад видалено',
+                success_update_with_warnings: '✅ Ліки оновлено, але є проблеми з розкладом',
+
+                // Stock Status
                 stock_ok: 'Запас в нормі',
                 stock_ok_detail: 'Залишилось {diff} до повідомлення',
                 stock_warning: 'Час поповнити',
                 stock_warning_detail: 'Порог повідомлення досягнутий',
                 stock_low: 'Низький залишок!',
                 stock_low_detail: 'На {diff} нижче порога',
+
+                // Toast Messages
                 toast_loaded: '✅ Дані ліків завантажені',
                 toast_error_load: '❌ Помилка завантаження ліків',
                 toast_error_load_detail: '❌ Не вдалося завантажити дані: ',
                 toast_schedule_updated: '✅ Розклад оновлено',
                 toast_schedule_added: '✅ Час прийому додано',
-                toast_schedule_deleted: '🗑️ Розклад видалено',
+                toast_schedule_deleted: '✅ Розклад видалено',
                 toast_success_add: '✅ Ліки додано',
                 toast_success_update: '✅ Ліки оновлено',
+                toast_success_delete: '✅ Ліки видалено',
                 toast_warning_schedules: '⚠️ Ліки оновлено, але є проблеми з розкладом',
-                toast_error_save: '❌ Не вдалося зберегти: '
+                toast_error_save: '❌ Не вдалося зберегти: ',
+
+                // Button keys
+                btn_next: 'Далі →',
+                btn_back: '← Назад',
+                btn_cancel: 'Скасувати',
+                btn_save: '💾 Зберегти',
+                btn_add_schedule: '✓ Додати',
+                error_unknown_step: 'Невідомий крок',
+
+                // Legacy keys
+                btn_cancel: 'Скасувати'
             },
 
             simple: {

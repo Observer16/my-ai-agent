@@ -136,10 +136,10 @@ const MedicationFormModal = (function() {
                 content = renderStep4();
                 break;
             default:
-                content = '<p>Неизвестный шаг</p>';
+                content = `<p>${t('health.modals.medication.error_unknown_step')}</p>`;
         }
 
-        const title = medicationId ? '✏️ Редактировать лекарство' : '💊 Добавить лекарство';
+        const title = medicationId ? t('health.modals.medication.edit_title') : t('health.modals.medication.add_title');
         const modalHtml = BaseModal.createModalStructure(title, content, 'large');
         BaseModal.show(modalHtml);
 
@@ -149,13 +149,13 @@ const MedicationFormModal = (function() {
     function renderStepIndicator(currentStep) {
         return `
             <div class="step-indicator">
-                ${renderStepItem(1, 'Основное', currentStep)}
+                ${renderStepItem(1, t('health.modals.medication.step1_title'), currentStep)}
                 <div class="step-line"></div>
-                ${renderStepItem(2, 'Тип приёма', currentStep)}
+                ${renderStepItem(2, t('health.modals.medication.step2_title'), currentStep)}
                 <div class="step-line"></div>
-                ${renderStepItem(3, 'Остатки', currentStep)}
+                ${renderStepItem(3, t('health.modals.medication.step3_title'), currentStep)}
                 <div class="step-line"></div>
-                ${renderStepItem(4, 'Расписание', currentStep)}
+                ${renderStepItem(4, t('health.modals.medication.step4_title'), currentStep)}
             </div>
         `;
     }
@@ -186,20 +186,20 @@ const MedicationFormModal = (function() {
                 <div class="form-content">
                     <div class="form-group">
                         <label for="medication-name">
-                            Название лекарства <span style="color: var(--health-danger);">*</span>
+                            ${t('health.modals.medication.field_name_label')} <span style="color: var(--health-danger);">*</span>
                         </label>
                         <input
                             type="text"
                             id="medication-name"
                             class="modal-input"
                             value="${formData.name}"
-                            placeholder="Например: Витамин D"
+                            placeholder="${t('health.modals.medication.field_name_placeholder')}"
                             required
                             autofocus
                         >
                     </div>
                     <div class="form-group">
-                        <label for="medication-dosage">Дозировка</label>
+                        <label for="medication-dosage">${t('health.modals.medication.field_dosage_label')}</label>
                         <input
                             type="text"
                             id="medication-dosage"
@@ -207,35 +207,35 @@ const MedicationFormModal = (function() {
                             value="${formData.dosage}"
                             placeholder="Например: 1000 МЕ"
                         >
-                        <div class="form-hint">Укажите дозировку одной единицы</div>
+                        <div class="form-hint">${t('health.modals.medication.field_dosage_hint')}</div>
                     </div>
                     <div class="form-group">
-                        <label for="medication-form">Форма выпуска</label>
+                        <label for="medication-form">${t('health.modals.medication.field_form_label')}</label>
                         <select id="medication-form" class="modal-input">
                             ${FORM_OPTIONS.map(option => `
                                 <option value="${option}" ${formData.form === option ? 'selected' : ''}>
-                                    ${option.charAt(0).toUpperCase() + option.slice(1)}
+                                    ${t(`health.medications.forms.${option}`) || option.charAt(0).toUpperCase() + option.slice(1)}
                                 </option>
                             `).join('')}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="medication-instructions">Инструкция по применению</label>
+                        <label for="medication-instructions">${t('health.modals.medication.field_instructions_label')}</label>
                         <textarea
                             id="medication-instructions"
                             class="modal-input"
                             rows="3"
                             placeholder="Например: Принимать во время еды, запивая водой"
                         >${formData.instructions}</textarea>
-                        <div class="form-hint">Как правильно принимать это лекарство</div>
+                        <div class="form-hint">${t('health.modals.medication.field_instructions_hint')}</div>
                     </div>
                 </div>
                 <div class="modal-actions">
                     <button class="health-btn btn-secondary" onclick="MedicationFormModal.close()">
-                        Отмена
+                        ${t('health.common.cancel')}
                     </button>
                     <button class="health-btn btn-primary" onclick="MedicationFormModal.nextStep()">
-                        Далее →
+                        ${t('health.modals.medication.btn_next')}
                     </button>
                 </div>
             </div>
@@ -250,7 +250,7 @@ const MedicationFormModal = (function() {
                 ${renderStepIndicator(2)}
                 <div class="form-content">
                     <div class="form-group">
-                        <label>Тип приёма <span style="color: var(--health-danger);">*</span></label>
+                        <label>${t('health.modals.medication.field_intake_type_label')} <span style="color: var(--health-danger);">*</span></label>
                         <div class="intake-type-selector">
                             <button
                                 class="intake-type-btn ${!isCourse ? 'active' : ''}"
@@ -258,7 +258,7 @@ const MedicationFormModal = (function() {
                             >
                                 <span class="intake-icon">🔄</span>
                                 <div class="intake-details">
-                                    <div class="intake-label">Постоянно</div>
+                                    <div class="intake-label">${t('health.modals.medication.intake_type_continuous')}</div>
                                     <div class="intake-description">Принимаю регулярно</div>
                                 </div>
                             </button>
@@ -268,14 +268,14 @@ const MedicationFormModal = (function() {
                             >
                                 <span class="intake-icon">📅</span>
                                 <div class="intake-details">
-                                    <div class="intake-label">Курсом</div>
+                                    <div class="intake-label">${t('health.modals.medication.intake_type_course')}</div>
                                     <div class="intake-description">Ограниченный период</div>
                                 </div>
                             </button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="medication-start-date">Начало приёма</label>
+                        <label for="medication-start-date">${t('health.modals.medication.field_start_date_label')}</label>
                         <input
                             type="date"
                             id="medication-start-date"
@@ -286,7 +286,7 @@ const MedicationFormModal = (function() {
                     ${isCourse ? `
                         <div class="form-group">
                             <label for="medication-end-date">
-                                Окончание приёма <span style="color: var(--health-danger);">*</span>
+                                ${t('health.modals.medication.field_end_date_label')} <span style="color: var(--health-danger);">*</span>
                             </label>
                             <input
                                 type="date"
@@ -301,10 +301,10 @@ const MedicationFormModal = (function() {
                 </div>
                 <div class="modal-actions">
                     <button class="health-btn btn-secondary" onclick="MedicationFormModal.prevStep()">
-                        ← Назад
+                        ${t('health.modals.medication.btn_back')}
                     </button>
                     <button class="health-btn btn-primary" onclick="MedicationFormModal.nextStep()">
-                        Далее →
+                        ${t('health.modals.medication.btn_next')}
                     </button>
                 </div>
             </div>
@@ -321,24 +321,27 @@ const MedicationFormModal = (function() {
                 <div class="form-content">
                     <div class="form-group">
                         <label for="medication-quantity-unit">
-                            Единица измерения <span style="color: var(--health-danger);">*</span>
+                            ${t('health.modals.medication.field_quantity_unit_label')} <span style="color: var(--health-danger);">*</span>
                         </label>
                         <div class="quantity-unit-selector">
-                            ${QUANTITY_UNITS.map(unit => `
-                                <button
-                                    class="quantity-unit-btn ${selectedUnit === unit.value ? 'active' : ''}"
-                                    onclick="MedicationFormModal.selectQuantityUnit('${unit.value}')"
-                                    type="button"
-                                >
-                                    <span class="unit-icon">${unit.icon}</span>
-                                    <span class="unit-label">${unit.label}</span>
-                                </button>
-                            `).join('')}
+                            ${QUANTITY_UNITS.map(unit => {
+                                const unitKey = `health.modals.medication.unit_${unit.value.replace('таблетки', 'tablets').replace('капсулы', 'capsules').replace('мл', 'milliliters').replace('капли', 'drops').replace('дозы', 'doses').replace('штуки', 'pieces')}`;
+                                return `
+                                    <button
+                                        class="quantity-unit-btn ${selectedUnit === unit.value ? 'active' : ''}"
+                                        onclick="MedicationFormModal.selectQuantityUnit('${unit.value}')"
+                                        type="button"
+                                    >
+                                        <span class="unit-icon">${unit.icon}</span>
+                                        <span class="unit-label">${unit.label}</span>
+                                    </button>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="medication-quantity-available">
-                            Количество в наличии
+                            ${t('health.modals.medication.field_quantity_available_label')}
                         </label>
                         <div class="quantity-input-group">
                             <button
@@ -365,11 +368,11 @@ const MedicationFormModal = (function() {
                             </button>
                             <span class="quantity-unit-label">${unitInfo.label}</span>
                         </div>
-                        <div class="form-hint">Сколько у вас есть сейчас</div>
+                        <div class="form-hint">${t('health.modals.medication.field_quantity_available_hint')}</div>
                     </div>
                     <div class="form-group">
                         <label for="medication-quantity-threshold">
-                            Уведомить о покупке когда остаётся
+                            ${t('health.modals.medication.field_quantity_threshold_label')}
                         </label>
                         <div class="quantity-input-group">
                             <button
@@ -398,14 +401,14 @@ const MedicationFormModal = (function() {
                         </div>
                         <div class="form-hint">
                             ${formData.intake_type === 'постоянно'
-                                ? '💡 Вы получите уведомление когда остаток будет ≤ этого значения'
-                                : '⚠️ Уведомления работают только для постоянных лекарств'}
+                                ? '💡 ' + t('health.modals.medication.info_threshold_continuous')
+                                : '⚠️ ' + t('health.modals.medication.info_threshold_course_only')}
                         </div>
                     </div>
                     ${formData.intake_type === 'постоянно' && formData.quantity_available > 0 ? `
                         <div class="stock-preview">
                             <div class="stock-preview-header">
-                                <span>📊 Прогноз</span>
+                                <span>📊 ${t('health.modals.medication.stock_preview_title')}</span>
                             </div>
                             <div class="stock-preview-body">
                                 ${renderStockPreview()}
@@ -415,10 +418,10 @@ const MedicationFormModal = (function() {
                 </div>
                 <div class="modal-actions">
                     <button class="health-btn btn-secondary" onclick="MedicationFormModal.prevStep()">
-                        ← Назад
+                        ${t('health.modals.medication.btn_back')}
                     </button>
                     <button class="health-btn btn-primary" onclick="MedicationFormModal.nextStep()">
-                        Далее →
+                        ${t('health.modals.medication.btn_next')}
                     </button>
                 </div>
             </div>
@@ -431,8 +434,8 @@ const MedicationFormModal = (function() {
                 ${renderStepIndicator(4)}
                 <div class="form-content">
                     <div class="form-group">
-                        <label>Расписание приёма</label>
-                        <div class="form-hint">Добавьте время и дни для приёма лекарства</div>
+                        <label>${t('health.modals.medication.field_schedule_label')}</label>
+                        <div class="form-hint">${t('health.modals.medication.field_schedule_hint')}</div>
                     </div>
 
                     <!-- Список расписаний -->
@@ -440,8 +443,8 @@ const MedicationFormModal = (function() {
                         ${formData.schedules.length === 0 ? `
                             <div class="empty-schedules">
                                 <span class="empty-icon">📅</span>
-                                <div class="empty-text">Расписание не добавлено</div>
-                                <div class="empty-hint">Можно сохранить без расписания и добавить позже</div>
+                                <div class="empty-text">${t('health.modals.medication.empty_schedules_text')}</div>
+                                <div class="empty-hint">${t('health.modals.medication.empty_schedules_hint')}</div>
                             </div>
                         ` : formData.schedules.map((schedule, index) => renderScheduleItem(schedule, index)).join('')}
                     </div>
@@ -452,13 +455,13 @@ const MedicationFormModal = (function() {
                         class="health-btn btn-secondary add-schedule-btn"
                         onclick="MedicationFormModal.showScheduleForm()"
                     >
-                        <span>➕</span> Добавить время приёма
+                        <span>➕</span> ${t('health.modals.medication.btn_add_time_label')}
                     </button>
 
                     <!-- Форма добавления (скрыта по умолчанию) -->
                     <div id="schedule-form" class="schedule-form" style="display: none;">
                         <div class="schedule-form-header">
-                            <span>➕ Новое время приёма</span>
+                            <span>➕ ${t('health.modals.medication.schedule_form_header')}</span>
                             <button
                                 type="button"
                                 class="close-schedule-form-btn"
@@ -469,7 +472,7 @@ const MedicationFormModal = (function() {
                         </div>
 
                         <div class="form-group">
-                            <label>Дни недели <span style="color: var(--health-danger);">*</span></label>
+                            <label>${t('health.modals.medication.schedule_days_label')} <span style="color: var(--health-danger);">*</span></label>
                             <div class="days-selector">
                                 ${DAYS_OF_WEEK.map(day => `
                                     <button
@@ -478,21 +481,21 @@ const MedicationFormModal = (function() {
                                         data-day="${day.value}"
                                         onclick="MedicationFormModal.toggleDay(${day.value})"
                                     >
-                                        ${day.label}
+                                        ${t(`health.modals.medication.day_${['mon_short', 'tue_short', 'wed_short', 'thu_short', 'fri_short', 'sat_short', 'sun_short'][day.value]}`)}
                                     </button>
                                 `).join('')}
                             </div>
                             <div class="quick-select-days">
-                                <button type="button" class="quick-btn" onclick="MedicationFormModal.selectAllDays()">Все дни</button>
-                                <button type="button" class="quick-btn" onclick="MedicationFormModal.selectWeekdays()">Будни</button>
-                                <button type="button" class="quick-btn" onclick="MedicationFormModal.selectWeekends()">Выходные</button>
-                                <button type="button" class="quick-btn" onclick="MedicationFormModal.clearDays()">Очистить</button>
+                                <button type="button" class="quick-btn" onclick="MedicationFormModal.selectAllDays()">${t('health.modals.medication.btn_quick_all_days')}</button>
+                                <button type="button" class="quick-btn" onclick="MedicationFormModal.selectWeekdays()">${t('health.modals.medication.btn_quick_weekdays')}</button>
+                                <button type="button" class="quick-btn" onclick="MedicationFormModal.selectWeekends()">${t('health.modals.medication.btn_quick_weekends')}</button>
+                                <button type="button" class="quick-btn" onclick="MedicationFormModal.clearDays()">${t('health.modals.medication.btn_quick_clear')}</button>
                             </div>
                         </div>
 
                         <div class="schedule-time-dosage">
                             <div class="form-group">
-                                <label for="schedule-time">Время <span style="color: var(--health-danger);">*</span></label>
+                                <label for="schedule-time">${t('health.modals.medication.schedule_time_label')} <span style="color: var(--health-danger);">*</span></label>
                                 <input
                                     type="time"
                                     id="schedule-time"
@@ -502,7 +505,7 @@ const MedicationFormModal = (function() {
                                 >
                             </div>
                             <div class="form-group">
-                                <label for="schedule-dosage">Количество</label>
+                                <label for="schedule-dosage">${t('health.modals.medication.schedule_dosage_label')}</label>
                                 <div class="quantity-input-group">
                                     <button
                                         type="button"
@@ -535,17 +538,17 @@ const MedicationFormModal = (function() {
                             class="health-btn btn-primary"
                             onclick="MedicationFormModal.addSchedule()"
                         >
-                            ✓ Добавить
+                            ✓ ${t('health.modals.medication.btn_add_schedule')}
                         </button>
                     </div>
                 </div>
 
                 <div class="modal-actions">
                     <button class="health-btn btn-secondary" onclick="MedicationFormModal.prevStep()">
-                        ← Назад
+                        ${t('health.modals.medication.btn_back')}
                     </button>
                     <button class="health-btn btn-primary" onclick="MedicationFormModal.save()">
-                        💾 Сохранить
+                        💾 ${t('health.common.save')}
                     </button>
                 </div>
             </div>
@@ -665,7 +668,7 @@ const MedicationFormModal = (function() {
             case 1:
                 const name = document.getElementById('medication-name')?.value.trim();
                 if (!name) {
-                    showToast('⚠️ Укажите название лекарства', 'warning');
+                    showToast(t('health.modals.medication.error_name_required'), 'warning');
                     return false;
                 }
                 return true;
@@ -675,13 +678,13 @@ const MedicationFormModal = (function() {
                 if (intakeType === 'курсом') {
                     const endDate = document.getElementById('medication-end-date')?.value;
                     if (!endDate) {
-                        showToast('⚠️ Укажите дату окончания курса', 'warning');
+                        showToast(t('health.modals.medication.error_end_date_required'), 'warning');
                         return false;
                     }
 
                     const startDate = document.getElementById('medication-start-date')?.value;
                     if (endDate <= startDate) {
-                        showToast('⚠️ Дата окончания должна быть позже начала', 'warning');
+                        showToast(t('health.modals.medication.error_end_date_after_start'), 'warning');
                         return false;
                     }
                 }
@@ -692,14 +695,14 @@ const MedicationFormModal = (function() {
                 const threshold = parseInt(document.getElementById('medication-quantity-threshold')?.value || 0);
 
                 if (available < 0 || threshold < 0) {
-                    showToast('⚠️ Количество не может быть отрицательным', 'warning');
+                    showToast(t('health.modals.medication.error_quantity_negative'), 'warning');
                     return false;
                 }
                 return true;
 
             case 4:
                 if (formData.schedules.length === 0) {
-                    showToast('⚠️ Добавьте хотя бы одно время приёма', 'warning');
+                    showToast(t('health.modals.medication.error_schedule_required'), 'warning');
                     return false;
                 }
                 return true;
@@ -915,13 +918,13 @@ const MedicationFormModal = (function() {
     function addSchedule() {
         // Валидация
         if (tempSchedule.days_of_week.length === 0) {
-            showToast('⚠️ Выберите хотя бы один день недели', 'warning');
+            showToast(t('health.modals.medication.error_days_required'), 'warning');
             return;
         }
 
         const timeInput = document.getElementById('schedule-time');
         if (!timeInput || !timeInput.value) {
-            showToast('⚠️ Укажите время приёма', 'warning');
+            showToast(t('health.modals.medication.error_time_required'), 'warning');
             return;
         }
 
@@ -929,7 +932,7 @@ const MedicationFormModal = (function() {
         const dosage = parseFloat(dosageInput?.value || 1);
 
         if (dosage <= 0) {
-            showToast('⚠️ Количество должно быть больше нуля', 'warning');
+            showToast(t('health.modals.medication.error_quantity_zero'), 'warning');
             return;
         }
 
@@ -947,7 +950,7 @@ const MedicationFormModal = (function() {
                 is_active: true
             };
             console.log('✅ Расписание обновлено:', formData.schedules[editingScheduleIndex]);
-            showToast('✅ Расписание обновлено', 'success');
+            showToast(t('health.modals.medication.success_schedule_updated'), 'success');
             editingScheduleIndex = null;
         } else {
             // ДОБАВЛЕНИЕ нового расписания
@@ -959,7 +962,7 @@ const MedicationFormModal = (function() {
                 is_active: true
             });
             console.log(' Расписание добавлено:', formData.schedules);
-            showToast(' Время приёма добавлено', 'success');
+            showToast(t('health.modals.medication.success_schedule_added'), 'success');
         }
 
         // Закрываем форму и обновляем список
@@ -970,7 +973,7 @@ const MedicationFormModal = (function() {
     function removeSchedule(index) {
         formData.schedules.splice(index, 1);
         renderStep(4);
-        showToast('🗑️ Расписание удалено', 'info');
+        showToast(t('health.modals.medication.success_schedule_deleted'), 'info');
     }
 
     async function save() {
@@ -1043,16 +1046,16 @@ const MedicationFormModal = (function() {
 
                 if (scheduleErrors.length > 0) {
                     console.warn('⚠️ Ошибки обновления расписаний:', scheduleErrors);
-                    showToast(' Лекарство обновлено, но есть проблемы с расписаниями', 'warning');
+                    showToast(t('health.modals.medication.success_update_with_warnings'), 'warning');
                 } else {
-                    showToast(' Лекарство обновлено', 'success');
+                    showToast(t('health.modals.medication.success_updated'), 'success');
                 }
 
             } else {
                 // СОЗДАНИЕ нового лекарства (с расписаниями)
                 result = await HealthAPI.createMedication(medicationData);
                 if (result.success) {
-                    showToast(' Лекарство добавлено', 'success');
+                    showToast(t('health.modals.medication.success_created'), 'success');
                 }
             }
 
@@ -1064,11 +1067,11 @@ const MedicationFormModal = (function() {
                     Medications.init();
                 }
             } else {
-                throw new Error(result.error || 'Ошибка сохранения');
+                throw new Error(result.error || t('health.modals.medication.error_save_generic'));
             }
         } catch (error) {
             console.error('❌ Ошибка сохранения лекарства:', error);
-            showToast('❌ Не удалось сохранить: ' + error.message, 'error');
+            showToast(t('health.modals.medication.error_save') + error.message, 'error');
         }
     }
 
