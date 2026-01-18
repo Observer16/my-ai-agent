@@ -43,14 +43,14 @@ const Dashboard = (function() {
             const takenTime = med.taken_time ?
                 `в ${new Date(med.taken_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : '';
 
-            const medicationName = med.medication_name || 'Лекарство';
+            const medicationName = med.medication_name || (typeof t === 'function' ? t('health.medications.default_name') : 'Лекарство');
 
-            let dosage = 'одна шт.';
+            let dosage = typeof t === 'function' ? t('health.medications.default_dosage') : 'одна шт.';
             if (med.dosage !== null && med.dosage !== undefined && med.dosage !== '') {
                 dosage = med.dosage;
             }
 
-            const form = med.form || 'Не указана';
+            const form = med.form || (typeof t === 'function' ? t('health.medications.form_not_specified') : 'Не указана');
 
             // Проверяем время напоминания
             const [hours, minutes] = med.time_of_day.split(':').map(Number);
@@ -73,9 +73,10 @@ const Dashboard = (function() {
                 statusClass = 'waiting';
                 const hoursUntil = Math.floor(timeUntilReminder / 60);
                 const minsUntil = timeUntilReminder % 60;
+                const reminderText = typeof t === 'function' ? t('health.dashboard.reminder_at') : '🔔 Напоминание появится в';
                 statusInfo = `
                     <div class="medication-reminder-info">
-                        🔔 Напоминание появится в ${String(Math.floor(reminderTime / 60)).padStart(2, '0')}:${String(reminderTime % 60).padStart(2, '0')}
+                        ${reminderText} ${String(Math.floor(reminderTime / 60)).padStart(2, '0')}:${String(reminderTime % 60).padStart(2, '0')}
                     </div>
                 `;
             }
@@ -96,13 +97,13 @@ const Dashboard = (function() {
                             <div class="medication-actions">
                                 ${isTaken ?
                                     `<button class="health-btn btn-success" disabled>
-                                        ✅ Принято ${takenTime}
+                                        ${typeof t === 'function' ? t('health.dashboard.medication_taken') : '✅ Принято'} ${takenTime}
                                     </button>` :
                                     `<button class="health-btn btn-primary" data-action="take">
-                                        ✅ Принять
+                                        ${typeof t === 'function' ? t('health.dashboard.take_medication') : '✅ Принять'}
                                     </button>
                                     <button class="health-btn btn-secondary" data-action="skip">
-                                        ⏭ Пропустить
+                                        ${typeof t === 'function' ? t('health.dashboard.skip_medication') : '⏭ Пропустить'}
                                     </button>`
                                 }
                             </div>
@@ -211,26 +212,26 @@ const Dashboard = (function() {
             <div class="wellness-grid">
                 <div class="wellness-item" onclick="Dashboard.showMoodPicker()">
                     <div class="wellness-icon">${HealthFormatters.getMoodEmoji(todayEntry?.mood)}</div>
-                    <div class="wellness-label">Настроение</div>
-                    <div class="wellness-value">${todayEntry?.mood || 'Добавить'}</div>
+                    <div class="wellness-label">${typeof t === 'function' ? t('health.dashboard.mood') : 'Настроение'}</div>
+                    <div class="wellness-value">${todayEntry?.mood || (typeof t === 'function' ? t('health.common.add') : 'Добавить')}</div>
                 </div>
 
                 <div class="wellness-item" onclick="Dashboard.showSleepInput()">
                     <div class="wellness-icon">🌙</div>
-                    <div class="wellness-label">Сон</div>
-                    <div class="wellness-value">${todayEntry?.sleep_hours ? `${todayEntry.sleep_hours} ч` : 'Добавить'}</div>
+                    <div class="wellness-label">${typeof t === 'function' ? t('health.dashboard.sleep') : 'Сон'}</div>
+                    <div class="wellness-value">${todayEntry?.sleep_hours ? `${todayEntry.sleep_hours} ч` : (typeof t === 'function' ? t('health.common.add') : 'Добавить')}</div>
                 </div>
 
                 <div class="wellness-item" onclick="Dashboard.showSymptomPicker()">
                     <div class="wellness-icon">🤕</div>
-                    <div class="wellness-label">Симптомы</div>
-                    <div class="wellness-value">${symptomsCount > 0 ? `${symptomsCount} шт` : 'Добавить'}</div>
+                    <div class="wellness-label">${typeof t === 'function' ? t('health.dashboard.symptoms') : 'Симптомы'}</div>
+                    <div class="wellness-value">${symptomsCount > 0 ? `${symptomsCount} шт` : (typeof t === 'function' ? t('health.common.add') : 'Добавить')}</div>
                 </div>
 
                 <div class="wellness-item" onclick="Dashboard.showSexualActivityPicker()">
                     <div class="wellness-icon">🔒</div>
-                    <div class="wellness-label">Интимность</div>
-                    <div class="wellness-value">${todayEntry?.sexual_activity ? 'Указано' : 'Добавить'}</div>
+                    <div class="wellness-label">${typeof t === 'function' ? t('health.dashboard.intimacy') : 'Интимность'}</div>
+                    <div class="wellness-value">${todayEntry?.sexual_activity ? (typeof t === 'function' ? t('health.dashboard.specified') : 'Указано') : (typeof t === 'function' ? t('health.common.add') : 'Добавить')}</div>
                 </div>
             </div>
         `;
@@ -243,7 +244,8 @@ const Dashboard = (function() {
         const state = HealthModule.getState();
 
         if (!state.stats) {
-            summaryContainer.innerHTML = '<p>Загрузка сводки...</p>';
+            const loadingText = typeof t === 'function' ? t('health.common.loading') : 'Загрузка...';
+            summaryContainer.innerHTML = `<p>${loadingText}</p>`;
             return;
         }
 
@@ -253,7 +255,7 @@ const Dashboard = (function() {
     function renderSummaryCard(stats) {
         return `
             <div class="summary-card">
-                <h3>📊 За последние 7 дней</h3>
+                <h3>${typeof t === 'function' ? t('health.dashboard.weekly_summary') : '📊 За последние 7 дней'}</h3>
                 <div class="summary-stats">
                     <div class="summary-stat">
                         <div class="stat-value">${stats.entries_count || 0}</div>
@@ -329,9 +331,9 @@ const Dashboard = (function() {
         return `
             <div class="no-medications">
                 <div class="no-meds-icon">💊</div>
-                <p>На сегодня нет запланированных лекарств</p>
+                <p>${typeof t === 'function' ? t('health.dashboard.no_medications_today') : 'На сегодня нет запланированных лекарств'}</p>
                 <button class="health-btn btn-secondary" onclick="HealthModule.switchTab('medications')">
-                    Добавить лекарство
+                    ${typeof t === 'function' ? t('health.medications.add_medication') : 'Добавить лекарство'}
                 </button>
             </div>
         `;

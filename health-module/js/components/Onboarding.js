@@ -38,10 +38,11 @@ const Onboarding = (function() {
         // 2. Показываем загрузку
         button.classList.add('loading');
         const originalHTML = button.innerHTML;
+        const savingText = typeof t === 'function' ? t('health.onboarding.saving') : 'Сохранение...';
         button.innerHTML = `
             <div style="padding: 20px; text-align: center;">
                 <div class="loading-spinner-small" style="margin: 0 auto 10px;"></div>
-                <div style="font-size: 12px; color: #666;">Сохранение...</div>
+                <div style="font-size: 12px; color: #666;">${savingText}</div>
             </div>
         `;
 
@@ -59,10 +60,11 @@ const Onboarding = (function() {
             // 4. Показываем успех
             button.classList.remove('loading');
             button.classList.add('selected');
+            const savedText = typeof t === 'function' ? t('health.onboarding.saved') : 'Сохранено!';
             button.innerHTML = `
                 <div style="padding: 20px; text-align: center;">
                     <div style="font-size: 32px; color: #4CAF50; margin-bottom: 10px;">✓</div>
-                    <div style="font-size: 14px; color: #4CAF50;">Сохранено!</div>
+                    <div style="font-size: 14px; color: #4CAF50;">${savedText}</div>
                 </div>
             `;
 
@@ -87,10 +89,14 @@ const Onboarding = (function() {
 
             button.innerHTML = originalHTML;
 
+            const errorMsg = typeof t === 'function'
+                ? t('health.onboarding.error_save')
+                : 'Ошибка сохранения. Попробуйте еще раз.';
+
             if (window.ErrorHandler) {
-                ErrorHandler.show('Ошибка сохранения. Попробуйте еще раз.', { type: 'error' });
+                ErrorHandler.show(errorMsg, { type: 'error' });
             } else {
-                alert('Ошибка сохранения. Попробуйте еще раз.');
+                alert(errorMsg);
             }
         }
     }

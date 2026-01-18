@@ -28,10 +28,10 @@ const SettingsComponent = {
                 <div class="settings-header">
                     <h1 class="settings-title">
                         <span class="settings-icon">⚙️</span>
-                        Настройки здоровья
+                        ${typeof t === 'function' ? t('health.settings.title') : 'Настройки здоровья'}
                     </h1>
                     <p class="settings-subtitle">
-                        Профиль и антропометрические данные
+                        ${typeof t === 'function' ? t('health.settings.profile_section') : 'Профиль и антропометрические данные'}
                     </p>
                 </div>
 
@@ -39,7 +39,44 @@ const SettingsComponent = {
                 <div id="settings-success" class="settings-success" style="display: none;"></div>
 
                 <div class="settings-content">
+                    ${this.renderLanguageSection()}
                     ${this.renderProfileSection()}
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Рендер секции выбора языка
+     */
+    renderLanguageSection() {
+        const languages = [
+            { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+            { code: 'en', label: 'English', flag: '🇺🇸' },
+            { code: 'es', label: 'Español', flag: '🇪🇸' },
+            { code: 'uk', label: 'Українська', flag: '🇺🇦' }
+        ];
+
+        const currentLang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'ru';
+
+        return `
+            <div class="settings-section language-section">
+                <div class="section-header">
+                    <div class="section-icon">🌐</div>
+                    <div class="section-info">
+                        <h2 class="section-title">${typeof t === 'function' ? t('health.settings.language') : 'Язык интерфейса'}</h2>
+                    </div>
+                </div>
+
+                <div class="language-selector">
+                    ${languages.map(lang => `
+                        <button class="language-btn ${lang.code === currentLang ? 'active' : ''}"
+                                onclick="SettingsComponent.changeLanguage('${lang.code}')"
+                                type="button">
+                            <span class="flag">${lang.flag}</span>
+                            <span class="lang-label">${lang.label}</span>
+                        </button>
+                    `).join('')}
                 </div>
             </div>
         `;
@@ -53,21 +90,24 @@ const SettingsComponent = {
             return `
                 <div class="settings-section">
                     <div class="loading-spinner"></div>
-                    <p>Загрузка профиля...</p>
+                    <p>${typeof t === 'function' ? t('health.settings.loading_profile') : 'Загрузка профиля...'}</p>
                 </div>
             `;
         }
 
         const profile = this.state.profile || {};
+        const genderOptions = typeof HealthConstants !== 'undefined' && HealthConstants.getGenderOptions
+            ? HealthConstants.getGenderOptions()
+            : this.state.genderOptions;
 
         return `
             <div class="settings-section profile-section">
                 <div class="section-header">
                     <div class="section-icon">👤</div>
                     <div class="section-info">
-                        <h2 class="section-title">Профиль пользователя</h2>
+                        <h2 class="section-title">${typeof t === 'function' ? t('health.settings.profile_title') : 'Профиль пользователя'}</h2>
                         <p class="section-description">
-                            Основные данные для анализа здоровья
+                            ${typeof t === 'function' ? t('health.settings.profile_subtitle') : 'Основные данные для анализа здоровья'}
                         </p>
                     </div>
                 </div>
@@ -76,17 +116,17 @@ const SettingsComponent = {
                     <!-- Пол -->
                     <div class="form-group">
                         <label class="form-label">
-                            <span>Пол</span>
+                            <span>${typeof t === 'function' ? t('health.settings.gender') : 'Пол'}</span>
                         </label>
-                        <select 
+                        <select
                             id="gender"
                             name="gender"
                             class="form-input form-select"
                         >
-                            <option value="">Не указан</option>
-                            ${this.state.genderOptions.map(opt => `
-                                <option 
-                                    value="${opt.value}" 
+                            <option value="">${typeof t === 'function' ? t('health.settings.gender_not_specified') : 'Не указан'}</option>
+                            ${genderOptions.map(opt => `
+                                <option
+                                    value="${opt.value}"
                                     ${profile.gender === opt.value ? 'selected' : ''}
                                 >
                                     ${opt.label}
@@ -98,14 +138,14 @@ const SettingsComponent = {
                     <!-- Дата рождения -->
                     <div class="form-group">
                         <label class="form-label">
-                            <span>Дата рождения</span>
+                            <span>${typeof t === 'function' ? t('health.settings.birth_date') : 'Дата рождения'}</span>
                             ${profile.age ? `<span class="form-hint">Возраст: ${profile.age} лет</span>` : ''}
                         </label>
-                        <input 
-                            type="date" 
+                        <input
+                            type="date"
                             id="birth_date"
                             name="birth_date"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             value="${profile.birth_date || ''}"
                         />
                     </div>
@@ -116,11 +156,11 @@ const SettingsComponent = {
                             <span>Рост</span>
                             <span class="form-hint">в сантиметрах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="height_cm"
                             name="height_cm"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="50"
                             max="250"
                             step="1"
@@ -135,11 +175,11 @@ const SettingsComponent = {
                             <span>Вес</span>
                             <span class="form-hint">в килограммах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="weight_kg"
                             name="weight_kg"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="20"
                             max="300"
                             step="0.1"
@@ -158,11 +198,11 @@ const SettingsComponent = {
                             <span>Обхват груди</span>
                             <span class="form-hint">в сантиметрах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="chest_cm"
                             name="chest_cm"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="50"
                             max="200"
                             step="0.5"
@@ -177,11 +217,11 @@ const SettingsComponent = {
                             <span>Обхват талии</span>
                             <span class="form-hint">в сантиметрах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="waist_cm"
                             name="waist_cm"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="40"
                             max="200"
                             step="0.5"
@@ -196,11 +236,11 @@ const SettingsComponent = {
                             <span>Обхват бёдер</span>
                             <span class="form-hint">в сантиметрах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="hips_cm"
                             name="hips_cm"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="50"
                             max="200"
                             step="0.5"
@@ -215,11 +255,11 @@ const SettingsComponent = {
                             <span>Обхват шеи</span>
                             <span class="form-hint">в сантиметрах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="neck_cm"
                             name="neck_cm"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="20"
                             max="60"
                             step="0.5"
@@ -234,11 +274,11 @@ const SettingsComponent = {
                             <span>Обхват бицепса</span>
                             <span class="form-hint">в сантиметрах</span>
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             id="biceps_cm"
                             name="biceps_cm"
-                            class="form-input form-input-compact" 
+                            class="form-input form-input-compact"
                             min="15"
                             max="60"
                             step="0.5"
@@ -249,17 +289,17 @@ const SettingsComponent = {
 
                     <!-- Кнопки -->
                     <div class="form-actions">
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             class="btn btn-primary btn-block"
                             ${this.state.saving ? 'disabled' : ''}
                         >
                             ${this.state.saving ? `
                                 <div class="loading-spinner-small"></div>
-                                <span>Сохранение...</span>
+                                <span>${typeof t === 'function' ? t('health.common.loading') : 'Сохранение...'}</span>
                             ` : `
                                 <span>💾</span>
-                                <span>Сохранить</span>
+                                <span>${typeof t === 'function' ? t('health.common.save') : 'Сохранить'}</span>
                             `}
                         </button>
                     </div>
@@ -434,6 +474,50 @@ const SettingsComponent = {
             setTimeout(() => {
                 successEl.style.display = 'none';
             }, 3000);
+        }
+    },
+
+    /**
+     * Изменить язык интерфейса
+     */
+    async changeLanguage(langCode) {
+        try {
+            // Проверяем, существует ли функция setLanguage
+            if (typeof setLanguage === 'function') {
+                const success = setLanguage(langCode);
+
+                if (success) {
+                    console.log('🌐 Language changed to:', langCode);
+
+                    // Сохранить в backend если существует API
+                    if (typeof HealthAPI !== 'undefined' && HealthAPI.updateUserSettings) {
+                        await HealthAPI.updateUserSettings({ preferred_language: langCode });
+                    }
+
+                    // Обновить UI
+                    if (typeof applyDataI18n === 'function') {
+                        applyDataI18n();
+                    }
+
+                    // Перерисовать все компоненты модуля
+                    if (typeof HealthModule !== 'undefined' && HealthModule.refreshAllComponents) {
+                        HealthModule.refreshAllComponents();
+                    } else {
+                        // Fallback: перезагрузить текущий компонент
+                        this.updateView();
+                    }
+
+                    this.showSuccess(typeof t === 'function' ? t('health.settings.language_changed') : '✅ Язык изменён');
+                } else {
+                    this.showError(typeof t === 'function' ? t('health.settings.language_change_error') : '❌ Не удалось изменить язык');
+                }
+            } else {
+                console.error('❌ setLanguage function not available');
+                this.showError(typeof t === 'function' ? t('health.settings.language_change_error') : '❌ Не удалось изменить язык');
+            }
+        } catch (error) {
+            console.error('❌ Error changing language:', error);
+            this.showError(typeof t === 'function' ? t('health.settings.language_change_error') : '❌ Не удалось изменить язык');
         }
     }
 };

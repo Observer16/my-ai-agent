@@ -57,17 +57,17 @@ const Medications = (function() {
                         </div>
                     </div>
 
-                    ${med.form && med.form !== 'string' ? `<div class="medication-detail"><strong>Форма:</strong> ${med.form}</div>` : ''}
+                    ${med.form && med.form !== 'string' ? `<div class="medication-detail"><strong>${typeof t === 'function' ? t('health.medications.form_label') : 'Форма:'}</strong> ${med.form}</div>` : ''}
 
                     ${nextSchedule ? `
                         <div class="medication-detail">
-                            <strong>Следующий прием:</strong> ${nextSchedule}
+                            <strong>${typeof t === 'function' ? t('health.medications.next_intake') : 'Следующий прием:'}</strong> ${nextSchedule}
                         </div>
                     ` : ''}
 
                     ${med.instructions && med.instructions !== 'string' ? `
                         <div class="medication-detail">
-                            <strong>Инструкция:</strong> ${med.instructions.substring(0, 50)}${med.instructions.length > 50 ? '...' : ''}
+                            <strong>${typeof t === 'function' ? t('health.medications.instructions') : 'Инструкция:'}</strong> ${med.instructions.substring(0, 50)}${med.instructions.length > 50 ? '...' : ''}
                         </div>
                     ` : ''}
 
@@ -91,10 +91,10 @@ const Medications = (function() {
         return `
             <div class="empty-state">
                 <div class="empty-icon">💊</div>
-                <h3>Аптечка пуста</h3>
-                <p>Добавьте лекарства, которые вы принимаете регулярно</p>
+                <h3>${typeof t === 'function' ? t('health.medications.empty_medications') : 'Аптечка пуста'}</h3>
+                <p>${typeof t === 'function' ? t('health.medications.add_first_medication') : 'Добавьте лекарства, которые вы принимаете регулярно'}</p>
                 <button class="btn-primary" onclick="showMedicationForm()">
-                    Добавить первое лекарство
+                    ${typeof t === 'function' ? t('health.medications.add_first_medication_btn') : 'Добавить первое лекарство'}
                 </button>
             </div>
         `;
@@ -117,7 +117,7 @@ const Medications = (function() {
             }
         }
 
-        return 'Завтра';
+        return 'Завтра'; // TODO: translate "Tomorrow" when needed
     }
 
     function initAddButton() {
@@ -144,6 +144,7 @@ const Medications = (function() {
 
         const toggleBtn = document.getElementById('toggle-archive');
         if (toggleBtn) {
+            // TODO: add translation keys for "Show active" and "Show archived"
             toggleBtn.textContent = showArchived ? 'Показать активные' : 'Показать архивные';
         }
     }

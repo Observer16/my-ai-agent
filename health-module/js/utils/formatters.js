@@ -1,6 +1,18 @@
 // js/utils/formatters.js
 
 const HealthFormatters = (function() {
+    // Получить текущий язык и преобразовать в локаль
+    function getLocale() {
+        const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'ru';
+        const localeMap = {
+            ru: 'ru-RU',
+            en: 'en-US',
+            es: 'es-ES',
+            uk: 'uk-UA'
+        };
+        return localeMap[lang] || 'ru-RU';
+    }
+
     function formatTime(timeStr) {
         if (!timeStr) return '--:--';
         return typeof timeStr === 'string' ? timeStr.substring(0, 5) : '--:--';
@@ -13,7 +25,8 @@ const HealthFormatters = (function() {
         const [year, month, day] = dateStr.split('-').map(Number);
         const date = new Date(year, month - 1, day); // month - 1 потому что в JS месяцы начинаются с 0
 
-        return date.toLocaleDateString('ru-RU', {
+        const locale = getLocale();
+        return date.toLocaleDateString(locale, {
             weekday: options.weekday ? 'long' : undefined,
             year: 'numeric',
             month: 'long',
@@ -23,6 +36,17 @@ const HealthFormatters = (function() {
     }
 
     function getMonthName(monthIndex) {
+        // Получаем месяцы из переводов если доступна функция t()
+        if (typeof t === 'function') {
+            const monthKey = `health.months.${monthIndex}`;
+            const monthName = t(monthKey);
+            // Если ключ не найден, используем fallback
+            if (!monthName.startsWith('health.months')) {
+                return monthName;
+            }
+        }
+
+        // Fallback на русские месяцы
         const months = [
             'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
             'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
@@ -31,7 +55,24 @@ const HealthFormatters = (function() {
     }
 
     function getMoodEmoji(mood) {
+        // Используем константы если доступны (уже с английскими ключами)
+        if (typeof HealthConstants !== 'undefined' && HealthConstants.MOOD_EMOJIS) {
+            return HealthConstants.MOOD_EMOJIS[mood] || '😐';
+        }
+
+        // Fallback с английскими ключами (совместимость)
         const MOOD_EMOJIS = {
+            'joy': '😄',
+            'satisfaction': '🙂',
+            'neutral': '😐',
+            'sadness': '😔',
+            'stress': '😫',
+            'irritability': '😠',
+            'anxiety': '😟',
+            'fatigue': '😴',
+            'energy': '⚡️',
+            'calm': '😌',
+            // Для обратной совместимости с русскими ключами
             'радость': '😄',
             'удовлетворение': '🙂',
             'нейтрально': '😐',
@@ -63,7 +104,8 @@ const HealthFormatters = (function() {
         formatDate,
         getMonthName,
         getMoodEmoji,
-        getIntensityColor
+        getIntensityColor,
+        getLocale
     };
 })();
 

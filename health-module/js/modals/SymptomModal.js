@@ -9,6 +9,11 @@ const SymptomModal = (function() {
         currentDate = data.date || new Date().toISOString().split('T')[0];
         console.log('🤕 Открытие модального окна симптомов для даты:', currentDate);
 
+        // Проверяем что функция t доступна для переводов
+        if (typeof t !== 'function') {
+            console.warn('⚠️ Функция t() не доступна, переводы не будут применены');
+        }
+
         let categories = [];
         let symptomsByCategory = {};
 
@@ -49,7 +54,8 @@ const SymptomModal = (function() {
         }
 
         const content = renderModalContent(categories);
-        const modalHtml = BaseModal.createModalStructure('🤕 Добавить симптом', content, 'large');
+        const modalTitle = typeof t === 'function' ? t('health.modals.symptom.title') : '🤕 Добавить симптом';
+        const modalHtml = BaseModal.createModalStructure(modalTitle, content, 'large');
 
         BaseModal.show(modalHtml);
 
@@ -62,9 +68,9 @@ const SymptomModal = (function() {
         return `
             <div class="symptom-modal-content">
                 <div class="form-group">
-                    <label for="symptom-category">Категория</label>
+                    <label for="symptom-category">${t('health.modals.symptom.field_category')}</label>
                     <select id="symptom-category" class="modal-input">
-                        <option value="">Выберите категорию</option>
+                        <option value="">${t('health.modals.symptom.field_category_placeholder')}</option>
                         ${categories.map(cat => {
                             const displayName = cat.charAt(0).toUpperCase() + cat.slice(1);
                             return `<option value="${cat}">${displayName}</option>`;
@@ -73,31 +79,31 @@ const SymptomModal = (function() {
                 </div>
 
                 <div class="form-group">
-                    <label for="symptom-name">Симптом</label>
+                    <label for="symptom-name">${t('health.modals.symptom.field_symptom')}</label>
                     <select id="symptom-name" class="modal-input" disabled>
-                        <option value="">Сначала выберите категорию</option>
+                        <option value="">${t('health.modals.symptom.field_symptom_placeholder_select')}</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>
-                        Интенсивность: <span id="intensity-value" class="intensity-badge">${intensity}</span>/5
+                        ${t('health.modals.symptom.field_intensity')}: <span id="intensity-value" class="intensity-badge">${intensity}</span>/5
                     </label>
                     <input type="range" id="symptom-intensity" class="intensity-slider"
                            min="1" max="5" value="${intensity}">
                     <div class="intensity-labels">
-                        <span>Слабо</span>
-                        <span>Средне</span>
-                        <span>Сильно</span>
+                        <span>${t('health.modals.symptom.intensity_low')}</span>
+                        <span>${t('health.modals.symptom.intensity_medium')}</span>
+                        <span>${t('health.modals.symptom.intensity_high')}</span>
                     </div>
                 </div>
 
                 <div class="modal-actions">
                     <button class="health-btn btn-secondary" onclick="SymptomModal.close()">
-                        Отмена
+                        ${t('health.modals.symptom.btn_cancel')}
                     </button>
                     <button class="health-btn btn-primary" onclick="SymptomModal.save()">
-                        Добавить симптом
+                        ${t('health.modals.symptom.btn_save')}
                     </button>
                 </div>
             </div>
@@ -141,13 +147,15 @@ const SymptomModal = (function() {
 
         if (symptoms.length === 0) {
             nameSelect.disabled = true;
-            nameSelect.innerHTML = '<option value="">Симптомы не найдены</option>';
+            const notFoundText = typeof t === 'function' ? t('health.modals.symptom.field_symptom_not_found') : 'Симптомы не найдены';
+            nameSelect.innerHTML = `<option value="">${notFoundText}</option>`;
             return;
         }
 
         nameSelect.disabled = false;
+        const placeholder = typeof t === 'function' ? t('health.modals.symptom.field_symptom_placeholder_empty') : 'Выберите симптом';
         nameSelect.innerHTML = `
-            <option value="">Выберите симптом</option>
+            <option value="">${placeholder}</option>
             ${symptoms.map(symptom => {
                 const displayName = symptom.replace(/_/g, ' ');
                 return `<option value="${symptom}">${displayName}</option>`;
@@ -161,12 +169,14 @@ const SymptomModal = (function() {
         console.log('💾 Сохранение симптома:', { selectedCategory, selectedSymptom, intensity, currentDate });
 
         if (!selectedCategory || !selectedSymptom) {
-            showToast('⚠️ Выберите категорию и симптом', 'warning');
+            const errorMsg = typeof t === 'function' ? t('health.modals.symptom.error_select') : '⚠️ Выберите категорию и симптом';
+            showToast(errorMsg, 'warning');
             return;
         }
 
         if (!currentDate) {
-            showToast('❌ Дата не указана', 'error');
+            const errorMsg = typeof t === 'function' ? t('health.modals.symptom.error_date') : '❌ Дата не указана';
+            showToast(errorMsg, 'error');
             return;
         }
 
@@ -186,7 +196,8 @@ const SymptomModal = (function() {
             console.log('📥 Результат API:', result);
 
             if (result && result.success) {
-                showToast('✅ Симптом добавлен', 'success');
+                const successMsg = typeof t === 'function' ? t('health.modals.symptom.save_success') : '✅ Симптом добавлен';
+                showToast(successMsg, 'success');
                 close();
 
                 // ВАЖНО: Сначала обновляем данные модуля
@@ -212,7 +223,7 @@ const SymptomModal = (function() {
         } catch (error) {
             console.error('❌ Ошибка добавления симптома:', error);
 
-            let errorMessage = 'Ошибка добавления симптома';
+            let errorMessage = typeof t === 'function' ? t('health.modals.symptom.save_error') : '❌ Не удалось добавить симптом';
 
             if (error.response?.data?.detail) {
                 errorMessage = error.response.data.detail;
@@ -220,7 +231,7 @@ const SymptomModal = (function() {
                 errorMessage = error.message;
             }
 
-            showToast('❌ ' + errorMessage, 'error');
+            showToast(errorMessage, 'error');
         }
     }
 

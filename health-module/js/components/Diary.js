@@ -40,7 +40,10 @@ const Diary = (function() {
 
         html += '<div class="calendar-grid">';
 
-        const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        // Получаем дни недели из переводов
+        const weekDays = typeof t === 'function'
+            ? t('health.diary.weekdays_short')
+            : ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         weekDays.forEach(day => {
             html += `<div class="calendar-weekday">${day}</div>`;
         });
@@ -145,12 +148,13 @@ const Diary = (function() {
             return `<option value="${option}" ${selected}>${label}</option>`;
         }).join('');
 
-        let moodOptions = [{ value: '', label: 'Не указано' }];
+        const notSpecified = typeof t === 'function' ? t('health.diary.no_entry') : 'Не указано';
+        let moodOptions = [{ value: '', label: notSpecified }];
 
         if (typeof HealthConstants !== 'undefined' && HealthConstants.getMoodsWithEmojis) {
             const moods = HealthConstants.getMoodsWithEmojis();
             moodOptions = [
-                { value: '', label: 'Не указано' },
+                { value: '', label: notSpecified },
                 ...moods.map(mood => ({
                     value: mood.value,
                     label: mood.label
@@ -159,11 +163,11 @@ const Diary = (function() {
         } else {
             console.warn('⚠️ HealthConstants недоступен, используем fallback настроения');
             moodOptions = [
-                { value: '', label: 'Не указано' },
-                { value: 'радость', label: 'Радость' },
-                { value: 'удовлетворение', label: 'Удовлетворение' },
-                { value: 'нейтрально', label: 'Нейтрально' },
-                { value: 'грусть', label: 'Грусть' }
+                { value: '', label: notSpecified },
+                { value: 'joy', label: typeof t === 'function' ? t('health.moods.joy') : 'Радость' },
+                { value: 'satisfaction', label: typeof t === 'function' ? t('health.moods.satisfaction') : 'Удовлетворение' },
+                { value: 'neutral', label: typeof t === 'function' ? t('health.moods.neutral') : 'Нейтрально' },
+                { value: 'sadness', label: typeof t === 'function' ? t('health.moods.sadness') : 'Грусть' }
             ];
         }
 
@@ -172,56 +176,67 @@ const Diary = (function() {
             return `<option value="${option.value}" ${selected}>${option.label}</option>`;
         }).join('');
 
+        const moodLabel = typeof t === 'function' ? t('health.dashboard.mood') : 'Настроение';
+        const sleepLabel = typeof t === 'function' ? t('health.diary.sleep_label') : 'Сон (часы)';
+        const sleepPlaceholder = typeof t === 'function' ? t('health.diary.sleep_placeholder') : 'Например: 7.5';
+        const sexualActivityLabel = typeof t === 'function' ? t('health.dashboard.intimacy') : '🔒 Сексуальная активность (приватно)';
+        const sexualActivityNote = typeof t === 'function' ? t('health.diary.sexual_activity_note') : 'Только для вас';
+        const symptomsLabel = typeof t === 'function' ? t('health.dashboard.symptoms') : 'Симптомы';
+        const addSymptomBtn = typeof t === 'function' ? t('health.diary.add_symptom_btn') : '+ Добавить симптом';
+        const notesLabel = typeof t === 'function' ? t('health.diary.notes_label') : 'Заметки';
+        const notesPlaceholder = typeof t === 'function' ? t('health.diary.notes_placeholder') : 'Как вы себя чувствовали сегодня?';
+        const saveBtn = typeof t === 'function' ? t('health.diary.save_btn') : '💾 Сохранить запись';
+
         return `
             <div class="entry-form">
                 <h3>📅 ${formattedDate}</h3>
 
                 <div class="form-section">
-                    <label>Настроение</label>
+                    <label>${moodLabel}</label>
                     <select id="mood-input" class="modal-input">
                         ${moodOptionsHtml}
                     </select>
                 </div>
 
                 <div class="form-section">
-                    <label>Сон (часы)</label>
+                    <label>${sleepLabel}</label>
                     <input type="number" id="sleep-input" min="0" max="24" step="0.5"
                            value="${entry?.sleep_hours || ''}"
-                           placeholder="Например: 7.5">
+                           placeholder="${sleepPlaceholder}">
                 </div>
 
                 <div class="form-section">
                     <label>
-                        🔒 Сексуальная активность (приватно)
+                        🔒 ${sexualActivityLabel}
                         <span style="font-size: 12px; color: var(--health-text-light); margin-left: 8px;">
-                            Только для вас
+                            ${sexualActivityNote}
                         </span>
                     </label>
                     <select id="sexual-activity-input" class="modal-input">
-                        <option value="">Не указано</option>
+                        <option value="">${notSpecified}</option>
                         ${sexualActivityOptionsHtml}
                     </select>
                 </div>
 
                 <div class="form-section">
-                    <label>Симптомы</label>
+                    <label>${symptomsLabel}</label>
                     <div id="symptoms-list">
                         ${renderSymptomsList(entry?.symptoms || [])}
                     </div>
                     <button class="btn-secondary" onclick="Diary.showSymptomPicker()">
-                        + Добавить симптом
+                        ${addSymptomBtn}
                     </button>
                 </div>
 
                 <div class="form-section">
-                    <label>Заметки</label>
+                    <label>${notesLabel}</label>
                     <textarea id="notes-input" rows="4"
-                              placeholder="Как вы себя чувствовали сегодня?">${entry?.notes || ''}</textarea>
+                              placeholder="${notesPlaceholder}">${entry?.notes || ''}</textarea>
                 </div>
 
                 <div class="form-actions">
                     <button class="btn-primary" onclick="Diary.saveEntry('${date}')">
-                        💾 Сохранить запись
+                        ${saveBtn}
                     </button>
                 </div>
             </div>
@@ -230,7 +245,8 @@ const Diary = (function() {
 
     function renderSymptomsList(symptoms) {
         if (!symptoms || symptoms.length === 0) {
-            return '<p class="no-symptoms">Симптомы не добавлены</p>';
+            const noSymptomsText = typeof t === 'function' ? t('health.diary.no_symptoms') : 'Симптомы не добавлены';
+            return `<p class="no-symptoms">${noSymptomsText}</p>`;
         }
 
         let html = '<div class="symptoms-tags" style="display: flex; flex-direction: column; gap: 12px;">';

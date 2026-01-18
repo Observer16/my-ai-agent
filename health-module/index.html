@@ -18,24 +18,24 @@
     <div class="health-tabs" id="health-tabs" style="display: grid;">
         <div class="health-tab active" data-tab="dashboard">
             <span class="tab-icon">🏠</span>
-            <span class="tab-text">Сегодня</span>
+            <span class="tab-text" data-i18n="health.tabs.dashboard">Сегодня</span>
         </div>
         <div class="health-tab" data-tab="medications">
             <span class="tab-icon">💊</span>
-            <span class="tab-text">Аптечка</span>
+            <span class="tab-text" data-i18n="health.tabs.medications">Аптечка</span>
         </div>
         <div class="health-tab" data-tab="diary">
             <span class="tab-icon">📖</span>
-            <span class="tab-text">Дневник</span>
+            <span class="tab-text" data-i18n="health.tabs.diary">Дневник</span>
         </div>
         <div class="health-tab" data-tab="stats">
             <span class="tab-icon">📊</span>
-            <span class="tab-text">Статистика</span>
+            <span class="tab-text" data-i18n="health.tabs.stats">Статистика</span>
         </div>
         <!-- 🆕 Кнопка настроек -->
         <div class="health-tab health-tab-settings" data-tab="settings">
             <span class="tab-icon">⚙️</span>
-            <span class="tab-text">Настройки</span>
+            <span class="tab-text" data-i18n="health.tabs.settings">Настройки</span>
         </div>
     </div>
 </div>
@@ -45,7 +45,7 @@
     <!-- Контент загружается динамически -->
     <div class="health-loading" id="health-loading">
         <div class="loading-spinner"></div>
-        <p>Загрузка модуля здоровья...</p>
+        <p data-i18n="health.common.loading_module">Загрузка модуля здоровья...</p>
     </div>
 </div>
 
@@ -59,6 +59,15 @@
 
 <!-- ГЛАВНАЯ конфигурация проекта (только ОДИН раз!) -->
 <script src="../js/config.js"></script>
+
+<!-- i18n система (многоязычность) -->
+<script src="../js/i18n/core.js"></script>
+<script src="../js/i18n/common.js"></script>
+<script src="../js/i18n/health.js"></script>           <!-- Оркестратор -->
+<script src="../js/i18n/health-ru.js"></script>        <!-- Русские переводы -->
+<script src="../js/i18n/health-en.js"></script>        <!-- Английские переводы -->
+<script src="../js/i18n/health-es.js"></script>        <!-- Испанские переводы -->
+<script src="../js/i18n/health-uk.js"></script>        <!-- Украинские переводы -->
 
 <script src="js/health-constants.js?v=202512300258"></script>
 
@@ -136,8 +145,30 @@
 
 <!-- Инициализация -->
 <script>
+    /**
+     * Применить переводы ко всем элементам с атрибутом data-i18n
+     */
+    function applyDataI18n() {
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (typeof t === 'function') {
+                el.textContent = t(key);
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Запуск модуля здоровья...');
+
+        // 1. Инициализация i18n ПЕРЕД загрузкой модуля
+        if (typeof initLanguage === 'function') {
+            initLanguage();
+            console.log('✅ i18n initialized, language:', typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'unknown');
+        }
+
+        // 2. Применение переводов к статическим элементам
+        applyDataI18n();
 
         // Проверяем загрузку всех зависимостей
         const dependencies = {

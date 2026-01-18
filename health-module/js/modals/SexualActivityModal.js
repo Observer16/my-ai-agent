@@ -72,13 +72,15 @@ const SexualActivityModal = (function() {
         console.log('🔒 SexualActivityModal.show() вызван');
 
         // Показываем loader
+        const loadingText = typeof t === 'function' ? t('health.modals.sexual.loading') : 'Загружаем опции...';
         const loaderHtml = `
             <div style="padding: 40px; text-align: center;">
                 <div style="font-size: 24px; margin-bottom: 16px;">⏳</div>
-                <div>Загружаем опции...</div>
+                <div>${loadingText}</div>
             </div>
         `;
-        const modalHtml = BaseModal.createModalStructure('🔒 Интимная жизнь', loaderHtml, 'large');
+        const modalTitle = typeof t === 'function' ? t('health.modals.sexual.title') : '🔒 Интимная жизнь';
+        const modalHtml = BaseModal.createModalStructure(modalTitle, loaderHtml, 'large');
         BaseModal.show(modalHtml);
 
         try {
@@ -98,7 +100,8 @@ const SexualActivityModal = (function() {
             if (!optionsResponse.success) {
                 console.error('❌ OptionsCache вернул ошибку:', optionsResponse);
                 BaseModal.close();
-                showToast('❌ Не удалось загрузить опции', 'error');
+                const errorMsg = typeof t === 'function' ? t('health.modals.sexual.error_load_options') : '❌ Не удалось загрузить опции';
+                showToast(errorMsg, 'error');
                 return;
             }
 
@@ -116,26 +119,30 @@ const SexualActivityModal = (function() {
             if (serverOptions.length === 0) {
                 console.warn('⚠️ Массив sexual_activity_options пустой!');
                 BaseModal.close();
-                showToast('⚠️ Нет доступных опций', 'warning');
+                const errorMsg = typeof t === 'function' ? t('health.modals.sexual.error_no_options') : '⚠️ Нет доступных опций';
+                showToast(errorMsg, 'warning');
                 return;
             }
 
             // Генерируем контент с опциями
+            const privacyNotice = typeof t === 'function' ? t('health.modals.sexual.privacy_notice') : '🔒 Приватная информация';
+            const privacyDesc = typeof t === 'function' ? t('health.modals.sexual.privacy_description') : 'Эти данные видны только вам и защищены шифрованием. Используются для анализа здоровья и самочувствия.';
+            const selectLabel = typeof t === 'function' ? t('health.modals.sexual.select_activity') : 'Выберите активность за сегодня';
+
             let content = `
                 <div class="sexual-activity-modal-content">
                     <div style="background: rgba(0, 150, 136, 0.1); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                             <span style="font-size: 20px;">🔒</span>
-                            <strong style="color: var(--health-primary);">Приватная информация</strong>
+                            <strong style="color: var(--health-primary);">${privacyNotice}</strong>
                         </div>
                         <p style="font-size: 13px; color: var(--health-text-light); margin: 0;">
-                            Эти данные видны только вам и защищены шифрованием.
-                            Используются для анализа здоровья и самочувствия.
+                            ${privacyDesc}
                         </p>
                     </div>
 
                     <div class="form-group">
-                        <label>Выберите активность за сегодня</label>
+                        <label>${selectLabel}</label>
                         <div class="activity-options" style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
             `;
 
@@ -180,6 +187,9 @@ const SexualActivityModal = (function() {
                 `;
             });
 
+            const btnClear = typeof t === 'function' ? t('health.modals.sexual.btn_clear') : '🗑️ Очистить';
+            const btnCancel = typeof t === 'function' ? t('health.modals.sexual.btn_cancel') : 'Отмена';
+
             content += `
                         </div>
                     </div>
@@ -187,11 +197,11 @@ const SexualActivityModal = (function() {
                     <div class="modal-actions" style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end;">
                         ${currentActivity ? `
                             <button class="health-btn btn-danger" onclick="SexualActivityModal.clear()">
-                                🗑️ Очистить
+                                ${btnClear}
                             </button>
                         ` : ''}
                         <button class="health-btn btn-secondary" onclick="SexualActivityModal.close()">
-                            Отмена
+                            ${btnCancel}
                         </button>
                     </div>
                 </div>
@@ -211,7 +221,8 @@ const SexualActivityModal = (function() {
         } catch (error) {
             console.error('❌ Ошибка в show модалки:', error);
             BaseModal.close();
-            showToast('❌ Ошибка загрузки', 'error');
+            const errorMsg = typeof t === 'function' ? t('health.modals.sexual.error_load') : '❌ Ошибка загрузки';
+            showToast(errorMsg, 'error');
         }
     }
 
@@ -223,7 +234,8 @@ const SexualActivityModal = (function() {
             const response = await HealthAPI.addSexualActivity(today, activity);
 
             if (response.success) {
-                showToast('✅ Информация сохранена', 'success');
+                const successMsg = typeof t === 'function' ? t('health.modals.sexual.save_success') : '✅ Информация сохранена';
+                showToast(successMsg, 'success');
                 close();
 
                 // Обновляем данные и перерисовываем Dashboard
@@ -237,12 +249,14 @@ const SexualActivityModal = (function() {
             }
         } catch (error) {
             console.error('❌ Ошибка сохранения активности:', error);
-            showToast('❌ Не удалось сохранить', 'error');
+            const errorMsg = typeof t === 'function' ? t('health.modals.sexual.error_save') : '❌ Не удалось сохранить';
+            showToast(errorMsg, 'error');
         }
     }
 
     async function clear() {
-        if (!confirm('Удалить запись об интимной активности за сегодня?')) {
+        const confirmMsg = typeof t === 'function' ? t('health.modals.sexual.confirm_delete') : 'Удалить запись об интимной активности за сегодня?';
+        if (!confirm(confirmMsg)) {
             return;
         }
 

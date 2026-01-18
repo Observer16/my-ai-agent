@@ -28,11 +28,12 @@ const Stats = (function() {
         const state = HealthModule.getState();
 
         if (!state.stats) {
+            const loadingText = typeof t === 'function' ? t('health.stats.loading') : 'Загрузка статистики...';
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px;">
                     <div class="loading-spinner"></div>
                     <p style="margin-top: 16px; color: var(--health-text-light);">
-                        Загрузка статистики...
+                        ${loadingText}
                     </p>
                 </div>
             `;
@@ -48,9 +49,16 @@ const Stats = (function() {
         const adherence = stats.medication_adherence || 0;
         const remaining = 100 - adherence;
 
+        const adherenceTitle = typeof t === 'function' ? t('health.stats.adherence_title') : '💊 Приверженность лечению';
+        const adherenceTaken = typeof t === 'function' ? t('health.stats.adherence_taken') : 'Принято вовремя';
+        const adherenceMissed = typeof t === 'function' ? t('health.stats.adherence_missed') : 'Пропущено';
+        const moodTitle = typeof t === 'function' ? t('health.stats.mood_title') : '😊 Настроение';
+        const symptomsTitle = typeof t === 'function' ? t('health.stats.symptoms_title') : '⚠️ Частые симптомы';
+        const sleepTitle = typeof t === 'function' ? t('health.stats.sleep_title') : '💤 Статистика сна';
+
         return `
             <div class="stats-section">
-                <h3>💊 Приверженность лечению</h3>
+                <h3>${adherenceTitle}</h3>
                 <div class="adherence-chart">
                     <div class="chart-container">
                         <div class="pie-chart" style="--percentage: ${adherence}%"></div>
@@ -59,32 +67,32 @@ const Stats = (function() {
                     <div class="chart-legend">
                         <div class="legend-item">
                             <span class="legend-color" style="background-color: #4CAF50"></span>
-                            <span>Принято вовремя: ${adherence.toFixed(1)}%</span>
+                            <span>${adherenceTaken}: ${adherence.toFixed(1)}%</span>
                         </div>
                         <div class="legend-item">
                             <span class="legend-color" style="background-color: #e0e0e0"></span>
-                            <span>Пропущено: ${remaining.toFixed(1)}%</span>
+                            <span>${adherenceMissed}: ${remaining.toFixed(1)}%</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="stats-section">
-                <h3>😊 Настроение</h3>
+                <h3>${moodTitle}</h3>
                 <div class="mood-trend">
                     ${renderMoodTrend(stats.mood_trend)}
                 </div>
             </div>
 
             <div class="stats-section">
-                <h3>⚠️ Частые симптомы</h3>
+                <h3>${symptomsTitle}</h3>
                 <div class="symptoms-stats">
                     ${renderTopSymptoms(stats.top_symptoms || [])}
                 </div>
             </div>
 
             <div class="stats-section">
-                <h3>💤 Статистика сна</h3>
+                <h3>${sleepTitle}</h3>
                 <div class="sleep-stats">
                     ${renderSleepStats(stats)}
                 </div>
@@ -93,8 +101,10 @@ const Stats = (function() {
     }
 
     function renderMoodTrend(moodTrend) {
+        const noMoodDataText = typeof t === 'function' ? t('health.stats.mood_no_data') : 'Нет данных о настроении';
+
         if (!moodTrend) {
-            return '<p style="color: var(--health-text-light);">Нет данных о настроении</p>';
+            return `<p style="color: var(--health-text-light);">${noMoodDataText}</p>`;
         }
 
         const moodEmojis = {
@@ -106,6 +116,7 @@ const Stats = (function() {
         };
 
         const emoji = moodEmojis[moodTrend] || '😐';
+        const predominantText = typeof t === 'function' ? t('health.stats.mood_predominant') : 'Преобладающее настроение в выбранный период';
 
         return `
             <div style="text-align: center; padding: 20px;">
@@ -114,15 +125,17 @@ const Stats = (function() {
                     ${moodTrend.charAt(0).toUpperCase() + moodTrend.slice(1)}
                 </div>
                 <div style="font-size: 14px; color: var(--health-text-light); margin-top: 8px;">
-                    Преобладающее настроение в выбранный период
+                    ${predominantText}
                 </div>
             </div>
         `;
     }
 
     function renderTopSymptoms(symptoms) {
+        const noSymptomsDataText = typeof t === 'function' ? t('health.stats.symptoms_no_data') : 'Нет данных о симптомах';
+
         if (!symptoms || symptoms.length === 0) {
-            return '<p style="color: var(--health-text-light);">Нет данных о симптомах</p>';
+            return `<p style="color: var(--health-text-light);">${noSymptomsDataText}</p>`;
         }
 
         let html = '<div class="top-symptoms">';
@@ -153,19 +166,25 @@ const Stats = (function() {
         const avgSleep = stats.average_sleep || 0;
         const entriesCount = stats.entries_count || 0;
 
+        const avgLabel = typeof t === 'function' ? t('health.stats.sleep_average') : 'Среднее';
+        const hoursUnit = typeof t === 'function' ? t('health.stats.sleep_hours_unit') : 'ч';
+        const entriesLabel = typeof t === 'function' ? t('health.stats.sleep_entries') : 'Записей';
+        const periodLabel = typeof t === 'function' ? t('health.stats.sleep_period') : 'Период';
+        const daysUnit = typeof t === 'function' ? t('health.stats.sleep_days_unit') : 'дн';
+
         return `
             <div class="sleep-stats">
                 <div class="stat-item">
-                    <div class="stat-label">Среднее</div>
-                    <div class="stat-value">${avgSleep.toFixed(1)} ч</div>
+                    <div class="stat-label">${avgLabel}</div>
+                    <div class="stat-value">${avgSleep.toFixed(1)} ${hoursUnit}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Записей</div>
+                    <div class="stat-label">${entriesLabel}</div>
                     <div class="stat-value">${entriesCount}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Период</div>
-                    <div class="stat-value">${stats.period_days || 0} дн</div>
+                    <div class="stat-label">${periodLabel}</div>
+                    <div class="stat-value">${stats.period_days || 0} ${daysUnit}</div>
                 </div>
             </div>
         `;
@@ -182,11 +201,16 @@ const Stats = (function() {
         // Показываем загрузку
         const container = document.getElementById('stats-content');
         if (container) {
+            let loadingMessage = `Загрузка статистики за ${days} дней...`;
+            if (typeof t === 'function') {
+                loadingMessage = t('health.stats.loading_for_days', { days: days });
+            }
+
             container.innerHTML = `
                 <div style="text-align: center; padding: 40px;">
                     <div class="loading-spinner"></div>
                     <p style="margin-top: 16px; color: var(--health-text-light);">
-                        Загрузка статистики за ${days} дней...
+                        ${loadingMessage}
                     </p>
                 </div>
             `;
@@ -204,29 +228,37 @@ const Stats = (function() {
                 // Перерисовываем статистику
                 renderStats();
 
-                showToast(`✅ Статистика за ${days} дней загружена`, 'success');
+                let successMessage = `✅ Статистика за ${days} дней загружена`;
+                if (typeof t === 'function') {
+                    successMessage = '✅ ' + t('health.stats.loaded_for_days', { days: days });
+                }
+                showToast(successMessage, 'success');
             } else {
                 throw new Error(response.error || 'Ошибка загрузки статистики');
             }
         } catch (error) {
             console.error('❌ Ошибка загрузки статистики:', error);
 
+            const errorTitle = typeof t === 'function' ? t('health.stats.error_load') : 'Не удалось загрузить статистику';
+            const tryAgainBtn = typeof t === 'function' ? t('health.stats.try_again') : 'Попробовать снова';
+
             if (container) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📊</div>
-                        <h3>Не удалось загрузить статистику</h3>
+                        <h3>${errorTitle}</h3>
                         <p style="color: var(--health-text-light); margin: 16px 0;">
                             ${error.message || 'Попробуйте позже'}
                         </p>
                         <button class="health-btn btn-primary" onclick="Stats.loadStats(${days})">
-                            Попробовать снова
+                            ${tryAgainBtn}
                         </button>
                     </div>
                 `;
             }
 
-            showToast('❌ Ошибка загрузки статистики', 'error');
+            const errorMessage = typeof t === 'function' ? t('health.stats.error_load_message') : 'Ошибка загрузки статистики';
+            showToast(`❌ ${errorMessage}`, 'error');
         }
     }
 

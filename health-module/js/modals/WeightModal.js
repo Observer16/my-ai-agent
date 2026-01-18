@@ -9,7 +9,7 @@ const WeightModal = (function() {
             <div class="weight-modal-content">
                 <div class="form-group">
                     <label for="modal-weight-input">
-                        Ваш вес (кг)
+                        ${t('health.modals.weight.field_weight')}
                     </label>
                     <input
                         type="number"
@@ -19,26 +19,26 @@ const WeightModal = (function() {
                         max="500"
                         step="0.1"
                         value="${currentWeight}"
-                        placeholder="Например: 70.5"
+                        placeholder="${t('health.modals.weight.field_weight_placeholder')}"
                         autofocus
                     >
                     <div style="font-size: 12px; color: var(--health-text-light); margin-top: 8px;">
-                        💡 Для точного отслеживания рекомендуется взвешиваться утром до еды
+                        ${t('health.modals.weight.hint')}
                     </div>
                 </div>
 
                 <div class="modal-actions">
                     <button class="health-btn btn-secondary" onclick="WeightModal.close()">
-                        Отмена
+                        ${t('health.modals.weight.btn_cancel')}
                     </button>
                     <button class="health-btn btn-primary" onclick="WeightModal.save()">
-                        💾 Сохранить
+                        ${t('health.modals.weight.btn_save')}
                     </button>
                 </div>
             </div>
         `;
 
-        const modalHtml = BaseModal.createModalStructure('⚖️ Вес', content);
+        const modalHtml = BaseModal.createModalStructure(t('health.modals.weight.title'), content);
         BaseModal.show(modalHtml);
 
         // Фокус на поле ввода
@@ -65,7 +65,7 @@ const WeightModal = (function() {
         const input = document.getElementById('modal-weight-input');
 
         if (!input || !input.value) {
-            showToast('⚠️ Введите вес', 'warning');
+            showToast(t('health.modals.weight.error_empty'), 'warning');
             return;
         }
 
@@ -73,7 +73,7 @@ const WeightModal = (function() {
 
         // Валидация
         if (isNaN(weight) || weight <= 0 || weight > 500) {
-            showToast('❌ Некорректное значение веса (0-500 кг)', 'error');
+            showToast(t('health.modals.weight.error_invalid'), 'error');
             return;
         }
 
@@ -83,7 +83,7 @@ const WeightModal = (function() {
         const success = await HealthModule.updateHealthEntry(today, 'weight', weight);
 
         if (success) {
-            showToast('✅ Вес сохранён', 'success');
+            showToast(t('health.modals.weight.save_success'), 'success');
             close();
 
             // Обновляем данные и перерисовываем Dashboard
@@ -93,7 +93,7 @@ const WeightModal = (function() {
                 Dashboard.init();
             }
         } else {
-            showToast('❌ Не удалось сохранить вес', 'error');
+            showToast(t('health.modals.weight.save_error'), 'error');
         }
     }
 

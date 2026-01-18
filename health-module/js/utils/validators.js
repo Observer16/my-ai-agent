@@ -2,11 +2,17 @@
 const HealthValidators = (function() {
 
     function isValidMood(mood) {
+        // Используем английские ключи (как в constants.js)
         const MOOD_OPTIONS = [
+            'joy', 'satisfaction', 'neutral', 'sadness',
+            'stress', 'irritability', 'anxiety', 'fatigue', 'energy', 'calm'
+        ];
+        // Для обратной совместимости, принимаем и русские значения
+        const LEGACY_MOOD_OPTIONS = [
             'радость', 'удовлетворение', 'нейтрально', 'грусть',
             'стресс', 'раздражительность', 'беспокойство', 'усталость', 'энергичность', 'спокойствие'
         ];
-        return !mood || MOOD_OPTIONS.includes(mood);
+        return !mood || MOOD_OPTIONS.includes(mood) || LEGACY_MOOD_OPTIONS.includes(mood);
     }
 
     function isValidSleepHours(hours) {
