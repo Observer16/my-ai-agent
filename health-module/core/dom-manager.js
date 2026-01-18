@@ -57,7 +57,6 @@ const DomManager = (function() {
                 bottom: 0;
                 background: rgba(255, 255, 255, 0.9);
                 z-index: 1000;
-                display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
@@ -92,7 +91,6 @@ const DomManager = (function() {
             bottom: 0;
             background: rgba(255,255,255,0.9);
             z-index: 1000;
-            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -135,23 +133,20 @@ const DomManager = (function() {
         }
     }
 
-    // Очистить контейнер
+    // Очистить контейнер (оставить только tabs, loading будет управляться отдельно)
     function clearContainer() {
         if (elements.container) {
-            const loadingEl = elements.container.querySelector('#health-loading');
-            const tabsEl = elements.container.querySelector('#health-tabs');
-
+            // Просто удаляем всё содержимое кроме tabs
             elements.container.innerHTML = '';
-
-            if (loadingEl) elements.container.appendChild(loadingEl);
-            if (tabsEl) elements.container.appendChild(tabsEl);
         }
     }
 
-    // Вставить HTML в контейнер
+    // Вставить HTML в контейнер (это сразу показывает содержимое)
     function setContainerHTML(html) {
         if (elements.container) {
             elements.container.innerHTML = html;
+            // Убеждаемся что loading спиннер скрыт после вставки содержимого
+            hideLoading();
             return true;
         }
         return false;
