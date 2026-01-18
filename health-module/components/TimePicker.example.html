@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimePicker - iOS-Style Wheel Picker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 28px;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+        }
+
+        .demo-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        #time-picker-demo {
+            margin-bottom: 20px;
+        }
+
+        .time-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 15px;
+            letter-spacing: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .code-example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .code-example code {
+            color: #f8f8f2;
+        }
+
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .number { color: #bd93f9; }
+        .function { color: #8be9fd; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .time-display {
+                font-size: 24px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background: #fadbd8;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏰ TimePicker</h1>
+        <p class="description">iOS-Style Wheel Picker для выбора времени</p>
+
+        <!-- Demo 1: Basic -->
+        <div class="demo-section">
+            <div class="demo-title">📱 Базовый пример</div>
+            <div id="time-picker-demo"></div>
+            <div class="time-display" id="time-display">00:00</div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="setCustomTime()">Установить 14:30</button>
+                <button class="btn-secondary" onclick="resetTime()">Сброс</button>
+            </div>
+
+            <div class="info-box">
+                ✨ <strong>Попробуй:</strong> Прокрути колеса мышью или пальцем. Используй инерцию для быстрого выбора. На ПК поддерживается прокрутка колеса мыши.
+            </div>
+        </div>
+
+        <!-- Usage Example -->
+        <div class="demo-section">
+            <div class="demo-title">💻 Как использовать</div>
+            <div class="code-example"><code>
+<span class="keyword">const</span> picker = <span class="keyword">new</span> <span class="function">TimePicker</span>(containerEl, {
+  initialHours: <span class="number">14</span>,
+  initialMinutes: <span class="number">30</span>,
+  hoursLabel: <span class="string">'ч'</span>,
+  minutesLabel: <span class="string">'мин'</span>,
+  format24h: <span class="keyword">true</span>,
+  minuteStep: <span class="number">1</span>,
+  onTimeSelect: (hours, minutes) => {
+    console.log(<span class="string">`Время: </span>${hours}<span class="string">:</span>${minutes}<span class="string">`</span>);
+  }
+});
+
+<span class="comment">// Методы:</span>
+picker.setTime(<span class="number">10</span>, <span class="number">45</span>);  <span class="comment">// Установить время</span>
+picker.getTime();            <span class="comment">// { hours: 10, minutes: 45, formatted: "10:45" }</span>
+picker.reset();              <span class="comment">// Сброс на начальное время</span>
+            </code></div>
+        </div>
+
+        <!-- Features -->
+        <div class="demo-section">
+            <div class="demo-title">✨ Особенности</div>
+            <div class="info-box">
+                <strong>✓</strong> iOS-style wheel picker с инерцией<br>
+                <strong>✓</strong> Поддержка touch и mouse<br>
+                <strong>✓</strong> Прокрутка колеса мыши (wheel event)<br>
+                <strong>✓</strong> Гладкая привязка к ближайшему элементу<br>
+                <strong>✓</strong> Адаптивен для мобильных и ПК<br>
+                <strong>✓</strong> Поддержка 12/24 часового формата<br>
+                <strong>✓</strong> Настраиваемый шаг минут (1, 5, 15, 30 мин)<br>
+                <strong>✓</strong> Колбэк при выборе времени<br>
+                <strong>✓</strong> Поддержка темной/светлой темы
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="demo-section">
+            <div class="demo-title">⚙️ Опции</div>
+            <div class="info-box">
+                <strong>initialHours</strong> (number): Начальные часы [0-23] (по умолчанию: 12)<br>
+                <strong>initialMinutes</strong> (number): Начальные минуты [0-59] (по умолчанию: 0)<br>
+                <strong>hoursLabel</strong> (string): Название часов (по умолчанию: 'ч')<br>
+                <strong>minutesLabel</strong> (string): Название минут (по умолчанию: 'мин')<br>
+                <strong>format24h</strong> (boolean): 24-часовой формат (по умолчанию: true)<br>
+                <strong>minuteStep</strong> (number): Шаг минут [1, 5, 15, 30] (по умолчанию: 1)<br>
+                <strong>onTimeSelect</strong> (function): Колбэк при выборе времени
+            </div>
+        </div>
+    </div>
+
+    <script src="TimePicker.js"></script>
+    <script>
+        let picker;
+
+        // Инициализация пикера
+        window.addEventListener('DOMContentLoaded', () => {
+            picker = new TimePicker(document.getElementById('time-picker-demo'), {
+                initialHours: 14,
+                initialMinutes: 30,
+                hoursLabel: 'ч',
+                minutesLabel: 'мин',
+                format24h: true,
+                minuteStep: 1,
+                onTimeSelect: (hours, minutes) => {
+                    const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                    document.getElementById('time-display').textContent = formatted;
+                    console.log(`⏰ Время выбрано: ${formatted}`);
+                }
+            });
+
+            // Установить начальное отображение
+            const time = picker.getTime();
+            document.getElementById('time-display').textContent = time.formatted;
+        });
+
+        function setCustomTime() {
+            picker.setTime(14, 30);
+            console.log('✅ Время установлено на 14:30');
+        }
+
+        function resetTime() {
+            picker.reset();
+            console.log('🔄 Пикер сброшен на начальное время');
+        }
+    </script>
+</body>
+</html>
