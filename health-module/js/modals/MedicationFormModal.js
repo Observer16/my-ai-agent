@@ -41,6 +41,20 @@ const MedicationFormModal = (function() {
         { value: 'штуки', label: 'Штуки', icon: '📦' }
     ];
 
+    // Маппинг: форма выпуска → единица измерения
+    const FORM_TO_UNIT_MAP = {
+        'таблетки': 'таблетки',
+        'капсулы': 'капсулы',
+        'сироп': 'мл',
+        'раствор': 'мл',
+        'мазь': 'мл',
+        'крем': 'мл',
+        'капли': 'капли',
+        'спрей': 'дозы',
+        'порошок': 'штуки',
+        'другое': 'штуки'
+    };
+
     const DAYS_OF_WEEK = [
         { value: 0, label: 'Пн', fullLabel: 'Понедельник' },
         { value: 1, label: 'Вт', fullLabel: 'Вторник' },
@@ -313,6 +327,10 @@ const MedicationFormModal = (function() {
     }
 
     function renderStep3() {
+        // Автоматически устанавливаем единицу измерения на основе формы выпуска
+        const autoUnit = FORM_TO_UNIT_MAP[formData.form] || 'таблетки';
+        formData.quantity_unit = autoUnit;
+
         const selectedUnit = formData.quantity_unit;
         const unitInfo = QUANTITY_UNITS.find(u => u.value === selectedUnit) || QUANTITY_UNITS[0];
 
@@ -321,23 +339,25 @@ const MedicationFormModal = (function() {
                 ${renderStepIndicator(3)}
                 <div class="form-content">
                     <div class="form-group">
-                        <label for="medication-quantity-unit">
-                            ${t('health.modals.medication.field_quantity_unit_label')} <span style="color: var(--health-danger);">*</span>
+                        <label>
+                            ${t('health.modals.medication.field_quantity_unit_label')}
                         </label>
-                        <div class="quantity-unit-selector">
-                            ${QUANTITY_UNITS.map(unit => {
-                                const unitKey = `health.modals.medication.unit_${unit.value.replace('таблетки', 'tablets').replace('капсулы', 'capsules').replace('мл', 'milliliters').replace('капли', 'drops').replace('дозы', 'doses').replace('штуки', 'pieces')}`;
-                                return `
-                                    <button
-                                        class="quantity-unit-btn ${selectedUnit === unit.value ? 'active' : ''}"
-                                        onclick="MedicationFormModal.selectQuantityUnit('${unit.value}')"
-                                        type="button"
-                                    >
-                                        <span class="unit-icon">${unit.icon}</span>
-                                        <span class="unit-label">${unit.label}</span>
-                                    </button>
-                                `;
-                            }).join('')}
+                        <div class="quantity-unit-display" style="
+                            padding: 14px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            border-radius: 8px;
+                            color: white;
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        ">
+                            <span style="font-size: 20px;">${unitInfo.icon}</span>
+                            <span>${unitInfo.label}</span>
+                            <span style="margin-left: auto; font-size: 12px; opacity: 0.9;">автоматически</span>
+                        </div>
+                        <div class="form-hint" style="margin-top: 8px;">
+                            ℹ️ Единица измерения выбирается автоматически в соответствии с формой выпуска: <strong>${formData.form}</strong>
                         </div>
                     </div>
                     <div class="form-group">
