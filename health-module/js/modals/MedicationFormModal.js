@@ -894,18 +894,23 @@ const MedicationFormModal = (function() {
             // Устанавливаем частичный приём если есть фракция
             const partialCheckbox = document.getElementById('schedule-partial-dose-checkbox');
             const fractionSelect = document.getElementById('schedule-fraction');
+            const dosageInputElem = document.getElementById('schedule-dosage');
+            const quantityAvailable = formData.quantity_available || 0;
+
             if (schedule.dosage_fraction && schedule.dosage_fraction > 0) {
                 partialCheckbox.checked = true;
-                document.getElementById('schedule-dosage').step = '1';
-                document.getElementById('schedule-dosage').min = '0';
+                dosageInputElem.step = '1';
+                dosageInputElem.min = '0';  // С фракцией может быть 0 (только фракция)
+                dosageInputElem.max = quantityAvailable;  // Максимум ограничивается
                 if (fractionSelect) {
                     fractionSelect.value = schedule.dosage_fraction.toString();
                     document.getElementById('fraction-selector-container').style.display = 'block';
                 }
             } else {
                 partialCheckbox.checked = false;
-                document.getElementById('schedule-dosage').step = '0.5';
-                document.getElementById('schedule-dosage').min = '0.5';
+                dosageInputElem.step = '1';  // Только целые числа
+                dosageInputElem.min = '1';  // Без фракции минимум 1 целая
+                dosageInputElem.max = quantityAvailable;  // Максимум ограничивается
                 document.getElementById('fraction-selector-container').style.display = 'none';
             }
 
@@ -963,8 +968,16 @@ const MedicationFormModal = (function() {
                 btn.classList.remove('active');
             });
 
-            // Сбрасываем поля
-            document.getElementById('schedule-dosage').value = '1';
+            // Сбрасываем поля и устанавливаем параметры
+            const dosageInputElem = document.getElementById('schedule-dosage');
+            dosageInputElem.value = '1';
+            dosageInputElem.step = '1';  // Только целые числа
+            dosageInputElem.min = '1';  // Минимум 1 целая
+            dosageInputElem.max = formData.quantity_available || 100;  // Максимум из шага 3
+
+            // Сбрасываем чекбокс и контейнер фракции
+            document.getElementById('schedule-partial-dose-checkbox').checked = false;
+            document.getElementById('fraction-selector-container').style.display = 'none';
 
             // Инициализируем TimePicker
             const pickerContainer = document.getElementById('schedule-time-picker-container');
@@ -1057,8 +1070,20 @@ const MedicationFormModal = (function() {
         const input = document.getElementById('schedule-dosage');
         if (!input) return;
 
-        const currentValue = parseFloat(input.value || 1);
-        const newValue = Math.max(0.5, currentValue + delta);
+        const checkbox = document.getElementById('schedule-partial-dose-checkbox');
+        const currentValue = parseFloat(input.value || 0);
+
+        // Определяем минимальное значение в зависимости от чекбокса
+        let minValue;
+        if (checkbox && checkbox.checked) {
+            // С частичным приёмом: минимум 0 (может быть только фракция)
+            minValue = 0;
+        } else {
+            // Без частичного приёма: минимум 1 (только целые числа)
+            minValue = 1;
+        }
+
+        const newValue = Math.max(minValue, currentValue + delta);
 
         input.value = newValue;
         tempSchedule.dosage_amount = newValue;
@@ -1078,11 +1103,26 @@ const MedicationFormModal = (function() {
         }
 
         const dosageInput = document.getElementById('schedule-dosage');
-        const dosage = parseFloat(dosageInput?.value || 1);
+        const dosage = parseFloat(dosageInput?.value || 0);
+        const checkbox = document.getElementById('schedule-partial-dose-checkbox');
+        const fraction = tempSchedule.dosage_fraction || 0.0;
+        const totalDose = dosage + fraction;
 
-        if (dosage <= 0) {
+        // Валидация: сумма dosage_amount + dosage_fraction должна быть > 0
+        if (totalDose <= 0) {
             showToast(t('health.modals.medication.error_quantity_zero'), 'warning');
             return;
+        }
+
+        // Дополнительная валидация в зависимости от режима
+        if (checkbox && checkbox.checked) {
+            // С фракцией: dosage может быть 0, но сумма должна быть > 0 (уже проверено выше)
+        } else {
+            // Без фракции: dosage должен быть >= 1 (только целые числа)
+            if (dosage < 1) {
+                showToast(t('health.modals.medication.error_quantity_zero'), 'warning');
+                return;
+            }
         }
 
         const reminderInput = document.getElementById('schedule-reminder');
@@ -1242,25 +1282,31 @@ const MedicationFormModal = (function() {
         const checkbox = document.getElementById('schedule-partial-dose-checkbox');
         const fractionContainer = document.getElementById('fraction-selector-container');
         const dosageInput = document.getElementById('schedule-dosage');
+        const quantityAvailable = formData.quantity_available || 0;
 
         if (checkbox.checked) {
             // Включаем частичный приём
             fractionContainer.style.display = 'block';
-            // Меняем шаг на 1 (только целые числа)
+            // Только целые числа, но может быть 0 (приём только фракции)
             dosageInput.step = '1';
-            dosageInput.min = '0';
-            dosageInput.value = Math.max(0, parseInt(dosageInput.value));
+            dosageInput.min = '0';  // С фракцией может быть 0
+            dosageInput.max = quantityAvailable;  // Максимум не должен превышать общее количество
+            dosageInput.value = Math.max(0, Math.floor(parseFloat(dosageInput.value)));
             tempSchedule.dosage_fraction = 0.5;  // По умолчанию половина
         } else {
             // Отключаем частичный приём
             fractionContainer.style.display = 'none';
-            // Меняем шаг обратно на 0.5 (дробные значения)
-            dosageInput.step = '0.5';
-            dosageInput.min = '0.5';
+            // Только целые числа (без дробных), минимум 1
+            dosageInput.step = '1';
+            dosageInput.min = '1';  // Без фракции минимум 1 целая
+            dosageInput.max = quantityAvailable;  // Максимум не должен превышать общее количество
             tempSchedule.dosage_fraction = 0.0;
-            // Если значение меньше 0.5, устанавливаем 0.5
-            if (parseFloat(dosageInput.value) < 0.5) {
-                dosageInput.value = 0.5;
+            // Если значение меньше 1, устанавливаем 1
+            const currentValue = parseFloat(dosageInput.value);
+            if (currentValue < 1) {
+                dosageInput.value = 1;
+            } else {
+                dosageInput.value = Math.floor(currentValue);  // Убираем дробную часть
             }
         }
     }
