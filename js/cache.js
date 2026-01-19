@@ -31,7 +31,7 @@ class CacheManager {
             'family/info': 86400,       // 24 часа
 
             // Фото-отзывы
-            'photo-reviews': 86400,           // 24 часа - список отзывов
+            'photo-reviews': 259200,           // 72 часа - список отзывов
             'photo-reviews/photo': 86400     // 24 часа - фото (меняются редко)
         };
         
