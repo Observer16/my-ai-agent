@@ -446,28 +446,30 @@ const MedicationFormModal = (function() {
                         <div class="form-hint">${t('health.modals.medication.field_schedule_hint')}</div>
                     </div>
 
-                    <!-- Список расписаний -->
-                    <div id="schedules-list" class="schedules-list">
-                        ${formData.schedules.length === 0 ? `
-                            <div class="empty-schedules">
-                                <span class="empty-icon">📅</span>
-                                <div class="empty-text">${t('health.modals.medication.empty_schedules_text')}</div>
-                                <div class="empty-hint">${t('health.modals.medication.empty_schedules_hint')}</div>
-                            </div>
-                        ` : formData.schedules.map((schedule, index) => renderScheduleItem(schedule, index)).join('')}
-                    </div>
+                    <!-- Контейнер для расписаний и формы -->
+                    <div style="position: relative; display: flex; flex-direction: column;">
+                        <!-- Список расписаний -->
+                        <div id="schedules-list" class="schedules-list">
+                            ${formData.schedules.length === 0 ? `
+                                <div class="empty-schedules">
+                                    <span class="empty-icon">📅</span>
+                                    <div class="empty-text">${t('health.modals.medication.empty_schedules_text')}</div>
+                                    <div class="empty-hint">${t('health.modals.medication.empty_schedules_hint')}</div>
+                                </div>
+                            ` : formData.schedules.map((schedule, index) => renderScheduleItem(schedule, index)).join('')}
+                        </div>
 
-                    <!-- Кнопка добавления -->
-                    <button
-                        type="button"
-                        class="health-btn btn-secondary add-schedule-btn"
-                        onclick="MedicationFormModal.showScheduleForm()"
-                    >
-                        <span>➕</span> ${t('health.modals.medication.btn_add_time_label')}
-                    </button>
+                        <!-- Кнопка добавления -->
+                        <button
+                            type="button"
+                            class="health-btn btn-secondary add-schedule-btn"
+                            onclick="MedicationFormModal.showScheduleForm()"
+                        >
+                            <span>➕</span> ${t('health.modals.medication.btn_add_time_label')}
+                        </button>
 
-                    <!-- Форма добавления (скрыта по умолчанию) -->
-                    <div id="schedule-form" class="schedule-form" style="display: none;">
+                        <!-- Форма добавления (скрыта по умолчанию) -->
+                        <div id="schedule-form" class="schedule-form" style="display: none;">
                         <div class="schedule-form-header">
                             <span>➕ ${t('health.modals.medication.schedule_form_header')}</span>
                             <button
@@ -569,6 +571,7 @@ const MedicationFormModal = (function() {
                         >
                             ✓ ${t('health.modals.medication.btn_add_schedule')}
                         </button>
+                    </div>
                     </div>
                 </div>
 
