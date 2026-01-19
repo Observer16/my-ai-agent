@@ -40,14 +40,14 @@ const MoodModal = (function() {
             showToast(successMsg, 'success');
             BaseModal.close();
 
-            // Обновляем Diary если он открыт
-            if (window.Diary && typeof Diary.loadDate === 'function') {
-                Diary.loadDate(targetDate);
+            // Обновляем Diary только если он инициализирован (контейнер entry-form существует)
+            if (window.Diary && typeof Diary.loadDate === 'function' && document.getElementById('entry-form')) {
+                await Diary.loadDate(targetDate);
             }
 
-            // Также обновляем Dashboard если он открыт (для совместимости)
+            // Обновляем Dashboard если он открыт
             if (window.Dashboard && typeof Dashboard.init === 'function') {
-                Dashboard.init();
+                await Dashboard.init();
             }
         } else {
             const errorMsg = typeof t === 'function' ? t('health.modals.mood.save_error') : '❌ Не удалось сохранить настроение';
