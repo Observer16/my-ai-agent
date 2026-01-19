@@ -104,13 +104,13 @@ class TimePicker {
                     position: relative;
                     width: 35px;
                     height: 90px;
-                    background: #f8f9fa;
+                    background: #ffffff;
                     border-radius: 8px;
                     overflow: hidden;
                     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
                     user-select: none;
                     cursor: grab;
-                    border: 1px solid #d0d0d0;
+                    border: 1px solid #cccccc;
                 }
 
                 .time-picker-wheel.dragging {
@@ -131,14 +131,14 @@ class TimePicker {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 10px;
+                    font-size: 12px;
                     font-weight: 600;
-                    color: #aaa;
+                    color: #555555;
                     transition: color 0.2s ease;
                 }
 
                 .time-picker-item.active {
-                    color: #333;
+                    color: #000000;
                     font-weight: 700;
                 }
 
