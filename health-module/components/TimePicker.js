@@ -39,7 +39,7 @@ class TimePicker {
 
         this.hoursRange = this.options.format24h ? 24 : 12;
         this.minutesRange = Math.ceil(60 / this.options.minuteStep);
-        this.itemHeight = 45; // Высота одного элемента в пикселе
+        this.itemHeight = 22.5; // Высота одного элемента (уменьшено в 2 раза с 45)
         this.friction = 0.96; // Трение для инерции
         this.maxVelocity = 10;
 
@@ -85,10 +85,11 @@ class TimePicker {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 8px;
-                    padding: 20px;
-                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                    border-radius: 16px;
+                    gap: 4px;
+                    padding: 10px;
+                    background: #ffffff;
+                    border-radius: 12px;
+                    border: 1px solid #e0e0e0;
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 }
 
@@ -96,24 +97,25 @@ class TimePicker {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 8px;
+                    gap: 4px;
                 }
 
                 .time-picker-wheel {
                     position: relative;
-                    width: 70px;
-                    height: 180px;
-                    background: white;
-                    border-radius: 12px;
+                    width: 35px;
+                    height: 90px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
                     overflow: hidden;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
                     user-select: none;
                     cursor: grab;
+                    border: 1px solid #d0d0d0;
                 }
 
                 .time-picker-wheel.dragging {
                     cursor: grabbing;
-                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
                 }
 
                 .time-picker-items {
@@ -125,13 +127,13 @@ class TimePicker {
                 .time-picker-item {
                     position: absolute;
                     width: 100%;
-                    height: 45px;
+                    height: 22.5px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 20px;
+                    font-size: 10px;
                     font-weight: 600;
-                    color: #999;
+                    color: #aaa;
                     transition: color 0.2s ease;
                 }
 
@@ -145,29 +147,29 @@ class TimePicker {
                     top: 50%;
                     left: 0;
                     right: 0;
-                    height: 45px;
+                    height: 22.5px;
                     transform: translateY(-50%);
-                    border-top: 1px solid #e0e0e0;
-                    border-bottom: 1px solid #e0e0e0;
-                    background: rgba(52, 152, 219, 0.05);
+                    border-top: 1px solid #d0d0d0;
+                    border-bottom: 1px solid #d0d0d0;
+                    background: rgba(52, 152, 219, 0.08);
                     pointer-events: none;
                     z-index: 1;
                 }
 
                 .time-picker-separator {
-                    font-size: 32px;
+                    font-size: 16px;
                     font-weight: 700;
                     color: #333;
-                    margin: 0 4px;
+                    margin: 0 2px;
                     line-height: 1;
                 }
 
                 .time-picker-label {
-                    font-size: 12px;
+                    font-size: 8px;
                     color: #666;
                     font-weight: 600;
                     text-transform: uppercase;
-                    letter-spacing: 0.5px;
+                    letter-spacing: 0.3px;
                 }
 
                 @media (prefers-reduced-motion: reduce) {
@@ -196,7 +198,7 @@ class TimePicker {
      * Генерация элементов часов
      */
     generateHoursItems() {
-        let html = '<div style="height: 67.5px;"></div>'; // Отступ сверху
+        let html = '<div style="height: 33.75px;"></div>'; // Отступ сверху (уменьшено в 2 раза)
 
         for (let i = 0; i < this.hoursRange; i++) {
             const displayHour = this.options.format24h ?
@@ -206,7 +208,7 @@ class TimePicker {
             html += `<div class="time-picker-item" data-value="${i}">${displayHour}</div>`;
         }
 
-        html += '<div style="height: 67.5px;"></div>'; // Отступ снизу
+        html += '<div style="height: 33.75px;"></div>'; // Отступ снизу (уменьшено в 2 раза)
         return html;
     }
 
@@ -214,7 +216,7 @@ class TimePicker {
      * Генерация элементов минут
      */
     generateMinutesItems() {
-        let html = '<div style="height: 67.5px;"></div>'; // Отступ сверху
+        let html = '<div style="height: 33.75px;"></div>'; // Отступ сверху (уменьшено в 2 раза)
 
         for (let i = 0; i < this.minutesRange; i++) {
             const minutes = i * this.options.minuteStep;
@@ -223,7 +225,7 @@ class TimePicker {
             html += `<div class="time-picker-item" data-value="${minutes}">${displayMinutes}</div>`;
         }
 
-        html += '<div style="height: 67.5px;"></div>'; // Отступ снизу
+        html += '<div style="height: 33.75px;"></div>'; // Отступ снизу (уменьшено в 2 раза)
         return html;
     }
 
