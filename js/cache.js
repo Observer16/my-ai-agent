@@ -32,7 +32,7 @@ class CacheManager {
 
             // Фото-отзывы
             'photo-reviews': 259200,           // 72 часа - список отзывов
-            'photo-reviews/photo': 86400     // 24 часа - фото (меняются редко)
+            'photo-reviews/photo': 604800     // 7 дней - фото (меняются редко)
         };
         
         // Не кэшировать эти endpoints
