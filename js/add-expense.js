@@ -46,8 +46,12 @@ async function init() {
         allProducts = await API.getProducts(null, null, 1000);
 
         // Загружаем категории
-        allCategories = await API.getCategories();
-        console.log('✅ Категории загружены:', allCategories.length);
+        const rawCategories = await API.getCategories();
+
+        // Фильтруем категории с пустым именем (без переводов)
+        allCategories = rawCategories.filter(cat => cat.name && cat.name.trim());
+
+        console.log(`✅ Категории загружены: ${allCategories.length} из ${rawCategories.length}${rawCategories.length > allCategories.length ? ' (некоторые без переводов)' : ''}`);
 
         tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
