@@ -168,15 +168,38 @@ function searchProducts(query) {
 }
 
 // Переключение табов
-function switchTab(tab) {
+function switchTab(tab, clickedElement = null) {
     const tabs = document.querySelectorAll('.tab');
-    const clickedTab = event.target;
 
+    // Если функция вызвана как обработчик события (onclick="switchTab(...)"),
+    // event может быть доступен как глобальная переменная
+    // Иначе используем переданный элемент
+    let tabElement = clickedElement || (typeof event !== 'undefined' ? event.target : null);
+
+    // Если элемент не найден, найти таб по названию вкладки
+    if (!tabElement) {
+        const tabElements = Array.from(tabs);
+        const tabNames = ['products', 'categories', 'stores'];
+        const tabIndex = tabNames.indexOf(tab);
+        if (tabIndex >= 0 && tabIndex < tabElements.length) {
+            tabElement = tabElements[tabIndex];
+        }
+    }
+
+    // Удалить активный класс со всех табов
     tabs.forEach(t => t.classList.remove('active'));
-    clickedTab.classList.add('active');
 
+    // Добавить активный класс к нужному табу
+    if (tabElement && tabElement.classList) {
+        tabElement.classList.add('active');
+    }
+
+    // Переключить содержимое вкладок
     document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-    document.getElementById(`tab-${tab}`).classList.add('active');
+    const contentElement = document.getElementById(`tab-${tab}`);
+    if (contentElement) {
+        contentElement.classList.add('active');
+    }
 
     currentTab = tab;
     updateButtonsVisibility();
